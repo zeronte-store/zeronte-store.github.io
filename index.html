@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Zeronte | Personalización Musical & Partituras</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap');
+    
+    body { 
+      font-family: 'Montserrat', sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    h1, h2, h3, .brand-font { font-family: 'Cinzel', serif; }
+
+    .text-gold { color: #d4af37; }
+    .bg-gold { background-color: #d4af37; }
+    .border-gold { border-color: #d4af37; }
+    .gold-gradient {
+      background: linear-gradient(135deg, #fce99f 0%, #d4af37 50%, #947413 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Ocultar barra de scroll en carrusel móvil */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#0c0c0e] text-zinc-100 antialiased min-h-screen pb-20 sm:pb-0 selection:bg-[#d4af37] selection:text-black">
+
+  <!-- ==================== HEADER (Estilo App Móvil) ==================== -->
+  <header class="bg-black/90 backdrop-blur-md border-b border-zinc-800 sticky top-0 z-40 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      
+      <!-- Logo Zeronte con imagen -->
+      <a href="#" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl overflow-hidden bg-black border border-zinc-700 flex items-center justify-center shadow-lg">
+          <img src="logo-zeronte.png" alt="Zeronte" class="w-full h-full object-cover" 
+               onerror="this.style.display='none'; document.getElementById('logoFallback').classList.remove('hidden');">
+          <span id="logoFallback" class="hidden text-white font-black text-xl brand-font">Z</span>
+        </div>
+        <div>
+          <span class="text-lg sm:text-xl font-bold tracking-widest brand-font block leading-none text-white">ZERONTE</span>
+          <span class="text-[9px] tracking-[0.25em] text-zinc-400 uppercase font-light">Custom Music</span>
+        </div>
+      </a>
+
+      <!-- Botón WhatsApp Directo en Cabecera -->
+      <a href="https://wa.me/34600123456" target="_blank" class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black px-3.5 py-2 rounded-xl text-xs font-semibold transition active:scale-95">
+        <i class="fa-brands fa-whatsapp text-sm"></i>
+        <span class="hidden sm:inline">Hablar por WhatsApp</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== BANNER ESTACIONAL ==================== -->
+  <section class="w-full bg-black border-b border-zinc-800 overflow-hidden">
+    <div class="max-w-6xl mx-auto">
+      <div class="relative w-full aspect-[21/9] sm:aspect-[32/9] max-h-[260px] overflow-hidden bg-zinc-950 flex items-center justify-center">
+        <img id="bannerTienda" 
+             src="banner-zeronte.png" 
+             alt="Zeronte Soundtrack" 
+             class="w-full h-full object-cover object-center"
+             onerror="this.style.display='none'; document.getElementById('bannerFallback').classList.remove('hidden');">
+
+        <!-- Fallback si no está la imagen aún -->
+        <div id="bannerFallback" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-gradient-to-r from-black via-zinc-900 to-black">
+          <p class="text-[10px] tracking-[0.3em] uppercase text-gold font-bold mb-1">We are your soundtrack</p>
+          <h2 class="text-2xl sm:text-4xl font-bold brand-font text-white">ZERONTE</h2>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== HERO APP / INTRO ==================== -->
+  <section class="py-6 px-4 bg-[#111113] border-b border-zinc-900">
+    <div class="max-w-xl mx-auto text-center">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800/80 border border-zinc-700 text-[10px] uppercase font-semibold text-gold mb-3">
+        <i class="fa-solid fa-certificate"></i> +1.000 partituras creadas
+      </span>
+      <h1 class="text-xl sm:text-2xl font-bold text-white brand-font leading-snug">
+        Convierte nombres o fechas en <span class="gold-gradient">música real</span>
+      </h1>
+      <p class="text-xs text-zinc-400 mt-2">
+        Archivos PDF listos para imprimir + Melodía original en audio MP3 + Código QR reproducible.
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== FILTROS CATEGORÍAS (Desplazables en móvil) ==================== -->
+  <div class="sticky top-[61px] z-30 bg-[#0c0c0e]/95 backdrop-blur-md border-b border-zinc-800/80 py-3 px-4">
+    <div class="max-w-6xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <button onclick="filtrar('todos', this)" class="filtro-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold border border-gold bg-gold text-black transition active:scale-95">Todos</button>
+      <button onclick="filtrar('partitura', this)" class="filtro-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 transition active:scale-95">Partituras</button>
+      <button onclick="filtrar('natalicio', this)" class="filtro-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 transition active:scale-95">Natalicio</button>
+      <button onclick="filtrar('posters', this)" class="filtro-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 transition active:scale-95">Pósters</button>
+    </div>
+  </div>
+
+  <!-- ==================== CATÁLOGO DE PRODUCTOS ==================== -->
+  <main id="catalogo" class="max-w-6xl mx-auto px-4 py-6 sm:py-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
+
+      <!-- Item 1: Top Ventas -->
+      <div class="producto-card partitura bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
+        <div>
+          <div class="h-56 bg-zinc-950 relative">
+            <img src="https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=700&q=80" alt="Mi nombre en música" class="w-full h-full object-cover">
+            <span class="absolute top-3 right-3 bg-black/85 backdrop-blur-md border border-gold text-gold text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full shadow">
+              ★ Más Vendido
+            </span>
+          </div>
+          <div class="p-4 sm:p-5">
+            <span class="text-[10px] uppercase tracking-wider text-gold font-semibold">Completo</span>
+            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Mi Nombre en Música + MP3 + QR</h3>
+            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
+              Notas cifradas a partir del nombre, dedicatoria al pie, código QR escaneable y archivo de audio MP3 para escuchar la melodía.
+            </p>
+          </div>
+        </div>
+        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
+          <div>
+            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF + MP3</span>
+            <span class="text-xl sm:text-2xl font-bold text-white brand-font">11,99 €</span>
+          </div>
+          <button onclick="abrirModal('Mi Nombre en Música + MP3 + QR', 11.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
+            Pedir
+          </button>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="producto-card partitura bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
+        <div>
+          <div class="h-56 bg-zinc-950 relative">
+            <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=700&q=80" alt="Melodía + MP3" class="w-full h-full object-cover">
+          </div>
+          <div class="p-4 sm:p-5">
+            <span class="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">Melodía & Audio</span>
+            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Tu Nombre con Melodía + MP3</h3>
+            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
+              Arreglo musical personalizado para piano a partir de tu nombre. Incluye partitura en alta definición y pista en MP3.
+            </p>
+          </div>
+        </div>
+        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
+          <div>
+            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF + MP3</span>
+            <span class="text-xl sm:text-2xl font-bold text-white brand-font">8,99 €</span>
+          </div>
+          <button onclick="abrirModal('Tu Nombre con Melodía + MP3', 8.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
+            Pedir
+          </button>
+        </div>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="producto-card partitura bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
+        <div>
+          <div class="h-56 bg-zinc-950 relative">
+            <img src="https://images.unsplash.com/photo-1520523839898-50712825e617?auto=format&fit=crop&w=700&q=80" alt="Melodía Simple" class="w-full h-full object-cover">
+          </div>
+          <div class="p-4 sm:p-5">
+            <span class="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">Esencial</span>
+            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Nombre en Melodía Simple</h3>
+            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
+              Lámina minimalista con pentagrama y las notas del nombre listas para imprimir y enmarcar en cualquier tamaño estándar.
+            </p>
+          </div>
+        </div>
+        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
+          <div>
+            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF</span>
+            <span class="text-xl sm:text-2xl font-bold text-white brand-font">3,99 €</span>
+          </div>
+          <button onclick="abrirModal('Nombre en Melodía Simple', 3.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
+            Pedir
+          </button>
+        </div>
+      </div>
+
+      <!-- Item 4: Natalicio -->
+      <div class="producto-card natalicio bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
+        <div>
+          <div class="h-56 bg-zinc-950 relative">
+            <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=700&q=80" alt="Lámina Natalicio" class="w-full h-full object-cover">
+          </div>
+          <div class="p-4 sm:p-5">
+            <span class="text-[10px] uppercase tracking-wider text-gold font-semibold">Nacimiento</span>
+            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Lámina Natalicio con Partitura</h3>
+            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
+              El recuerdo perfecto: notas del bebé, fecha, hora exacta, peso y centímetros diseñados armoniosamente.
+            </p>
+          </div>
+        </div>
+        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
+          <div>
+            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF</span>
+            <span class="text-xl sm:text-2xl font-bold text-white brand-font">12,99 €</span>
+          </div>
+          <button onclick="abrirModal('Lámina Natalicio con Partitura', 12.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
+            Pedir
+          </button>
+        </div>
+      </div>
+
+      <!-- Item 5: Póster -->
+      <div class="producto-card posters bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
+        <div>
+          <div class="h-56 bg-zinc-950 relative">
+            <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=700&q=80" alt="Círculo de Quintas" class="w-full h-full object-cover">
+          </div>
+          <div class="p-4 sm:p-5">
+            <span class="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">Teoría & Diseño</span>
+            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Póster Círculo de Quintas</h3>
+            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
+              Infografía de alta fidelidad para músicos, estudiantes y escuelas. Archivo vectorial y PDF 300 DPI.
+            </p>
+          </div>
+        </div>
+        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
+          <div>
+            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Descarga Directa</span>
+            <span class="text-xl sm:text-2xl font-bold text-white brand-font">6,99 €</span>
+          </div>
+          <button onclick="abrirModal('Póster Círculo de Quintas', 6.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
+            Pedir
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==================== MODAL DE COMPRA (BOTTOM-SHEET EN MÓVIL) ==================== -->
+  <div id="modalCompra" class="fixed inset-0 bg-black/85 hidden items-end sm:items-center justify-center z-50 backdrop-blur-md">
+    
+    <div class="bg-[#141417] border-t sm:border border-zinc-800 rounded-t-3xl sm:rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      
+      <!-- Indicador táctil para móviles (drag bar visual) -->
+      <div class="w-12 h-1.5 bg-zinc-700 rounded-full mx-auto mb-4 sm:hidden"></div>
+
+      <!-- Botón Cerrar -->
+      <button onclick="cerrarModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-zinc-800/80 flex items-center justify-center text-zinc-400 hover:text-white transition">✕</button>
+
+      <!-- Formulario de Pedido -->
+      <div id="pantallaFormulario">
+        <span class="text-[10px] uppercase tracking-widest text-gold font-bold">Personaliza tu obra</span>
+        <h3 class="text-lg sm:text-xl font-bold text-white brand-font mt-0.5 pr-8" id="resumenProducto">Producto</h3>
+
+        <form id="formularioPedido" onsubmit="enviarPedido(event)" class="space-y-3.5 mt-4">
+          <input type="hidden" id="productoInput">
+          <input type="hidden" id="precioInput">
+
+          <div>
+            <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Nombre y Apellidos *</label>
+            <input type="text" id="nombreCliente" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-gold" placeholder="Ej. Javier Gómez">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">WhatsApp (para el archivo) *</label>
+              <input type="tel" inputmode="tel" id="telefonoCliente" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-gold" placeholder="600 000 000">
+            </div>
+            <div>
+              <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Email *</label>
+              <input type="email" inputmode="email" id="emailCliente" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-gold" placeholder="correo@ejemplo.com">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Datos de personalización *</label>
+            <textarea id="personalizacionCliente" rows="2" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gold" placeholder="Nombre(s) para las notas, dedicatoria o fechas..."></textarea>
+          </div>
+
+          <!-- SELECTOR DE FORMA DE PAGO CON LOGOS OFICIALES -->
+          <div>
+            <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-2 font-semibold">Método de pago preferido</label>
+            <div class="grid grid-cols-2 gap-3">
+              
+              <!-- Bizum Card -->
+              <label class="pago-label flex items-center justify-between p-3 rounded-xl border border-zinc-700 bg-zinc-900 cursor-pointer transition active:scale-98">
+                <div class="flex items-center gap-2.5">
+                  <input type="radio" name="metodoPago" value="Bizum" checked class="text-emerald-500 focus:ring-0">
+                  <span class="text-xs font-bold text-white">Bizum</span>
+                </div>
+                <!-- Logo Bizum Oficial SVG -->
+                <svg class="h-5 w-auto" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.5 7.5C12.5 6.1 13.6 5 15 5H21C22.4 5 23.5 6.1 23.5 7.5V11H12.5V7.5Z" fill="#00AAAC"/>
+                  <path d="M12.5 14H23.5V26C23.5 27.4 22.4 28.5 21 28.5H15C13.6 28.5 12.5 27.4 12.5 26V14Z" fill="#00AAAC"/>
+                  <circle cx="29" cy="8" r="3.5" fill="#00AAAC"/>
+                  <text x="38" y="24" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="bold" font-size="20" letter-spacing="-0.5">bizum</text>
+                </svg>
+              </label>
+
+              <!-- PayPal Card -->
+              <label class="pago-label flex items-center justify-between p-3 rounded-xl border border-zinc-700 bg-zinc-900 cursor-pointer transition active:scale-98">
+                <div class="flex items-center gap-2.5">
+                  <input type="radio" name="metodoPago" value="PayPal" class="text-blue-500 focus:ring-0">
+                  <span class="text-xs font-bold text-white">PayPal</span>
+                </div>
+                <!-- Logo PayPal Oficial SVG -->
+                <svg class="h-5 w-auto" viewBox="0 0 100 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4H21C25 4 28 6.5 27 11.5C26 16.5 22.5 19 18.5 19H14.5L12 30H7L12 4Z" fill="#003087"/>
+                  <path d="M16 9H23C26.5 9 29.5 11 28.5 15.5C27.5 20.5 24 23 20 23H17L15.5 30H11L16 9Z" fill="#0079C1"/>
+                  <text x="33" y="23" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="bold" font-size="19" font-style="italic">PayPal</text>
+                </svg>
+              </label>
+
+            </div>
+          </div>
+
+          <button type="submit" id="btnEnviar" class="w-full mt-3 bg-white hover:bg-gold text-black font-bold py-3.5 rounded-xl uppercase tracking-wider text-xs transition duration-200 active:scale-98 shadow-lg flex items-center justify-center gap-2">
+            <span>Confirmar Pedido</span>
+            <span id="btnPrecioTexto"></span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Pantalla Éxito -->
+      <div id="pantallaExito" class="hidden text-center py-2">
+        <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+          ✓
+        </div>
+        <h3 class="text-xl font-bold text-white brand-font mb-1">¡Pedido Registrado!</h3>
+        <p class="text-xs text-zinc-400 mb-5">Identificador de pedido: <strong id="codigoPedido" class="text-gold font-mono text-sm"></strong></p>
+
+        <!-- Instrucciones Bizum -->
+        <div id="instruccionesBizum" class="bg-zinc-900 border border-zinc-700 rounded-2xl p-4 text-left mb-5 space-y-2">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <p class="font-bold text-white text-xs uppercase tracking-wider">Pago por Bizum</p>
+          </div>
+          <p class="text-xs text-zinc-300">1. Envía <strong id="totalBizum" class="text-white text-sm"></strong> al número:</p>
+          <div class="bg-black/60 p-3 rounded-xl flex items-center justify-between border border-zinc-800">
+            <span class="font-mono font-bold text-gold text-base">600 123 456</span>
+            <button onclick="copiarTexto('600123456')" class="text-[11px] text-zinc-400 hover:text-white uppercase font-bold bg-zinc-800 px-2.5 py-1 rounded-lg">Copiar</button>
+          </div>
+          <p class="text-xs text-zinc-400">2. Concepto: <strong id="conceptoBizum" class="text-white font-mono"></strong></p>
+        </div>
+
+        <!-- Instrucciones PayPal -->
+        <div id="instruccionesPaypal" class="bg-zinc-900 border border-zinc-700 rounded-2xl p-4 text-left mb-5 space-y-3 hidden">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+            <p class="font-bold text-white text-xs uppercase tracking-wider">Pago por PayPal</p>
+          </div>
+          <p class="text-xs text-zinc-300">Pulsa para abonar <strong id="totalPaypal" class="text-white"></strong> con PayPal:</p>
+          <a id="enlacePaypal" href="#" target="_blank" class="block text-center bg-[#0070BA] hover:bg-[#003087] text-white font-bold py-3 rounded-xl transition text-xs uppercase tracking-wider">
+            Abrir PayPal
+          </a>
+        </div>
+
+        <!-- Botón WhatsApp -->
+        <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
+          <i class="fa-brands fa-whatsapp text-lg"></i>
+          <span>Enviar justificante por WhatsApp</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MENÚ APP INFERIOR MÓVIL (Sticky Bottom Nav) ==================== -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-[#0c0c0e]/95 backdrop-blur-lg border-t border-zinc-800 z-40 py-2 px-6">
+    <div class="flex items-center justify-around">
+      <a href="#catalogo" class="flex flex-col items-center text-zinc-400 hover:text-gold transition active:scale-90">
+        <i class="fa-solid fa-music text-base"></i>
+        <span class="text-[10px] mt-1 font-medium">Catálogo</span>
+      </a>
+      <button onclick="abrirModal('Mi Nombre en Música + MP3 + QR', 11.99)" class="flex flex-col items-center text-gold transition active:scale-90">
+        <div class="w-10 h-10 -mt-5 bg-gold text-black rounded-full flex items-center justify-center shadow-lg font-bold border-2 border-black">
+          <i class="fa-solid fa-plus text-sm"></i>
+        </div>
+        <span class="text-[10px] mt-0.5 font-bold text-white">Pedir</span>
+      </button>
+      <a href="https://wa.me/34600123456" target="_blank" class="flex flex-col items-center text-emerald-400 transition active:scale-90">
+        <i class="fa-brands fa-whatsapp text-base"></i>
+        <span class="text-[10px] mt-1 font-medium">Chat</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-black border-t border-zinc-900 py-8 px-4 text-center text-xs text-zinc-500">
+    <div class="max-w-6xl mx-auto flex flex-col items-center justify-center gap-3">
+      <img src="logo-zeronte.png" alt="Zeronte" class="w-8 h-8 rounded-lg opacity-80" onerror="this.style.display='none'">
+      <p class="font-bold tracking-widest brand-font text-zinc-300">ZERONTE · WE ARE YOUR SOUNDTRACK</p>
+      <p>© 2026 Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-hlCFkngwGxqTIsrr-YvMoOpyFH0tRnbzsYxgrHbosz1ObyxPjnVu-1Wn4EvRd-KwYA/exec";
+    const MI_TELEFONO_WHATSAPP = "34600123456"; // Tu teléfono para WhatsApp (con prefijo 34)
+    const MI_PAYPAL_USER = "tuusuario";        // Tu usuario de paypal.me
+
+    function filtrar(categoria, boton) {
+      document.querySelectorAll('.filtro-btn').forEach(btn => {
+        btn.classList.remove('border-gold', 'bg-gold', 'text-black');
+        btn.classList.add('border-zinc-800', 'bg-zinc-900', 'text-zinc-300');
+      });
+      boton.classList.add('border-gold', 'bg-gold', 'text-black');
+      boton.classList.remove('border-zinc-800', 'bg-zinc-900', 'text-zinc-300');
+
+      document.querySelectorAll('.producto-card').forEach(card => {
+        if (categoria === 'todos' || card.classList.contains(categoria)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    function abrirModal(producto, precio) {
+      document.getElementById('productoInput').value = producto;
+      document.getElementById('precioInput').value = precio;
+      document.getElementById('resumenProducto').innerText = `${producto} (${precio.toFixed(2)} €)`;
+      document.getElementById('btnPrecioTexto').innerText = `· ${precio.toFixed(2)} €`;
+
+      document.getElementById('pantallaFormulario').classList.remove('hidden');
+      document.getElementById('pantallaExito').classList.add('hidden');
+      document.getElementById('modalCompra').classList.remove('hidden');
+      document.getElementById('modalCompra').classList.add('flex');
+    }
+
+    function cerrarModal() {
+      document.getElementById('modalCompra').classList.add('hidden');
+      document.getElementById('modalCompra').classList.remove('flex');
+    }
+
+    async function enviarPedido(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnEnviar');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Creando pedido...`;
+
+      const datos = {
+        nombre: document.getElementById('nombreCliente').value,
+        telefono: document.getElementById('telefonoCliente').value,
+        email: document.getElementById('emailCliente').value,
+        personalizacion: document.getElementById('personalizacionCliente').value,
+        producto: document.getElementById('productoInput').value,
+        precio: document.getElementById('precioInput').value + " €",
+        metodoPago: document.querySelector('input[name="metodoPago"]:checked').value
+      };
+
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(datos)
+        });
+
+        const respuesta = await res.json();
+        const orderId = respuesta.orderId || ("PED-" + Math.floor(1000 + Math.random() * 9000));
+        mostrarExito(orderId, datos);
+      } catch (err) {
+        console.error("Error:", err);
+        const orderIdFallback = "PED-" + Math.floor(1000 + Math.random() * 9000);
+        mostrarExito(orderIdFallback, datos);
+      }
+    }
+
+    function mostrarExito(orderId, datos) {
+      document.getElementById('pantallaFormulario').classList.add('hidden');
+      document.getElementById('pantallaExito').classList.remove('hidden');
+
+      document.getElementById('codigoPedido').innerText = orderId;
+      document.getElementById('totalBizum').innerText = datos.precio;
+      document.getElementById('conceptoBizum').innerText = orderId;
+      document.getElementById('totalPaypal').innerText = datos.precio;
+
+      if (datos.metodoPago === 'PayPal') {
+        document.getElementById('instruccionesBizum').classList.add('hidden');
+        document.getElementById('instruccionesPaypal').classList.remove('hidden');
+        document.getElementById('enlacePaypal').href = `https://paypal.me/${MI_PAYPAL_USER}/${datos.precio.replace(' €', '')}`;
+      } else {
+        document.getElementById('instruccionesBizum').classList.remove('hidden');
+        document.getElementById('instruccionesPaypal').classList.add('hidden');
+      }
+
+      const msg = encodeURIComponent(`Hola Zeronte! Acabo de hacer el encargo ${orderId} (${datos.producto}) por ${datos.precio}. Mi nombre es ${datos.nombre}.`);
+      document.getElementById('btnWhatsappConfirmar').href = `https://wa.me/${MI_TELEFONO_WHATSAPP}?text=${msg}`;
+    }
+
+    function copiarTexto(texto) {
+      navigator.clipboard.writeText(texto);
+      alert("Número copiado al portapapeles: " + texto);
+    }
+  </script>
+</body>
+</html>
