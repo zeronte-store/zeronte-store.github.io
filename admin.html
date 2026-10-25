@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zeronte | Panel de Control Shop Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+    body { font-family: 'Montserrat', sans-serif; }
+    .text-gold { color: #d4af37; }
+    .bg-gold { background-color: #d4af37; }
+  </style>
+</head>
+<body class="bg-[#0b0b0d] text-zinc-200 antialiased min-h-screen">
+
+  <!-- ==================== PANTALLA LOGIN ==================== -->
+  <div id="pantallaLogin" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-[#141417] border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+      <div class="w-12 h-12 bg-zinc-900 border border-gold/40 rounded-2xl mx-auto mb-4 flex items-center justify-center text-gold font-bold text-xl">Z</div>
+      <h1 class="text-xl font-bold text-white mb-1">Zeronte Manager</h1>
+      <p class="text-xs text-zinc-500 mb-6">Introduce tu clave de administrador</p>
+      <form onsubmit="autenticar(event)" class="space-y-4">
+        <input type="password" id="inputClave" placeholder="PIN o Contraseña" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-center text-sm text-white focus:outline-none focus:border-gold">
+        <button type="submit" id="btnEntrar" class="w-full bg-white hover:bg-gold text-black font-bold py-3 rounded-xl uppercase text-xs tracking-wider transition">Acceder</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== PANEL DASHBOARD ==================== -->
+  <div id="panelDashboard" class="hidden min-h-screen flex flex-col">
+    <!-- Barra Superior -->
+    <header class="bg-black border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="w-8 h-8 bg-white text-black font-black flex items-center justify-center rounded-lg text-sm">Z</span>
+        <span class="font-bold tracking-widest text-white text-sm">ZERONTE <span class="text-zinc-500 font-normal">| Shop Manager</span></span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="cargarDatos()" class="text-xs bg-zinc-900 border border-zinc-700 hover:border-gold px-3 py-1.5 rounded-lg text-zinc-300 transition">
+          <i class="fa-solid fa-arrows-rotate mr-1"></i> Actualizar
+        </button>
+        <button onclick="cerrarSesion()" class="text-xs text-rose-400 hover:text-rose-300">Salir</button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
+      
+      <!-- 1. Métricas / Estadísticas clave (Estilo Etsy) -->
+      <section class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-[#141417] border border-zinc-800 p-5 rounded-2xl">
+          <span class="text-zinc-500 text-[11px] uppercase tracking-wider font-semibold">Total Ingresos</span>
+          <p id="statIngresos" class="text-2xl font-bold text-white mt-1">0.00 €</p>
+        </div>
+        <div class="bg-[#141417] border border-zinc-800 p-5 rounded-2xl">
+          <span class="text-zinc-500 text-[11px] uppercase tracking-wider font-semibold">Pedidos Totales</span>
+          <p id="statPedidos" class="text-2xl font-bold text-white mt-1">0</p>
+        </div>
+        <div class="bg-[#141417] border border-zinc-800 p-5 rounded-2xl">
+          <span class="text-zinc-500 text-[11px] uppercase tracking-wider font-semibold">Pendientes de Pago</span>
+          <p id="statPendientes" class="text-2xl font-bold text-amber-400 mt-1">0</p>
+        </div>
+        <div class="bg-[#141417] border border-zinc-800 p-5 rounded-2xl">
+          <span class="text-zinc-500 text-[11px] uppercase tracking-wider font-semibold">Catálogo Activo</span>
+          <p id="statProductos" class="text-2xl font-bold text-gold mt-1">0</p>
+        </div>
+      </section>
+
+      <!-- 2. Sección de Pedidos -->
+      <section class="bg-[#141417] border border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-box text-gold text-sm"></i> Pedidos Recientes
+          </h2>
+          <span class="text-xs text-zinc-500" id="contadorPedidos">0 pedidos</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-zinc-300">
+            <thead class="text-[10px] uppercase tracking-wider text-zinc-500 border-b border-zinc-800">
+              <tr>
+                <th class="pb-3">ID / Fecha</th>
+                <th class="pb-3">Cliente</th>
+                <th class="pb-3">Producto & Personalización</th>
+                <th class="pb-3">Pago</th>
+                <th class="pb-3">Estado</th>
+                <th class="pb-3 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tablaPedidos" class="divide-y divide-zinc-800/60">
+              <!-- Se rellena por JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. Gestión del Catálogo (Añadir nuevo producto) -->
+      <section class="bg-[#141417] border border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-music text-gold text-sm"></i> Catálogo de Partituras
+            </h2>
+            <p class="text-xs text-zinc-500">Los productos que crees aquí se mostrarán inmediatamente en la web principal.</p>
+          </div>
+          <button onclick="document.getElementById('formNuevoProducto').classList.toggle('hidden')" class="bg-gold hover:bg-amber-400 text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition">
+            + Añadir Producto
+          </button>
+        </div>
+
+        <!-- Formulario Ocultable para Crear Producto -->
+        <form id="formNuevoProducto" onsubmit="guardarProducto(event)" class="hidden bg-zinc-900 border border-zinc-800 p-5 rounded-2xl mb-6 space-y-4">
+          <h3 class="text-xs uppercase tracking-wider font-bold text-white">Nuevo Artículo para la Tienda</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[10px] text-zinc-400 mb-1">Título del Producto *</label>
+              <input type="text" id="nuevoTitulo" required placeholder="Ej: Lámina Partitura San Valentín" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] text-zinc-400 mb-1">Precio (€) *</label>
+              <input type="number" step="0.01" id="nuevoPrecio" required placeholder="12.99" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] text-zinc-400 mb-1">Categoría *</label>
+              <select id="nuevaCategoria" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
+                <option value="partitura">Partitura Personalizada</option>
+                <option value="natalicio">Natalicio</option>
+                <option value="posters">Pósters Educativos</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] text-zinc-400 mb-1">Ruta o Enlace de la Foto *</label>
+              <input type="text" id="nuevaImagen" required placeholder="img/mi-foto.jpg o URL" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] text-zinc-400 mb-1">Descripción corta *</label>
+              <input type="text" id="nuevaDesc" required placeholder="Breve detalle de lo que incluye el PDF..." class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
+            </div>
+          </div>
+          <button type="submit" id="btnGuardarProd" class="bg-white hover:bg-gold text-black font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Publicar en la Web</button>
+        </form>
+
+        <!-- Lista de Productos en el catálogo -->
+        <div id="listaProductosAdmin" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Rellenado por JS -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- SCRIPT DASHBOARD -->
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-hlCFkngwGxqTIsrr-YvMoOpyFH0tRnbzsYxgrHbosz1ObyxPjnVu-1Wn4EvRd-KwYA/exec";
+    let tokenClave = "";
+
+    function autenticar(e) {
+      e.preventDefault();
+      tokenClave = document.getElementById('inputClave').value;
+      cargarDatos();
+    }
+
+    async function cargarDatos() {
+      const btn = document.getElementById('btnEntrar');
+      if (btn) btn.innerText = "Cargando...";
+
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=datosAdmin&clave=${encodeURIComponent(tokenClave)}`);
+        const data = await res.json();
+
+        if (data.status !== "success") {
+          alert("Clave incorrecta");
+          if (btn) btn.innerText = "Acceder";
+          return;
+        }
+
+        document.getElementById('pantallaLogin').classList.add('hidden');
+        document.getElementById('panelDashboard').classList.remove('hidden');
+
+        pintarDashboard(data.pedidos, data.productos);
+      } catch (err) {
+        alert("Error al conectar con la base de datos.");
+      }
+    }
+
+    function pintarDashboard(pedidos, productos) {
+      // 1. Estadísticas
+      let totalDinero = 0;
+      let pendientes = 0;
+      pedidos.forEach(p => {
+        const num = parseFloat(p.precio) || 0;
+        totalDinero += num;
+        if (p.estado.includes("Pendiente")) pendientes++;
+      });
+
+      document.getElementById('statIngresos').innerText = totalDinero.toFixed(2) + " €";
+      document.getElementById('statPedidos').innerText = pedidos.length;
+      document.getElementById('statPendientes').innerText = pendientes;
+      document.getElementById('statProductos').innerText = productos.length;
+      document.getElementById('contadorPedidos').innerText = `${pedidos.length} pedidos registrados`;
+
+      // 2. Tabla Pedidos
+      const tbody = document.getElementById('tablaPedidos');
+      tbody.innerHTML = pedidos.map(p => `
+        <tr class="hover:bg-zinc-900/50 transition">
+          <td class="py-4">
+            <span class="font-mono font-bold text-gold">${p.id}</span>
+            <span class="block text-[10px] text-zinc-500">${p.fecha}</span>
+          </td>
+          <td class="py-4">
+            <span class="font-semibold text-white block">${p.nombre}</span>
+            <span class="text-[11px] text-zinc-400">${p.telefono}</span>
+          </td>
+          <td class="py-4 max-w-xs">
+            <span class="font-bold text-zinc-200 block">${p.producto}</span>
+            <span class="text-[11px] text-zinc-400 italic block line-clamp-2">"${p.personalizacion}"</span>
+          </td>
+          <td class="py-4 font-bold text-white">
+            ${p.precio}
+            <span class="block text-[10px] text-zinc-500 uppercase">${p.metodoPago}</span>
+          </td>
+          <td class="py-4">
+            <select onchange="cambiarEstado(${p.fila}, this.value)" class="bg-black border border-zinc-700 text-[11px] rounded-lg px-2 py-1 text-white">
+              <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>Pendiente</option>
+              <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>Pagado</option>
+              <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>Enviado</option>
+            </select>
+          </td>
+          <td class="py-4 text-right">
+            <a href="https://wa.me/${p.telefono.replace(/\s+/g, '')}?text=${encodeURIComponent('Hola ' + p.nombre + ', sobre tu pedido en Zeronte...')}" target="_blank" class="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-black px-2.5 py-1.5 rounded-lg text-[11px] transition">
+              <i class="fa-brands fa-whatsapp"></i> Chat
+            </a>
+          </td>
+        </tr>
+      `).join('');
+
+      // 3. Catálogo
+      const contProd = document.getElementById('listaProductosAdmin');
+      contProd.innerHTML = productos.map(prod => `
+        <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center gap-3">
+          <img src="${prod.imagen}" class="w-14 h-14 rounded-xl object-cover bg-black" onerror="this.src='img/logo-zeronte.png'">
+          <div class="flex-grow">
+            <h4 class="text-xs font-bold text-white">${prod.titulo}</h4>
+            <span class="text-xs font-bold text-gold">${prod.precio} €</span>
+            <span class="text-[10px] text-zinc-500 block uppercase">${prod.categoria}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function cambiarEstado(fila, nuevoEstado) {
+      await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ accion: "actualizarEstadoPedido", clave: tokenClave, fila: fila, nuevoEstado: nuevoEstado })
+      });
+      cargarDatos();
+    }
+
+    async function guardarProducto(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnGuardarProd');
+      btn.innerText = "Guardando...";
+
+      const nuevo = {
+        accion: "crearProducto",
+        clave: tokenClave,
+        titulo: document.getElementById('nuevoTitulo').value,
+        precio: document.getElementById('nuevoPrecio').value,
+        categoria: document.getElementById('nuevaCategoria').value,
+        imagen: document.getElementById('nuevaImagen').value,
+        descripcion: document.getElementById('nuevaDesc').value
+      };
+
+      await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(nuevo)
+      });
+
+      document.getElementById('formNuevoProducto').reset();
+      document.getElementById('formNuevoProducto').classList.add('hidden');
+      btn.innerText = "Publicar en la Web";
+      cargarDatos();
+    }
+
+    function cerrarSesion() {
+      tokenClave = "";
+      document.getElementById('pantallaLogin').classList.remove('hidden');
+      document.getElementById('panelDashboard').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
