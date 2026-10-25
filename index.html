@@ -397,7 +397,7 @@
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-hlCFkngwGxqTIsrr-YvMoOpyFH0tRnbzsYxgrHbosz1ObyxPjnVu-1Wn4EvRd-KwYA/exec";
     const MI_TELEFONO_WHATSAPP = "34641851073"; // Tu teléfono para WhatsApp (con prefijo 34)
-    const MI_PAYPAL_USER = "adriandiazgiraldez";        // Tu usuario de paypal.me
+    const MI_PAYPAL_USER = "paypal.me/adriandiazgiraldez";        // Tu usuario de paypal.me
 
     function filtrar(categoria, boton) {
       document.querySelectorAll('.filtro-btn').forEach(btn => {
@@ -492,6 +492,44 @@
       navigator.clipboard.writeText(texto);
       alert("Número copiado al portapapeles: " + texto);
     }
+
+    // Cargar catálogo dinámico al iniciar la página
+document.addEventListener("DOMContentLoaded", cargarCatalogoDinamico);
+
+async function cargarCatalogoDinamico() {
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos`);
+    const data = await res.json();
+    if (data.status === "success" && data.productos.length > 0) {
+      const contenedor = document.querySelector("#catalogo > div");
+      contenedor.innerHTML = data.productos.map(p => `
+        <div class="producto-card ${p.categoria} bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="h-56 bg-zinc-950 relative">
+              <img src="${p.imagen}" alt="${p.titulo}" class="w-full h-full object-cover">
+            </div>
+            <div class="p-4 sm:p-5">
+              <span class="text-[10px] uppercase tracking-wider text-gold font-semibold">${p.categoria}</span>
+              <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">${p.titulo}</h3>
+              <p class="text-xs text-zinc-400 mt-2 leading-relaxed">${p.descripcion}</p>
+            </div>
+          </div>
+          <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
+            <div>
+              <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF</span>
+              <span class="text-xl sm:text-2xl font-bold text-white brand-font">${p.precio.toFixed(2)} €</span>
+            </div>
+            <button onclick="abrirModal('${p.titulo}', ${p.precio})" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
+              Pedir
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    console.log("Usando productos predeterminados en caché.");
+  }
+}
   </script>
 </body>
 </html>
