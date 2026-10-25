@@ -2,118 +2,189 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Zeronte | Panel de Control Shop Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-    body { font-family: 'Montserrat', sans-serif; }
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+    body { 
+      font-family: 'Montserrat', sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
     .text-gold { color: #d4af37; }
     .bg-gold { background-color: #d4af37; }
+    .border-gold { border-color: #d4af37; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-[#0b0b0d] text-zinc-200 antialiased min-h-screen">
 
   <!-- ==================== PANTALLA LOGIN ==================== -->
   <div id="pantallaLogin" class="min-h-screen flex items-center justify-center p-4">
-    <div class="bg-[#141417] border border-zinc-800 p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+    <div class="bg-[#141417] border border-zinc-800 p-7 sm:p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
       <div class="w-12 h-12 bg-zinc-900 border border-gold/40 rounded-2xl mx-auto mb-4 flex items-center justify-center text-gold font-bold text-xl">Z</div>
       <h1 class="text-xl font-bold text-white mb-1">Zeronte Manager</h1>
-      <p class="text-xs text-zinc-500 mb-6">Introduce tu clave de administrador</p>
+      <p class="text-xs text-zinc-500 mb-6">Acceso exclusivo de administrador</p>
       <form onsubmit="autenticar(event)" class="space-y-4">
-        <input type="password" id="inputClave" placeholder="PIN o Contraseña" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-center text-sm text-white focus:outline-none focus:border-gold">
-        <button type="submit" id="btnEntrar" class="w-full bg-white hover:bg-gold text-black font-bold py-3 rounded-xl uppercase text-xs tracking-wider transition">Acceder</button>
+        <input type="password" id="inputClave" placeholder="PIN o Contraseña" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3.5 text-center text-sm text-white focus:outline-none focus:border-gold">
+        <button type="submit" id="btnEntrar" class="w-full bg-white hover:bg-gold text-black font-bold py-3.5 rounded-xl uppercase text-xs tracking-wider transition active:scale-98">Acceder</button>
       </form>
     </div>
   </div>
 
   <!-- ==================== PANEL DASHBOARD ==================== -->
   <div id="panelDashboard" class="hidden min-h-screen flex flex-col">
-    <!-- Barra Superior -->
-    <header class="bg-black border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
+    
+    <!-- Topbar (Optimizada para iPhone notch) -->
+    <header class="bg-black/90 backdrop-blur-md border-b border-zinc-800 px-4 sm:px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
         <span class="w-8 h-8 bg-white text-black font-black flex items-center justify-center rounded-lg text-sm">Z</span>
-        <span class="font-bold tracking-widest text-white text-sm">ZERONTE <span class="text-zinc-500 font-normal">| Shop Manager</span></span>
+        <div>
+          <span class="font-bold tracking-widest text-white text-sm block leading-none">ZERONTE</span>
+          <span class="text-[9px] text-zinc-500 font-medium uppercase tracking-wider">Shop Manager</span>
+        </div>
       </div>
-      <div class="flex items-center gap-4">
-        <button onclick="cargarDatos()" class="text-xs bg-zinc-900 border border-zinc-700 hover:border-gold px-3 py-1.5 rounded-lg text-zinc-300 transition">
-          <i class="fa-solid fa-arrows-rotate mr-1"></i> Actualizar
+      <div class="flex items-center gap-2">
+        <button onclick="cargarDatos()" class="text-xs bg-zinc-900 border border-zinc-700 hover:border-gold px-3 py-2 rounded-xl text-zinc-300 transition flex items-center gap-1.5 active:scale-95">
+          <i id="iconoRefrescar" class="fa-solid fa-arrows-rotate"></i>
+          <span class="hidden sm:inline">Actualizar</span>
         </button>
-        <button onclick="cerrarSesion()" class="text-xs text-rose-400 hover:text-rose-300">Salir</button>
+        <button onclick="cerrarSesion()" class="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-xl transition active:scale-95">
+          Salir
+        </button>
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8 flex-grow w-full space-y-6">
       
-      <!-- 1. Métricas / Estadísticas clave (Estilo Etsy) -->
-      <section class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-[#141417] border border-zinc-800 p-5 rounded-2xl">
-          <span class="text-zinc-500 text-[11px] uppercase tracking-wider font-semibold">Total Ingresos</span>
-          <p id="statIngresos" class="text-2xl font-bold text-white mt-1">0.00 €</p>
+      <!-- 1. BLOQUE DE FINANZAS (3 Métricas Principales) -->
+      <section class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <!-- Total Ingresos -->
+        <div class="bg-[#141417] border border-zinc-800 p-4 sm:p-5 rounded-2xl shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-zinc-500 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Total Ingresos</span>
+            <i class="fa-solid fa-chart-line text-zinc-600 text-xs"></i>
+          </div>
+          <p id="statIngresos" class="text-2xl sm:text-3xl font-bold text-white mt-1.5">0.00 €</p>
+          <span class="text-[10px] text-zinc-500 mt-1 block">Facturación acumulada</span>
         </div>
-        <div class="bg-[#141417] border border-zinc-800 p-5 rounded-2xl">
-          <span class="text-zinc-500 text-[11px] uppercase tracking-wider font-semibold">Pedidos Totales</span>
-          <p id="statPedidos" class="text-2xl font-bold text-white mt-1">0</p>
+
+        <!-- Pendiente de Cobro -->
+        <div class="bg-[#141417] border border-zinc-800 border-l-4 border-l-rose-500 p-4 sm:p-5 rounded-2xl shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-zinc-500 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pendiente</span>
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+          </div>
+          <p id="statPendienteDinero" class="text-2xl sm:text-3xl font-bold text-rose-400 mt-1.5">0.00 €</p>
+          <span class="text-[10px] text-zinc-500 mt-1 block">Pendiente de justificante</span>
         </div>
-        <div class="bg-[#141417] border border-zinc-800 p-5 rounded-2xl">
-          <span class="text-zinc-500 text-[11px] uppercase tracking-wider font-semibold">Pendientes de Pago</span>
-          <p id="statPendientes" class="text-2xl font-bold text-amber-400 mt-1">0</p>
-        </div>
-        <div class="bg-[#141417] border border-zinc-800 p-5 rounded-2xl">
-          <span class="text-zinc-500 text-[11px] uppercase tracking-wider font-semibold">Catálogo Activo</span>
-          <p id="statProductos" class="text-2xl font-bold text-gold mt-1">0</p>
+
+        <!-- Cobrado / Pagado -->
+        <div class="bg-[#141417] border border-zinc-800 border-l-4 border-l-emerald-500 p-4 sm:p-5 rounded-2xl shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-zinc-500 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pagada</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          </div>
+          <p id="statPagado" class="text-2xl sm:text-3xl font-bold text-emerald-400 mt-1.5">0.00 €</p>
+          <span class="text-[10px] text-zinc-500 mt-1 block">Confirmado en Bizum/PayPal</span>
         </div>
       </section>
 
-      <!-- 2. Sección de Pedidos -->
-      <section class="bg-[#141417] border border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-xl">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-box text-gold text-sm"></i> Pedidos Recientes
-          </h2>
-          <span class="text-xs text-zinc-500" id="contadorPedidos">0 pedidos</span>
+      <!-- 2. MINI INDICADORES DE VOLUMEN (Pedidos y Catálogo) -->
+      <section class="grid grid-cols-3 gap-2.5 sm:gap-4">
+        <div class="bg-zinc-900/60 border border-zinc-800/80 p-3 sm:p-4 rounded-xl text-center">
+          <span class="text-zinc-500 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pedidos</span>
+          <span id="statPedidos" class="text-lg sm:text-xl font-bold text-white">0</span>
+        </div>
+        <div class="bg-zinc-900/60 border border-zinc-800/80 p-3 sm:p-4 rounded-xl text-center">
+          <span class="text-zinc-500 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pendientes</span>
+          <span id="statPendientesCount" class="text-lg sm:text-xl font-bold text-rose-400">0</span>
+        </div>
+        <div class="bg-zinc-900/60 border border-zinc-800/80 p-3 sm:p-4 rounded-xl text-center">
+          <span class="text-zinc-500 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Enviados</span>
+          <span id="statCompletadosCount" class="text-lg sm:text-xl font-bold text-emerald-400">0</span>
+        </div>
+      </section>
+
+      <!-- 3. GESTOR DE PEDIDOS -->
+      <section class="bg-[#141417] border border-zinc-800 rounded-3xl p-4 sm:p-6 shadow-xl">
+        
+        <!-- Controles: Título, Buscador y Filtros -->
+        <div class="flex flex-col gap-3.5 mb-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-box text-gold text-base"></i> Pedidos Recibidos
+            </h2>
+            <span class="text-xs text-zinc-500" id="contadorPedidos">0 pedidos</span>
+          </div>
+
+          <!-- Barra de Búsqueda -->
+          <div class="relative w-full">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-zinc-500"></i>
+            <input type="text" id="inputBuscador" oninput="filtrarPedidos()" placeholder="Buscar por cliente, ID, móvil..." class="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold">
+          </div>
+
+          <!-- Pestañas de Filtro Rápido (scroll horizontal en móvil) -->
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+            <button onclick="setFiltroEstado('todos', this)" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-black transition active:scale-95">Todos</button>
+            <button onclick="setFiltroEstado('pendiente', this)" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-95">🔴 Pendientes</button>
+            <button onclick="setFiltroEstado('proceso', this)" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-95">🟠 En Proceso</button>
+            <button onclick="setFiltroEstado('completado', this)" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-95">🟢 Enviados</button>
+          </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- VISTA SMARTPHONE (Tarjetas táctiles limpias) -->
+        <div id="vistaMovilPedidos" class="block sm:hidden space-y-3">
+          <!-- Renderizado móvil -->
+        </div>
+
+        <!-- VISTA ESCRITORIO (Tabla clásica para PC) -->
+        <div class="hidden sm:block overflow-x-auto">
           <table class="w-full text-left text-xs text-zinc-300">
-            <thead class="text-[10px] uppercase tracking-wider text-zinc-500 border-b border-zinc-800">
+            <thead class="text-[10px] uppercase tracking-wider text-zinc-500 border-b border-zinc-800 pb-3">
               <tr>
+                <th class="pb-3 px-3">Estado</th>
                 <th class="pb-3">ID / Fecha</th>
                 <th class="pb-3">Cliente</th>
                 <th class="pb-3">Producto & Personalización</th>
-                <th class="pb-3">Pago</th>
-                <th class="pb-3">Estado</th>
-                <th class="pb-3 text-right">Acción</th>
+                <th class="pb-3">Importe</th>
+                <th class="pb-3 text-right pr-2">Acción</th>
               </tr>
             </thead>
-            <tbody id="tablaPedidos" class="divide-y divide-zinc-800/60">
-              <!-- Se rellena por JavaScript -->
+            <tbody id="tablaPedidosPC" class="divide-y divide-zinc-800/60">
+              <!-- Renderizado PC -->
             </tbody>
           </table>
         </div>
+
+        <div id="sinResultados" class="hidden text-center py-8 text-zinc-500 text-xs">
+          No se encontraron pedidos con ese criterio.
+        </div>
       </section>
 
-      <!-- 3. Gestión del Catálogo (Añadir nuevo producto) -->
-      <section class="bg-[#141417] border border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-xl">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <!-- 4. CATÁLOGO DE PARTITURAS -->
+      <section class="bg-[#141417] border border-zinc-800 rounded-3xl p-4 sm:p-6 shadow-xl">
+        <div class="flex items-center justify-between gap-2 mb-5">
           <div>
-            <h2 class="text-lg font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-music text-gold text-sm"></i> Catálogo de Partituras
+            <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-music text-gold text-base"></i> Catálogo Activo
             </h2>
-            <p class="text-xs text-zinc-500">Los productos que crees aquí se mostrarán inmediatamente en la web principal.</p>
+            <p class="text-[11px] text-zinc-500 mt-0.5">Gestión de productos de la tienda online.</p>
           </div>
-          <button onclick="document.getElementById('formNuevoProducto').classList.toggle('hidden')" class="bg-gold hover:bg-amber-400 text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition">
-            + Añadir Producto
+          <button onclick="document.getElementById('formNuevoProducto').classList.toggle('hidden')" class="bg-gold hover:bg-amber-400 text-black px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95">
+            + Añadir
           </button>
         </div>
 
-        <!-- Formulario Ocultable para Crear Producto -->
-        <form id="formNuevoProducto" onsubmit="guardarProducto(event)" class="hidden bg-zinc-900 border border-zinc-800 p-5 rounded-2xl mb-6 space-y-4">
+        <!-- Formulario Crear Producto -->
+        <form id="formNuevoProducto" onsubmit="guardarProducto(event)" class="hidden bg-zinc-900 border border-zinc-800 p-4 sm:p-5 rounded-2xl mb-5 space-y-3.5">
           <h3 class="text-xs uppercase tracking-wider font-bold text-white">Nuevo Artículo para la Tienda</h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block text-[10px] text-zinc-400 mb-1">Título del Producto *</label>
+              <label class="block text-[10px] text-zinc-400 mb-1">Título *</label>
               <input type="text" id="nuevoTitulo" required placeholder="Ej: Lámina Partitura San Valentín" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
             </div>
             <div>
@@ -132,29 +203,33 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-[10px] text-zinc-400 mb-1">Ruta o Enlace de la Foto *</label>
-              <input type="text" id="nuevaImagen" required placeholder="img/mi-foto.jpg o URL" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
+              <input type="text" id="nuevaImagen" required placeholder="img/foto.jpg o URL" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
             </div>
             <div>
               <label class="block text-[10px] text-zinc-400 mb-1">Descripción corta *</label>
-              <input type="text" id="nuevaDesc" required placeholder="Breve detalle de lo que incluye el PDF..." class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
+              <input type="text" id="nuevaDesc" required placeholder="Detalle de lo que incluye..." class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
             </div>
           </div>
-          <button type="submit" id="btnGuardarProd" class="bg-white hover:bg-gold text-black font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Publicar en la Web</button>
+          <button type="submit" id="btnGuardarProd" class="w-full sm:w-auto bg-white hover:bg-gold text-black font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Publicar en la Tienda</button>
         </form>
 
-        <!-- Lista de Productos en el catálogo -->
-        <div id="listaProductosAdmin" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <!-- Rellenado por JS -->
+        <!-- Rejilla de Productos -->
+        <div id="listaProductosAdmin" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- Render dinámico -->
         </div>
       </section>
 
     </main>
   </div>
 
-  <!-- SCRIPT DASHBOARD -->
+  <!-- ==================== SCRIPT DASHBOARD ==================== -->
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-hlCFkngwGxqTIsrr-YvMoOpyFH0tRnbzsYxgrHbosz1ObyxPjnVu-1Wn4EvRd-KwYA/exec";
+    
     let tokenClave = "";
+    let listaPedidosGlobal = [];
+    let listaProductosGlobal = [];
+    let filtroEstadoActual = "todos";
 
     function autenticar(e) {
       e.preventDefault();
@@ -164,7 +239,9 @@
 
     async function cargarDatos() {
       const btn = document.getElementById('btnEntrar');
+      const icono = document.getElementById('iconoRefrescar');
       if (btn) btn.innerText = "Cargando...";
+      if (icono) icono.classList.add('fa-spin');
 
       try {
         const res = await fetch(`${APPS_SCRIPT_URL}?accion=datosAdmin&clave=${encodeURIComponent(tokenClave)}`);
@@ -179,84 +256,235 @@
         document.getElementById('pantallaLogin').classList.add('hidden');
         document.getElementById('panelDashboard').classList.remove('hidden');
 
-        pintarDashboard(data.pedidos, data.productos);
+        listaPedidosGlobal = data.pedidos || [];
+        listaProductosGlobal = data.productos || [];
+
+        actualizarMetricas();
+        filtrarPedidos();
+        renderizarProductos();
+
       } catch (err) {
-        alert("Error al conectar con la base de datos.");
+        console.error(err);
+        alert("Error de conexión con la base de datos.");
+      } finally {
+        if (icono) icono.classList.remove('fa-spin');
       }
     }
 
-    function pintarDashboard(pedidos, productos) {
-      // 1. Estadísticas
-      let totalDinero = 0;
-      let pendientes = 0;
-      pedidos.forEach(p => {
+    // 1. Cálculo de Métricas y Desglose Financiero
+    function actualizarMetricas() {
+      let totalIngresos = 0;
+      let totalPagado = 0;
+      let totalPendiente = 0;
+      let pendientesCount = 0;
+      let completadosCount = 0;
+
+      listaPedidosGlobal.forEach(p => {
         const num = parseFloat(p.precio) || 0;
-        totalDinero += num;
-        if (p.estado.includes("Pendiente")) pendientes++;
+        totalIngresos += num;
+        
+        const est = (p.estado || "").toLowerCase();
+        if (est.includes("pendiente")) {
+          totalPendiente += num;
+          pendientesCount++;
+        } else {
+          // Si está pagado o enviado se considera dinero cobrado
+          totalPagado += num;
+          if (est.includes("enviado") || est.includes("completado")) {
+            completadosCount++;
+          }
+        }
       });
 
-      document.getElementById('statIngresos').innerText = totalDinero.toFixed(2) + " €";
-      document.getElementById('statPedidos').innerText = pedidos.length;
-      document.getElementById('statPendientes').innerText = pendientes;
-      document.getElementById('statProductos').innerText = productos.length;
-      document.getElementById('contadorPedidos').innerText = `${pedidos.length} pedidos registrados`;
+      // Rellenar Bloque Superior
+      document.getElementById('statIngresos').innerText = totalIngresos.toFixed(2) + " €";
+      document.getElementById('statPagado').innerText = totalPagado.toFixed(2) + " €";
+      document.getElementById('statPendienteDinero').innerText = totalPendiente.toFixed(2) + " €";
 
-      // 2. Tabla Pedidos
-      const tbody = document.getElementById('tablaPedidos');
-      tbody.innerHTML = pedidos.map(p => `
-        <tr class="hover:bg-zinc-900/50 transition">
-          <td class="py-4">
-            <span class="font-mono font-bold text-gold">${p.id}</span>
-            <span class="block text-[10px] text-zinc-500">${p.fecha}</span>
-          </td>
-          <td class="py-4">
-            <span class="font-semibold text-white block">${p.nombre}</span>
-            <span class="text-[11px] text-zinc-400">${p.telefono}</span>
-          </td>
-          <td class="py-4 max-w-xs">
-            <span class="font-bold text-zinc-200 block">${p.producto}</span>
-            <span class="text-[11px] text-zinc-400 italic block line-clamp-2">"${p.personalizacion}"</span>
-          </td>
-          <td class="py-4 font-bold text-white">
-            ${p.precio}
-            <span class="block text-[10px] text-zinc-500 uppercase">${p.metodoPago}</span>
-          </td>
-          <td class="py-4">
-            <select onchange="cambiarEstado(${p.fila}, this.value)" class="bg-black border border-zinc-700 text-[11px] rounded-lg px-2 py-1 text-white">
-              <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>Pendiente</option>
-              <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>Pagado</option>
-              <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>Enviado</option>
-            </select>
-          </td>
-          <td class="py-4 text-right">
-            <a href="https://wa.me/${p.telefono.replace(/\s+/g, '')}?text=${encodeURIComponent('Hola ' + p.nombre + ', sobre tu pedido en Zeronte...')}" target="_blank" class="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-black px-2.5 py-1.5 rounded-lg text-[11px] transition">
-              <i class="fa-brands fa-whatsapp"></i> Chat
-            </a>
-          </td>
-        </tr>
-      `).join('');
+      // Rellenar Mini Indicadores
+      document.getElementById('statPedidos').innerText = listaPedidosGlobal.length;
+      document.getElementById('statPendientesCount').innerText = pendientesCount;
+      document.getElementById('statCompletadosCount').innerText = completadosCount;
+      document.getElementById('contadorPedidos').innerText = `${listaPedidosGlobal.length} pedidos registrados`;
+    }
 
-      // 3. Catálogo
-      const contProd = document.getElementById('listaProductosAdmin');
-      contProd.innerHTML = productos.map(prod => `
-        <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center gap-3">
-          <img src="${prod.imagen}" class="w-14 h-14 rounded-xl object-cover bg-black" onerror="this.src='img/logo-zeronte.png'">
-          <div class="flex-grow">
-            <h4 class="text-xs font-bold text-white">${prod.titulo}</h4>
+    function getEstadoBadge(estado) {
+      const est = (estado || "").toLowerCase();
+      if (est.includes("pendiente")) {
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Pendiente
+                </span>`;
+      } else if (est.includes("proceso") || est.includes("pagado")) {
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> En Proceso
+                </span>`;
+      } else if (est.includes("enviado") || est.includes("completado")) {
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Enviado
+                </span>`;
+      }
+      return `<span class="text-zinc-400 text-[10px]">${estado}</span>`;
+    }
+
+    function setFiltroEstado(estado, btn) {
+      filtroEstadoActual = estado;
+      document.querySelectorAll('.filtro-btn-estado').forEach(b => {
+        b.classList.remove('bg-white', 'text-black');
+        b.classList.add('bg-zinc-900', 'text-zinc-400');
+      });
+      btn.classList.add('bg-white', 'text-black');
+      btn.classList.remove('bg-zinc-900', 'text-zinc-400');
+      filtrarPedidos();
+    }
+
+    function filtrarPedidos() {
+      const texto = (document.getElementById('inputBuscador').value || "").toLowerCase();
+
+      const pedidosFiltrados = listaPedidosGlobal.filter(p => {
+        const est = (p.estado || "").toLowerCase();
+        let coincideEstado = true;
+        if (filtroEstadoActual === "pendiente") coincideEstado = est.includes("pendiente");
+        if (filtroEstadoActual === "proceso") coincideEstado = (est.includes("proceso") || est.includes("pagado"));
+        if (filtroEstadoActual === "completado") coincideEstado = (est.includes("enviado") || est.includes("completado"));
+
+        const coincideTexto = 
+          (p.id || "").toLowerCase().includes(texto) ||
+          (p.nombre || "").toLowerCase().includes(texto) ||
+          (p.telefono || "").toString().includes(texto) ||
+          (p.email || "").toLowerCase().includes(texto) ||
+          (p.producto || "").toLowerCase().includes(texto);
+
+        return coincideEstado && coincideTexto;
+      });
+
+      renderizarPedidos(pedidosFiltrados);
+    }
+
+    function renderizarPedidos(pedidos) {
+      const tablaPC = document.getElementById('tablaPedidosPC');
+      const vistaMovil = document.getElementById('vistaMovilPedidos');
+      const sinRes = document.getElementById('sinResultados');
+
+      if (pedidos.length === 0) {
+        tablaPC.innerHTML = "";
+        vistaMovil.innerHTML = "";
+        sinRes.classList.remove('hidden');
+        return;
+      }
+      sinRes.classList.add('hidden');
+
+      // 1. Render para ESCRITORIO (Tabla)
+      tablaPC.innerHTML = pedidos.map(p => {
+        const cleanTel = (p.telefono || "").toString().replace(/[^0-9]/g, '');
+        const msg = encodeURIComponent(`Hola ${p.nombre}! Te escribo de Zeronte respecto a tu pedido ${p.id}...`);
+
+        return `
+          <tr class="hover:bg-zinc-900/50 transition">
+            <td class="py-4 px-3 align-top">
+              <div class="space-y-1.5">
+                <div>${getEstadoBadge(p.estado)}</div>
+                <select onchange="cambiarEstado(${p.fila}, this.value)" class="bg-black border border-zinc-700 text-[11px] rounded-lg px-2 py-1 text-zinc-300 focus:outline-none focus:border-gold">
+                  <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
+                  <option value="En proceso / Pagado" ${(p.estado === 'En proceso / Pagado' || p.estado === 'Pagado') ? 'selected' : ''}>🟠 En proceso</option>
+                  <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
+                </select>
+              </div>
+            </td>
+            <td class="py-4 align-top">
+              <span class="font-mono font-bold text-gold text-xs block">${p.id}</span>
+              <span class="text-[10px] text-zinc-500">${p.fecha}</span>
+            </td>
+            <td class="py-4 align-top">
+              <span class="font-semibold text-white block text-xs">${p.nombre}</span>
+              <span class="text-[11px] text-zinc-400 block">${p.telefono}</span>
+              <span class="text-[10px] text-zinc-500 block truncate max-w-[130px]">${p.email}</span>
+            </td>
+            <td class="py-4 align-top max-w-xs">
+              <span class="font-bold text-zinc-200 block text-xs">${p.producto}</span>
+              <div class="mt-1 bg-zinc-900/90 border border-zinc-800 p-2 rounded-xl text-[11px] text-zinc-300 italic">
+                "${p.personalizacion || 'Sin datos de dedicatoria'}"
+              </div>
+            </td>
+            <td class="py-4 align-top">
+              <span class="font-bold text-white text-sm block">${p.precio}</span>
+              <span class="text-[10px] uppercase font-semibold text-zinc-400">${p.metodoPago}</span>
+            </td>
+            <td class="py-4 align-top text-right pr-2">
+              <a href="https://wa.me/${cleanTel}?text=${msg}" target="_blank" class="inline-flex items-center gap-1.5 bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-black font-semibold px-3 py-1.5 rounded-xl text-xs transition active:scale-95">
+                <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // 2. Render para SMARTPHONE (Tarjetas táctiles limpias)
+      vistaMovil.innerHTML = pedidos.map(p => {
+        const cleanTel = (p.telefono || "").toString().replace(/[^0-9]/g, '');
+        const msg = encodeURIComponent(`Hola ${p.nombre}! Te escribo de Zeronte respecto a tu pedido ${p.id}...`);
+
+        return `
+          <div class="bg-zinc-900/70 border border-zinc-800/90 rounded-2xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-mono font-bold text-gold text-xs">${p.id}</span>
+                <span class="text-[10px] text-zinc-500 block">${p.fecha}</span>
+              </div>
+              <div>${getEstadoBadge(p.estado)}</div>
+            </div>
+
+            <div>
+              <p class="font-bold text-white text-sm">${p.nombre}</p>
+              <p class="text-xs text-zinc-400">${p.producto} — <strong class="text-white">${p.precio}</strong> (${p.metodoPago})</p>
+              <div class="mt-2 bg-black/50 border border-zinc-800 p-2.5 rounded-xl text-xs text-zinc-300 italic">
+                "${p.personalizacion || 'Sin dedicatoria'}"
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1 border-t border-zinc-800/60">
+              <select onchange="cambiarEstado(${p.fila}, this.value)" class="flex-grow bg-black border border-zinc-700 text-xs rounded-xl px-2.5 py-2 text-zinc-200">
+                <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
+                <option value="En proceso / Pagado" ${(p.estado === 'En proceso / Pagado' || p.estado === 'Pagado') ? 'selected' : ''}>🟠 En proceso</option>
+                <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
+              </select>
+              <a href="https://wa.me/${cleanTel}?text=${msg}" target="_blank" class="bg-emerald-600 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 active:scale-95 shadow">
+                <i class="fa-brands fa-whatsapp text-sm"></i> Chat
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderizarProductos() {
+      const cont = document.getElementById('listaProductosAdmin');
+      cont.innerHTML = listaProductosGlobal.map(prod => `
+        <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl flex items-center gap-3">
+          <img src="${prod.imagen}" class="w-12 h-12 rounded-xl object-cover bg-black" onerror="this.src='img/logo-zeronte.png'">
+          <div class="flex-grow min-w-0">
+            <h4 class="text-xs font-bold text-white truncate">${prod.titulo}</h4>
             <span class="text-xs font-bold text-gold">${prod.precio} €</span>
-            <span class="text-[10px] text-zinc-500 block uppercase">${prod.categoria}</span>
+            <span class="text-[9px] text-zinc-500 uppercase block">${prod.categoria}</span>
           </div>
         </div>
       `).join('');
     }
 
     async function cambiarEstado(fila, nuevoEstado) {
-      await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ accion: "actualizarEstadoPedido", clave: tokenClave, fila: fila, nuevoEstado: nuevoEstado })
-      });
-      cargarDatos();
+      const item = listaPedidosGlobal.find(p => p.fila === fila);
+      if (item) item.estado = nuevoEstado;
+      actualizarMetricas();
+      filtrarPedidos();
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ accion: "actualizarEstadoPedido", clave: tokenClave, fila: fila, nuevoEstado: nuevoEstado })
+        });
+      } catch (e) {
+        console.error("Error al actualizar estado:", e);
+      }
     }
 
     async function guardarProducto(e) {
@@ -282,7 +510,7 @@
 
       document.getElementById('formNuevoProducto').reset();
       document.getElementById('formNuevoProducto').classList.add('hidden');
-      btn.innerText = "Publicar en la Web";
+      btn.innerText = "Publicar en la Tienda";
       cargarDatos();
     }
 
