@@ -6,6 +6,9 @@
   <title>Zeronte | Panel de Control Shop Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Motor PDF Vectorial con texto nativo -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
     body { 
@@ -20,7 +23,7 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[#0b0b0d] text-zinc-200 antialiased min-h-screen">
+<body class="bg-[#f8f9fa] text-slate-800 antialiased min-h-screen">
 
   <!-- ==================== PANTALLA LOGIN ==================== -->
   <div id="pantallaLogin" class="min-h-screen flex items-center justify-center p-4">
@@ -35,191 +38,337 @@
     </div>
   </div>
 
-  <!-- ==================== PANEL DASHBOARD ==================== -->
-  <div id="panelDashboard" class="hidden min-h-screen flex flex-col">
+<!-- ==================== PANEL DASHBOARD ==================== -->
+  <div id="panelDashboard" class="hidden min-h-screen flex flex-col md:flex-row bg-[#f8f9fa]">
     
-    <!-- Topbar (Optimizada para iPhone notch) -->
-    <header class="bg-black/90 backdrop-blur-md border-b border-zinc-800 px-4 sm:px-8 py-3.5 sticky top-0 z-30 flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <span class="w-8 h-8 bg-white text-black font-black flex items-center justify-center rounded-lg text-sm">Z</span>
-        <div>
-          <span class="font-bold tracking-widest text-white text-sm block leading-none">ZERONTE</span>
-          <span class="text-[9px] text-zinc-500 font-medium uppercase tracking-wider">Shop Manager</span>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="cargarDatos()" class="text-xs bg-zinc-900 border border-zinc-700 hover:border-gold px-3 py-2 rounded-xl text-zinc-300 transition flex items-center gap-1.5 active:scale-95">
-          <i id="iconoRefrescar" class="fa-solid fa-arrows-rotate"></i>
-          <span class="hidden sm:inline">Actualizar</span>
-        </button>
-        <button onclick="cerrarSesion()" class="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-xl transition active:scale-95">
-          Salir
-        </button>
-      </div>
-    </header>
+    <!-- OVERLAY OSCURO PARA MÓVIL AL ABRIR EL SIDEBAR -->
+    <div id="sidebarOverlay" onclick="toggleSidebarMovil()" class="fixed inset-0 bg-black/40 z-30 hidden md:hidden transition-opacity"></div>
 
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8 flex-grow w-full space-y-6">
-      
-      <!-- 1. BLOQUE DE FINANZAS (3 Métricas Principales) -->
-      <section class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-        <!-- Total Ingresos -->
-        <div class="bg-[#141417] border border-zinc-800 p-4 sm:p-5 rounded-2xl shadow-sm">
-          <div class="flex items-center justify-between">
-            <span class="text-zinc-500 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Total Ingresos</span>
-            <i class="fa-solid fa-chart-line text-zinc-600 text-xs"></i>
+    <!-- SIDEBAR / MENÚ LATERAL IZQUIERDO -->
+    <aside id="sidebarMenu" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-40 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-200 ease-in-out flex flex-col justify-between shadow-sm">
+      <div>
+        <!-- Cabecera Sidebar -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 bg-slate-900 text-white font-black flex items-center justify-center rounded-lg text-sm shadow-sm">Z</span>
+            <div>
+              <span class="font-bold tracking-widest text-slate-900 text-sm block leading-none">ZERONTE</span>
+              <span class="text-[9px] text-slate-400 font-medium uppercase tracking-wider">Shop Manager</span>
+            </div>
           </div>
-          <p id="statIngresos" class="text-2xl sm:text-3xl font-bold text-white mt-1.5">0.00 €</p>
-          <span class="text-[10px] text-zinc-500 mt-1 block">Facturación acumulada</span>
-        </div>
-
-        <!-- Pendiente de Cobro -->
-        <div class="bg-[#141417] border border-zinc-800 border-l-4 border-l-rose-500 p-4 sm:p-5 rounded-2xl shadow-sm">
-          <div class="flex items-center justify-between">
-            <span class="text-zinc-500 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pendiente</span>
-            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-          </div>
-          <p id="statPendienteDinero" class="text-2xl sm:text-3xl font-bold text-rose-400 mt-1.5">0.00 €</p>
-          <span class="text-[10px] text-zinc-500 mt-1 block">Pendiente de justificante</span>
-        </div>
-
-        <!-- Cobrado / Pagado -->
-        <div class="bg-[#141417] border border-zinc-800 border-l-4 border-l-emerald-500 p-4 sm:p-5 rounded-2xl shadow-sm">
-          <div class="flex items-center justify-between">
-            <span class="text-zinc-500 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pagada</span>
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          </div>
-          <p id="statPagado" class="text-2xl sm:text-3xl font-bold text-emerald-400 mt-1.5">0.00 €</p>
-          <span class="text-[10px] text-zinc-500 mt-1 block">Confirmado en Bizum/PayPal</span>
-        </div>
-      </section>
-
-      <!-- 2. MINI INDICADORES DE VOLUMEN (Pedidos y Catálogo) -->
-      <section class="grid grid-cols-3 gap-2.5 sm:gap-4">
-        <div class="bg-zinc-900/60 border border-zinc-800/80 p-3 sm:p-4 rounded-xl text-center">
-          <span class="text-zinc-500 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pedidos</span>
-          <span id="statPedidos" class="text-lg sm:text-xl font-bold text-white">0</span>
-        </div>
-        <div class="bg-zinc-900/60 border border-zinc-800/80 p-3 sm:p-4 rounded-xl text-center">
-          <span class="text-zinc-500 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pendientes</span>
-          <span id="statPendientesCount" class="text-lg sm:text-xl font-bold text-rose-400">0</span>
-        </div>
-        <div class="bg-zinc-900/60 border border-zinc-800/80 p-3 sm:p-4 rounded-xl text-center">
-          <span class="text-zinc-500 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Enviados</span>
-          <span id="statCompletadosCount" class="text-lg sm:text-xl font-bold text-emerald-400">0</span>
-        </div>
-      </section>
-
-      <!-- 3. GESTOR DE PEDIDOS -->
-      <section class="bg-[#141417] border border-zinc-800 rounded-3xl p-4 sm:p-6 shadow-xl">
-        
-        <!-- Controles: Título, Buscador y Filtros -->
-        <div class="flex flex-col gap-3.5 mb-5">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-box text-gold text-base"></i> Pedidos Recibidos
-            </h2>
-            <span class="text-xs text-zinc-500" id="contadorPedidos">0 pedidos</span>
-          </div>
-
-          <!-- Barra de Búsqueda -->
-          <div class="relative w-full">
-            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-zinc-500"></i>
-            <input type="text" id="inputBuscador" oninput="filtrarPedidos()" placeholder="Buscar por cliente, ID, móvil..." class="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold">
-          </div>
-
-          <!-- Pestañas de Filtro Rápido (scroll horizontal en móvil) -->
-          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-            <button onclick="setFiltroEstado('todos', this)" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-black transition active:scale-95">Todos</button>
-            <button onclick="setFiltroEstado('pendiente', this)" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-95">🔴 Pendientes</button>
-            <button onclick="setFiltroEstado('proceso', this)" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-95">🟠 En Proceso</button>
-            <button onclick="setFiltroEstado('completado', this)" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-95">🟢 Enviados</button>
-          </div>
-        </div>
-
-        <!-- VISTA SMARTPHONE (Tarjetas táctiles limpias) -->
-        <div id="vistaMovilPedidos" class="block sm:hidden space-y-3">
-          <!-- Renderizado móvil -->
-        </div>
-
-        <!-- VISTA ESCRITORIO (Tabla clásica para PC) -->
-        <div class="hidden sm:block overflow-x-auto">
-          <table class="w-full text-left text-xs text-zinc-300">
-            <thead class="text-[10px] uppercase tracking-wider text-zinc-500 border-b border-zinc-800 pb-3">
-              <tr>
-                <th class="pb-3 px-3">Estado</th>
-                <th class="pb-3">ID / Fecha</th>
-                <th class="pb-3">Cliente</th>
-                <th class="pb-3">Producto & Personalización</th>
-                <th class="pb-3">Importe</th>
-                <th class="pb-3 text-right pr-2">Acción</th>
-              </tr>
-            </thead>
-            <tbody id="tablaPedidosPC" class="divide-y divide-zinc-800/60">
-              <!-- Renderizado PC -->
-            </tbody>
-          </table>
-        </div>
-
-        <div id="sinResultados" class="hidden text-center py-8 text-zinc-500 text-xs">
-          No se encontraron pedidos con ese criterio.
-        </div>
-      </section>
-
-      <!-- 4. CATÁLOGO DE PARTITURAS -->
-      <section class="bg-[#141417] border border-zinc-800 rounded-3xl p-4 sm:p-6 shadow-xl">
-        <div class="flex items-center justify-between gap-2 mb-5">
-          <div>
-            <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-music text-gold text-base"></i> Catálogo Activo
-            </h2>
-            <p class="text-[11px] text-zinc-500 mt-0.5">Gestión de productos de la tienda online.</p>
-          </div>
-          <button onclick="document.getElementById('formNuevoProducto').classList.toggle('hidden')" class="bg-gold hover:bg-amber-400 text-black px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95">
-            + Añadir
+          <button onclick="toggleSidebarMovil()" class="md:hidden text-slate-400 hover:text-slate-600 p-1">
+            <i class="fa-solid fa-xmark text-lg"></i>
           </button>
         </div>
 
-        <!-- Formulario Crear Producto -->
-        <form id="formNuevoProducto" onsubmit="guardarProducto(event)" class="hidden bg-zinc-900 border border-zinc-800 p-4 sm:p-5 rounded-2xl mb-5 space-y-3.5">
-          <h3 class="text-xs uppercase tracking-wider font-bold text-white">Nuevo Artículo para la Tienda</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-[10px] text-zinc-400 mb-1">Título *</label>
-              <input type="text" id="nuevoTitulo" required placeholder="Ej: Lámina Partitura San Valentín" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
-            </div>
-            <div>
-              <label class="block text-[10px] text-zinc-400 mb-1">Precio (€) *</label>
-              <input type="number" step="0.01" id="nuevoPrecio" required placeholder="12.99" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
-            </div>
-            <div>
-              <label class="block text-[10px] text-zinc-400 mb-1">Categoría *</label>
-              <select id="nuevaCategoria" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
-                <option value="partitura">Partitura Personalizada</option>
-                <option value="natalicio">Natalicio</option>
-                <option value="posters">Pósters Educativos</option>
-              </select>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[10px] text-zinc-400 mb-1">Ruta o Enlace de la Foto *</label>
-              <input type="text" id="nuevaImagen" required placeholder="img/foto.jpg o URL" class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
-            </div>
-            <div>
-              <label class="block text-[10px] text-zinc-400 mb-1">Descripción corta *</label>
-              <input type="text" id="nuevaDesc" required placeholder="Detalle de lo que incluye..." class="w-full bg-black border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white">
-            </div>
-          </div>
-          <button type="submit" id="btnGuardarProd" class="w-full sm:w-auto bg-white hover:bg-gold text-black font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Publicar en la Tienda</button>
-        </form>
+        <!-- Opciones de Navegación -->
+        <nav class="p-3 space-y-1.5">
+          <button onclick="cambiarSeccion('dashboard', this)" class="nav-item-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 text-white shadow-sm transition">
+            <i class="fa-solid fa-chart-pie w-4 text-center"></i>
+            <span>Inicio & Pedidos</span>
+          </button>
+          
+          <button onclick="cambiarSeccion('catalogo', this)" class="nav-item-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <i class="fa-solid fa-music w-4 text-center"></i>
+            <span>Catálogo</span>
+          </button>
 
-        <!-- Rejilla de Productos -->
-        <div id="listaProductosAdmin" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <!-- Render dinámico -->
+          <button onclick="cambiarSeccion('clientes', this)" class="nav-item-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <i class="fa-solid fa-users w-4 text-center"></i>
+            <span>Clientes</span>
+          </button>
+
+          <button onclick="cambiarSeccion('mensajes', this)" class="nav-item-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-envelope w-4 text-center"></i>
+              <span>Mensajes</span>
+            </div>
+            <span id="badgeMensajes" class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold">0</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Pie del Sidebar con Salir -->
+      <div class="p-4 border-t border-slate-100">
+        <button onclick="cerrarSesion()" class="w-full flex items-center justify-center gap-2 text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 font-semibold py-2.5 rounded-xl transition active:scale-95">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- CONTENEDOR PRINCIPAL DERECHO -->
+    <div class="flex-grow flex flex-col min-w-0">
+      
+      <!-- Topbar Superior (Adaptada para PC y Smartphones) -->
+      <header class="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 sticky top-0 z-20 flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-3">
+          <button onclick="toggleSidebarMovil()" class="md:hidden text-slate-700 p-2 rounded-xl bg-slate-100 hover:bg-slate-200">
+            <i class="fa-solid fa-bars text-sm"></i>
+          </button>
+          <span class="font-bold text-slate-800 text-sm md:hidden">ZERONTE</span>
         </div>
-      </section>
+        
+        <div class="flex items-center gap-2">
+          <button onclick="cargarDatos()" class="text-xs bg-white border border-slate-300 hover:border-slate-400 px-3 py-2 rounded-xl text-slate-700 transition flex items-center gap-1.5 active:scale-95 shadow-xs">
+            <i id="iconoRefrescar" class="fa-solid fa-arrows-rotate"></i>
+            <span class="hidden sm:inline">Actualizar</span>
+          </button>
+        </div>
+      </header>
 
-    </main>
+      <!-- CONTENIDOS SEGÚN SECCIÓN SELECCIONADA -->
+      <div class="p-3 sm:p-6 md:p-8 flex-grow space-y-6">
+
+        <!-- ================= SECCIÓN 1: INICIO & PEDIDOS ================= -->
+        <div id="vistaSeccionDashboard" class="space-y-6">
+          
+          <!-- 1. BLOQUE DE FINANZAS (4 Tarjetas) -->
+          <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <!-- Total de Hoy -->
+            <div onclick="filtrarDesdeTarjeta('hoy')" class="bg-white border border-slate-200 border-l-4 border-l-blue-500 p-4 sm:p-5 rounded-2xl shadow-xs cursor-pointer hover:shadow-md hover:border-slate-300 transition active:scale-98">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Total de Hoy</span>
+                <i class="fa-solid fa-calendar-day text-blue-500 text-xs"></i>
+              </div>
+              <p id="statHoyDinero" class="text-2xl sm:text-3xl font-bold text-blue-600 mt-1.5">0.00 €</p>
+              <span class="text-[10px] text-slate-400 mt-1 block">Facturado hoy</span>
+            </div>
+
+            <!-- Total Acumulado -->
+            <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Total Ingresos</span>
+                <i class="fa-solid fa-chart-line text-slate-400 text-xs"></i>
+              </div>
+              <p id="statIngresos" class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5">0.00 €</p>
+              <span class="text-[10px] text-slate-400 mt-1 block">Facturación total</span>
+            </div>
+
+            <!-- Cantidad Pendiente -->
+            <div onclick="filtrarDesdeTarjeta('pendiente')" class="bg-white border border-slate-200 border-l-4 border-l-rose-500 p-4 sm:p-5 rounded-2xl shadow-xs cursor-pointer hover:shadow-md hover:border-slate-300 transition active:scale-98">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pendiente</span>
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              </div>
+              <p id="statPendienteDinero" class="text-2xl sm:text-3xl font-bold text-rose-600 mt-1.5">0.00 €</p>
+              <span class="text-[10px] text-slate-400 mt-1 block">Haz clic para filtrar</span>
+            </div>
+
+            <!-- Cantidad Pagada -->
+            <div onclick="filtrarDesdeTarjeta('pagado')" class="bg-white border border-slate-200 border-l-4 border-l-emerald-500 p-4 sm:p-5 rounded-2xl shadow-xs cursor-pointer hover:shadow-md hover:border-slate-300 transition active:scale-98">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pagada</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              </div>
+              <p id="statPagado" class="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1.5">0.00 €</p>
+              <span class="text-[10px] text-slate-400 mt-1 block">Haz clic para filtrar</span>
+            </div>
+          </section>
+
+          <!-- 2. MINI INDICADORES CLICABLES DE VOLUMEN (5 Tarjetas) -->
+          <section class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-4">
+            <!-- Hoy Pedidos -->
+            <div onclick="filtrarDesdeTarjeta('hoy')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-blue-400 hover:shadow-sm transition active:scale-95">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Hoy</span>
+              <span id="statHoyPedidos" class="text-lg sm:text-xl font-bold text-blue-600">0</span>
+            </div>
+
+            <!-- Total Pedidos (Clicable: muestra todos) -->
+            <div onclick="filtrarDesdeTarjeta('todos')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-slate-400 hover:shadow-sm transition active:scale-95">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Total Pedidos</span>
+              <span id="statPedidos" class="text-lg sm:text-xl font-bold text-slate-800">0</span>
+            </div>
+
+            <!-- Pendientes (Clicable) -->
+            <div onclick="filtrarDesdeTarjeta('pendiente')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-rose-300 hover:shadow-sm transition active:scale-95">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pendientes</span>
+              <span id="statPendientesCount" class="text-lg sm:text-xl font-bold text-rose-600">0</span>
+            </div>
+
+            <!-- Enviados (Clicable) -->
+            <div onclick="filtrarDesdeTarjeta('completado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-emerald-300 hover:shadow-sm transition active:scale-95">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Enviados</span>
+              <span id="statCompletadosCount" class="text-lg sm:text-xl font-bold text-emerald-600">0</span>
+            </div>
+
+            <!-- Cancelados (Clicable) -->
+            <div onclick="filtrarDesdeTarjeta('cancelado')" class="col-span-2 sm:col-span-1 bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-slate-400 hover:shadow-sm transition active:scale-95">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Cancelados</span>
+              <span id="statCanceladosCount" class="text-lg sm:text-xl font-bold text-slate-400">0</span>
+            </div>
+          </section>
+
+          <!-- 3. GESTOR DE PEDIDOS -->
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
+            <div class="flex flex-col gap-3.5 mb-5">
+              <div class="flex items-center justify-between">
+                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-box text-slate-500 text-sm"></i> Pedidos Recibidos
+                </h2>
+                <span class="text-xs text-slate-400" id="contadorPedidos">0 pedidos</span>
+              </div>
+
+              <!-- Buscador -->
+              <div class="relative w-full">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+                <input type="text" id="inputBuscador" oninput="filtrarPedidos()" placeholder="Buscar por cliente, ID, móvil..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+              </div>
+
+              <!-- Pestañas de Estado -->
+              <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                <button onclick="setFiltroEstado('todos', this)" data-estado="todos" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-white transition active:scale-95">Todos</button>
+                <button onclick="setFiltroEstado('pendiente', this)" data-estado="pendiente" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🔴 Pendientes</button>
+                <button onclick="setFiltroEstado('proceso', this)" data-estado="proceso" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟠 En Proceso</button>
+                <button onclick="setFiltroEstado('completado', this)" data-estado="completado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟢 Enviados</button>
+                <button onclick="setFiltroEstado('cancelado', this)" data-estado="cancelado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">⚪ Cancelados</button>
+              </div>
+
+            <!-- VISTA SMARTPHONE (Tarjetas) -->
+            <div id="vistaMovilPedidos" class="block sm:hidden space-y-3">
+              <!-- Renderizado dinámico -->
+            </div>
+
+            <!-- VISTA ESCRITORIO (Tabla) -->
+            <div class="hidden sm:block overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-700">
+                <thead class="text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3">
+                  <tr>
+                    <th class="pb-3 px-3 text-center">Nº Venta</th>
+                    <th class="pb-3 px-3">Estado</th>
+                    <th class="pb-3">ID / Fecha</th>
+                    <th class="pb-3">Cliente</th>
+                    <th class="pb-3">Producto & Personalización</th>
+                    <th class="pb-3">Importe</th>
+                    <th class="pb-3 text-right pr-2">Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaPedidosPC" class="divide-y divide-slate-100">
+                  <!-- Renderizado dinámico -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="sinResultados" class="hidden text-center py-8 text-slate-400 text-xs">
+              No se encontraron pedidos con ese criterio.
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ================= SECCIÓN 2: CATÁLOGO DE PARTITURAS ================= -->
+        <div id="vistaSeccionCatalogo" class="hidden space-y-6">
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
+            <div class="flex items-center justify-between gap-2 mb-5">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-music text-slate-500 text-sm"></i> Catálogo Activo
+                </h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">Gestión de productos y partituras disponibles en la tienda.</p>
+              </div>
+              <button onclick="document.getElementById('formNuevoProducto').classList.toggle('hidden')" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95">
+                + Añadir Producto
+              </button>
+            </div>
+
+            <!-- Formulario Crear Producto -->
+            <form id="formNuevoProducto" onsubmit="guardarProducto(event)" class="hidden bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-2xl mb-5 space-y-3.5">
+              <h3 class="text-xs uppercase tracking-wider font-bold text-slate-700">Nuevo Artículo para la Tienda</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-1">Título *</label>
+                  <input type="text" id="nuevoTitulo" required placeholder="Ej: Lámina Partitura San Valentín" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-1">Precio (€) *</label>
+                  <input type="number" step="0.01" id="nuevoPrecio" required placeholder="12.99" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-1">Categoría *</label>
+                  <select id="nuevaCategoria" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+                    <option value="partitura">Partitura Personalizada</option>
+                    <option value="natalicio">Natalicio</option>
+                    <option value="posters">Pósters Educativos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-1">Ruta o Enlace de la Foto *</label>
+                  <input type="text" id="nuevaImagen" required placeholder="img/foto.jpg o URL" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-1">Descripción corta *</label>
+                  <input type="text" id="nuevaDesc" required placeholder="Detalle de lo que incluye..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+                </div>
+              </div>
+              <button type="submit" id="btnGuardarProd" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Publicar en la Tienda</button>
+            </form>
+
+            <!-- Rejilla de Productos -->
+            <div id="listaProductosAdmin" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <!-- Render dinámico -->
+            </div>
+          </section>
+        </div>
+
+        <!-- ================= SECCIÓN: CLIENTES ================= -->
+        <div id="vistaSeccionClientes" class="hidden space-y-6">
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-users text-slate-500 text-sm"></i> Directorio de Clientes
+                </h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">Historial consolidado por cliente en orden alfabético.</p>
+              </div>
+              <span id="contadorClientesBadge" class="self-start sm:self-auto text-xs bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold">
+                0 clientes
+              </span>
+            </div>
+
+            <!-- Buscador de Clientes -->
+            <div class="relative w-full mb-5">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+              <input type="text" id="inputBuscadorClientes" oninput="filtrarListaClientes()" placeholder="Buscar por cliente, email, teléfono o Nº de pedido (ej: PED-3956)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+            </div>
+
+            <!-- Listado / Tarjetas de Clientes -->
+            <div id="contenedorListaClientes" class="space-y-3">
+              <!-- Renderizado dinámico -->
+            </div>
+
+            <div id="sinClientesEncontrados" class="hidden text-center py-8 text-slate-400 text-xs">
+              No se encontraron clientes con ese criterio.
+            </div>
+          </section>
+        </div>
+
+        <!-- ================= SECCIÓN 3: MENSAJES Y CONSULTAS ================= -->
+        <div id="vistaSeccionMensajes" class="hidden space-y-6">
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-envelope text-slate-500 text-sm"></i> Mensajes y Dudas de Clientes
+                </h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">Consultas recibidas desde el formulario de contacto.</p>
+              </div>
+            </div>
+
+            <!-- Lista de Mensajes -->
+            <div id="contenedorMensajes" class="space-y-3">
+              <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 text-center py-8">
+                <i class="fa-solid fa-inbox text-slate-300 text-2xl mb-2 block"></i>
+                <p class="text-xs text-slate-500 font-medium">Bandeja de mensajes lista para recibir consultas.</p>
+                <span class="text-[10px] text-slate-400 block mt-1">Al integrar el formulario en index.html, los mensajes aparecerán automáticamente aquí.</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <!-- ==================== SCRIPT DASHBOARD ==================== -->
@@ -271,81 +420,249 @@
       }
     }
 
-    // 1. Cálculo de Métricas y Desglose Financiero
+    // Formatear fecha: "Lunes, 26/10/2026 - 19:23h"
+    function formatearFechaEspanol(fechaRaw) {
+      if (!fechaRaw) return "Sin fecha";
+      const d = new Date(fechaRaw);
+      if (isNaN(d.getTime())) return fechaRaw; // Fallback si viene en texto plano
+
+      const opcionesDiaSemana = { weekday: 'long', timeZone: 'Europe/Madrid' };
+      let diaSemana = new Intl.DateTimeFormat('es-ES', opcionesDiaSemana).format(d);
+      diaSemana = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
+
+      const opcionesFecha = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Madrid' };
+      const fecha = new Intl.DateTimeFormat('es-ES', opcionesFecha).format(d);
+
+      const opcionesHora = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Madrid' };
+      const hora = new Intl.DateTimeFormat('es-ES', opcionesHora).format(d);
+
+      return `${diaSemana}, ${fecha} - ${hora}h`;
+    }
+
+    // Formatear teléfono para vista y limpiar para enlace wa.me directo
+    function formatearTelefonoConPrefijo(telRaw) {
+      if (!telRaw) return { visible: "Sin teléfono", waNumber: "" };
+      let clean = telRaw.toString().replace(/[^0-9]/g, '');
+
+      // Quitar ceros internacionales si el usuario escribió 0034...
+      if (clean.startsWith("00")) {
+        clean = clean.slice(2);
+      }
+
+      let prefijo = "34";
+      let num = clean;
+
+      // Si el cliente solo puso los 9 dígitos de España (ej: 626582608)
+      if (clean.length === 9) {
+        prefijo = "34";
+        num = clean;
+      } else if (clean.length > 9) {
+        // Si el cliente ya puso el 34 delante (ej: 34626582608)
+        if (clean.startsWith("34") && clean.length === 11) {
+          prefijo = "34";
+          num = clean.slice(2);
+        } else {
+          // Teléfono extranjero: primeros 2 dígitos como prefijo
+          prefijo = clean.slice(0, 2);
+          num = clean.slice(2);
+        }
+      }
+
+      const bloques = num.match(/.{1,3}/g) || [num];
+      const formateado = `(+${prefijo}) ${bloques.join(' ')}`;
+      
+      // Número estricto internacional para wa.me sin espacios ni signos
+      const waNumber = `${prefijo}${num}`;
+
+      return { visible: formateado, waNumber: waNumber };
+    }
+
+    // Copiar al portapapeles compatible con entornos restringidos e iOS
+    function copiarDato(texto, btn) {
+      if (!texto) return;
+
+      const cambiarIconoExito = () => {
+        if (!btn) return;
+        const icono = btn.querySelector('i');
+        if (icono) {
+          const claseOriginal = icono.className;
+          icono.className = 'fa-solid fa-check text-emerald-500';
+          setTimeout(() => {
+            icono.className = claseOriginal;
+          }, 1200);
+        }
+      };
+
+      // Intentar primero con la API moderna si está permitida
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(texto).then(() => {
+          cambiarIconoExito();
+        }).catch(() => {
+          // Si el entorno (iframe de OneCompiler, etc.) lo bloquea, usar método fallback
+          copiarConFallback(texto, cambiarIconoExito);
+        });
+      } else {
+        copiarConFallback(texto, cambiarIconoExito);
+      }
+    }
+
+    // Método de respaldo universal (funciona en OneCompiler, iPhones y navegadores antiguos)
+    function copiarConFallback(texto, callbackExito) {
+      const areaTemporal = document.createElement("textarea");
+      areaTemporal.value = texto;
+      areaTemporal.style.position = "fixed";
+      areaTemporal.style.top = "-9999px";
+      areaTemporal.style.left = "-9999px";
+      document.body.appendChild(areaTemporal);
+      areaTemporal.focus();
+      areaTemporal.select();
+
+      try {
+        const copiado = document.execCommand('copy');
+        if (copiado && callbackExito) callbackExito();
+      } catch (err) {
+        console.error("No se pudo copiar: ", err);
+      }
+
+      document.body.removeChild(areaTemporal);
+    }
+
+    // 1. Cálculo de Métricas (con Totales de Hoy y Cancelados)
     function actualizarMetricas() {
       let totalIngresos = 0;
       let totalPagado = 0;
       let totalPendiente = 0;
+      let hoyDinero = 0;
+
       let pendientesCount = 0;
       let completadosCount = 0;
+      let canceladosCount = 0;
+      let hoyPedidosCount = 0;
+
+      // Obtener la fecha de hoy en formato DD/MM/YYYY (horario España)
+      const hoyString = new Date().toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" });
 
       listaPedidosGlobal.forEach(p => {
         const num = parseFloat(p.precio) || 0;
-        totalIngresos += num;
-        
         const est = (p.estado || "").toLowerCase();
-        if (est.includes("pendiente")) {
-          totalPendiente += num;
-          pendientesCount++;
+        const fechaPedido = (p.fecha || "").toString();
+
+        // Comprobar si el pedido se creó hoy
+        const esDeHoy = fechaPedido.includes(hoyString);
+
+        if (est.includes("cancelado")) {
+          canceladosCount++;
+          // Los cancelados no computan en ingresos ni pendientes
         } else {
-          // Si está pagado o enviado se considera dinero cobrado
-          totalPagado += num;
-          if (est.includes("enviado") || est.includes("completado")) {
-            completadosCount++;
+          totalIngresos += num;
+
+          if (esDeHoy) {
+            hoyDinero += num;
+            hoyPedidosCount++;
+          }
+
+          if (est.includes("pendiente")) {
+            totalPendiente += num;
+            pendientesCount++;
+          } else {
+            totalPagado += num;
+            if (est.includes("enviado") || est.includes("completado")) {
+              completadosCount++;
+            }
           }
         }
       });
 
       // Rellenar Bloque Superior
+      document.getElementById('statHoyDinero').innerText = hoyDinero.toFixed(2) + " €";
       document.getElementById('statIngresos').innerText = totalIngresos.toFixed(2) + " €";
       document.getElementById('statPagado').innerText = totalPagado.toFixed(2) + " €";
       document.getElementById('statPendienteDinero').innerText = totalPendiente.toFixed(2) + " €";
 
       // Rellenar Mini Indicadores
+      document.getElementById('statHoyPedidos').innerText = hoyPedidosCount;
       document.getElementById('statPedidos').innerText = listaPedidosGlobal.length;
       document.getElementById('statPendientesCount').innerText = pendientesCount;
       document.getElementById('statCompletadosCount').innerText = completadosCount;
+      document.getElementById('statCanceladosCount').innerText = canceladosCount;
       document.getElementById('contadorPedidos').innerText = `${listaPedidosGlobal.length} pedidos registrados`;
     }
 
+    // 2. Colores e indicadores de estado
     function getEstadoBadge(estado) {
       const est = (estado || "").toLowerCase();
       if (est.includes("pendiente")) {
-        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-600 border border-rose-500/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Pendiente
                 </span>`;
       } else if (est.includes("proceso") || est.includes("pagado")) {
-        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-600 border border-amber-500/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> En Proceso
                 </span>`;
       } else if (est.includes("enviado") || est.includes("completado")) {
-        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Enviado
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 border border-emerald-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Enviado
+                </span>`;
+      } else if (est.includes("cancelado")) {
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-500 border border-slate-300">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Cancelado
                 </span>`;
       }
-      return `<span class="text-zinc-400 text-[10px]">${estado}</span>`;
+      return `<span class="text-slate-400 text-[10px]">${estado}</span>`;
     }
 
     function setFiltroEstado(estado, btn) {
       filtroEstadoActual = estado;
+      
+      // Resetear estilo de todos los botones de filtro
       document.querySelectorAll('.filtro-btn-estado').forEach(b => {
-        b.classList.remove('bg-white', 'text-black');
-        b.classList.add('bg-zinc-900', 'text-zinc-400');
+        b.classList.remove('bg-slate-900', 'text-white');
+        b.classList.add('bg-slate-100', 'text-slate-600');
       });
-      btn.classList.add('bg-white', 'text-black');
-      btn.classList.remove('bg-zinc-900', 'text-zinc-400');
+
+      // Activar el botón pulsado
+      if (btn) {
+        btn.classList.add('bg-slate-900', 'text-white');
+        btn.classList.remove('bg-slate-100', 'text-slate-600');
+      }
+
+      // Aplicar el filtro a la tabla
       filtrarPedidos();
     }
 
+    // 3. Filtrar directamente al pulsar una tarjeta superior
+    function filtrarDesdeTarjeta(estado) {
+      if (estado === 'pagado' || estado === 'hoy') {
+        // Quita la selección de los botones inferiores para indicar un filtro especial
+        document.querySelectorAll('.filtro-btn-estado').forEach(b => {
+          b.classList.remove('bg-slate-900', 'text-white');
+          b.classList.add('bg-slate-100', 'text-slate-600');
+        });
+        filtroEstadoActual = estado;
+        filtrarPedidos();
+      } else {
+        const btn = document.querySelector(`.filtro-btn-estado[data-estado="${estado}"]`);
+        if (btn) {
+          setFiltroEstado(estado, btn);
+        }
+      }
+    }
+
+    // 4. Filtrado reactivo
     function filtrarPedidos() {
       const texto = (document.getElementById('inputBuscador').value || "").toLowerCase();
 
       const pedidosFiltrados = listaPedidosGlobal.filter(p => {
         const est = (p.estado || "").toLowerCase();
         let coincideEstado = true;
+        const hoyString = new Date().toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" });
+
         if (filtroEstadoActual === "pendiente") coincideEstado = est.includes("pendiente");
-        if (filtroEstadoActual === "proceso") coincideEstado = (est.includes("proceso") || est.includes("pagado"));
+        if (filtroEstadoActual === "proceso") coincideEstado = (est.includes("proceso") || est === "pagado");
         if (filtroEstadoActual === "completado") coincideEstado = (est.includes("enviado") || est.includes("completado"));
+        if (filtroEstadoActual === "cancelado") coincideEstado = est.includes("cancelado");
+        if (filtroEstadoActual === "pagado") coincideEstado = (!est.includes("pendiente") && !est.includes("cancelado"));
+        if (filtroEstadoActual === "hoy") coincideEstado = (p.fecha || "").toString().includes(hoyString);
 
         const coincideTexto = 
           (p.id || "").toLowerCase().includes(texto) ||
@@ -360,6 +677,7 @@
       renderizarPedidos(pedidosFiltrados);
     }
 
+    // 5. Renderizar pedidos (Corrección clientes, miniaturas ampliadas sin parpadeo, caja ajustada y precio forzado en €)
     function renderizarPedidos(pedidos) {
       const tablaPC = document.getElementById('tablaPedidosPC');
       const vistaMovil = document.getElementById('vistaMovilPedidos');
@@ -373,82 +691,252 @@
       }
       sinRes.classList.add('hidden');
 
-      // 1. Render para ESCRITORIO (Tabla)
+      // 1. Agrupar pedidos estrictamente por Nombre completo (o por teléfono si no hay nombre)
+      const mapaPedidosCliente = {};
+      listaPedidosGlobal.forEach(p => {
+        const idCliente = (p.nombre || p.telefono || "cliente").toString().trim().toLowerCase();
+        if (!mapaPedidosCliente[idCliente]) {
+          mapaPedidosCliente[idCliente] = [];
+        }
+        mapaPedidosCliente[idCliente].push(p);
+      });
+
+      // 2. Localizar foto del catálogo
+      const obtenerFotoProducto = (nombreProducto) => {
+        if (!nombreProducto) return "";
+        const prod = listaProductosGlobal.find(pr => 
+          (pr.titulo && pr.titulo.toLowerCase().trim() === nombreProducto.toLowerCase().trim()) ||
+          nombreProducto.toLowerCase().includes((pr.titulo || "").toLowerCase()) ||
+          (pr.titulo || "").toLowerCase().includes(nombreProducto.toLowerCase())
+        );
+        return (prod && prod.imagen) ? prod.imagen : "";
+      };
+
+      // 3. Forzar siempre formato con dos decimales y símbolo €
+      const formatearMonedaEuro = (valorRaw) => {
+        if (!valorRaw) return "0.00 €";
+        const limpio = valorRaw.toString().replace('€', '').trim().replace(',', '.');
+        const num = parseFloat(limpio);
+        if (isNaN(num)) return valorRaw.toString().includes('€') ? valorRaw : `${valorRaw} €`;
+        return `${num.toFixed(2)} €`;
+      };
+
+      // Escritorio (PC)
       tablaPC.innerHTML = pedidos.map(p => {
-        const cleanTel = (p.telefono || "").toString().replace(/[^0-9]/g, '');
+        const telInfo = formatearTelefonoConPrefijo(p.telefono);
+        const fechaFormateada = formatearFechaEspanol(p.fecha);
+        const precioFormateado = formatearMonedaEuro(p.precio);
         const msg = encodeURIComponent(`Hola ${p.nombre}! Te escribo de Zeronte respecto a tu pedido ${p.id}...`);
 
+        const asuntoEmail = encodeURIComponent(`Información sobre tu pedido ${p.id} - Zeronte`);
+        const cuerpoEmail = encodeURIComponent(`Hola ${p.nombre},\n\nTe escribimos de Zeronte en relación a tu encargo ${p.id} (${p.producto}).\n\n`);
+        const mailtoUrl = `mailto:${p.email}?subject=${asuntoEmail}&body=${cuerpoEmail}`;
+
+        // Cálculo de venta descendente
+        const indiceEnGlobal = listaPedidosGlobal.findIndex(item => item.id === p.id);
+        const numVentaDescendente = indiceEnGlobal !== -1 ? (listaPedidosGlobal.length - indiceEnGlobal) : "-";
+
+        // Conteo del cliente
+        const idCl = (p.nombre || p.telefono || "cliente").toString().trim().toLowerCase();
+        const listaDelCliente = mapaPedidosCliente[idCl] || [p];
+        const totalDelCliente = listaDelCliente.length;
+        const posicionCliente = listaDelCliente.findIndex(item => item.id === p.id);
+        const indiceCliente = posicionCliente !== -1 ? (totalDelCliente - posicionCliente) : 1;
+        const badgeCliente = `${indiceCliente}/${totalDelCliente}`;
+
+        const fotoProd = obtenerFotoProducto(p.producto);
+        const textoPersonalizacion = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+
         return `
-          <tr class="hover:bg-zinc-900/50 transition">
+          <tr class="hover:bg-slate-50 transition">
+            <!-- Nº Venta Descendente -->
+            <td class="py-4 px-3 align-top text-center">
+              <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800">
+                #${numVentaDescendente}
+              </span>
+            </td>
+
+            <!-- Estado -->
             <td class="py-4 px-3 align-top">
               <div class="space-y-1.5">
                 <div>${getEstadoBadge(p.estado)}</div>
-                <select onchange="cambiarEstado(${p.fila}, this.value)" class="bg-black border border-zinc-700 text-[11px] rounded-lg px-2 py-1 text-zinc-300 focus:outline-none focus:border-gold">
+                <select onchange="cambiarEstado(${p.fila}, this.value)" class="bg-white border border-slate-300 text-[11px] rounded-lg px-2 py-1 text-slate-700 focus:outline-none focus:border-slate-500">
                   <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
                   <option value="En proceso / Pagado" ${(p.estado === 'En proceso / Pagado' || p.estado === 'Pagado') ? 'selected' : ''}>🟠 En proceso</option>
                   <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
+                  <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
                 </select>
               </div>
             </td>
+
+            <!-- ID y Fecha -->
             <td class="py-4 align-top">
-              <span class="font-mono font-bold text-gold text-xs block">${p.id}</span>
-              <span class="text-[10px] text-zinc-500">${p.fecha}</span>
+              <span class="font-mono font-bold text-slate-900 text-xs block">${p.id}</span>
+              <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">${fechaFormateada}</span>
             </td>
+
+            <!-- Cliente -->
             <td class="py-4 align-top">
-              <span class="font-semibold text-white block text-xs">${p.nombre}</span>
-              <span class="text-[11px] text-zinc-400 block">${p.telefono}</span>
-              <span class="text-[10px] text-zinc-500 block truncate max-w-[130px]">${p.email}</span>
-            </td>
-            <td class="py-4 align-top max-w-xs">
-              <span class="font-bold text-zinc-200 block text-xs">${p.producto}</span>
-              <div class="mt-1 bg-zinc-900/90 border border-zinc-800 p-2 rounded-xl text-[11px] text-zinc-300 italic">
-                "${p.personalizacion || 'Sin datos de dedicatoria'}"
+              <div class="flex items-center gap-1.5">
+                <span class="font-semibold text-slate-900 block text-xs">${p.nombre}</span>
+                <span title="Pedido ${badgeCliente} de este cliente" class="text-[10px] font-bold px-1.5 py-0.5 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500'}">
+                  ${badgeCliente}
+                </span>
+              </div>
+              
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-[11px] text-slate-600 font-medium tracking-tight">${telInfo.visible}</span>
+                <button onclick="copiarDato('${telInfo.visible}', this)" title="Copiar teléfono" class="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-100 transition active:scale-90">
+                  <i class="fa-regular fa-copy text-xs"></i>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-[10px] text-slate-400 truncate max-w-[130px] block">${p.email}</span>
+                <button onclick="copiarDato('${p.email}', this)" title="Copiar email" class="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-100 transition active:scale-90">
+                  <i class="fa-regular fa-copy text-xs"></i>
+                </button>
               </div>
             </td>
-            <td class="py-4 align-top">
-              <span class="font-bold text-white text-sm block">${p.precio}</span>
-              <span class="text-[10px] uppercase font-semibold text-zinc-400">${p.metodoPago}</span>
+
+            <!-- Producto & Personalización (Miniatura ampliada y caja ajustada con margen) -->
+            <td class="py-4 align-top pr-4">
+              <div class="flex items-start gap-3">
+                <div class="w-14 h-14 rounded-xl bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-xs">
+                  ${fotoProd ? `
+                    <img src="${fotoProd}" alt="${p.producto}" class="w-full h-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <span class="hidden text-white font-bold text-xs brand-font">Z</span>
+                  ` : `
+                    <span class="text-white font-bold text-xs brand-font">Z</span>
+                  `}
+                </div>
+                <div class="max-w-[280px] lg:max-w-[320px]">
+                  <span class="font-bold text-slate-800 block text-xs leading-snug">${p.producto}</span>
+                  <div class="mt-1 bg-blue-50/70 border border-blue-200/70 px-2.5 py-1.5 rounded-lg text-[11px] text-[#002b49] font-medium leading-snug">
+                    ${textoPersonalizacion}
+                  </div>
+                </div>
+              </div>
             </td>
+
+            <!-- Importe (Forzado en €) -->
+            <td class="py-4 align-top whitespace-nowrap">
+              <span class="font-bold text-slate-900 text-sm block">${precioFormateado}</span>
+              <span class="text-[10px] uppercase font-semibold text-slate-400">${p.metodoPago}</span>
+            </td>
+
+            <!-- Acciones -->
             <td class="py-4 align-top text-right pr-2">
-              <a href="https://wa.me/${cleanTel}?text=${msg}" target="_blank" class="inline-flex items-center gap-1.5 bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-black font-semibold px-3 py-1.5 rounded-xl text-xs transition active:scale-95">
-                <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
-              </a>
+              <div class="flex flex-col items-end gap-1.5">
+                <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="w-[105px] inline-flex items-center justify-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold px-2.5 py-1.5 rounded-xl text-xs transition active:scale-95 shadow-xs">
+                  <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                </a>
+                <a href="${mailtoUrl}" class="w-[105px] inline-flex items-center justify-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-800 hover:text-white font-semibold px-2.5 py-1.5 rounded-xl text-xs transition active:scale-95 shadow-xs">
+                  <i class="fa-regular fa-envelope text-xs"></i> Email
+                </a>
+              </div>
             </td>
           </tr>
         `;
       }).join('');
 
-      // 2. Render para SMARTPHONE (Tarjetas táctiles limpias)
+      // Smartphone (Móvil)
       vistaMovil.innerHTML = pedidos.map(p => {
-        const cleanTel = (p.telefono || "").toString().replace(/[^0-9]/g, '');
+        const telInfo = formatearTelefonoConPrefijo(p.telefono);
+        const fechaFormateada = formatearFechaEspanol(p.fecha);
+        const precioFormateado = formatearMonedaEuro(p.precio);
         const msg = encodeURIComponent(`Hola ${p.nombre}! Te escribo de Zeronte respecto a tu pedido ${p.id}...`);
 
+        const asuntoEmail = encodeURIComponent(`Información sobre tu pedido ${p.id} - Zeronte`);
+        const cuerpoEmail = encodeURIComponent(`Hola ${p.nombre},\n\nTe escribimos de Zeronte en relación a tu encargo ${p.id} (${p.producto}).\n\n`);
+        const mailtoUrl = `mailto:${p.email}?subject=${asuntoEmail}&body=${cuerpoEmail}`;
+
+        const indiceEnGlobal = listaPedidosGlobal.findIndex(item => item.id === p.id);
+        const numVentaDescendente = indiceEnGlobal !== -1 ? (listaPedidosGlobal.length - indiceEnGlobal) : "-";
+
+        const idCl = (p.nombre || p.telefono || "cliente").toString().trim().toLowerCase();
+        const listaDelCliente = mapaPedidosCliente[idCl] || [p];
+        const totalDelCliente = listaDelCliente.length;
+        const posicionCliente = listaDelCliente.findIndex(item => item.id === p.id);
+        const indiceCliente = posicionCliente !== -1 ? (totalDelCliente - posicionCliente) : 1;
+        const badgeCliente = `${indiceCliente}/${totalDelCliente}`;
+
+        const fotoProd = obtenerFotoProducto(p.producto);
+        const textoPersonalizacion = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+
         return `
-          <div class="bg-zinc-900/70 border border-zinc-800/90 rounded-2xl p-4 space-y-3">
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-xs">
             <div class="flex items-center justify-between">
-              <div>
-                <span class="font-mono font-bold text-gold text-xs">${p.id}</span>
-                <span class="text-[10px] text-zinc-500 block">${p.fecha}</span>
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-800">
+                  #${numVentaDescendente}
+                </span>
+                <div>
+                  <span class="font-mono font-bold text-slate-900 text-xs">${p.id}</span>
+                  <span class="text-[10px] text-slate-500 font-medium block">${fechaFormateada}</span>
+                </div>
               </div>
               <div>${getEstadoBadge(p.estado)}</div>
             </div>
 
             <div>
-              <p class="font-bold text-white text-sm">${p.nombre}</p>
-              <p class="text-xs text-zinc-400">${p.producto} — <strong class="text-white">${p.precio}</strong> (${p.metodoPago})</p>
-              <div class="mt-2 bg-black/50 border border-zinc-800 p-2.5 rounded-xl text-xs text-zinc-300 italic">
-                "${p.personalizacion || 'Sin dedicatoria'}"
+              <div class="flex items-center gap-1.5">
+                <p class="font-bold text-slate-900 text-sm">${p.nombre}</p>
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500'}">
+                  ${badgeCliente}
+                </span>
+              </div>
+
+              <!-- Miniatura + Producto + Importe -->
+              <div class="flex items-center gap-3 mt-2">
+                <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
+                  ${fotoProd ? `
+                    <img src="${fotoProd}" alt="${p.producto}" class="w-full h-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <span class="hidden text-white font-bold text-xs brand-font">Z</span>
+                  ` : `
+                    <span class="text-white font-bold text-xs brand-font">Z</span>
+                  `}
+                </div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-slate-800 truncate">${p.producto}</p>
+                  <p class="text-xs text-slate-500"><strong class="text-slate-900">${precioFormateado}</strong> (${p.metodoPago})</p>
+                </div>
+              </div>
+
+              <!-- Teléfono e Email con botón copiar -->
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-slate-600 font-medium">${telInfo.visible}</span>
+                  <button onclick="copiarDato('${telInfo.visible}', this)" title="Copiar teléfono" class="text-slate-400 hover:text-slate-700 p-1 rounded active:scale-90">
+                    <i class="fa-regular fa-copy text-xs"></i>
+                  </button>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-slate-400 truncate max-w-[150px]">${p.email}</span>
+                  <button onclick="copiarDato('${p.email}', this)" title="Copiar email" class="text-slate-400 hover:text-slate-700 p-1 rounded active:scale-90">
+                    <i class="fa-regular fa-copy text-xs"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Personalización en azul marino -->
+              <div class="mt-2 bg-blue-50/70 border border-blue-200/70 p-2.5 rounded-xl text-xs text-[#002b49] font-medium leading-relaxed">
+                ${textoPersonalizacion}
               </div>
             </div>
 
-            <div class="flex items-center gap-2 pt-1 border-t border-zinc-800/60">
-              <select onchange="cambiarEstado(${p.fila}, this.value)" class="flex-grow bg-black border border-zinc-700 text-xs rounded-xl px-2.5 py-2 text-zinc-200">
+            <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+              <select onchange="cambiarEstado(${p.fila}, this.value)" class="flex-grow bg-white border border-slate-300 text-xs rounded-xl px-2.5 py-2 text-slate-700">
                 <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
                 <option value="En proceso / Pagado" ${(p.estado === 'En proceso / Pagado' || p.estado === 'Pagado') ? 'selected' : ''}>🟠 En proceso</option>
                 <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
+                <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
               </select>
-              <a href="https://wa.me/${cleanTel}?text=${msg}" target="_blank" class="bg-emerald-600 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 active:scale-95 shadow">
+              <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 active:scale-95 shadow-xs">
                 <i class="fa-brands fa-whatsapp text-sm"></i> Chat
+              </a>
+              <a href="${mailtoUrl}" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 active:scale-95 shadow-xs">
+                <i class="fa-regular fa-envelope text-xs"></i> Email
               </a>
             </div>
           </div>
@@ -514,10 +1002,356 @@
       cargarDatos();
     }
 
+    // Variable global para clientes
+    let listaClientesGlobal = [];
+
+    // Procesar pedidos agrupando clientes y renderizar por orden alfabético
+    function renderizarClientes() {
+      const mapa = {};
+
+      listaPedidosGlobal.forEach(p => {
+        const clave = (p.nombre || "").trim().toLowerCase();
+        if (!clave) return;
+
+        if (!mapa[clave]) {
+          mapa[clave] = {
+            nombre: (p.nombre || "").trim(),
+            telefono: p.telefono || "",
+            email: p.email || "",
+            pedidos: [],
+            totalGastado: 0
+          };
+        }
+
+        // Si faltaba email o teléfono en pedidos anteriores, conservamos el más completo
+        if (!mapa[clave].telefono && p.telefono) mapa[clave].telefono = p.telefono;
+        if (!mapa[clave].email && p.email) mapa[clave].email = p.email;
+
+        // Limpiar importe para sumar
+        const precioNum = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        
+        // Sumar al total (excluyendo cancelados si procede)
+        if (!(p.estado || "").toLowerCase().includes("cancelado")) {
+          mapa[clave].totalGastado += precioNum;
+        }
+
+        mapa[clave].pedidos.push(p);
+      });
+
+      // Convertir a array y ordenar ALFABÉTICAMENTE por nombre
+      listaClientesGlobal = Object.values(mapa).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+
+      document.getElementById('contadorClientesBadge').innerText = `${listaClientesGlobal.length} clientes registrados`;
+      filtrarListaClientes();
+    }
+
+    // Filtrar lista de clientes (Incluye búsqueda por ID de pedido)
+    function filtrarListaClientes() {
+      const texto = (document.getElementById('inputBuscadorClientes').value || "").toLowerCase().trim();
+      const cont = document.getElementById('contenedorListaClientes');
+      const sinRes = document.getElementById('sinClientesEncontrados');
+
+      const clientesFiltrados = listaClientesGlobal.filter(c => {
+        const coincideBasico = 
+          c.nombre.toLowerCase().includes(texto) ||
+          (c.email || "").toLowerCase().includes(texto) ||
+          (c.telefono || "").toString().includes(texto);
+
+        // Búsqueda por número o ID de pedido (ej: PED-3956 o 3956)
+        const coincidePedido = c.pedidos.some(ped => 
+          (ped.id || "").toLowerCase().includes(texto)
+        );
+
+        return coincideBasico || coincidePedido;
+      });
+
+      if (clientesFiltrados.length === 0) {
+        cont.innerHTML = "";
+        sinRes.classList.remove('hidden');
+        return;
+      }
+      sinRes.classList.add('hidden');
+
+      cont.innerHTML = clientesFiltrados.map((c, idx) => {
+        const telInfo = formatearTelefonoConPrefijo(c.telefono);
+        const inicial = c.nombre.charAt(0).toUpperCase();
+        const msg = encodeURIComponent(`Hola ${c.nombre}! Te escribo de Zeronte...`);
+        const asuntoEmail = encodeURIComponent(`Contacto de Zeronte`);
+        const cuerpoEmail = encodeURIComponent(`Hola ${c.nombre},\n\nTe contactamos desde Zeronte.\n\n`);
+        const mailtoUrl = `mailto:${c.email}?subject=${asuntoEmail}&body=${cuerpoEmail}`;
+
+        // Desglose de cada pedido realizado por este cliente
+        const pedidosHTML = c.pedidos.map(ped => {
+          const fechaForm = formatearFechaEspanol(ped.fecha);
+          const precioForm = (parseFloat((ped.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0).toFixed(2) + " €";
+          const persLimpia = (ped.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+
+          return `
+            <div class="bg-white border border-slate-200/80 rounded-xl p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px]">
+              <div>
+                <span class="font-mono font-bold text-slate-800 mr-2">${ped.id}</span>
+                <span class="text-slate-700 font-semibold">${ped.producto}</span>
+                <span class="text-slate-400 block sm:inline sm:ml-2">(${fechaForm})</span>
+                <span class="block text-slate-500 text-[10px] italic mt-0.5">${persLimpia}</span>
+              </div>
+              <div class="flex items-center gap-2 self-start sm:self-auto mt-1 sm:mt-0">
+                <span class="font-bold text-slate-800">${precioForm}</span>
+                ${getEstadoBadge(ped.estado)}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 transition hover:border-slate-300">
+            <!-- Fila Superior: Datos y Acciones -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/70">
+              
+              <div class="flex items-start sm:items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-900 text-white font-bold flex items-center justify-center text-sm shrink-0">
+                  ${inicial}
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-sm leading-tight">${c.nombre}</h3>
+                  
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs">
+                    <!-- Teléfono con Copiar -->
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-slate-600 font-medium">${telInfo.visible}</span>
+                      <button onclick="copiarDato('${telInfo.visible}', this)" title="Copiar teléfono" class="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200 transition active:scale-90">
+                        <i class="fa-regular fa-copy text-xs"></i>
+                      </button>
+                    </div>
+
+                    <!-- Email con Copiar -->
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-slate-400 truncate max-w-[160px]">${c.email || 'Sin email'}</span>
+                      ${c.email ? `
+                        <button onclick="copiarDato('${c.email}', this)" title="Copiar email" class="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200 transition active:scale-90">
+                          <i class="fa-regular fa-copy text-xs"></i>
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Métricas del Cliente y Acciones Rápidas (Incluye botón PDF) -->
+              <div class="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                <div class="text-right mr-2">
+                  <span class="text-[10px] text-slate-400 font-semibold block uppercase">Total Invertido</span>
+                  <span class="text-sm sm:text-base font-bold text-slate-900">${c.totalGastado.toFixed(2)} €</span>
+                </div>
+                <span class="text-xs bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-xl mr-1">
+                  ${c.pedidos.length} ${c.pedidos.length === 1 ? 'pedido' : 'pedidos'}
+                </span>
+                
+                <!-- Botón Descargar PDF -->
+                <button onclick="descargarPdfCliente('${c.nombre.replace(/'/g, "\\'")}')" class="bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-600 hover:text-white p-2 rounded-xl text-xs transition active:scale-95 shadow-xs" title="Descargar Ficha en PDF">
+                  <i class="fa-regular fa-file-pdf text-sm"></i>
+                </button>
+
+                <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white p-2 rounded-xl text-xs transition active:scale-95 shadow-xs" title="Enviar WhatsApp">
+                  <i class="fa-brands fa-whatsapp text-sm"></i>
+                </a>
+                ${c.email ? `
+                  <a href="${mailtoUrl}" class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-800 hover:text-white p-2 rounded-xl text-xs transition active:scale-95 shadow-xs" title="Enviar Correo">
+                    <i class="fa-regular fa-envelope text-xs"></i>
+                  </a>
+                ` : ''}
+              </div>
+
+            </div>
+
+            <!-- Desglose de Pedidos del Cliente -->
+            <div class="mt-3">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Historial de encargos:</span>
+              <div class="space-y-1.5">
+                ${pedidosHTML}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Generación de PDF vectorial con texto nativo y ultra nitidez
+    function descargarPdfCliente(nombreCliente) {
+      const cliente = listaClientesGlobal.find(c => c.nombre === nombreCliente);
+      if (!cliente) return;
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+
+      const telInfo = formatearTelefonoConPrefijo(cliente.telefono);
+      const hoyString = new Date().toLocaleDateString("es-ES", { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      // 1. Cabecera de marca
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(15, 23, 42); // slate-900
+      doc.text("ZERONTE", 14, 18);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139); // slate-500
+      doc.text("FICHA DE CLIENTE & HISTORIAL DE PEDIDOS", 14, 23);
+
+      doc.setFontSize(8);
+      doc.text(`Fecha de emisión: ${hoyString}`, 196, 18, { align: "right" });
+
+      // Línea divisoria superior
+      doc.setDrawColor(226, 232, 240); // slate-200
+      doc.setLineWidth(0.5);
+      doc.line(14, 27, 196, 27);
+
+      // 2. Tarjeta resumen del Cliente (Caja con borde y fondo sutil)
+      doc.setFillColor(248, 250, 252); // slate-50
+      doc.roundedRect(14, 32, 182, 34, 3, 3, "F");
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(14, 32, 182, 34, 3, 3, "S");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(15, 23, 42);
+      doc.text(cliente.nombre, 20, 41);
+
+      // Datos en dos columnas
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 116, 139);
+      doc.text("Teléfono:", 20, 49);
+      doc.text("Email:", 20, 56);
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(30, 41, 59);
+      doc.text(telInfo.visible, 42, 49);
+      doc.text(cliente.email || "No registrado", 42, 56);
+
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 116, 139);
+      doc.text("Total Pedidos:", 120, 49);
+      doc.text("Total Invertido:", 120, 56);
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(15, 23, 42);
+      doc.text(`${cliente.pedidos.length}`, 150, 49);
+
+      doc.setFontSize(11);
+      doc.setTextColor(2, 132, 199); // blue-600
+      doc.text(`${cliente.totalGastado.toFixed(2)} €`, 150, 56);
+
+      // 3. Título de sección de tabla
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(71, 85, 105);
+      doc.text("DESGLOSE DE ENCARGOS", 14, 74);
+
+      // Preparar filas de datos para la tabla
+      const filasTabla = cliente.pedidos.map(p => {
+        const fechaForm = formatearFechaEspanol(p.fecha);
+        const precioForm = (parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0).toFixed(2) + " €";
+        const pers = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+
+        return [
+          p.id,
+          fechaForm,
+          `${p.producto}\nNota: ${pers}`,
+          precioForm,
+          p.estado || "Pendiente"
+        ];
+      });
+
+      // 4. Renderizado vectorial nativo con autoTable
+      doc.autoTable({
+        startY: 78,
+        head: [["ID Pedido", "Fecha", "Producto & Personalización", "Importe", "Estado"]],
+        body: filasTabla,
+        theme: "plain",
+        styles: {
+          font: "helvetica",
+          fontSize: 8.5,
+          textColor: [30, 41, 59],
+          cellPadding: 4,
+          overflow: "linebreak"
+        },
+        headStyles: {
+          fillColor: [241, 245, 249], // slate-100
+          textColor: [71, 85, 105],
+          fontStyle: "bold",
+          fontSize: 8
+        },
+        columnStyles: {
+          0: { cellWidth: 26, font: "courier", fontStyle: "bold" },
+          1: { cellWidth: 38, textColor: [100, 116, 139] },
+          2: { cellWidth: 68 },
+          3: { cellWidth: 24, halign: "right", fontStyle: "bold" },
+          4: { cellWidth: 26, halign: "center", fontSize: 8 }
+        },
+        alternateRowStyles: {
+          fillColor: [250, 250, 250]
+        },
+        didDrawPage: (data) => {
+          // Pie de página en todas las páginas
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.setTextColor(148, 163, 184);
+          doc.setDrawColor(226, 232, 240);
+          doc.line(14, 283, 196, 283);
+          doc.text("Zeronte · Custom Music & Art · Documento vectorial oficial", 105, 288, { align: "center" });
+        }
+      });
+
+      // Descargar con nombre formateado
+      doc.save(`${cliente.nombre.replace(/\s+/g, ' ')} - Cliente Zeronte.pdf`);
+    }
+
     function cerrarSesion() {
       tokenClave = "";
       document.getElementById('pantallaLogin').classList.remove('hidden');
       document.getElementById('panelDashboard').classList.add('hidden');
+    }
+
+    // Control del Menú Lateral y Pestañas
+    function cambiarSeccion(seccion, btn) {
+      document.getElementById('vistaSeccionDashboard').classList.add('hidden');
+      document.getElementById('vistaSeccionCatalogo').classList.add('hidden');
+      document.getElementById('vistaSeccionClientes').classList.add('hidden');
+      document.getElementById('vistaSeccionMensajes').classList.add('hidden');
+
+      document.querySelectorAll('.nav-item-btn').forEach(b => {
+        b.classList.remove('bg-slate-900', 'text-white', 'shadow-sm');
+        b.classList.add('text-slate-600', 'hover:bg-slate-100');
+      });
+
+      if (seccion === 'dashboard') {
+        document.getElementById('vistaSeccionDashboard').classList.remove('hidden');
+      } else if (seccion === 'catalogo') {
+        document.getElementById('vistaSeccionCatalogo').classList.remove('hidden');
+      } else if (seccion === 'clientes') {
+        document.getElementById('vistaSeccionClientes').classList.remove('hidden');
+        renderizarClientes();
+      } else if (seccion === 'mensajes') {
+        document.getElementById('vistaSeccionMensajes').classList.remove('hidden');
+      }
+
+      btn.classList.add('bg-slate-900', 'text-white', 'shadow-sm');
+      btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+
+      if (window.innerWidth < 768) {
+        toggleSidebarMovil();
+      }
+    }
+
+    function toggleSidebarMovil() {
+      const sidebar = document.getElementById('sidebarMenu');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
     }
   </script>
 </body>
