@@ -53,7 +53,7 @@
             <span class="w-8 h-8 bg-slate-900 text-white font-black flex items-center justify-center rounded-lg text-sm shadow-sm">Z</span>
             <div>
               <span class="font-bold tracking-widest text-slate-900 text-sm block leading-none">ZERONTE</span>
-              <span class="text-[9px] text-slate-400 font-medium uppercase tracking-wider">Panel de Control</span>
+              <span class="text-[9px] text-slate-400 font-medium uppercase tracking-wider">Shop Manager</span>
             </div>
           </div>
           <button onclick="toggleSidebarMovil()" class="md:hidden text-slate-400 hover:text-slate-600 p-1">
@@ -110,10 +110,14 @@
         </div>
         
         <div class="flex items-center gap-2">
-          <button onclick="cargarDatos()" class="text-xs bg-white border border-slate-300 hover:border-slate-400 px-3 py-2 rounded-xl text-slate-700 transition flex items-center gap-1.5 active:scale-95 shadow-xs">
-            <i id="iconoRefrescar" class="fa-solid fa-arrows-rotate"></i>
-            <span class="hidden sm:inline">Actualizar</span>
-          </button>
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200/80 rounded-xl text-[11px] font-semibold text-emerald-700 shadow-xs">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="hidden sm:inline">Sincronizado en tiempo real</span>
+            <span class="sm:hidden">En vivo</span>
+          </div>
         </div>
       </header>
 
@@ -386,18 +390,18 @@
       cargarDatos();
     }
 
-    async function cargarDatos() {
+    let temporizadorAutoRefresco = null;
+
+    async function cargarDatos(esSilencioso = false) {
       const btn = document.getElementById('btnEntrar');
-      const icono = document.getElementById('iconoRefrescar');
-      if (btn) btn.innerText = "Cargando...";
-      if (icono) icono.classList.add('fa-spin');
+      if (btn && !esSilencioso) btn.innerText = "Cargando...";
 
       try {
         const res = await fetch(`${APPS_SCRIPT_URL}?accion=datosAdmin&clave=${encodeURIComponent(tokenClave)}`);
         const data = await res.json();
 
         if (data.status !== "success") {
-          alert("Clave incorrecta");
+          if (!esSilencioso) alert("Clave incorrecta");
           if (btn) btn.innerText = "Acceder";
           return;
         }
@@ -405,18 +409,39 @@
         document.getElementById('pantallaLogin').classList.add('hidden');
         document.getElementById('panelDashboard').classList.remove('hidden');
 
+        // Comparar si hubo cambios antes de re-renderizar para evitar parpadeos
+        const datosCambiaron = JSON.stringify(listaPedidosGlobal) !== JSON.stringify(data.pedidos || []) ||
+                               JSON.stringify(listaProductosGlobal) !== JSON.stringify(data.productos || []);
+
         listaPedidosGlobal = data.pedidos || [];
         listaProductosGlobal = data.productos || [];
 
-        actualizarMetricas();
-        filtrarPedidos();
-        renderizarProductos();
+        if (datosCambiaron || !esSilencioso) {
+          actualizarMetricas();
+          filtrarPedidos();
+          renderizarProductos();
+
+          // Si la sección de clientes está visible, actualizarla también
+          const vistaClientes = document.getElementById('vistaSeccionClientes');
+          if (vistaClientes && !vistaClientes.classList.contains('hidden')) {
+            renderizarClientes();
+          }
+        }
+
+        // Iniciar el auto-refresco continuo cada 15 segundos si no estaba iniciado
+        if (!temporizadorAutoRefresco) {
+          temporizadorAutoRefresco = setInterval(() => {
+            if (tokenClave) {
+              cargarDatos(true); // llamada silenciosa en segundo plano
+            }
+          }, 15000);
+        }
 
       } catch (err) {
-        console.error(err);
-        alert("Error de conexión con la base de datos.");
-      } finally {
-        if (icono) icono.classList.remove('fa-spin');
+        if (!esSilencioso) {
+          console.error(err);
+          alert("Error de conexión con la base de datos.");
+        }
       }
     }
 
@@ -539,16 +564,21 @@
       let canceladosCount = 0;
       let hoyPedidosCount = 0;
 
-      // Obtener la fecha de hoy en formato DD/MM/YYYY (horario España)
-      const hoyString = new Date().toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" });
+      // Obtener la fecha de hoy en formato ISO (YYYY-MM-DD) y español (DD/MM/YYYY) para comparar
+      const ahora = new Date();
+      const año = ahora.toLocaleDateString("es-ES", { year: 'numeric', timeZone: 'Europe/Madrid' });
+      const mes = ahora.toLocaleDateString("es-ES", { month: '2-digit', timeZone: 'Europe/Madrid' });
+      const dia = ahora.toLocaleDateString("es-ES", { day: '2-digit', timeZone: 'Europe/Madrid' });
+      const hoyISO = `${año}-${mes}-${dia}`;        // Formato que guarda Google Sheets: 2026-10-26
+      const hoyES = `${dia}/${mes}/${año}`;         // Formato español alternativo: 26/10/2026
 
       listaPedidosGlobal.forEach(p => {
         const num = parseFloat(p.precio) || 0;
         const est = (p.estado || "").toLowerCase();
         const fechaPedido = (p.fecha || "").toString();
 
-        // Comprobar si el pedido se creó hoy
-        const esDeHoy = fechaPedido.includes(hoyString);
+        // Comprobar si el pedido se creó hoy (compatible con ambos formatos)
+        const esDeHoy = fechaPedido.includes(hoyISO) || fechaPedido.includes(hoyES);
 
         if (est.includes("cancelado")) {
           canceladosCount++;
@@ -561,14 +591,13 @@
             hoyPedidosCount++;
           }
 
-          if (est.includes("pendiente")) {
+          // Solo se suma a pagado si está Enviado/Completado
+          if (est.includes("enviado") || est.includes("completado")) {
+            totalPagado += num;
+            completadosCount++;
+          } else {
             totalPendiente += num;
             pendientesCount++;
-          } else {
-            totalPagado += num;
-            if (est.includes("enviado") || est.includes("completado")) {
-              completadosCount++;
-            }
           }
         }
       });
@@ -657,12 +686,22 @@
         let coincideEstado = true;
         const hoyString = new Date().toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" });
 
+        const ahora = new Date();
+        const año = ahora.toLocaleDateString("es-ES", { year: 'numeric', timeZone: 'Europe/Madrid' });
+        const mes = ahora.toLocaleDateString("es-ES", { month: '2-digit', timeZone: 'Europe/Madrid' });
+        const dia = ahora.toLocaleDateString("es-ES", { day: '2-digit', timeZone: 'Europe/Madrid' });
+        const hoyISO = `${año}-${mes}-${dia}`;
+        const hoyES = `${dia}/${mes}/${año}`;
+
         if (filtroEstadoActual === "pendiente") coincideEstado = est.includes("pendiente");
         if (filtroEstadoActual === "proceso") coincideEstado = (est.includes("proceso") || est === "pagado");
         if (filtroEstadoActual === "completado") coincideEstado = (est.includes("enviado") || est.includes("completado"));
         if (filtroEstadoActual === "cancelado") coincideEstado = est.includes("cancelado");
         if (filtroEstadoActual === "pagado") coincideEstado = (!est.includes("pendiente") && !est.includes("cancelado"));
-        if (filtroEstadoActual === "hoy") coincideEstado = (p.fecha || "").toString().includes(hoyString);
+        if (filtroEstadoActual === "hoy") {
+          const f = (p.fecha || "").toString();
+          coincideEstado = f.includes(hoyISO) || f.includes(hoyES);
+        }
 
         const coincideTexto = 
           (p.id || "").toLowerCase().includes(texto) ||
@@ -1311,6 +1350,10 @@
     }
 
     function cerrarSesion() {
+      if (temporizadorAutoRefresco) {
+        clearInterval(temporizadorAutoRefresco);
+        temporizadorAutoRefresco = null;
+      }
       tokenClave = "";
       document.getElementById('pantallaLogin').classList.remove('hidden');
       document.getElementById('panelDashboard').classList.add('hidden');
