@@ -156,7 +156,7 @@
                 <span class="w-2 h-2 rounded-full bg-rose-500"></span>
               </div>
               <p id="statPendienteDinero" class="text-2xl sm:text-3xl font-bold text-rose-600 mt-1.5">0.00 €</p>
-              <span class="text-[10px] text-slate-400 mt-1 block">Haz clic para filtrar</span>
+              <span class="text-[10px] text-slate-400 mt-1 block">Dinero por cobrar</span>
             </div>
 
             <!-- Cantidad Pagada -->
@@ -166,40 +166,40 @@
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
               </div>
               <p id="statPagado" class="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1.5">0.00 €</p>
-              <span class="text-[10px] text-slate-400 mt-1 block">Haz clic para filtrar</span>
+              <span class="text-[10px] text-slate-400 mt-1 block">Dinero ingresado</span>
             </div>
           </section>
 
           <!-- 2. MINI INDICADORES CLICABLES DE VOLUMEN (5 Tarjetas) -->
           <section class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-4">
-            <!-- Hoy Pedidos -->
-            <div onclick="filtrarDesdeTarjeta('hoy')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-blue-400 hover:shadow-sm transition active:scale-95">
-              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Hoy</span>
-              <span id="statHoyPedidos" class="text-lg sm:text-xl font-bold text-blue-600">0</span>
-            </div>
-
-            <!-- Total Pedidos (Clicable: muestra todos) -->
+            <!-- Total Pedidos -->
             <div onclick="filtrarDesdeTarjeta('todos')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-slate-400 hover:shadow-sm transition active:scale-95">
               <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Total Pedidos</span>
               <span id="statPedidos" class="text-lg sm:text-xl font-bold text-slate-800">0</span>
             </div>
 
-            <!-- Pendientes (Clicable) -->
+            <!-- Pendientes -->
             <div onclick="filtrarDesdeTarjeta('pendiente')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-rose-300 hover:shadow-sm transition active:scale-95">
               <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pendientes</span>
               <span id="statPendientesCount" class="text-lg sm:text-xl font-bold text-rose-600">0</span>
             </div>
 
-            <!-- Enviados (Clicable) -->
+            <!-- Enviados -->
             <div onclick="filtrarDesdeTarjeta('completado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-emerald-300 hover:shadow-sm transition active:scale-95">
               <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Enviados</span>
               <span id="statCompletadosCount" class="text-lg sm:text-xl font-bold text-emerald-600">0</span>
             </div>
 
-            <!-- Cancelados (Clicable) -->
-            <div onclick="filtrarDesdeTarjeta('cancelado')" class="col-span-2 sm:col-span-1 bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-slate-400 hover:shadow-sm transition active:scale-95">
+            <!-- Cancelados (Pequeño: ocupa 1 celda) -->
+            <div onclick="filtrarDesdeTarjeta('cancelado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-slate-400 hover:shadow-sm transition active:scale-95">
               <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Cancelados</span>
               <span id="statCanceladosCount" class="text-lg sm:text-xl font-bold text-slate-400">0</span>
+            </div>
+
+            <!-- Hoy (Grande: ocupa todo el ancho abajo en móvil con col-span-2) -->
+            <div onclick="filtrarDesdeTarjeta('hoy')" class="col-span-2 sm:col-span-1 bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-blue-400 hover:shadow-sm transition active:scale-95">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Hoy</span>
+              <span id="statHoyPedidos" class="text-lg sm:text-xl font-bold text-blue-600">0</span>
             </div>
           </section>
 
@@ -219,13 +219,27 @@
                 <input type="text" id="inputBuscador" oninput="filtrarPedidos()" placeholder="Buscar por cliente, ID, móvil..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
               </div>
 
-              <!-- Pestañas de Estado -->
-              <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                <button onclick="setFiltroEstado('todos', this)" data-estado="todos" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-white transition active:scale-95">Todos</button>
-                <button onclick="setFiltroEstado('pendiente', this)" data-estado="pendiente" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🔴 Pendientes</button>
-                <button onclick="setFiltroEstado('proceso', this)" data-estado="proceso" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟠 En Proceso</button>
-                <button onclick="setFiltroEstado('completado', this)" data-estado="completado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟢 Enviados</button>
-                <button onclick="setFiltroEstado('cancelado', this)" data-estado="cancelado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">⚪ Cancelados</button>
+              <!-- Pestañas de Estado con Flechas de Navegación Lateral -->
+              <div class="relative flex items-center">
+                <!-- Flecha Izquierda -->
+                <button type="button" onclick="scrollCategorias('izq')" aria-label="Desplazar a la izquierda" class="sm:hidden shrink-0 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 shadow-xs mr-1 active:scale-90 transition">
+                  <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                </button>
+
+                <!-- Carrusel Desplazable -->
+                <div id="carruselCategorias" class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth pb-1 flex-grow">
+                  <button onclick="setFiltroEstado('todos', this)" data-estado="todos" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-white transition active:scale-95">Todos</button>
+                  <button onclick="setFiltroEstado('pendiente', this)" data-estado="pendiente" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🔴 Pendientes</button>
+                  <button onclick="setFiltroEstado('proceso', this)" data-estado="proceso" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟠 En Proceso</button>
+                  <button onclick="setFiltroEstado('completado', this)" data-estado="completado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟢 Enviados</button>
+                  <button onclick="setFiltroEstado('pagado', this)" data-estado="pagado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🔵 Pagados</button>
+                  <button onclick="setFiltroEstado('cancelado', this)" data-estado="cancelado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">⚪ Cancelados</button>
+                </div>
+
+                <!-- Flecha Derecha -->
+                <button type="button" onclick="scrollCategorias('der')" aria-label="Desplazar a la derecha" class="sm:hidden shrink-0 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 shadow-xs ml-1 active:scale-90 transition">
+                  <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
               </div>
 
             <!-- VISTA SMARTPHONE (Tarjetas) -->
@@ -502,6 +516,78 @@
       return { visible: formateado, waNumber: waNumber };
     }
 
+    // Gestión de notas de pedido (con persistencia sincronizada y fallback seguro)
+    function obtenerNotaPedido(orderId) {
+      if (!orderId) return "";
+      const p = listaPedidosGlobal.find(item => item.id === orderId);
+      if (p && p.nota !== undefined && p.nota !== null && p.nota !== "") {
+        return p.nota;
+      }
+      return localStorage.getItem(`nota_pedido_${orderId}`) || "";
+    }
+
+    async function guardarNotaPedido(orderId, texto) {
+      if (!orderId) return;
+      const notaLimpia = (texto || "").trim();
+      
+      const p = listaPedidosGlobal.find(item => item.id === orderId);
+      if (p) p.nota = notaLimpia;
+      
+      if (notaLimpia) {
+        localStorage.setItem(`nota_pedido_${orderId}`, notaLimpia);
+      } else {
+        localStorage.removeItem(`nota_pedido_${orderId}`);
+      }
+      
+      filtrarPedidos();
+
+      // Envío a Google Sheets (si Apps Script está actualizado)
+      if (p && p.fila) {
+        try {
+          await fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              accion: "guardarNotaPedido",
+              clave: tokenClave,
+              fila: p.fila,
+              nota: notaLimpia
+            })
+          });
+        } catch (e) {
+          console.log("Nota guardada localmente:", e);
+        }
+      }
+    }
+
+    function accionNotaPedido(orderId, accion) {
+      const notaActual = obtenerNotaPedido(orderId);
+      if (accion === 'agregar' || accion === 'editar') {
+        const mensaje = accion === 'agregar' 
+          ? `Añadir anotación para el pedido ${orderId}:` 
+          : `Editar anotación para el pedido ${orderId}:`;
+        const nuevaNota = prompt(mensaje, notaActual);
+        if (nuevaNota !== null) {
+          guardarNotaPedido(orderId, nuevaNota);
+        }
+      } else if (accion === 'eliminar') {
+        if (confirm(`¿Eliminar la anotación del pedido ${orderId}?`)) {
+          guardarNotaPedido(orderId, "");
+        }
+      }
+    }
+
+    // Busca el ID exacto que tienes en tu columna A de Google Sheets (prod-1, prod-2...)
+    function obtenerIdProducto(nombreProducto) {
+      if (!nombreProducto) return "PROD";
+      const prod = listaProductosGlobal.find(pr => 
+        (pr.titulo && pr.titulo.toLowerCase().trim() === nombreProducto.toLowerCase().trim()) ||
+        nombreProducto.toLowerCase().includes((pr.titulo || "").toLowerCase()) ||
+        (pr.titulo || "").toLowerCase().includes(nombreProducto.toLowerCase())
+      );
+      return (prod && prod.id) ? prod.id : "prod-1";
+    }
+
     // Copiar al portapapeles compatible con entornos restringidos e iOS
     function copiarDato(texto, btn) {
       if (!texto) return;
@@ -552,7 +638,7 @@
       document.body.removeChild(areaTemporal);
     }
 
-    // 1. Cálculo de Métricas (con Totales de Hoy y Cancelados)
+    // 1. Cálculo de Métricas (Solo 'Pagado' suma a Cantidad Pagada)
     function actualizarMetricas() {
       let totalIngresos = 0;
       let totalPagado = 0;
@@ -564,25 +650,22 @@
       let canceladosCount = 0;
       let hoyPedidosCount = 0;
 
-      // Obtener la fecha de hoy en formato ISO (YYYY-MM-DD) y español (DD/MM/YYYY) para comparar
       const ahora = new Date();
       const año = ahora.toLocaleDateString("es-ES", { year: 'numeric', timeZone: 'Europe/Madrid' });
       const mes = ahora.toLocaleDateString("es-ES", { month: '2-digit', timeZone: 'Europe/Madrid' });
       const dia = ahora.toLocaleDateString("es-ES", { day: '2-digit', timeZone: 'Europe/Madrid' });
-      const hoyISO = `${año}-${mes}-${dia}`;        // Formato que guarda Google Sheets: 2026-10-26
-      const hoyES = `${dia}/${mes}/${año}`;         // Formato español alternativo: 26/10/2026
+      const hoyISO = `${año}-${mes}-${dia}`;
+      const hoyES = `${dia}/${mes}/${año}`;
 
       listaPedidosGlobal.forEach(p => {
-        const num = parseFloat(p.precio) || 0;
-        const est = (p.estado || "").toLowerCase();
+        const num = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        const est = (p.estado !== undefined && p.estado !== null) ? p.estado.toString().toLowerCase().trim() : "";
         const fechaPedido = (p.fecha || "").toString();
 
-        // Comprobar si el pedido se creó hoy (compatible con ambos formatos)
         const esDeHoy = fechaPedido.includes(hoyISO) || fechaPedido.includes(hoyES);
 
         if (est.includes("cancelado")) {
           canceladosCount++;
-          // Los cancelados no computan en ingresos ni pendientes
         } else {
           totalIngresos += num;
 
@@ -591,10 +674,13 @@
             hoyPedidosCount++;
           }
 
-          // Solo se suma a pagado si está Enviado/Completado
           if (est.includes("enviado") || est.includes("completado")) {
-            totalPagado += num;
             completadosCount++;
+          }
+
+          // EXCLUSIVO: Solo computa como dinero cobrado si está en estado 'Pagado'
+          if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) {
+            totalPagado += num;
           } else {
             totalPendiente += num;
             pendientesCount++;
@@ -602,13 +688,11 @@
         }
       });
 
-      // Rellenar Bloque Superior
       document.getElementById('statHoyDinero').innerText = hoyDinero.toFixed(2) + " €";
       document.getElementById('statIngresos').innerText = totalIngresos.toFixed(2) + " €";
       document.getElementById('statPagado').innerText = totalPagado.toFixed(2) + " €";
       document.getElementById('statPendienteDinero').innerText = totalPendiente.toFixed(2) + " €";
 
-      // Rellenar Mini Indicadores
       document.getElementById('statHoyPedidos').innerText = hoyPedidosCount;
       document.getElementById('statPedidos').innerText = listaPedidosGlobal.length;
       document.getElementById('statPendientesCount').innerText = pendientesCount;
@@ -617,16 +701,20 @@
       document.getElementById('contadorPedidos').innerText = `${listaPedidosGlobal.length} pedidos registrados`;
     }
 
-    // 2. Colores e indicadores de estado
+    // 2. Colores e indicadores de estado (con Pagado independiente)
     function getEstadoBadge(estado) {
-      const est = (estado || "").toLowerCase();
+      const est = (estado || "").toString().toLowerCase().trim();
       if (est.includes("pendiente")) {
         return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-600 border border-rose-500/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Pendiente
                 </span>`;
-      } else if (est.includes("proceso") || est.includes("pagado")) {
+      } else if (est.includes("proceso")) {
         return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-600 border border-amber-500/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> En Proceso
+                </span>`;
+      } else if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) {
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-600 border border-blue-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Pagado
                 </span>`;
       } else if (est.includes("enviado") || est.includes("completado")) {
         return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 border border-emerald-500/30">
@@ -638,6 +726,14 @@
                 </span>`;
       }
       return `<span class="text-slate-400 text-[10px]">${estado}</span>`;
+    }
+
+    // Desplazar lateralmente el carrusel de categorías en móvil
+    function scrollCategorias(direccion) {
+      const contenedor = document.getElementById('carruselCategorias');
+      if (!contenedor) return;
+      const desplazamiento = direccion === 'izq' ? -140 : 140;
+      contenedor.scrollBy({ left: desplazamiento, behavior: 'smooth' });
     }
 
     function setFiltroEstado(estado, btn) {
@@ -694,10 +790,10 @@
         const hoyES = `${dia}/${mes}/${año}`;
 
         if (filtroEstadoActual === "pendiente") coincideEstado = est.includes("pendiente");
-        if (filtroEstadoActual === "proceso") coincideEstado = (est.includes("proceso") || est === "pagado");
+        if (filtroEstadoActual === "proceso") coincideEstado = est.includes("proceso");
+        if (filtroEstadoActual === "pagado") coincideEstado = (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso")));
         if (filtroEstadoActual === "completado") coincideEstado = (est.includes("enviado") || est.includes("completado"));
         if (filtroEstadoActual === "cancelado") coincideEstado = est.includes("cancelado");
-        if (filtroEstadoActual === "pagado") coincideEstado = (!est.includes("pendiente") && !est.includes("cancelado"));
         if (filtroEstadoActual === "hoy") {
           const f = (p.fecha || "").toString();
           coincideEstado = f.includes(hoyISO) || f.includes(hoyES);
@@ -716,7 +812,7 @@
       renderizarPedidos(pedidosFiltrados);
     }
 
-    // 5. Renderizar pedidos (Corrección clientes, miniaturas ampliadas sin parpadeo, caja ajustada y precio forzado en €)
+    // 5. Renderizar pedidos (Con ID de producto real de Sheets y Post-it con añadir, editar y eliminar)
     function renderizarPedidos(pedidos) {
       const tablaPC = document.getElementById('tablaPedidosPC');
       const vistaMovil = document.getElementById('vistaMovilPedidos');
@@ -730,7 +826,7 @@
       }
       sinRes.classList.add('hidden');
 
-      // 1. Agrupar pedidos estrictamente por Nombre completo (o por teléfono si no hay nombre)
+      // 1. Agrupar pedidos estrictamente por Nombre completo
       const mapaPedidosCliente = {};
       listaPedidosGlobal.forEach(p => {
         const idCliente = (p.nombre || p.telefono || "cliente").toString().trim().toLowerCase();
@@ -771,11 +867,9 @@
         const cuerpoEmail = encodeURIComponent(`Hola ${p.nombre},\n\nTe escribimos de Zeronte en relación a tu encargo ${p.id} (${p.producto}).\n\n`);
         const mailtoUrl = `mailto:${p.email}?subject=${asuntoEmail}&body=${cuerpoEmail}`;
 
-        // Cálculo de venta descendente
         const indiceEnGlobal = listaPedidosGlobal.findIndex(item => item.id === p.id);
         const numVentaDescendente = indiceEnGlobal !== -1 ? (listaPedidosGlobal.length - indiceEnGlobal) : "-";
 
-        // Conteo del cliente
         const idCl = (p.nombre || p.telefono || "cliente").toString().trim().toLowerCase();
         const listaDelCliente = mapaPedidosCliente[idCl] || [p];
         const totalDelCliente = listaDelCliente.length;
@@ -784,7 +878,9 @@
         const badgeCliente = `${indiceCliente}/${totalDelCliente}`;
 
         const fotoProd = obtenerFotoProducto(p.producto);
+        const idProd = obtenerIdProducto(p.producto);
         const textoPersonalizacion = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+        const notaActual = obtenerNotaPedido(p.id);
 
         return `
           <tr class="hover:bg-slate-50 transition">
@@ -801,8 +897,9 @@
                 <div>${getEstadoBadge(p.estado)}</div>
                 <select onchange="cambiarEstado(${p.fila}, this.value)" class="bg-white border border-slate-300 text-[11px] rounded-lg px-2 py-1 text-slate-700 focus:outline-none focus:border-slate-500">
                   <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
-                  <option value="En proceso / Pagado" ${(p.estado === 'En proceso / Pagado' || p.estado === 'Pagado') ? 'selected' : ''}>🟠 En proceso</option>
+                  <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
                   <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
+                  <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🔵 Pagado</option>
                   <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
                 </select>
               </div>
@@ -838,7 +935,7 @@
               </div>
             </td>
 
-            <!-- Producto & Personalización (Miniatura ampliada y caja ajustada con margen) -->
+            <!-- Producto & Personalización & Anotaciones Post-it -->
             <td class="py-4 align-top pr-4">
               <div class="flex items-start gap-3">
                 <div class="w-14 h-14 rounded-xl bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-xs">
@@ -850,9 +947,39 @@
                   `}
                 </div>
                 <div class="max-w-[280px] lg:max-w-[320px]">
-                  <span class="font-bold text-slate-800 block text-xs leading-snug">${p.producto}</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="inline-block bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider shadow-2xs">${idProd}</span>
+                    <span class="font-bold text-slate-800 text-xs leading-snug truncate">${p.producto}</span>
+                  </div>
+
                   <div class="mt-1 bg-blue-50/70 border border-blue-200/70 px-2.5 py-1.5 rounded-lg text-[11px] text-[#002b49] font-medium leading-snug">
                     ${textoPersonalizacion}
+                  </div>
+
+                  <!-- Post-it de Anotaciones -->
+                  <div class="mt-1.5">
+                    ${notaActual ? `
+                      <div class="bg-amber-100/95 border border-amber-300 text-amber-950 p-2 rounded-lg text-[11px] shadow-xs">
+                        <div class="flex items-center justify-between pb-1 mb-1 border-b border-amber-200/90">
+                          <span class="text-[9px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
+                            <i class="fa-solid fa-note-sticky text-[10px]"></i> Anotación
+                          </span>
+                          <div class="flex items-center gap-1.5">
+                            <button onclick="accionNotaPedido('${p.id}', 'editar')" title="Editar anotación" class="text-amber-800 hover:text-black p-0.5 rounded transition">
+                              <i class="fa-solid fa-pen text-[10px]"></i>
+                            </button>
+                            <button onclick="accionNotaPedido('${p.id}', 'eliminar')" title="Eliminar anotación" class="text-amber-800 hover:text-rose-600 p-0.5 rounded transition">
+                              <i class="fa-solid fa-trash text-[10px]"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <p class="leading-tight">${notaActual}</p>
+                      </div>
+                    ` : `
+                      <button onclick="accionNotaPedido('${p.id}', 'agregar')" class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-amber-700 hover:bg-amber-50 px-2 py-0.5 rounded transition">
+                        <i class="fa-solid fa-plus text-[9px]"></i> Añadir anotación
+                      </button>
+                    `}
                   </div>
                 </div>
               </div>
@@ -901,7 +1028,9 @@
         const badgeCliente = `${indiceCliente}/${totalDelCliente}`;
 
         const fotoProd = obtenerFotoProducto(p.producto);
+        const idProd = obtenerIdProducto(p.producto);
         const textoPersonalizacion = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+        const notaActual = obtenerNotaPedido(p.id);
 
         return `
           <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-xs">
@@ -926,7 +1055,7 @@
                 </span>
               </div>
 
-              <!-- Miniatura + Producto + Importe -->
+              <!-- Miniatura + Producto con su ID real + Importe -->
               <div class="flex items-center gap-3 mt-2">
                 <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
                   ${fotoProd ? `
@@ -937,8 +1066,11 @@
                   `}
                 </div>
                 <div class="min-w-0">
-                  <p class="text-xs font-bold text-slate-800 truncate">${p.producto}</p>
-                  <p class="text-xs text-slate-500"><strong class="text-slate-900">${precioFormateado}</strong> (${p.metodoPago})</p>
+                  <div class="flex items-center gap-1.5">
+                    <span class="bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded">${idProd}</span>
+                    <p class="text-xs font-bold text-slate-800 truncate">${p.producto}</p>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5"><strong class="text-slate-900">${precioFormateado}</strong> (${p.metodoPago})</p>
                 </div>
               </div>
 
@@ -962,13 +1094,40 @@
               <div class="mt-2 bg-blue-50/70 border border-blue-200/70 p-2.5 rounded-xl text-xs text-[#002b49] font-medium leading-relaxed">
                 ${textoPersonalizacion}
               </div>
+
+              <!-- Post-it Móvil -->
+              <div class="mt-2">
+                ${notaActual ? `
+                  <div class="bg-amber-100/95 border border-amber-300 text-amber-950 p-2.5 rounded-xl text-xs shadow-xs">
+                    <div class="flex items-center justify-between pb-1 mb-1 border-b border-amber-200">
+                      <span class="text-[10px] font-bold uppercase text-amber-800 flex items-center gap-1">
+                        <i class="fa-solid fa-note-sticky"></i> Anotación
+                      </span>
+                      <div class="flex items-center gap-2">
+                        <button onclick="accionNotaPedido('${p.id}', 'editar')" class="text-amber-800 p-1">
+                          <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button onclick="accionNotaPedido('${p.id}', 'eliminar')" class="text-amber-800 p-1">
+                          <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <p>${notaActual}</p>
+                  </div>
+                ` : `
+                  <button onclick="accionNotaPedido('${p.id}', 'agregar')" class="inline-flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl font-medium">
+                    <i class="fa-solid fa-plus text-[10px]"></i> Añadir anotación
+                  </button>
+                `}
+              </div>
             </div>
 
             <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
               <select onchange="cambiarEstado(${p.fila}, this.value)" class="flex-grow bg-white border border-slate-300 text-xs rounded-xl px-2.5 py-2 text-slate-700">
                 <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
-                <option value="En proceso / Pagado" ${(p.estado === 'En proceso / Pagado' || p.estado === 'Pagado') ? 'selected' : ''}>🟠 En proceso</option>
+                <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
                 <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
+                <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🔵 Pagado</option>
                 <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
               </select>
               <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 active:scale-95 shadow-xs">
@@ -985,16 +1144,22 @@
 
     function renderizarProductos() {
       const cont = document.getElementById('listaProductosAdmin');
-      cont.innerHTML = listaProductosGlobal.map(prod => `
-        <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl flex items-center gap-3">
-          <img src="${prod.imagen}" class="w-12 h-12 rounded-xl object-cover bg-black" onerror="this.src='img/logo-zeronte.png'">
-          <div class="flex-grow min-w-0">
-            <h4 class="text-xs font-bold text-white truncate">${prod.titulo}</h4>
-            <span class="text-xs font-bold text-gold">${prod.precio} €</span>
-            <span class="text-[9px] text-zinc-500 uppercase block">${prod.categoria}</span>
+      cont.innerHTML = listaProductosGlobal.map((prod, idx) => {
+        const idProd = prod.id || `prod-${idx + 1}`;
+        return `
+          <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl flex items-center gap-3 shadow-xs">
+            <img src="${prod.imagen}" class="w-12 h-12 rounded-xl object-cover bg-black" onerror="this.src='img/logo-zeronte.png'">
+            <div class="flex-grow min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="bg-zinc-800 text-gold border border-gold/30 font-mono text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider">${idProd}</span>
+                <h4 class="text-xs font-bold text-white truncate">${prod.titulo}</h4>
+              </div>
+              <span class="text-xs font-bold text-gold mt-0.5 block">${prod.precio} €</span>
+              <span class="text-[9px] text-zinc-500 uppercase block">${prod.categoria}</span>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function cambiarEstado(fila, nuevoEstado) {
