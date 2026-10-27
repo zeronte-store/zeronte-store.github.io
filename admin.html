@@ -658,7 +658,7 @@
       document.body.removeChild(areaTemporal);
     }
 
-    // 1. Cálculo de Métricas (Solo 'Pagado' suma a Cantidad Pagada)
+    // 1. Cálculo de Métricas y Contadores (Al marcar Pagado cuenta automáticamente como Enviado)
     function actualizarMetricas() {
       let totalIngresos = 0;
       let totalPagado = 0;
@@ -686,6 +686,7 @@
 
         if (est.includes("cancelado")) {
           canceladosCount++;
+          // Los pedidos cancelados no computan en ingresos ni pendientes
         } else {
           totalIngresos += num;
 
@@ -694,16 +695,25 @@
             hoyPedidosCount++;
           }
 
-          if (est.includes("enviado") || est.includes("completado")) {
+          const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
+          const esEnviado = est.includes("enviado") || est.includes("completado");
+
+          // Conteo de Enviados: suma si está Enviado O si está Pagado (ya que al cobrarlo ya fue enviado)
+          if (esEnviado || esPagado) {
             completadosCount++;
           }
 
-          // EXCLUSIVO: Solo computa como dinero cobrado si está en estado 'Pagado'
-          if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) {
+          // Conteo de Pendientes: solo si está en 'pendiente' o 'en proceso'.
+          // En cuanto se envía o se paga, se descuenta de pendientes.
+          if ((est.includes("pendiente") || est.includes("proceso")) && !esEnviado && !esPagado) {
+            pendientesCount++;
+          }
+
+          // Finanzas: solo suma a Cantidad Pagada si está marcado como Pagado
+          if (esPagado) {
             totalPagado += num;
           } else {
             totalPendiente += num;
-            pendientesCount++;
           }
         }
       });
