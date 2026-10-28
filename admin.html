@@ -275,7 +275,7 @@
                     <th class="pb-3">Cliente</th>
                     <th class="pb-3">Producto & Personalización</th>
                     <th class="pb-3">Importe</th>
-                    <th class="pb-3 text-right pr-2">Acción</th>
+                    <th class="pb-3 text-right pr-2"></th>
                   </tr>
                 </thead>
                 <tbody id="tablaPedidosPC" class="divide-y divide-slate-100">
@@ -286,6 +286,14 @@
 
             <div id="sinResultados" class="hidden text-center py-8 text-slate-400 text-xs">
               No se encontraron pedidos con ese criterio.
+            </div>
+
+            <!-- Controles de Paginación (10 pedidos por página) -->
+            <div id="barraPaginacionPedidos" class="hidden flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 text-xs text-slate-600">
+              <span id="infoPaginacionPedidos" class="text-[11px] text-slate-400 font-medium">Mostrando 1-10 de 0 pedidos</span>
+              <div id="botonesPaginacionPedidos" class="flex items-center gap-1">
+                <!-- Se genera dinámicamente con las flechas « ‹ 1, 2, 3... › » -->
+              </div>
             </div>
           </section>
 
@@ -414,6 +422,8 @@
     let listaPedidosGlobal = [];
     let listaProductosGlobal = [];
     let filtroEstadoActual = "todos";
+    let paginaActualPedidos = 1;
+    const pedidosPorPagina = 10;
 
     function autenticar(e) {
       e.preventDefault();
@@ -830,8 +840,22 @@
       }
     }
 
-    // 4. Filtrado reactivo ultra potente (busca por número de venta, ID, cliente, anotaciones, método, dedicatoria, etc.)
-    function filtrarPedidos() {
+    // Función para alternar el despliegue al pulsar la fila o tarjeta
+    function toggleDetallePedido(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById('icon-' + id);
+      if (!el) return;
+      el.classList.toggle('hidden');
+      if (icon) {
+        icon.classList.toggle('rotate-180');
+      }
+    }
+
+    // 4. Filtrado reactivo ultra potente con reset a la página 1
+    function filtrarPedidos(reiniciarPagina = true) {
+      if (reiniciarPagina) {
+        paginaActualPedidos = 1;
+      }
       const texto = (document.getElementById('inputBuscador').value || "").toLowerCase().trim();
       const terminos = texto.split(/\s+/).filter(Boolean);
 
@@ -859,17 +883,11 @@
         if (!coincideEstado) return false;
         if (terminos.length === 0) return true;
 
-        // Calcular el número de venta (#5, #4...)
         const numVenta = (listaPedidosGlobal.length - idx).toString();
         const numVentaConHash = `#${numVenta}`;
-
-        // Obtener el ID de catálogo (prod-1, prod-2...)
         const idCatalogo = (typeof obtenerIdProducto === 'function') ? obtenerIdProducto(p.producto) : "";
-
-        // Obtener la anotación guardada (del pedido o de localStorage)
         const nota = (typeof obtenerNotaPedido === 'function') ? obtenerNotaPedido(p.id) : (p.nota || "");
 
-        // Cadena acumulada con todos los campos disponibles del pedido
         const camposBuscables = [
           p.id || "",
           numVenta,
@@ -887,37 +905,126 @@
           p.fecha || ""
         ].join(" ").toLowerCase();
 
-        // Comprobar que todos los términos escritos en el buscador coincidan
         return terminos.every(term => camposBuscables.includes(term));
       });
 
       renderizarPedidos(pedidosFiltrados);
     }
 
-    // Función auxiliar para alternar el despliegue al pulsar la fila o tarjeta
-    function toggleDetallePedido(id) {
-      const el = document.getElementById(id);
-      const icon = document.getElementById('icon-' + id);
-      if (!el) return;
-      el.classList.toggle('hidden');
-      if (icon) {
-        icon.classList.toggle('rotate-180');
-      }
+    // Cambiar de página
+    function cambiarPaginaPedidos(nuevaPagina) {
+      paginaActualPedidos = nuevaPagina;
+      filtrarPedidos(false);
     }
 
-    // 5. Renderizar pedidos compacto con fondo pastel y acordeón desplegable
+    // Renderizar controles de paginación « ‹ 1, 2, 3... › »
+    function renderizarControlesPaginacion(totalItems) {
+      const barra = document.getElementById('barraPaginacionPedidos');
+      const contenedorBotones = document.getElementById('botonesPaginacionPedidos');
+      const infoTexto = document.getElementById('infoPaginacionPedidos');
+      if (!barra || !contenedorBotones || !infoTexto) return;
+
+      const totalPaginas = Math.ceil(totalItems / pedidosPorPagina);
+
+      if (totalPaginas <= 1) {
+        barra.classList.add('hidden');
+        return;
+      }
+      barra.classList.remove('hidden');
+
+      const inicio = ((paginaActualPedidos - 1) * pedidosPorPagina) + 1;
+      const fin = Math.min(paginaActualPedidos * pedidosPorPagina, totalItems);
+      infoTexto.innerText = `Mostrando ${inicio}-${fin} de ${totalItems} pedidos`;
+
+      let html = '';
+
+      // Botón « (Primera)
+      html += `
+        <button onclick="cambiarPaginaPedidos(1)" ${paginaActualPedidos === 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Primera página" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition">
+          <i class="fa-solid fa-angles-left text-[10px]"></i>
+        </button>
+      `;
+
+      // Botón ‹ (Anterior)
+      html += `
+        <button onclick="cambiarPaginaPedidos(${paginaActualPedidos - 1})" ${paginaActualPedidos === 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Página anterior" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition mr-1">
+          <i class="fa-solid fa-chevron-left text-[10px]"></i>
+        </button>
+      `;
+
+      // Rango de páginas con elipsis (...) si hay muchas
+      let paginas = [];
+      if (totalPaginas <= 7) {
+        for (let i = 1; i <= totalPaginas; i++) paginas.push(i);
+      } else {
+        if (paginaActualPedidos <= 4) {
+          paginas = [1, 2, 3, 4, 5, '...', totalPaginas];
+        } else if (paginaActualPedidos >= totalPaginas - 3) {
+          paginas = [1, '...', totalPaginas - 4, totalPaginas - 3, totalPaginas - 2, totalPaginas - 1, totalPaginas];
+        } else {
+          paginas = [1, '...', paginaActualPedidos - 1, paginaActualPedidos, paginaActualPedidos + 1, '...', totalPaginas];
+        }
+      }
+
+      paginas.forEach(p => {
+        if (p === '...') {
+          html += `<span class="w-8 h-8 flex items-center justify-center text-slate-400 font-bold">...</span>`;
+        } else {
+          const esActiva = p === paginaActualPedidos;
+          html += `
+            <button onclick="cambiarPaginaPedidos(${p})" class="w-8 h-8 rounded-lg text-xs font-bold transition active:scale-95 ${esActiva ? 'bg-slate-900 text-white shadow-xs' : 'border border-slate-200 hover:bg-slate-100 text-slate-700'}">
+              ${p}
+            </button>
+          `;
+        }
+      });
+
+      // Botón › (Siguiente)
+      html += `
+        <button onclick="cambiarPaginaPedidos(${paginaActualPedidos + 1})" ${paginaActualPedidos === totalPaginas ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Página siguiente" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition ml-1">
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+      `;
+
+      // Botón » (Última)
+      html += `
+        <button onclick="cambiarPaginaPedidos(${totalPaginas})" ${paginaActualPedidos === totalPaginas ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Última página" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition">
+          <i class="fa-solid fa-angles-right text-[10px]"></i>
+        </button>
+      `;
+
+      contenedorBotones.innerHTML = html;
+    }
+
+    // 5. Renderizar pedidos compacto con paginación de 10 en 10
     function renderizarPedidos(pedidos) {
       const tablaPC = document.getElementById('tablaPedidosPC');
       const vistaMovil = document.getElementById('vistaMovilPedidos');
       const sinRes = document.getElementById('sinResultados');
+      const barraPaginacion = document.getElementById('barraPaginacionPedidos');
 
       if (pedidos.length === 0) {
         tablaPC.innerHTML = "";
         vistaMovil.innerHTML = "";
         sinRes.classList.remove('hidden');
+        if (barraPaginacion) barraPaginacion.classList.add('hidden');
         return;
       }
       sinRes.classList.add('hidden');
+
+      // Validar que la página actual no sobrepase el total
+      const totalPaginas = Math.ceil(pedidos.length / pedidosPorPagina);
+      if (paginaActualPedidos > totalPaginas) {
+        paginaActualPedidos = totalPaginas || 1;
+      }
+
+      // Cortar únicamente los 10 pedidos de la página activa
+      const indiceInicio = (paginaActualPedidos - 1) * pedidosPorPagina;
+      const indiceFin = indiceInicio + pedidosPorPagina;
+      const pedidosPaginados = pedidos.slice(indiceInicio, indiceFin);
+
+      // Renderizar los controles « ‹ 1, 2, 3... › »
+      renderizarControlesPaginacion(pedidos.length);
 
       // 1. Agrupar pedidos estrictamente por Nombre completo
       const mapaPedidosCliente = {};
@@ -949,19 +1056,19 @@
         return `${num.toFixed(2)} €`;
       };
 
-      // 4. Obtener color de fondo pastel suave según el estado
+      // 4. Color de fondo pastel según estado (Enviado en Azul, Pagado en Verde)
       const obtenerFondoPastel = (estado) => {
         const est = (estado || "").toString().toLowerCase().trim();
         if (est.includes("pendiente")) return "bg-rose-50/70 border-rose-200/80 hover:bg-rose-100/60";
         if (est.includes("proceso")) return "bg-amber-50/70 border-amber-200/80 hover:bg-amber-100/60";
-        if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) return "bg-blue-50/70 border-blue-200/80 hover:bg-blue-100/60";
-        if (est.includes("enviado") || est.includes("completado")) return "bg-emerald-50/70 border-emerald-200/80 hover:bg-emerald-100/60";
+        if (est.includes("enviado") || est.includes("completado")) return "bg-blue-50/70 border-blue-200/80 hover:bg-blue-100/60";
+        if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) return "bg-emerald-50/70 border-emerald-200/80 hover:bg-emerald-100/60";
         if (est.includes("cancelado")) return "bg-slate-100/70 border-slate-200/80 hover:bg-slate-200/50";
         return "bg-white border-slate-200 hover:bg-slate-50";
       };
 
       // Escritorio (PC)
-      tablaPC.innerHTML = pedidos.map((p, idx) => {
+      tablaPC.innerHTML = pedidosPaginados.map((p, idx) => {
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
         const precioFormateado = formatearMonedaEuro(p.precio);
@@ -990,36 +1097,32 @@
         const detalleId = `detalle-pc-${idx}`;
 
         return `
-          <!-- FILA PRINCIPAL COMPACTA (SÓLO LO SOLICITADO) -->
+          <!-- FILA PRINCIPAL COMPACTA -->
           <tr onclick="toggleDetallePedido('${detalleId}')" class="${fondoPastel} cursor-pointer transition select-none border-b border-inherit">
-            <!-- Nº Venta -->
             <td class="py-2.5 px-3 text-center align-middle whitespace-nowrap">
               <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white/80 border border-slate-200 text-xs font-bold text-slate-800 shadow-2xs">
                 #${numVentaDescendente}
               </span>
             </td>
 
-            <!-- Estado -->
             <td class="py-2.5 px-3 align-middle whitespace-nowrap">
               ${getEstadoBadge(p.estado)}
             </td>
 
-            <!-- ID y Fecha (con Nº de pedido a su derecha) -->
-            <td class="py-4 align-top">
-              <div class="flex items-center gap-1.5">
-                <span class="font-mono font-bold text-slate-900 text-xs leading-none">${p.id}</span>
-                <span title="Pedido ${badgeCliente} de este cliente" class="text-[10px] font-bold px-1.5 py-0.5 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500'}">
+            <td class="py-2.5 px-3 align-middle whitespace-nowrap">
+              <div class="flex items-center gap-1.5 leading-tight">
+                <span class="font-mono font-bold text-slate-900 text-xs">${p.id}</span>
+                <span class="text-[10px] font-bold px-1.5 py-0.2 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white/80 text-slate-500 border border-slate-200'}">
                   ${badgeCliente}
                 </span>
               </div>
-              <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap block mt-1">${fechaFormateada}</span>
+              <span class="text-[10px] text-slate-500 font-medium block mt-0.5">${fechaFormateada}</span>
             </td>
 
-            <!-- Cliente -->
-            <td class="py-4 align-top">
-              <span class="font-semibold text-slate-900 block text-xs">${p.nombre}</span>
+            <td class="py-2.5 px-3 align-middle">
+              <span class="font-bold text-slate-900 text-xs whitespace-nowrap">${p.nombre}</span>
+            </td>
 
-            <!-- Miniatura + Producto con su ID -->
             <td class="py-2.5 px-3 align-middle">
               <div class="flex items-center gap-2.5 max-w-[340px]">
                 <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
@@ -1037,12 +1140,10 @@
               </div>
             </td>
 
-            <!-- Importe -->
             <td class="py-2.5 px-3 align-middle whitespace-nowrap">
               <span class="font-bold text-slate-900 text-sm">${precioFormateado}</span>
             </td>
 
-            <!-- Flecha Desplegable -->
             <td class="py-2.5 px-3 align-middle text-right pr-3 whitespace-nowrap">
               <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/70 text-slate-500 hover:text-slate-900 shadow-2xs transition">
                 <i id="icon-${detalleId}" class="fa-solid fa-chevron-down text-[11px] transition-transform duration-200"></i>
@@ -1054,15 +1155,15 @@
           <tr id="${detalleId}" class="hidden ${fondoPastel} border-b-2 border-slate-300">
             <td colspan="7" class="p-4 bg-white/70">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4" onclick="event.stopPropagation()">
-                <!-- 1. Estado & Acciones de Contacto -->
+                <!-- Estado & Acciones -->
                 <div class="space-y-3 bg-white border border-slate-200/90 p-3 rounded-xl shadow-2xs">
                   <div>
                     <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Cambiar Estado</label>
                     <select onchange="cambiarEstado(${p.fila}, this.value)" class="w-full bg-slate-50 border border-slate-300 text-xs rounded-xl px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-slate-500 font-medium">
                       <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
                       <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
-                      <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
-                      <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🔵 Pagado</option>
+                      <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🔵 Enviado</option>
+                      <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🟢 Pagado</option>
                       <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
                     </select>
                   </div>
@@ -1079,7 +1180,7 @@
                   </div>
                 </div>
 
-                <!-- 2. Datos de Contacto del Cliente -->
+                <!-- Contacto -->
                 <div class="space-y-2.5 bg-white border border-slate-200/90 p-3 rounded-xl shadow-2xs">
                   <span class="block text-[10px] uppercase font-bold text-slate-400">Datos de Contacto</span>
                   <div class="flex items-center justify-between text-xs bg-slate-50 border border-slate-200/60 p-2 rounded-lg">
@@ -1096,7 +1197,7 @@
                   </div>
                 </div>
 
-                <!-- 3. Dedicatoria & Post-it -->
+                <!-- Personalización y Notas -->
                 <div class="space-y-2 bg-white border border-slate-200/90 p-3 rounded-xl shadow-2xs">
                   <span class="block text-[10px] uppercase font-bold text-slate-400">Personalización & Notas</span>
                   <div class="bg-blue-50/70 border border-blue-200/70 px-2.5 py-1.5 rounded-lg text-xs text-[#002b49] font-medium leading-snug">
@@ -1134,7 +1235,7 @@
       }).join('');
 
       // Smartphone (Móvil)
-      vistaMovil.innerHTML = pedidos.map((p, idx) => {
+      vistaMovil.innerHTML = pedidosPaginados.map((p, idx) => {
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
         const precioFormateado = formatearMonedaEuro(p.precio);
@@ -1164,29 +1265,31 @@
 
         return `
           <div class="border rounded-2xl shadow-xs overflow-hidden transition ${fondoPastel}">
-            <!-- VISTA INICIAL MÓVIL (COMPACTA) -->
             <div onclick="toggleDetallePedido('${detalleId}')" class="p-3 cursor-pointer">
-              <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-800">
-                  #${numVentaDescendente}
-                </span>
-                <div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="font-mono font-bold text-slate-900 text-xs leading-none">${p.id}</span>
-                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500'}">
-                      ${badgeCliente}
-                    </span>
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/80 border border-slate-200 text-[11px] font-bold text-slate-800 shadow-2xs">
+                    #${numVentaDescendente}
+                  </span>
+                  <div>
+                    <div class="flex items-center gap-1.5 leading-none">
+                      <span class="font-mono font-bold text-slate-900 text-xs">${p.id}</span>
+                      <span class="text-[9px] font-bold px-1.5 py-0.2 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white/80 text-slate-500 border border-slate-200'}">
+                        ${badgeCliente}
+                      </span>
+                    </div>
+                    <span class="text-[10px] text-slate-500 font-medium block leading-none mt-1">${fechaFormateada}</span>
                   </div>
-                  <span class="text-[10px] text-slate-500 font-medium block mt-1 leading-none">${fechaFormateada}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  ${getEstadoBadge(p.estado)}
+                  <i id="icon-${detalleId}" class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200"></i>
                 </div>
               </div>
-              <div>${getEstadoBadge(p.estado)}</div>
-            </div>
 
-            <div class="mt-3.5">
-              <p class="font-bold text-slate-900 text-sm">${p.nombre}</p>
-                <span class="font-bold text-slate-900 text-xs shrink-0">${precioFormateado}</span>
+              <div class="mt-3.5">
+                <p class="font-bold text-slate-900 text-sm">${p.nombre}</p>
+                <span class="font-bold text-slate-900 text-xs block mt-0.5">${precioFormateado}</span>
               </div>
 
               <div class="flex items-center gap-2 mt-1.5">
@@ -1253,21 +1356,21 @@
               <!-- Controles de Estado y Botones -->
               <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
                 <select onchange="cambiarEstado(${p.fila}, this.value)" class="flex-grow min-w-0 bg-white border border-slate-300 text-xs rounded-xl px-2.5 py-2 text-slate-700">
-                <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
-                <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
-                <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
-                <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🔵 Pagado</option>
-                <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
-              </select>
-              <button type="button" onclick="confirmarLlamadaCliente('${telInfo.visible}', '${telInfo.waNumber}')" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Llamar al cliente">
-                <i class="fa-solid fa-phone text-sm"></i>
-              </button>
-              <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="WhatsApp">
-                <i class="fa-brands fa-whatsapp text-sm"></i>
-              </a>
-              <a href="${mailtoUrl}" class="bg-slate-800 hover:bg-slate-900 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Email">
-                <i class="fa-regular fa-envelope text-sm"></i>
-              </a>
+                  <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
+                  <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
+                  <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🔵 Enviado</option>
+                  <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🟢 Pagado</option>
+                  <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
+                </select>
+                <button type="button" onclick="confirmarLlamadaCliente('${telInfo.visible}', '${telInfo.waNumber}')" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Llamar al cliente">
+                  <i class="fa-solid fa-phone text-xs"></i>
+                </button>
+                <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="WhatsApp">
+                  <i class="fa-brands fa-whatsapp text-sm"></i>
+                </a>
+                <a href="${mailtoUrl}" class="bg-slate-800 hover:bg-slate-900 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Email">
+                  <i class="fa-regular fa-envelope text-xs"></i>
+                </a>
               </div>
             </div>
           </div>
