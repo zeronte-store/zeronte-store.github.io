@@ -50,54 +50,71 @@
     <div id="sidebarOverlay" onclick="toggleSidebarMovil()" class="fixed inset-0 bg-black/40 z-30 hidden md:hidden transition-opacity"></div>
 
     <!-- SIDEBAR / MENÚ LATERAL IZQUIERDO -->
-    <aside id="sidebarMenu" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-40 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-200 ease-in-out flex flex-col justify-between shadow-sm">
+    <aside id="sidebarMenu" class="fixed inset-y-0 left-0 w-64 md:w-64 bg-white border-r border-slate-200 z-40 transform -translate-x-full md:translate-x-0 md:static transition-all duration-200 ease-in-out flex flex-col justify-between shadow-sm shrink-0 select-none">
       <div>
         <!-- Cabecera Sidebar -->
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <span class="w-8 h-8 bg-slate-900 text-white font-black flex items-center justify-center rounded-lg text-sm shadow-sm">Z</span>
-            <div>
-              <span class="font-bold tracking-widest text-slate-900 text-sm block leading-none">ZERONTE</span>
-              <span class="text-[9px] text-slate-400 font-medium uppercase tracking-wider">Panel de Control</span>
+        <div id="cabeceraSidebar" class="h-16 px-4 border-b border-slate-100 flex items-center justify-between">
+          <div class="sidebar-brand-box flex items-center gap-3 overflow-hidden">
+            <span class="w-9 h-9 bg-slate-900 text-white font-black flex items-center justify-center rounded-xl text-sm shadow-xs shrink-0">Z</span>
+            <div class="sidebar-text leading-tight whitespace-nowrap">
+              <span class="font-bold tracking-widest text-slate-900 text-sm block">ZERONTE</span>
+              <span class="text-[9px] text-slate-400 font-medium uppercase tracking-wider block">Panel de Control</span>
             </div>
           </div>
-          <button onclick="toggleSidebarMovil()" class="md:hidden text-slate-400 hover:text-slate-600 p-1">
+
+          <!-- Botón de colapsar / expandir en PC (centrado automático al colapsar) -->
+          <button type="button" onclick="alternarColapsoSidebar()" title="Plegar / Desplegar menú" class="hidden md:flex text-slate-400 hover:text-slate-700 hover:bg-slate-100 w-9 h-9 items-center justify-center rounded-xl transition active:scale-90 shrink-0">
+            <i id="iconoColapsoSidebar" class="fa-solid fa-angles-left text-xs"></i>
+          </button>
+
+          <!-- Botón de cerrar en móvil -->
+          <button type="button" onclick="toggleSidebarMovil()" class="md:hidden text-slate-400 hover:text-slate-600 p-2">
             <i class="fa-solid fa-xmark text-lg"></i>
           </button>
         </div>
 
-        <!-- Opciones de Navegación -->
-        <nav class="p-3 space-y-1.5">
-          <button onclick="cambiarSeccion('dashboard', this)" class="nav-item-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 text-white shadow-sm transition">
-            <i class="fa-solid fa-chart-pie w-4 text-center"></i>
-            <span>Inicio & Pedidos</span>
+        <!-- Opciones de Navegación (Iconos en cajas fijas de 44x44px centradas) -->
+        <nav class="p-3 space-y-1.5 flex flex-col items-stretch">
+          <button onclick="cambiarSeccion('dashboard', this)" title="Inicio & Pedidos" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold bg-slate-900 text-white shadow-xs transition">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-chart-pie text-sm"></i>
+            </div>
+            <span class="sidebar-text truncate">Inicio & Pedidos</span>
           </button>
           
-          <button onclick="cambiarSeccion('catalogo', this)" class="nav-item-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-            <i class="fa-solid fa-music w-4 text-center"></i>
-            <span>Catálogo</span>
-          </button>
-
-          <button onclick="cambiarSeccion('clientes', this)" class="nav-item-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-            <i class="fa-solid fa-users w-4 text-center"></i>
-            <span>Clientes</span>
-          </button>
-
-          <button onclick="cambiarSeccion('mensajes', this)" class="nav-item-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-            <div class="flex items-center gap-3">
-              <i class="fa-solid fa-envelope w-4 text-center"></i>
-              <span>Mensajes</span>
+          <button onclick="cambiarSeccion('catalogo', this)" title="Catálogo" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-music text-sm"></i>
             </div>
-            <span id="badgeMensajes" class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold">0</span>
+            <span class="sidebar-text truncate">Catálogo</span>
+          </button>
+
+          <button onclick="cambiarSeccion('clientes', this)" title="Clientes" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-users text-sm"></i>
+            </div>
+            <span class="sidebar-text truncate">Clientes</span>
+          </button>
+
+          <button onclick="cambiarSeccion('mensajes', this)" title="Mensajes" class="nav-item-btn w-full h-11 flex items-center justify-between px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-envelope text-sm"></i>
+              </div>
+              <span class="sidebar-text truncate">Mensajes</span>
+            </div>
+            <span id="badgeMensajes" class="sidebar-badge text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold shrink-0">0</span>
           </button>
         </nav>
       </div>
 
       <!-- Pie del Sidebar con Salir -->
-      <div class="p-4 border-t border-slate-100">
-        <button onclick="cerrarSesion()" class="w-full flex items-center justify-center gap-2 text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 font-semibold py-2.5 rounded-xl transition active:scale-95">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-          <span>Cerrar Sesión</span>
+      <div class="p-3 border-t border-slate-100">
+        <button onclick="cerrarSesion()" title="Cerrar Sesión" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 font-semibold transition active:scale-95">
+          <div class="w-6 h-6 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
+          </div>
+          <span class="sidebar-text truncate">Cerrar Sesión</span>
         </button>
       </div>
     </aside>
@@ -105,10 +122,11 @@
     <!-- CONTENEDOR PRINCIPAL DERECHO -->
     <div class="flex-grow flex flex-col min-w-0">
       
-      <!-- Topbar Superior (Adaptada para PC y Smartphones) -->
-      <header class="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 sticky top-0 z-20 flex items-center justify-between shadow-xs">
+      <!-- Topbar Superior Limpia -->
+      <header class="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 sticky top-0 z-20 flex items-center justify-between shadow-xs">
         <div class="flex items-center gap-3">
-          <button onclick="toggleSidebarMovil()" class="md:hidden text-slate-700 p-2 rounded-xl bg-slate-100 hover:bg-slate-200">
+          <!-- Botón hamburguesa exclusivo para móvil -->
+          <button onclick="toggleSidebarMovil()" class="md:hidden text-slate-700 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 transition" aria-label="Abrir menú">
             <i class="fa-solid fa-bars text-sm"></i>
           </button>
           <span class="font-bold text-slate-800 text-sm md:hidden">ZERONTE</span>
@@ -120,8 +138,7 @@
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span class="hidden sm:inline">En vivo</span>
-            <span class="sm:hidden">En vivo</span>
+            <span>En vivo</span>
           </div>
         </div>
       </header>
@@ -328,22 +345,85 @@
                 </div>
                 <div>
                   <label class="block text-[10px] text-slate-500 mb-1">Categoría *</label>
-                  <select id="nuevaCategoria" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+                  <select id="nuevaCategoria" onchange="alternarNuevaCategoria(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
                     <option value="partitura">Partitura Personalizada</option>
                     <option value="natalicio">Natalicio</option>
                     <option value="posters">Pósters Educativos</option>
+                    <option value="__otra__">+ Añadir nueva categoría...</option>
                   </select>
+                  <!-- Campo que aparece al elegir '+ Añadir nueva categoría...' -->
+                  <input type="text" id="inputNuevaCategoriaTexto" placeholder="Escribe la nueva categoría" class="hidden mt-2 w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
                 </div>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-[10px] text-slate-500 mb-1">Ruta o Enlace de la Foto *</label>
-                  <input type="text" id="nuevaImagen" required placeholder="img/foto.jpg o URL" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+
+              <!-- Selector de foto -->
+              <div>
+                <label class="block text-[10px] text-slate-500 mb-1">Foto del producto (PC / Carrete móvil) *</label>
+                <label class="flex items-center justify-between w-full bg-white border border-slate-200 border-dashed hover:border-slate-400 rounded-xl px-3 py-2.5 cursor-pointer transition">
+                  <span id="labelTextoFoto" class="text-xs text-slate-400 truncate">Seleccionar imagen (JPG, PNG, TIF...)...</span>
+                  <i class="fa-solid fa-cloud-arrow-up text-slate-400 text-sm ml-2 shrink-0"></i>
+                  <input type="file" id="inputArchivoFoto" accept="image/*,.tif,.tiff" onchange="procesarFotoArchivo(this)" class="hidden">
+                </label>
+                <input type="hidden" id="nuevaImagen" required>
+              </div>
+
+              <!-- Editor enriquecido para Descripción Amplia -->
+              <div>
+                <label class="block text-[10px] text-slate-500 mb-1">Descripción detallada del producto *</label>
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs focus-within:border-slate-400 transition">
+                  
+                  <!-- Barra de herramientas (Negrita, Cursiva, Subrayado, Fuentes, Tamaños) -->
+                  <div class="bg-slate-100/90 border-b border-slate-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+                    <!-- Formato de texto -->
+                    <button type="button" onclick="aplicarFormato('bold')" title="Negrita (Ctrl+B)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95 font-bold">
+                      <i class="fa-solid fa-bold text-xs"></i>
+                    </button>
+                    <button type="button" onclick="aplicarFormato('italic')" title="Cursiva (Ctrl+I)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95 italic">
+                      <i class="fa-solid fa-italic text-xs"></i>
+                    </button>
+                    <button type="button" onclick="aplicarFormato('underline')" title="Subrayado (Ctrl+U)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95 underline">
+                      <i class="fa-solid fa-underline text-xs"></i>
+                    </button>
+
+                    <span class="w-[1px] h-4 bg-slate-300 mx-1"></span>
+
+                    <!-- Selector de Fuentes básicas -->
+                    <select onchange="aplicarFormato('fontName', this.value); this.selectedIndex=0;" class="bg-white border border-slate-200 rounded-lg text-[11px] px-2 py-1 text-slate-700 focus:outline-none">
+                      <option value="" disabled selected>Tipografía</option>
+                      <option value="Montserrat, sans-serif">Montserrat</option>
+                      <option value="Arial, sans-serif">Arial</option>
+                      <option value="'Times New Roman', serif">Times New Roman</option>
+                      <option value="Georgia, serif">Georgia</option>
+                      <option value="'Courier New', monospace">Courier</option>
+                    </select>
+
+                    <!-- Selector de Tamaño de texto -->
+                    <select onchange="aplicarFormato('fontSize', this.value); this.selectedIndex=0;" class="bg-white border border-slate-200 rounded-lg text-[11px] px-2 py-1 text-slate-700 focus:outline-none">
+                      <option value="" disabled selected>Tamaño</option>
+                      <option value="2">Pequeño</option>
+                      <option value="3">Normal</option>
+                      <option value="4">Medio</option>
+                      <option value="5">Grande</option>
+                      <option value="6">Muy Grande</option>
+                    </select>
+
+                    <span class="w-[1px] h-4 bg-slate-300 mx-1"></span>
+
+                    <!-- Listas -->
+                    <button type="button" onclick="aplicarFormato('insertUnorderedList')" title="Lista con viñetas" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95">
+                      <i class="fa-solid fa-list-ul text-xs"></i>
+                    </button>
+                    <button type="button" onclick="aplicarFormato('insertOrderedList')" title="Lista numerada" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95">
+                      <i class="fa-solid fa-list-ol text-xs"></i>
+                    </button>
+                  </div>
+
+                  <!-- Área editable amplia -->
+                  <div id="editorDescripcion" contenteditable="true" class="p-3 min-h-[160px] max-h-[320px] overflow-y-auto text-xs text-slate-800 leading-relaxed focus:outline-none"></div>
                 </div>
-                <div>
-                  <label class="block text-[10px] text-slate-500 mb-1">Descripción corta *</label>
-                  <input type="text" id="nuevaDesc" required placeholder="Detalle de lo que incluye..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
-                </div>
+
+                <!-- Input oculto para validación y envío de datos -->
+                <input type="hidden" id="nuevaDesc" required>
               </div>
               <button type="submit" id="btnGuardarProd" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Publicar en la Tienda</button>
             </form>
@@ -1415,6 +1495,46 @@
       }
     }
 
+    // Alternar campo de texto libre si selecciona "+ Añadir nueva categoría..."
+    function alternarNuevaCategoria(val) {
+      const inputOtra = document.getElementById('inputNuevaCategoriaTexto');
+      if (!inputOtra) return;
+      if (val === '__otra__') {
+        inputOtra.classList.remove('hidden');
+        inputOtra.required = true;
+        inputOtra.focus();
+      } else {
+        inputOtra.classList.add('hidden');
+        inputOtra.required = false;
+        inputOtra.value = '';
+      }
+    }
+
+    // Lee la foto desde PC o carrete de iPhone/iPad y la pasa a Base64
+    function procesarFotoArchivo(input) {
+      const file = input.files && input.files[0];
+      const label = document.getElementById('labelTextoFoto');
+      const hiddenInput = document.getElementById('nuevaImagen');
+      if (!file) return;
+
+      label.innerText = file.name;
+      label.classList.remove('text-slate-400');
+      label.classList.add('text-slate-800', 'font-medium');
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        hiddenInput.value = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Aplica negrita, cursiva, subrayado, fuente o tamaño en el editor enriquecido
+    function aplicarFormato(comando, valor = null) {
+      document.execCommand(comando, false, valor);
+      const editor = document.getElementById('editorDescripcion');
+      if (editor) editor.focus();
+    }
+
     async function guardarProducto(e) {
       e.preventDefault();
       const btn = document.getElementById('btnGuardarProd');
@@ -1425,10 +1545,19 @@
         clave: tokenClave,
         titulo: document.getElementById('nuevoTitulo').value,
         precio: document.getElementById('nuevoPrecio').value,
-        categoria: document.getElementById('nuevaCategoria').value,
+        categoria: document.getElementById('nuevaCategoria').value === '__otra__' ? document.getElementById('inputNuevaCategoriaTexto').value.trim() : document.getElementById('nuevaCategoria').value,
         imagen: document.getElementById('nuevaImagen').value,
-        descripcion: document.getElementById('nuevaDesc').value
+        descripcion: document.getElementById('editorDescripcion').innerHTML.trim()
       };
+
+      if (!nuevo.descripcion || nuevo.descripcion === '<br>') {
+        alert("Por favor, ingresa una descripción para el producto.");
+        document.getElementById('editorDescripcion').innerHTML = '';
+      document.getElementById('labelTextoFoto').innerText = 'Seleccionar imagen (JPG, PNG, TIF...)...';
+      document.getElementById('labelTextoFoto').className = 'text-xs text-slate-400 truncate';
+        btn.innerText = "Publicar en la Tienda";
+        return;
+      }
 
       await fetch(APPS_SCRIPT_URL, {
         method: "POST",
@@ -1796,6 +1925,51 @@
       const overlay = document.getElementById('sidebarOverlay');
       sidebar.classList.toggle('-translate-x-full');
       overlay.classList.toggle('hidden');
+    }
+
+// Alterna el menú lateral asegurando el centrado simétrico absoluto
+    function alternarColapsoSidebar() {
+      const sidebar = document.getElementById('sidebarMenu');
+      const cabecera = document.getElementById('cabeceraSidebar');
+      const brandBox = sidebar ? sidebar.querySelector('.sidebar-brand-box') : null;
+      const icono = document.getElementById('iconoColapsoSidebar');
+      if (!sidebar) return;
+
+      const estaCompacto = sidebar.classList.contains('md:w-[72px]');
+
+      if (estaCompacto) {
+        // MODO EXPANDIDO (256px)
+        sidebar.classList.remove('md:w-[72px]');
+        sidebar.classList.add('md:w-64');
+        if (cabecera) {
+          cabecera.classList.remove('justify-center', 'px-0');
+          cabecera.classList.add('justify-between', 'px-4');
+        }
+        if (brandBox) brandBox.classList.remove('hidden');
+        sidebar.querySelectorAll('.sidebar-text').forEach(el => el.classList.remove('hidden'));
+        sidebar.querySelectorAll('.sidebar-badge').forEach(el => el.classList.remove('hidden'));
+        sidebar.querySelectorAll('.nav-item-btn').forEach(btn => {
+          btn.classList.remove('justify-center', 'px-0');
+          btn.classList.add('px-3');
+        });
+        if (icono) icono.className = 'fa-solid fa-angles-left text-xs';
+      } else {
+        // MODO COMPACTO (72px) - Oculta logo para que la flecha quede centrada y alinea los 4 iconos
+        sidebar.classList.remove('md:w-64');
+        sidebar.classList.add('md:w-[72px]');
+        if (cabecera) {
+          cabecera.classList.remove('justify-between', 'px-4');
+          cabecera.classList.add('justify-center', 'px-0');
+        }
+        if (brandBox) brandBox.classList.add('hidden');
+        sidebar.querySelectorAll('.sidebar-text').forEach(el => el.classList.add('hidden'));
+        sidebar.querySelectorAll('.sidebar-badge').forEach(el => el.classList.add('hidden'));
+        sidebar.querySelectorAll('.nav-item-btn').forEach(btn => {
+          btn.classList.remove('px-3');
+          btn.classList.add('justify-center', 'px-0');
+        });
+        if (icono) icono.className = 'fa-solid fa-angles-right text-xs';
+      }
     }
   </script>
 </body>
