@@ -175,8 +175,8 @@
             </div>
           </section>
 
-          <!-- 2. MINI INDICADORES CLICABLES DE VOLUMEN (5 Tarjetas) -->
-          <section class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-4">
+          <!-- 2. MINI INDICADORES CLICABLES DE VOLUMEN (7 Tarjetas) -->
+          <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-4">
             <!-- Total Pedidos -->
             <div onclick="filtrarDesdeTarjeta('todos')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-slate-400 hover:shadow-sm transition active:scale-95">
               <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Total Pedidos</span>
@@ -189,19 +189,31 @@
               <span id="statPendientesCount" class="text-lg sm:text-xl font-bold text-rose-600">0</span>
             </div>
 
-            <!-- Enviados -->
-            <div onclick="filtrarDesdeTarjeta('completado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-emerald-300 hover:shadow-sm transition active:scale-95">
-              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Enviados</span>
-              <span id="statCompletadosCount" class="text-lg sm:text-xl font-bold text-emerald-600">0</span>
+            <!-- En Proceso (NUEVA) -->
+            <div onclick="filtrarDesdeTarjeta('proceso')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-amber-300 hover:shadow-sm transition active:scale-95">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">En Proceso</span>
+              <span id="statProcesoCount" class="text-lg sm:text-xl font-bold text-amber-500">0</span>
             </div>
 
-            <!-- Cancelados (Pequeño: ocupa 1 celda) -->
+            <!-- Enviados (AZUL) -->
+            <div onclick="filtrarDesdeTarjeta('completado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-blue-300 hover:shadow-sm transition active:scale-95">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Enviados</span>
+              <span id="statCompletadosCount" class="text-lg sm:text-xl font-bold text-blue-600">0</span>
+            </div>
+
+            <!-- Pagados (VERDE - NUEVA) -->
+            <div onclick="filtrarDesdeTarjeta('pagado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-emerald-300 hover:shadow-sm transition active:scale-95">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pagados</span>
+              <span id="statPagadosCount" class="text-lg sm:text-xl font-bold text-emerald-600">0</span>
+            </div>
+
+            <!-- Cancelados -->
             <div onclick="filtrarDesdeTarjeta('cancelado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-slate-400 hover:shadow-sm transition active:scale-95">
               <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Cancelados</span>
               <span id="statCanceladosCount" class="text-lg sm:text-xl font-bold text-slate-400">0</span>
             </div>
 
-            <!-- Hoy (Grande: ocupa todo el ancho abajo en móvil con col-span-2) -->
+            <!-- Hoy -->
             <div onclick="filtrarDesdeTarjeta('hoy')" class="col-span-2 sm:col-span-1 bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-blue-400 hover:shadow-sm transition active:scale-95">
               <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Hoy</span>
               <span id="statHoyPedidos" class="text-lg sm:text-xl font-bold text-blue-600">0</span>
@@ -236,8 +248,8 @@
                   <button onclick="setFiltroEstado('todos', this)" data-estado="todos" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-white transition active:scale-95">Todos</button>
                   <button onclick="setFiltroEstado('pendiente', this)" data-estado="pendiente" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🔴 Pendientes</button>
                   <button onclick="setFiltroEstado('proceso', this)" data-estado="proceso" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟠 En Proceso</button>
-                  <button onclick="setFiltroEstado('completado', this)" data-estado="completado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟢 Enviados</button>
-                  <button onclick="setFiltroEstado('pagado', this)" data-estado="pagado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🔵 Pagados</button>
+                  <button onclick="setFiltroEstado('completado', this)" data-estado="completado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🔵 Enviados</button>
+                  <button onclick="setFiltroEstado('pagado', this)" data-estado="pagado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟢 Pagados</button>
                   <button onclick="setFiltroEstado('cancelado', this)" data-estado="cancelado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">⚪ Cancelados</button>
                 </div>
 
@@ -608,6 +620,17 @@
       return (prod && prod.id) ? prod.id : "prod-1";
     }
 
+    // Confirmación previa antes de realizar la llamada telefónica en móvil
+    function confirmarLlamadaCliente(telVisible, telRaw) {
+      if (!telRaw) {
+        alert("Este pedido no tiene número de teléfono registrado.");
+        return;
+      }
+      if (confirm(`¿Deseas llamar al número ${telVisible}?`)) {
+        window.location.href = `tel:${telRaw}`;
+      }
+    }
+
     // Copiar al portapapeles compatible con entornos restringidos e iOS
     function copiarDato(texto, btn) {
       if (!texto) return;
@@ -658,7 +681,7 @@
       document.body.removeChild(areaTemporal);
     }
 
-    // 1. Cálculo de Métricas y Contadores (Al marcar Pagado cuenta automáticamente como Enviado)
+    // 1. Cálculo de Métricas y Contadores (Todo lo pagado se suma a enviados)
     function actualizarMetricas() {
       let totalIngresos = 0;
       let totalPagado = 0;
@@ -666,7 +689,9 @@
       let hoyDinero = 0;
 
       let pendientesCount = 0;
-      let completadosCount = 0;
+      let procesoCount = 0;
+      let soloEnviadosCount = 0;
+      let pagadosCount = 0;
       let canceladosCount = 0;
       let hoyPedidosCount = 0;
 
@@ -686,7 +711,6 @@
 
         if (est.includes("cancelado")) {
           canceladosCount++;
-          // Los pedidos cancelados no computan en ingresos ni pendientes
         } else {
           totalIngresos += num;
 
@@ -698,25 +722,24 @@
           const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
           const esEnviado = est.includes("enviado") || est.includes("completado");
 
-          // Conteo de Enviados: suma si está Enviado O si está Pagado (ya que al cobrarlo ya fue enviado)
-          if (esEnviado || esPagado) {
-            completadosCount++;
-          }
-
-          // Conteo de Pendientes: solo si está en 'pendiente' o 'en proceso'.
-          // En cuanto se envía o se paga, se descuenta de pendientes.
-          if ((est.includes("pendiente") || est.includes("proceso")) && !esEnviado && !esPagado) {
-            pendientesCount++;
-          }
-
-          // Finanzas: solo suma a Cantidad Pagada si está marcado como Pagado
           if (esPagado) {
+            pagadosCount++;
             totalPagado += num;
+          } else if (esEnviado) {
+            soloEnviadosCount++;
+            totalPendiente += num;
+          } else if (est.includes("proceso")) {
+            procesoCount++;
+            totalPendiente += num;
           } else {
+            pendientesCount++;
             totalPendiente += num;
           }
         }
       });
+
+      // LÓGICA SOLICITADA: Enviados muestra la suma de los que están como Enviado + los que están como Pagado
+      const totalEnviadosCalculado = soloEnviadosCount + pagadosCount;
 
       document.getElementById('statHoyDinero').innerText = hoyDinero.toFixed(2) + " €";
       document.getElementById('statIngresos').innerText = totalIngresos.toFixed(2) + " €";
@@ -726,12 +749,14 @@
       document.getElementById('statHoyPedidos').innerText = hoyPedidosCount;
       document.getElementById('statPedidos').innerText = listaPedidosGlobal.length;
       document.getElementById('statPendientesCount').innerText = pendientesCount;
-      document.getElementById('statCompletadosCount').innerText = completadosCount;
+      document.getElementById('statProcesoCount').innerText = procesoCount;
+      document.getElementById('statCompletadosCount').innerText = totalEnviadosCalculado;
+      document.getElementById('statPagadosCount').innerText = pagadosCount;
       document.getElementById('statCanceladosCount').innerText = canceladosCount;
       document.getElementById('contadorPedidos').innerText = `${listaPedidosGlobal.length} pedidos registrados`;
     }
 
-    // 2. Colores e indicadores de estado (con Pagado independiente)
+    // 2. Colores e indicadores de estado (Enviado en Azul, Pagado en Verde)
     function getEstadoBadge(estado) {
       const est = (estado || "").toString().toLowerCase().trim();
       if (est.includes("pendiente")) {
@@ -742,13 +767,15 @@
         return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-600 border border-amber-500/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> En Proceso
                 </span>`;
-      } else if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) {
-        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-600 border border-blue-500/30">
-                  <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Pagado
-                </span>`;
       } else if (est.includes("enviado") || est.includes("completado")) {
+        // ENVIADO EN AZUL
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-600 border border-blue-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Enviado
+                </span>`;
+      } else if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) {
+        // PAGADO EN VERDE
         return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 border border-emerald-500/30">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Enviado
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Pagado
                 </span>`;
       } else if (est.includes("cancelado")) {
         return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-500 border border-slate-300">
@@ -803,14 +830,14 @@
       }
     }
 
-    // 4. Filtrado reactivo
+    // 4. Filtrado reactivo ultra potente (busca por número de venta, ID, cliente, anotaciones, método, dedicatoria, etc.)
     function filtrarPedidos() {
-      const texto = (document.getElementById('inputBuscador').value || "").toLowerCase();
+      const texto = (document.getElementById('inputBuscador').value || "").toLowerCase().trim();
+      const terminos = texto.split(/\s+/).filter(Boolean);
 
-      const pedidosFiltrados = listaPedidosGlobal.filter(p => {
+      const pedidosFiltrados = listaPedidosGlobal.filter((p, idx) => {
         const est = (p.estado || "").toLowerCase();
         let coincideEstado = true;
-        const hoyString = new Date().toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" });
 
         const ahora = new Date();
         const año = ahora.toLocaleDateString("es-ES", { year: 'numeric', timeZone: 'Europe/Madrid' });
@@ -829,20 +856,56 @@
           coincideEstado = f.includes(hoyISO) || f.includes(hoyES);
         }
 
-        const coincideTexto = 
-          (p.id || "").toLowerCase().includes(texto) ||
-          (p.nombre || "").toLowerCase().includes(texto) ||
-          (p.telefono || "").toString().includes(texto) ||
-          (p.email || "").toLowerCase().includes(texto) ||
-          (p.producto || "").toLowerCase().includes(texto);
+        if (!coincideEstado) return false;
+        if (terminos.length === 0) return true;
 
-        return coincideEstado && coincideTexto;
+        // Calcular el número de venta (#5, #4...)
+        const numVenta = (listaPedidosGlobal.length - idx).toString();
+        const numVentaConHash = `#${numVenta}`;
+
+        // Obtener el ID de catálogo (prod-1, prod-2...)
+        const idCatalogo = (typeof obtenerIdProducto === 'function') ? obtenerIdProducto(p.producto) : "";
+
+        // Obtener la anotación guardada (del pedido o de localStorage)
+        const nota = (typeof obtenerNotaPedido === 'function') ? obtenerNotaPedido(p.id) : (p.nota || "");
+
+        // Cadena acumulada con todos los campos disponibles del pedido
+        const camposBuscables = [
+          p.id || "",
+          numVenta,
+          numVentaConHash,
+          p.nombre || "",
+          p.telefono || "",
+          p.email || "",
+          p.producto || "",
+          idCatalogo,
+          p.personalizacion || "",
+          nota,
+          p.metodoPago || "",
+          p.precio || "",
+          p.estado || "",
+          p.fecha || ""
+        ].join(" ").toLowerCase();
+
+        // Comprobar que todos los términos escritos en el buscador coincidan
+        return terminos.every(term => camposBuscables.includes(term));
       });
 
       renderizarPedidos(pedidosFiltrados);
     }
 
-    // 5. Renderizar pedidos (Con ID de producto real de Sheets y Post-it con añadir, editar y eliminar)
+    // Función auxiliar para alternar el despliegue al pulsar la fila o tarjeta
+    function toggleDetallePedido(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById('icon-' + id);
+      if (!el) return;
+      el.classList.toggle('hidden');
+      if (icon) {
+        icon.classList.toggle('rotate-180');
+      }
+    }
+
+    // 5. Renderizar pedidos compacto con fondo pastel y acordeón desplegable
     function renderizarPedidos(pedidos) {
       const tablaPC = document.getElementById('tablaPedidosPC');
       const vistaMovil = document.getElementById('vistaMovilPedidos');
@@ -886,8 +949,19 @@
         return `${num.toFixed(2)} €`;
       };
 
+      // 4. Obtener color de fondo pastel suave según el estado
+      const obtenerFondoPastel = (estado) => {
+        const est = (estado || "").toString().toLowerCase().trim();
+        if (est.includes("pendiente")) return "bg-rose-50/70 border-rose-200/80 hover:bg-rose-100/60";
+        if (est.includes("proceso")) return "bg-amber-50/70 border-amber-200/80 hover:bg-amber-100/60";
+        if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) return "bg-blue-50/70 border-blue-200/80 hover:bg-blue-100/60";
+        if (est.includes("enviado") || est.includes("completado")) return "bg-emerald-50/70 border-emerald-200/80 hover:bg-emerald-100/60";
+        if (est.includes("cancelado")) return "bg-slate-100/70 border-slate-200/80 hover:bg-slate-200/50";
+        return "bg-white border-slate-200 hover:bg-slate-50";
+      };
+
       // Escritorio (PC)
-      tablaPC.innerHTML = pedidos.map(p => {
+      tablaPC.innerHTML = pedidos.map((p, idx) => {
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
         const precioFormateado = formatearMonedaEuro(p.precio);
@@ -912,84 +986,125 @@
         const textoPersonalizacion = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
         const notaActual = obtenerNotaPedido(p.id);
 
+        const fondoPastel = obtenerFondoPastel(p.estado);
+        const detalleId = `detalle-pc-${idx}`;
+
         return `
-          <tr class="hover:bg-slate-50 transition">
-            <!-- Nº Venta Descendente -->
-            <td class="py-4 px-3 align-top text-center">
-              <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800">
+          <!-- FILA PRINCIPAL COMPACTA (SÓLO LO SOLICITADO) -->
+          <tr onclick="toggleDetallePedido('${detalleId}')" class="${fondoPastel} cursor-pointer transition select-none border-b border-inherit">
+            <!-- Nº Venta -->
+            <td class="py-2.5 px-3 text-center align-middle whitespace-nowrap">
+              <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white/80 border border-slate-200 text-xs font-bold text-slate-800 shadow-2xs">
                 #${numVentaDescendente}
               </span>
             </td>
 
             <!-- Estado -->
-            <td class="py-4 px-3 align-top">
-              <div class="space-y-1.5">
-                <div>${getEstadoBadge(p.estado)}</div>
-                <select onchange="cambiarEstado(${p.fila}, this.value)" class="bg-white border border-slate-300 text-[11px] rounded-lg px-2 py-1 text-slate-700 focus:outline-none focus:border-slate-500">
-                  <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
-                  <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
-                  <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
-                  <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🔵 Pagado</option>
-                  <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
-                </select>
-              </div>
+            <td class="py-2.5 px-3 align-middle whitespace-nowrap">
+              ${getEstadoBadge(p.estado)}
             </td>
 
-            <!-- ID y Fecha -->
-            <td class="py-4 align-top">
-              <span class="font-mono font-bold text-slate-900 text-xs block">${p.id}</span>
-              <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">${fechaFormateada}</span>
-            </td>
-
-            <!-- Cliente -->
+            <!-- ID y Fecha (con Nº de pedido a su derecha) -->
             <td class="py-4 align-top">
               <div class="flex items-center gap-1.5">
-                <span class="font-semibold text-slate-900 block text-xs">${p.nombre}</span>
+                <span class="font-mono font-bold text-slate-900 text-xs leading-none">${p.id}</span>
                 <span title="Pedido ${badgeCliente} de este cliente" class="text-[10px] font-bold px-1.5 py-0.5 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500'}">
                   ${badgeCliente}
                 </span>
               </div>
-              
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-[11px] text-slate-600 font-medium tracking-tight">${telInfo.visible}</span>
-                <button onclick="copiarDato('${telInfo.visible}', this)" title="Copiar teléfono" class="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-100 transition active:scale-90">
-                  <i class="fa-regular fa-copy text-xs"></i>
-                </button>
-              </div>
+              <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap block mt-1">${fechaFormateada}</span>
+            </td>
 
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-[10px] text-slate-400 truncate max-w-[130px] block">${p.email}</span>
-                <button onclick="copiarDato('${p.email}', this)" title="Copiar email" class="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-100 transition active:scale-90">
-                  <i class="fa-regular fa-copy text-xs"></i>
-                </button>
+            <!-- Cliente -->
+            <td class="py-4 align-top">
+              <span class="font-semibold text-slate-900 block text-xs">${p.nombre}</span>
+
+            <!-- Miniatura + Producto con su ID -->
+            <td class="py-2.5 px-3 align-middle">
+              <div class="flex items-center gap-2.5 max-w-[340px]">
+                <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
+                  ${fotoProd ? `
+                    <img src="${fotoProd}" alt="${p.producto}" class="w-full h-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <span class="hidden text-white font-bold text-[10px] brand-font">Z</span>
+                  ` : `
+                    <span class="text-white font-bold text-[10px] brand-font">Z</span>
+                  `}
+                </div>
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="inline-block bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider shadow-2xs shrink-0">${idProd}</span>
+                  <span class="font-bold text-slate-800 text-xs truncate" title="${p.producto}">${p.producto}</span>
+                </div>
               </div>
             </td>
 
-            <!-- Producto & Personalización & Anotaciones Post-it -->
-            <td class="py-4 align-top pr-4">
-              <div class="flex items-start gap-3">
-                <div class="w-14 h-14 rounded-xl bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-xs">
-                  ${fotoProd ? `
-                    <img src="${fotoProd}" alt="${p.producto}" class="w-full h-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-                    <span class="hidden text-white font-bold text-xs brand-font">Z</span>
-                  ` : `
-                    <span class="text-white font-bold text-xs brand-font">Z</span>
-                  `}
-                </div>
-                <div class="max-w-[280px] lg:max-w-[320px]">
-                  <div class="flex items-center gap-1.5">
-                    <span class="inline-block bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider shadow-2xs">${idProd}</span>
-                    <span class="font-bold text-slate-800 text-xs leading-snug truncate">${p.producto}</span>
-                  </div>
+            <!-- Importe -->
+            <td class="py-2.5 px-3 align-middle whitespace-nowrap">
+              <span class="font-bold text-slate-900 text-sm">${precioFormateado}</span>
+            </td>
 
-                  <div class="mt-1 bg-blue-50/70 border border-blue-200/70 px-2.5 py-1.5 rounded-lg text-[11px] text-[#002b49] font-medium leading-snug">
+            <!-- Flecha Desplegable -->
+            <td class="py-2.5 px-3 align-middle text-right pr-3 whitespace-nowrap">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/70 text-slate-500 hover:text-slate-900 shadow-2xs transition">
+                <i id="icon-${detalleId}" class="fa-solid fa-chevron-down text-[11px] transition-transform duration-200"></i>
+              </span>
+            </td>
+          </tr>
+
+          <!-- FILA DESPLEGABLE CON EL RESTO DE INFORMACIÓN -->
+          <tr id="${detalleId}" class="hidden ${fondoPastel} border-b-2 border-slate-300">
+            <td colspan="7" class="p-4 bg-white/70">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4" onclick="event.stopPropagation()">
+                <!-- 1. Estado & Acciones de Contacto -->
+                <div class="space-y-3 bg-white border border-slate-200/90 p-3 rounded-xl shadow-2xs">
+                  <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Cambiar Estado</label>
+                    <select onchange="cambiarEstado(${p.fila}, this.value)" class="w-full bg-slate-50 border border-slate-300 text-xs rounded-xl px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-slate-500 font-medium">
+                      <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
+                      <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
+                      <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
+                      <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🔵 Pagado</option>
+                      <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
+                    </select>
+                  </div>
+                  <div>
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Método de Pago: <strong class="text-slate-700">${p.metodoPago}</strong></span>
+                  </div>
+                  <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+                    <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold py-1.5 rounded-xl text-xs transition active:scale-95 shadow-xs">
+                      <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                    </a>
+                    <a href="${mailtoUrl}" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-800 hover:text-white font-semibold py-1.5 rounded-xl text-xs transition active:scale-95 shadow-xs">
+                      <i class="fa-regular fa-envelope text-xs"></i> Email
+                    </a>
+                  </div>
+                </div>
+
+                <!-- 2. Datos de Contacto del Cliente -->
+                <div class="space-y-2.5 bg-white border border-slate-200/90 p-3 rounded-xl shadow-2xs">
+                  <span class="block text-[10px] uppercase font-bold text-slate-400">Datos de Contacto</span>
+                  <div class="flex items-center justify-between text-xs bg-slate-50 border border-slate-200/60 p-2 rounded-lg">
+                    <span class="text-slate-700 font-medium">${telInfo.visible}</span>
+                    <button onclick="copiarDato('${telInfo.visible}', this)" title="Copiar teléfono" class="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200 transition active:scale-90">
+                      <i class="fa-regular fa-copy text-xs"></i>
+                    </button>
+                  </div>
+                  <div class="flex items-center justify-between text-xs bg-slate-50 border border-slate-200/60 p-2 rounded-lg">
+                    <span class="text-slate-500 truncate mr-2">${p.email}</span>
+                    <button onclick="copiarDato('${p.email}', this)" title="Copiar email" class="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200 transition active:scale-90">
+                      <i class="fa-regular fa-copy text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 3. Dedicatoria & Post-it -->
+                <div class="space-y-2 bg-white border border-slate-200/90 p-3 rounded-xl shadow-2xs">
+                  <span class="block text-[10px] uppercase font-bold text-slate-400">Personalización & Notas</span>
+                  <div class="bg-blue-50/70 border border-blue-200/70 px-2.5 py-1.5 rounded-lg text-xs text-[#002b49] font-medium leading-snug">
                     ${textoPersonalizacion}
                   </div>
-
-                  <!-- Post-it de Anotaciones -->
-                  <div class="mt-1.5">
+                  <div>
                     ${notaActual ? `
-                      <div class="bg-amber-100/95 border border-amber-300 text-amber-950 p-2 rounded-lg text-[11px] shadow-xs">
+                      <div class="bg-amber-100/95 border border-amber-300 text-amber-950 p-2 rounded-lg text-xs shadow-xs">
                         <div class="flex items-center justify-between pb-1 mb-1 border-b border-amber-200/90">
                           <span class="text-[9px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
                             <i class="fa-solid fa-note-sticky text-[10px]"></i> Anotación
@@ -1006,30 +1121,12 @@
                         <p class="leading-tight">${notaActual}</p>
                       </div>
                     ` : `
-                      <button onclick="accionNotaPedido('${p.id}', 'agregar')" class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-amber-700 hover:bg-amber-50 px-2 py-0.5 rounded transition">
-                        <i class="fa-solid fa-plus text-[9px]"></i> Añadir anotación
+                      <button onclick="accionNotaPedido('${p.id}', 'agregar')" class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-amber-700 hover:bg-amber-50 px-2.5 py-1 rounded-lg border border-slate-200 transition">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Añadir anotación
                       </button>
                     `}
                   </div>
                 </div>
-              </div>
-            </td>
-
-            <!-- Importe (Forzado en €) -->
-            <td class="py-4 align-top whitespace-nowrap">
-              <span class="font-bold text-slate-900 text-sm block">${precioFormateado}</span>
-              <span class="text-[10px] uppercase font-semibold text-slate-400">${p.metodoPago}</span>
-            </td>
-
-            <!-- Acciones -->
-            <td class="py-4 align-top text-right pr-2">
-              <div class="flex flex-col items-end gap-1.5">
-                <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="w-[105px] inline-flex items-center justify-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold px-2.5 py-1.5 rounded-xl text-xs transition active:scale-95 shadow-xs">
-                  <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
-                </a>
-                <a href="${mailtoUrl}" class="w-[105px] inline-flex items-center justify-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-800 hover:text-white font-semibold px-2.5 py-1.5 rounded-xl text-xs transition active:scale-95 shadow-xs">
-                  <i class="fa-regular fa-envelope text-xs"></i> Email
-                </a>
               </div>
             </td>
           </tr>
@@ -1037,7 +1134,7 @@
       }).join('');
 
       // Smartphone (Móvil)
-      vistaMovil.innerHTML = pedidos.map(p => {
+      vistaMovil.innerHTML = pedidos.map((p, idx) => {
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
         const precioFormateado = formatearMonedaEuro(p.precio);
@@ -1062,50 +1159,52 @@
         const textoPersonalizacion = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
         const notaActual = obtenerNotaPedido(p.id);
 
+        const fondoPastel = obtenerFondoPastel(p.estado);
+        const detalleId = `detalle-movil-${idx}`;
+
         return `
-          <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-xs">
-            <div class="flex items-center justify-between">
+          <div class="border rounded-2xl shadow-xs overflow-hidden transition ${fondoPastel}">
+            <!-- VISTA INICIAL MÓVIL (COMPACTA) -->
+            <div onclick="toggleDetallePedido('${detalleId}')" class="p-3 cursor-pointer">
+              <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-800">
                   #${numVentaDescendente}
                 </span>
                 <div>
-                  <span class="font-mono font-bold text-slate-900 text-xs">${p.id}</span>
-                  <span class="text-[10px] text-slate-500 font-medium block">${fechaFormateada}</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono font-bold text-slate-900 text-xs leading-none">${p.id}</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500'}">
+                      ${badgeCliente}
+                    </span>
+                  </div>
+                  <span class="text-[10px] text-slate-500 font-medium block mt-1 leading-none">${fechaFormateada}</span>
                 </div>
               </div>
               <div>${getEstadoBadge(p.estado)}</div>
             </div>
 
-            <div>
-              <div class="flex items-center gap-1.5">
-                <p class="font-bold text-slate-900 text-sm">${p.nombre}</p>
-                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500'}">
-                  ${badgeCliente}
-                </span>
+            <div class="mt-3.5">
+              <p class="font-bold text-slate-900 text-sm">${p.nombre}</p>
+                <span class="font-bold text-slate-900 text-xs shrink-0">${precioFormateado}</span>
               </div>
 
-              <!-- Miniatura + Producto con su ID real + Importe -->
-              <div class="flex items-center gap-3 mt-2">
-                <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
+              <div class="flex items-center gap-2 mt-1.5">
+                <div class="w-6 h-6 rounded bg-slate-900 shrink-0 overflow-hidden flex items-center justify-center">
                   ${fotoProd ? `
-                    <img src="${fotoProd}" alt="${p.producto}" class="w-full h-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-                    <span class="hidden text-white font-bold text-xs brand-font">Z</span>
+                    <img src="${fotoProd}" alt="${p.producto}" class="w-full h-full object-cover">
                   ` : `
-                    <span class="text-white font-bold text-xs brand-font">Z</span>
+                    <span class="text-white font-bold text-[9px] brand-font">Z</span>
                   `}
                 </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-1.5">
-                    <span class="bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded">${idProd}</span>
-                    <p class="text-xs font-bold text-slate-800 truncate">${p.producto}</p>
-                  </div>
-                  <p class="text-xs text-slate-500 mt-0.5"><strong class="text-slate-900">${precioFormateado}</strong> (${p.metodoPago})</p>
-                </div>
+                <span class="bg-slate-900 text-white font-mono text-[8px] font-bold px-1 rounded">${idProd}</span>
+                <p class="text-[11px] text-slate-700 truncate font-medium">${p.producto}</p>
               </div>
+            </div>
 
-              <!-- Teléfono e Email con botón copiar -->
-              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs">
+            <!-- DESPLEGABLE MÓVIL AL PULSAR -->
+            <div id="${detalleId}" class="hidden p-3 bg-white/80 border-t border-slate-200/80 space-y-3" onclick="event.stopPropagation()">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                 <div class="flex items-center gap-1.5">
                   <span class="text-slate-600 font-medium">${telInfo.visible}</span>
                   <button onclick="copiarDato('${telInfo.visible}', this)" title="Copiar teléfono" class="text-slate-400 hover:text-slate-700 p-1 rounded active:scale-90">
@@ -1120,13 +1219,13 @@
                 </div>
               </div>
 
-              <!-- Personalización en azul marino -->
-              <div class="mt-2 bg-blue-50/70 border border-blue-200/70 p-2.5 rounded-xl text-xs text-[#002b49] font-medium leading-relaxed">
+              <!-- Personalización -->
+              <div class="bg-blue-50/70 border border-blue-200/70 p-2.5 rounded-xl text-xs text-[#002b49] font-medium leading-relaxed">
                 ${textoPersonalizacion}
               </div>
 
               <!-- Post-it Móvil -->
-              <div class="mt-2">
+              <div>
                 ${notaActual ? `
                   <div class="bg-amber-100/95 border border-amber-300 text-amber-950 p-2.5 rounded-xl text-xs shadow-xs">
                     <div class="flex items-center justify-between pb-1 mb-1 border-b border-amber-200">
@@ -1145,27 +1244,31 @@
                     <p>${notaActual}</p>
                   </div>
                 ` : `
-                  <button onclick="accionNotaPedido('${p.id}', 'agregar')" class="inline-flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl font-medium">
+                  <button onclick="accionNotaPedido('${p.id}', 'agregar')" class="inline-flex items-center gap-1.5 text-xs text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-xl font-medium">
                     <i class="fa-solid fa-plus text-[10px]"></i> Añadir anotación
                   </button>
                 `}
               </div>
-            </div>
 
-            <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
-              <select onchange="cambiarEstado(${p.fila}, this.value)" class="flex-grow bg-white border border-slate-300 text-xs rounded-xl px-2.5 py-2 text-slate-700">
+              <!-- Controles de Estado y Botones -->
+              <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+                <select onchange="cambiarEstado(${p.fila}, this.value)" class="flex-grow min-w-0 bg-white border border-slate-300 text-xs rounded-xl px-2.5 py-2 text-slate-700">
                 <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
                 <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
                 <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🟢 Enviado</option>
                 <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🔵 Pagado</option>
                 <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
               </select>
-              <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 active:scale-95 shadow-xs">
-                <i class="fa-brands fa-whatsapp text-sm"></i> Chat
+              <button type="button" onclick="confirmarLlamadaCliente('${telInfo.visible}', '${telInfo.waNumber}')" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Llamar al cliente">
+                <i class="fa-solid fa-phone text-sm"></i>
+              </button>
+              <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="WhatsApp">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
               </a>
-              <a href="${mailtoUrl}" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 active:scale-95 shadow-xs">
-                <i class="fa-regular fa-envelope text-xs"></i> Email
+              <a href="${mailtoUrl}" class="bg-slate-800 hover:bg-slate-900 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Email">
+                <i class="fa-regular fa-envelope text-sm"></i>
               </a>
+              </div>
             </div>
           </div>
         `;
