@@ -28,7 +28,9 @@
   <!-- ==================== PANTALLA LOGIN ==================== -->
   <div id="pantallaLogin" class="min-h-screen flex items-center justify-center p-4">
     <div class="bg-[#141417] border border-zinc-800 p-7 sm:p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
-      <div class="w-12 h-12 bg-zinc-900 border border-gold/40 rounded-2xl mx-auto mb-4 flex items-center justify-center text-gold font-bold text-xl">Z</div>
+      <div class="w-20 h-20 bg-black border border-zinc-700/80 rounded-2xl mx-auto mb-4 flex items-center justify-center overflow-hidden shadow-lg shadow-black/60">
+        <img src="https://zeronte-store.github.io/img/logo-zeronte.png" alt="Logo Zeronte" class="w-full h-full object-cover bg-black" onerror="this.onerror=null; this.src='img/logo-zeronte.png';">
+      </div>
       <h1 class="text-xl font-bold text-white mb-1">Zeronte Dashboard</h1>
       <p class="text-xs text-zinc-500 mb-6">Acceso exclusivo de administrador</p>
       <form onsubmit="autenticar(event)" class="space-y-4">
@@ -55,7 +57,7 @@
         <!-- Cabecera Sidebar -->
         <div id="cabeceraSidebar" class="h-16 px-4 border-b border-slate-100 flex items-center justify-between">
           <div class="sidebar-brand-box flex items-center gap-3 overflow-hidden">
-            <span class="w-9 h-9 bg-slate-900 text-white font-black flex items-center justify-center rounded-xl text-sm shadow-xs shrink-0">Z</span>
+            <img src="https://zeronte-store.github.io/img/logo-zeronte.png" alt="Zeronte Logo" class="w-9 h-9 rounded-xl object-contain bg-slate-900 p-1 shadow-xs shrink-0" onerror="this.onerror=null; this.src='img/logo-zeronte.png';">
             <div class="sidebar-text leading-tight whitespace-nowrap">
               <span class="font-bold tracking-widest text-slate-900 text-sm block">ZERONTE</span>
               <span class="text-[9px] text-slate-400 font-medium uppercase tracking-wider block">Panel de Control</span>
@@ -94,6 +96,22 @@
               <i class="fa-solid fa-users text-sm"></i>
             </div>
             <span class="sidebar-text truncate">Clientes</span>
+          </button>
+
+          <!-- BOTÓN ESTADÍSTICAS -->
+          <button onclick="cambiarSeccion('estadisticas', this)" title="Estadísticas" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-chart-column text-sm"></i>
+            </div>
+            <span class="sidebar-text truncate">Estadísticas</span>
+          </button>
+
+          <!-- BOTÓN FINANZAS -->
+          <button onclick="cambiarSeccion('finanzas', this)" title="Finanzas" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-wallet text-sm"></i>
+            </div>
+            <span class="sidebar-text truncate">Finanzas</span>
           </button>
 
           <button onclick="cambiarSeccion('mensajes', this)" title="Mensajes" class="nav-item-btn w-full h-11 flex items-center justify-between px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
@@ -262,12 +280,12 @@
 
                 <!-- Carrusel Desplazable -->
                 <div id="carruselCategorias" class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth pb-1 flex-grow">
-                  <button onclick="setFiltroEstado('todos', this)" data-estado="todos" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-white transition active:scale-95">Todos</button>
-                  <button onclick="setFiltroEstado('pendiente', this)" data-estado="pendiente" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🔴 Pendientes</button>
-                  <button onclick="setFiltroEstado('proceso', this)" data-estado="proceso" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟠 En Proceso</button>
-                  <button onclick="setFiltroEstado('completado', this)" data-estado="completado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🔵 Enviados</button>
-                  <button onclick="setFiltroEstado('pagado', this)" data-estado="pagado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">🟢 Pagados</button>
-                  <button onclick="setFiltroEstado('cancelado', this)" data-estado="cancelado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition active:scale-95">⚪ Cancelados</button>
+                  <button onclick="setFiltroEstado('todos', this)" data-estado="todos" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-xs transition active:scale-95">Todos</button>
+                  <button onclick="setFiltroEstado('pendiente', this)" data-estado="pendiente" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:text-slate-900 transition active:scale-95">🔴 <span>Pendientes</span></button>
+                  <button onclick="setFiltroEstado('proceso', this)" data-estado="proceso" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:text-slate-900 transition active:scale-95">🟠 <span>En Proceso</span></button>
+                  <button onclick="setFiltroEstado('completado', this)" data-estado="completado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:text-slate-900 transition active:scale-95">🔵 <span>Enviados</span></button>
+                  <button onclick="setFiltroEstado('pagado', this)" data-estado="pagado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:text-slate-900 transition active:scale-95">🟢 <span>Pagados</span></button>
+                  <button onclick="setFiltroEstado('cancelado', this)" data-estado="cancelado" class="filtro-btn-estado whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:text-slate-900 transition active:scale-95">⚪ <span>Cancelados</span></button>
                 </div>
 
                 <!-- Flecha Derecha -->
@@ -316,123 +334,156 @@
 
         </div>
 
-        <!-- ================= SECCIÓN 2: CATÁLOGO DE PARTITURAS ================= -->
-        <div id="vistaSeccionCatalogo" class="hidden space-y-6">
-          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
-            <div class="flex items-center justify-between gap-2 mb-5">
-              <div>
-                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <i class="fa-solid fa-music text-slate-500 text-sm"></i> Catálogo Activo
-                </h2>
-                <p class="text-[11px] text-slate-400 mt-0.5">Gestión de productos y partituras disponibles en la tienda.</p>
+        <!-- ================= SECCIÓN 2: CATÁLOGO DE PARTITURAS (ESTILO ETSY) ================= -->
+        <div id="vistaSeccionCatalogo" class="hidden space-y-5">
+          <!-- CABECERA ESTILO ETSY -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Catálogo de Productos</h1>
+                <span id="badgeTotalCatalogo" class="text-xs bg-slate-200/80 text-slate-700 px-2 py-0.5 rounded-full font-bold">0</span>
               </div>
-              <button onclick="document.getElementById('formNuevoProducto').classList.toggle('hidden')" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95">
-                + Añadir Producto
-              </button>
+              <p class="text-xs text-slate-400 mt-0.5">Gestión y rendimiento individualizado de tus artículos publicados en la web de Zeronte</p>
             </div>
 
-            <!-- Formulario Crear Producto -->
-            <form id="formNuevoProducto" onsubmit="guardarProducto(event)" class="hidden bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-2xl mb-5 space-y-3.5">
-              <h3 class="text-xs uppercase tracking-wider font-bold text-slate-700">Nuevo Artículo para la Tienda</h3>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label class="block text-[10px] text-slate-500 mb-1">Título *</label>
-                  <input type="text" id="nuevoTitulo" required placeholder="Ej: Lámina Partitura San Valentín" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+            <div class="flex items-center gap-2">
+              <button onclick="abrirModalProducto()" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs">
+                <i class="fa-solid fa-plus text-xs"></i> Añadir artículo
+              </button>
+            </div>
+          </div>
+
+          <!-- BARRA DE ACCIONES Y BUSCADOR TIPO ETSY -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+            <!-- Buscador estilo Etsy -->
+            <div class="relative flex-grow max-w-md">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+              <input type="text" id="inputBuscadorCatalogo" oninput="filtrarCatalogoEtsy()" placeholder="Busca por título, categoría o ID..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+            </div>
+
+            <!-- CONTROLES DERECHA: BOTONES DE VISTA + FILTROS -->
+            <div class="flex items-center gap-2.5 flex-wrap justify-between lg:justify-end">
+              <!-- Selector de Vista: Cuadrícula vs Lista (Estilo Etsy) -->
+              <div class="inline-flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 shrink-0">
+                <button type="button" id="btnVistaGrid" onclick="cambiarModoVistaCatalogo('grid')" title="Vista en cuadrícula" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-white text-slate-900 shadow-xs transition active:scale-90">
+                  <i class="fa-solid fa-grip text-xs"></i>
+                </button>
+                <button type="button" id="btnVistaList" onclick="cambiarModoVistaCatalogo('list')" title="Vista en lista horizontal" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs text-slate-400 hover:text-slate-700 transition active:scale-90">
+                  <i class="fa-solid fa-bars text-xs"></i>
+                </button>
+              </div>
+
+              <!-- Filtros de categoría y orden -->
+              <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider shrink-0 hidden sm:inline">Filtrar:</span>
+                <select id="filtroCategoriaCatalogo" onchange="filtrarCatalogoEtsy()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 font-semibold focus:outline-none focus:border-slate-400">
+                  <option value="todas">Todas las categorías</option>
+                </select>
+                <select id="ordenCatalogo" onchange="filtrarCatalogoEtsy()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 font-semibold focus:outline-none focus:border-slate-400">
+                  <option value="recientes">Más recientes</option>
+                  <option value="mas_vendidos">Más vendidos</option>
+                  <option value="precio_desc">Mayor precio</option>
+                  <option value="precio_asc">Menor precio</option>
+                  <option value="titulo">Nombre (A-Z)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- REJILLA DE TARJETAS TIPO ANUNCIOS ETSY -->
+          <div id="listaProductosAdmin" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+            <!-- Render dinámico tipo Etsy con foto grande -->
+          </div>
+
+          <div id="sinArticulosCatalogo" class="hidden text-center py-16 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <i class="fa-solid fa-box-open text-slate-300 text-3xl mb-2 block"></i>
+            <p class="text-xs text-slate-500 font-medium">No se encontraron artículos con ese criterio.</p>
+          </div>
+
+          <!-- MODAL FLOTANTE / FORMULARIO: CREAR O EDITAR ARTÍCULO -->
+          <div id="modalProductoEtsy" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-white border border-slate-200 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden my-6 transform transition-all">
+              <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs">
+                    <i id="iconoModalProd" class="fa-solid fa-plus"></i>
+                  </div>
+                  <div>
+                    <h3 id="tituloModalProd" class="text-sm font-bold text-slate-900">Añadir nuevo artículo</h3>
+                    <p class="text-[10px] text-slate-400">Datos y fotografía que se mostrarán en la tienda.</p>
+                  </div>
                 </div>
-                <div>
-                  <label class="block text-[10px] text-slate-500 mb-1">Precio (€) *</label>
-                  <input type="number" step="0.01" id="nuevoPrecio" required placeholder="12.99" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+                <button type="button" onclick="cerrarModalProducto()" class="text-slate-400 hover:text-slate-700 p-2 rounded-xl transition">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <form id="formNuevoProducto" onsubmit="guardarProducto(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+                <input type="hidden" id="prodEditandoId" value="">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div class="sm:col-span-2">
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Título del artículo *</label>
+                    <input type="text" id="nuevoTitulo" required placeholder="Ej: Lámina Partitura San Valentín" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Precio (€) *</label>
+                    <input type="number" step="0.01" id="nuevoPrecio" required placeholder="12.99" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                  </div>
                 </div>
+
                 <div>
-                  <label class="block text-[10px] text-slate-500 mb-1">Categoría *</label>
-                  <select id="nuevaCategoria" onchange="alternarNuevaCategoria(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+                  <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Categoría *</label>
+                  <select id="nuevaCategoria" onchange="alternarNuevaCategoria(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
                     <option value="partitura">Partitura Personalizada</option>
                     <option value="natalicio">Natalicio</option>
                     <option value="posters">Pósters Educativos</option>
                     <option value="__otra__">+ Añadir nueva categoría...</option>
                   </select>
-                  <!-- Campo que aparece al elegir '+ Añadir nueva categoría...' -->
                   <input type="text" id="inputNuevaCategoriaTexto" placeholder="Escribe la nueva categoría" class="hidden mt-2 w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
                 </div>
-              </div>
 
-              <!-- Selector de foto -->
-              <div>
-                <label class="block text-[10px] text-slate-500 mb-1">Foto del producto (PC / Carrete móvil) *</label>
-                <label class="flex items-center justify-between w-full bg-white border border-slate-200 border-dashed hover:border-slate-400 rounded-xl px-3 py-2.5 cursor-pointer transition">
-                  <span id="labelTextoFoto" class="text-xs text-slate-400 truncate">Seleccionar imagen (JPG, PNG, TIF...)...</span>
-                  <i class="fa-solid fa-cloud-arrow-up text-slate-400 text-sm ml-2 shrink-0"></i>
-                  <input type="file" id="inputArchivoFoto" accept="image/*,.tif,.tiff" onchange="procesarFotoArchivo(this)" class="hidden">
-                </label>
-                <input type="hidden" id="nuevaImagen" required>
-              </div>
-
-              <!-- Editor enriquecido para Descripción Amplia -->
-              <div>
-                <label class="block text-[10px] text-slate-500 mb-1">Descripción detallada del producto *</label>
-                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs focus-within:border-slate-400 transition">
-                  
-                  <!-- Barra de herramientas (Negrita, Cursiva, Subrayado, Fuentes, Tamaños) -->
-                  <div class="bg-slate-100/90 border-b border-slate-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs">
-                    <!-- Formato de texto -->
-                    <button type="button" onclick="aplicarFormato('bold')" title="Negrita (Ctrl+B)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95 font-bold">
-                      <i class="fa-solid fa-bold text-xs"></i>
-                    </button>
-                    <button type="button" onclick="aplicarFormato('italic')" title="Cursiva (Ctrl+I)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95 italic">
-                      <i class="fa-solid fa-italic text-xs"></i>
-                    </button>
-                    <button type="button" onclick="aplicarFormato('underline')" title="Subrayado (Ctrl+U)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95 underline">
-                      <i class="fa-solid fa-underline text-xs"></i>
-                    </button>
-
-                    <span class="w-[1px] h-4 bg-slate-300 mx-1"></span>
-
-                    <!-- Selector de Fuentes básicas -->
-                    <select onchange="aplicarFormato('fontName', this.value); this.selectedIndex=0;" class="bg-white border border-slate-200 rounded-lg text-[11px] px-2 py-1 text-slate-700 focus:outline-none">
-                      <option value="" disabled selected>Tipografía</option>
-                      <option value="Montserrat, sans-serif">Montserrat</option>
-                      <option value="Arial, sans-serif">Arial</option>
-                      <option value="'Times New Roman', serif">Times New Roman</option>
-                      <option value="Georgia, serif">Georgia</option>
-                      <option value="'Courier New', monospace">Courier</option>
-                    </select>
-
-                    <!-- Selector de Tamaño de texto -->
-                    <select onchange="aplicarFormato('fontSize', this.value); this.selectedIndex=0;" class="bg-white border border-slate-200 rounded-lg text-[11px] px-2 py-1 text-slate-700 focus:outline-none">
-                      <option value="" disabled selected>Tamaño</option>
-                      <option value="2">Pequeño</option>
-                      <option value="3">Normal</option>
-                      <option value="4">Medio</option>
-                      <option value="5">Grande</option>
-                      <option value="6">Muy Grande</option>
-                    </select>
-
-                    <span class="w-[1px] h-4 bg-slate-300 mx-1"></span>
-
-                    <!-- Listas -->
-                    <button type="button" onclick="aplicarFormato('insertUnorderedList')" title="Lista con viñetas" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95">
-                      <i class="fa-solid fa-list-ul text-xs"></i>
-                    </button>
-                    <button type="button" onclick="aplicarFormato('insertOrderedList')" title="Lista numerada" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition active:scale-95">
-                      <i class="fa-solid fa-list-ol text-xs"></i>
-                    </button>
+                <!-- Selector de foto con previsualización en grande -->
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Fotografía del producto (JPG, PNG, TIFF) *</label>
+                  <div class="flex items-center gap-3">
+                    <div id="previewFotoWrapper" class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
+                      <img id="previewFotoImg" src="" class="w-full h-full object-cover hidden">
+                      <i id="previewFotoPlaceholder" class="fa-regular fa-image text-slate-300 text-xl"></i>
+                    </div>
+                    <label class="flex-grow flex items-center justify-between bg-slate-50 border border-slate-200 border-dashed hover:border-slate-400 rounded-xl px-3.5 py-3 cursor-pointer transition">
+                      <span id="labelTextoFoto" class="text-xs text-slate-400 truncate">Seleccionar o cambiar imagen...</span>
+                      <i class="fa-solid fa-cloud-arrow-up text-slate-400 text-sm ml-2 shrink-0"></i>
+                      <input type="file" id="inputArchivoFoto" accept="image/*,.tif,.tiff" onchange="procesarFotoArchivo(this)" class="hidden">
+                    </label>
                   </div>
-
-                  <!-- Área editable amplia -->
-                  <div id="editorDescripcion" contenteditable="true" class="p-3 min-h-[160px] max-h-[320px] overflow-y-auto text-xs text-slate-800 leading-relaxed focus:outline-none"></div>
+                  <input type="hidden" id="nuevaImagen" required>
                 </div>
 
-                <!-- Input oculto para validación y envío de datos -->
-                <input type="hidden" id="nuevaDesc" required>
-              </div>
-              <button type="submit" id="btnGuardarProd" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Publicar en la Tienda</button>
-            </form>
+                <!-- Editor enriquecido -->
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Descripción detallada *</label>
+                  <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs focus-within:border-slate-400 transition">
+                    <div class="bg-slate-100/90 border-b border-slate-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+                      <button type="button" onclick="aplicarFormato('bold')" title="Negrita" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition font-bold"><i class="fa-solid fa-bold text-xs"></i></button>
+                      <button type="button" onclick="aplicarFormato('italic')" title="Cursiva" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition italic"><i class="fa-solid fa-italic text-xs"></i></button>
+                      <button type="button" onclick="aplicarFormato('underline')" title="Subrayado" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition underline"><i class="fa-solid fa-underline text-xs"></i></button>
+                      <span class="w-[1px] h-4 bg-slate-300 mx-1"></span>
+                      <button type="button" onclick="aplicarFormato('insertUnorderedList')" title="Viñetas" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition"><i class="fa-solid fa-list-ul text-xs"></i></button>
+                      <button type="button" onclick="aplicarFormato('insertOrderedList')" title="Numeración" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition"><i class="fa-solid fa-list-ol text-xs"></i></button>
+                    </div>
+                    <div id="editorDescripcion" contenteditable="true" class="p-3 min-h-[120px] max-h-[220px] overflow-y-auto text-xs text-slate-800 leading-relaxed focus:outline-none"></div>
+                  </div>
+                  <input type="hidden" id="nuevaDesc">
+                </div>
 
-            <!-- Rejilla de Productos -->
-            <div id="listaProductosAdmin" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <!-- Render dinámico -->
+                <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                  <button type="button" onclick="cerrarModalProducto()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
+                  <button type="submit" id="btnGuardarProd" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Guardar artículo</button>
+                </div>
+              </form>
             </div>
-          </section>
+          </div>
         </div>
 
         <!-- ================= SECCIÓN: CLIENTES ================= -->
@@ -463,6 +514,95 @@
 
             <div id="sinClientesEncontrados" class="hidden text-center py-8 text-slate-400 text-xs">
               No se encontraron clientes con ese criterio.
+            </div>
+          </section>
+        </div>
+
+        <!-- ================= SECCIÓN: ESTADÍSTICAS ================= -->
+        <div id="vistaSeccionEstadisticas" class="hidden space-y-6">
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-column text-slate-500 text-sm"></i> Rendimiento de Productos
+                </h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">Ranking de los artículos más vendidos ordenados de mayor a menor.</p>
+              </div>
+              <span id="badgeTotalProductosVendidos" class="self-start sm:self-auto text-xs bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold">
+                0 unidades vendidas
+              </span>
+            </div>
+
+            <!-- Listado Ranking de Productos -->
+            <div id="contenedorRankingProductos" class="space-y-3">
+              <!-- Render dinámico -->
+            </div>
+          </section>
+        </div>
+
+        <!-- ================= SECCIÓN: FINANZAS ================= -->
+        <div id="vistaSeccionFinanzas" class="hidden space-y-6">
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-wallet text-slate-500 text-sm"></i> Libro Diario de Ingresos
+                </h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">Movimientos diarios de facturación con filtros por período y exportación.</p>
+              </div>
+              <button onclick="descargarPdfFinanzas()" class="self-start sm:self-auto inline-flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-600 hover:text-white px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95 shadow-xs">
+                <i class="fa-regular fa-file-pdf text-sm"></i> Descargar Informe PDF
+              </button>
+            </div>
+
+            <!-- Barra de Filtros de Finanzas -->
+            <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl mb-5 space-y-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">Filtrar:</span>
+                <button type="button" onclick="setFiltroFinanzasPeriodo('todo', this)" class="btn-filtro-finanzas px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-white transition active:scale-95">Histórico Completo</button>
+                <button type="button" onclick="setFiltroFinanzasPeriodo('mesActual', this)" class="btn-filtro-finanzas px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:text-slate-900 transition active:scale-95">Este Mes</button>
+                <button type="button" onclick="setFiltroFinanzasPeriodo('mesAnterior', this)" class="btn-filtro-finanzas px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:text-slate-900 transition active:scale-95">Mes Anterior</button>
+                <button type="button" onclick="setFiltroFinanzasPeriodo('anoActual', this)" class="btn-filtro-finanzas px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:text-slate-900 transition active:scale-95">Este Año</button>
+              </div>
+
+              <!-- Filtro por Rango Específico -->
+              <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-200/70 text-xs">
+                <span class="text-slate-500 font-medium">Rango personalizado:</span>
+                <div class="flex items-center gap-1.5">
+                  <label class="text-[10px] text-slate-400 uppercase font-semibold">Desde</label>
+                  <input type="date" id="finanzasFechaDesde" onchange="aplicarFiltroFinanzasPersonalizado()" class="bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:border-slate-400">
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <label class="text-[10px] text-slate-400 uppercase font-semibold">Hasta</label>
+                  <input type="date" id="finanzasFechaHasta" onchange="aplicarFiltroFinanzasPersonalizado()" class="bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:border-slate-400">
+                </div>
+                <button type="button" onclick="limpiarFiltroFechasFinanzas()" class="text-slate-400 hover:text-slate-700 underline text-[11px] ml-1">Restablecer fechas</button>
+              </div>
+            </div>
+
+            <!-- Resumen del Periodo Filtrado -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+              <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Movimientos</span>
+                <span id="finanzasTotalMovimientos" class="text-lg font-bold text-slate-800">0</span>
+              </div>
+              <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl">
+                <span class="text-[10px] uppercase font-bold text-emerald-700 block">Ingresos Cobrados</span>
+                <span id="finanzasTotalCobrado" class="text-lg font-bold text-emerald-700">0.00 €</span>
+              </div>
+              <div class="bg-rose-50 border border-rose-200 p-3.5 rounded-xl">
+                <span class="text-[10px] uppercase font-bold text-rose-700 block">Pendiente de Cobro</span>
+                <span id="finanzasTotalPendiente" class="text-lg font-bold text-rose-700">0.00 €</span>
+              </div>
+            </div>
+
+            <!-- Lista de Movimientos agrupados por Día (Estilo Extracto Bancario) -->
+            <div id="contenedorMovimientosFinanzas" class="space-y-4">
+              <!-- Render dinámico -->
+            </div>
+
+            <div id="sinMovimientosFinanzas" class="hidden text-center py-8 text-slate-400 text-xs">
+              No hay movimientos registrados en el período seleccionado.
             </div>
           </section>
         </div>
@@ -600,6 +740,42 @@
       const hora = new Intl.DateTimeFormat('es-ES', opcionesHora).format(d);
 
       return `${diaSemana}, ${fecha} - ${hora}h`;
+    }
+
+    // Calcula los días transcurridos desde la fecha del pedido hasta hoy (o finalizado si está enviado)
+    function calcularDiasTranscurridosPedido(fechaRaw, estado) {
+      const est = (estado || "").toString().toLowerCase();
+      // Si ya está enviado o completado, se da por finalizado el contador
+      if (est.includes("enviado") || est.includes("completado")) {
+        return `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded-md shrink-0">
+                  <i class="fa-solid fa-check text-[9px]"></i> Finalizado (Enviado)
+                </span>`;
+      }
+
+      if (!fechaRaw) return "";
+      const fechaPed = (typeof parsearFechaPedido === 'function') ? parsearFechaPedido(fechaRaw) : new Date(fechaRaw);
+      if (!fechaPed || isNaN(fechaPed.getTime())) return "";
+
+      const ahora = new Date();
+      // Comparar exclusivamente por días naturales a medianoche
+      const d1 = new Date(fechaPed.getFullYear(), fechaPed.getMonth(), fechaPed.getDate());
+      const d2 = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+      const diffDias = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+
+      if (diffDias <= 0) {
+        return `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md shrink-0">
+                  <i class="fa-regular fa-clock text-[9px]"></i> Hoy
+                </span>`;
+      } else if (diffDias === 1) {
+        return `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md shrink-0">
+                  <i class="fa-regular fa-clock text-[9px]"></i> Hace 1 día
+                </span>`;
+      } else {
+        const colorClase = diffDias >= 4 ? 'text-rose-700 bg-rose-50 border-rose-200/80' : 'text-amber-700 bg-amber-50 border-amber-200/80';
+        return `<span class="inline-flex items-center gap-1 text-[10px] font-bold ${colorClase} px-2 py-0.5 rounded-md shrink-0">
+                  <i class="fa-regular fa-clock text-[9px]"></i> Hace ${diffDias} días
+                </span>`;
+      }
     }
 
     // Formatear teléfono para vista y limpiar para enlace wa.me directo
@@ -890,14 +1066,24 @@
       
       // Resetear estilo de todos los botones de filtro
       document.querySelectorAll('.filtro-btn-estado').forEach(b => {
-        b.classList.remove('bg-slate-900', 'text-white');
-        b.classList.add('bg-slate-100', 'text-slate-600');
+        b.classList.remove('bg-slate-900', '!text-white', 'text-white', 'shadow-xs');
+        b.classList.add('bg-slate-100', 'text-slate-700');
+        const span = b.querySelector('span');
+        if (span) {
+          span.classList.remove('!text-white', 'text-white');
+          span.classList.add('text-slate-700');
+        }
       });
 
-      // Activar el botón pulsado
+      // Activar el botón pulsado con texto blanco 100% visible
       if (btn) {
-        btn.classList.add('bg-slate-900', 'text-white');
-        btn.classList.remove('bg-slate-100', 'text-slate-600');
+        btn.classList.remove('bg-slate-100', 'text-slate-700');
+        btn.classList.add('bg-slate-900', '!text-white', 'shadow-xs');
+        const span = btn.querySelector('span');
+        if (span) {
+          span.classList.remove('text-slate-700');
+          span.classList.add('!text-white');
+        }
       }
 
       // Aplicar el filtro a la tabla
@@ -1254,8 +1440,9 @@
                       </button>
                     </div>
                   </div>
-                  <div>
-                    <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Método de Pago: <strong class="text-slate-700">${p.metodoPago}</strong></span>
+                  <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <span class="text-[10px] uppercase font-bold text-slate-400">Método de Pago: <strong class="text-slate-700">${p.metodoPago || 'Web'}</strong></span>
+                    ${calcularDiasTranscurridosPedido(p.fecha, p.estado)}
                   </div>
                   <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
                     <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold py-1.5 rounded-xl text-xs transition active:scale-95 shadow-xs">
@@ -1394,6 +1581,10 @@
 
             <!-- DESPLEGABLE MÓVIL AL PULSAR -->
             <div id="${detalleId}" class="hidden p-3 bg-white/80 border-t border-slate-200/80 space-y-3" onclick="event.stopPropagation()">
+              <div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                <span class="text-[10px] uppercase font-bold text-slate-400">Método: <strong class="text-slate-700">${p.metodoPago || 'Web'}</strong></span>
+                ${calcularDiasTranscurridosPedido(p.fecha, p.estado)}
+              </div>
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                 <div class="flex items-center gap-1.5">
                   <span class="text-slate-600 font-medium">${telInfo.visible}</span>
@@ -1468,27 +1659,8 @@
       }).join('');
     }
 
-    function renderizarProductos() {
-      const cont = document.getElementById('listaProductosAdmin');
-      cont.innerHTML = listaProductosGlobal.map((prod, idx) => {
-        const idProd = prod.id || `prod-${idx + 1}`;
-        return `
-          <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl flex items-center gap-3 shadow-xs">
-            <img src="${prod.imagen}" class="w-12 h-12 rounded-xl object-cover bg-black" onerror="this.src='img/logo-zeronte.png'">
-            <div class="flex-grow min-w-0">
-              <div class="flex items-center gap-1.5">
-                <span class="bg-zinc-800 text-gold border border-gold/30 font-mono text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider">${idProd}</span>
-                <h4 class="text-xs font-bold text-white truncate">${prod.titulo}</h4>
-              </div>
-              <span class="text-xs font-bold text-gold mt-0.5 block">${prod.precio} €</span>
-              <span class="text-[9px] text-zinc-500 uppercase block">${prod.categoria}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-async function cambiarEstado(fila, nuevoEstado) {
+    // ==================== FUNCIONES DE ESTADO Y PEDIDOS ====================
+    async function cambiarEstado(fila, nuevoEstado) {
       const item = listaPedidosGlobal.find(p => p.fila === fila);
       if (item) item.estado = nuevoEstado;
       actualizarMetricas();
@@ -1497,7 +1669,7 @@ async function cambiarEstado(fila, nuevoEstado) {
       try {
         await fetch(APPS_SCRIPT_URL, {
           method: "POST",
-          mode: "no-cors", // <--- Imprescindible para evitar el bloqueo CORS / Failed to fetch
+          mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ 
             accion: "actualizarEstadoPedido", 
@@ -1518,7 +1690,6 @@ async function cambiarEstado(fila, nuevoEstado) {
       }
     }
 
-    // Confirmación mediante clave "Eliminar pedido" y borrado directo de la BD sin rebote visual
     async function confirmarEliminarPedido(fila, orderId) {
       const claveSeguridad = prompt(`⚠️ ATENCIÓN: Estás a punto de eliminar el pedido ${orderId} de forma permanente.\n\nEscribe "Eliminar pedido" para confirmar:`);
       
@@ -1529,22 +1700,17 @@ async function cambiarEstado(fila, nuevoEstado) {
         return;
       }
 
-      // 1. Registrar en el escudo protector para que jamás vuelva a pintarse
       idsEliminadosLocalmente.add(orderId);
-
-      // 2. Eliminarlo inmediatamente de la vista en pantalla y actualizar contadores
       listaPedidosGlobal = listaPedidosGlobal.filter(p => p.id !== orderId);
       localStorage.removeItem(`nota_pedido_${orderId}`);
       actualizarMetricas();
       filtrarPedidos();
 
-      // Si la sección de clientes está abierta, actualizarla también
       const vistaClientes = document.getElementById('vistaSeccionClientes');
       if (vistaClientes && !vistaClientes.classList.contains('hidden')) {
         renderizarClientes();
       }
 
-      // 3. Enviar orden de eliminación definitiva a Google Apps Script
       try {
         await fetch(APPS_SCRIPT_URL, {
           method: "POST",
@@ -1561,7 +1727,6 @@ async function cambiarEstado(fila, nuevoEstado) {
       }
     }
 
-    // Alternar campo de texto libre si selecciona "+ Añadir nueva categoría..."
     function alternarNuevaCategoria(val) {
       const inputOtra = document.getElementById('inputNuevaCategoriaTexto');
       if (!inputOtra) return;
@@ -1576,65 +1741,389 @@ async function cambiarEstado(fila, nuevoEstado) {
       }
     }
 
-    // Lee la foto desde PC o carrete de iPhone/iPad y la pasa a Base64
-    function procesarFotoArchivo(input) {
-      const file = input.files && input.files[0];
-      const label = document.getElementById('labelTextoFoto');
-      const hiddenInput = document.getElementById('nuevaImagen');
-      if (!file) return;
-
-      label.innerText = file.name;
-      label.classList.remove('text-slate-400');
-      label.classList.add('text-slate-800', 'font-medium');
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        hiddenInput.value = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // Aplica negrita, cursiva, subrayado, fuente o tamaño en el editor enriquecido
     function aplicarFormato(comando, valor = null) {
       document.execCommand(comando, false, valor);
       const editor = document.getElementById('editorDescripcion');
       if (editor) editor.focus();
     }
 
+    // ==================== GESTOR CATÁLOGO (ESTILO ETSY) ====================
+    let productosCatalogoFiltrados = [];
+    let modoVistaCatalogo = 'grid'; // 'grid' o 'list'
+
+    function cambiarModoVistaCatalogo(modo) {
+      modoVistaCatalogo = modo;
+      const btnGrid = document.getElementById('btnVistaGrid');
+      const btnList = document.getElementById('btnVistaList');
+
+      if (modo === 'grid') {
+        btnGrid.className = 'w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-white text-slate-900 shadow-xs transition active:scale-90';
+        btnList.className = 'w-8 h-8 rounded-lg flex items-center justify-center text-xs text-slate-400 hover:text-slate-700 transition active:scale-90';
+      } else {
+        btnList.className = 'w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-white text-slate-900 shadow-xs transition active:scale-90';
+        btnGrid.className = 'w-8 h-8 rounded-lg flex items-center justify-center text-xs text-slate-400 hover:text-slate-700 transition active:scale-90';
+      }
+
+      pintarTarjetasEtsy(productosCatalogoFiltrados);
+    }
+
+    function pintarTarjetasEtsy(articulos) {
+      const cont = document.getElementById('listaProductosAdmin');
+      const sinArt = document.getElementById('sinArticulosCatalogo');
+      const badge = document.getElementById('badgeTotalCatalogo');
+      if (!cont) return;
+
+      if (badge) badge.innerText = `${listaProductosGlobal.length} artículos`;
+
+      if (articulos.length === 0) {
+        cont.innerHTML = '';
+        sinArt.classList.remove('hidden');
+        return;
+      }
+      sinArt.classList.add('hidden');
+
+      // 1. MODO VISTA CUADRÍCULA (GRID)
+      if (modoVistaCatalogo === 'grid') {
+        cont.className = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4";
+        
+        cont.innerHTML = articulos.map(item => {
+          const idProd = item.idCalculado;
+          const precioFormateado = item.precioNum.toFixed(2) + ' €';
+
+          return `
+            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-slate-300 transition group flex flex-col justify-between">
+              <div>
+                <!-- FOTO LIMPIA SIN ELEMENTOS SUPERPUESTOS -->
+                <div class="relative w-full aspect-square bg-slate-100 overflow-hidden">
+                  <img src="${item.imagen}" alt="${item.titulo}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/logo-zeronte.png';">
+                </div>
+
+                <!-- CUERPO DE LA TARJETA -->
+                <div class="p-3">
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <span class="text-[9px] uppercase font-bold tracking-wider text-slate-400 truncate">${item.categoria || 'Sin categoría'}</span>
+                  </div>
+
+                  <h3 class="text-xs font-bold text-slate-900 line-clamp-2 leading-tight group-hover:text-blue-600 transition" title="${item.titulo}">
+                    ${item.titulo}
+                  </h3>
+
+                  <!-- PRECIO CON EL ID DE PRODUCTO AL LADO -->
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-sm font-extrabold text-slate-900">${precioFormateado}</span>
+                    <span class="bg-slate-100 text-slate-700 border border-slate-200 font-mono text-[9px] font-bold px-1.5 py-0.5 rounded shadow-2xs">
+                      ${idProd}
+                    </span>
+                  </div>
+
+                  <!-- HISTÓRICO DE VENTAS DEL ANUNCIO -->
+                  <div class="mt-3 pt-2.5 border-t border-slate-100">
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Histórico de ventas</span>
+                    <div class="flex items-center justify-between text-[11px]">
+                      <span class="text-slate-600 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-bag-shopping text-[10px] text-slate-400"></i> ${item.unidadesVendidas} ${item.unidadesVendidas === 1 ? 'venta' : 'ventas'}
+                      </span>
+                      <span class="font-bold ${item.ingresosTotales > 0 ? 'text-emerald-600' : 'text-slate-400'}">
+                        ${item.ingresosTotales.toFixed(2)} €
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BOTONES INFERIORES: EDITAR Y ELIMINAR -->
+              <div class="p-2.5 pt-0 bg-white flex items-center gap-1.5">
+                <button type="button" onclick="abrirModalProducto('${idProd}')" class="flex-grow bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95">
+                  <i class="fa-solid fa-gear text-[10px] text-slate-400"></i> Editar artículo
+                </button>
+                <button type="button" onclick="confirmarEliminarProducto('${idProd}', '${(item.titulo || '').replace(/'/g, "\\'")}')" title="Eliminar artículo del catálogo" class="shrink-0 w-8 h-8 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 rounded-xl flex items-center justify-center transition active:scale-90">
+                  <i class="fa-solid fa-trash text-xs"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } else {
+        // 2. MODO VISTA LISTA HORIZONTAL (FILAS TIPO ETSY)
+        cont.className = "space-y-3";
+
+        cont.innerHTML = articulos.map(item => {
+          const idProd = item.idCalculado;
+          const precioFormateado = item.precioNum.toFixed(2) + ' €';
+
+          return `
+            <div class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 shadow-xs hover:shadow-md hover:border-slate-300 transition flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3.5 group">
+              <!-- Lado Izquierdo: Foto + Info básica -->
+              <div class="flex items-center gap-3.5 min-w-0 flex-grow">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200/80">
+                  <img src="${item.imagen}" alt="${item.titulo}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/logo-zeronte.png';">
+                </div>
+                <div class="min-w-0 flex-grow">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="bg-slate-100 text-slate-700 border border-slate-200 font-mono text-[9px] font-bold px-1.5 py-0.5 rounded">
+                      ${idProd}
+                    </span>
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 truncate">
+                      ${item.categoria || 'Sin categoría'}
+                    </span>
+                  </div>
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate" title="${item.titulo}">
+                    ${item.titulo}
+                  </h3>
+                  <span class="text-sm font-extrabold text-slate-900 block mt-1">
+                    ${precioFormateado}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Lado Derecho: Rendimiento + Acciones -->
+              <div class="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                <div class="text-left sm:text-right">
+                  <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Histórico</span>
+                  <div class="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 mt-0.5">
+                    <span class="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                      <i class="fa-solid fa-bag-shopping text-[10px] text-slate-400"></i> ${item.unidadesVendidas} ${item.unidadesVendidas === 1 ? 'venta' : 'ventas'}
+                    </span>
+                    <span class="text-xs font-bold ${item.ingresosTotales > 0 ? 'text-emerald-600' : 'text-slate-400'}">
+                      ${item.ingresosTotales.toFixed(2)} €
+                    </span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="abrirModalProducto('${idProd}')" class="bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-2xs">
+                    <i class="fa-solid fa-gear text-[10px] text-slate-400"></i> Editar
+                  </button>
+                  <button type="button" onclick="confirmarEliminarProducto('${idProd}', '${(item.titulo || '').replace(/'/g, "\\'")}')" title="Eliminar artículo" class="w-8 h-8 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 rounded-xl flex items-center justify-center transition active:scale-90 shadow-2xs">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // ==================== FUNCIONES AUXILIARES CATÁLOGO ETSY ====================
+    function abrirModalProducto(prodId = null) {
+      const modal = document.getElementById('modalProductoEtsy');
+      const form = document.getElementById('formNuevoProducto');
+      const tituloModal = document.getElementById('tituloModalProd');
+      const iconoModal = document.getElementById('iconoModalProd');
+      const btn = document.getElementById('btnGuardarProd');
+      const inputEditando = document.getElementById('prodEditandoId');
+      const previewImg = document.getElementById('previewFotoImg');
+      const previewPlaceholder = document.getElementById('previewFotoPlaceholder');
+      const labelFoto = document.getElementById('labelTextoFoto');
+
+      if (!modal || !form) return;
+
+      form.reset();
+      const editorDesc = document.getElementById('editorDescripcion');
+      if (editorDesc) editorDesc.innerHTML = '';
+      alternarNuevaCategoria('');
+
+      if (prodId) {
+        const prod = listaProductosGlobal.find(p => (p.id || '') === prodId);
+        if (prod) {
+          if (inputEditando) inputEditando.value = prod.id;
+          if (tituloModal) tituloModal.innerText = `Editar artículo (${prod.id})`;
+          if (iconoModal) iconoModal.className = 'fa-solid fa-pen text-xs';
+          if (btn) btn.innerText = 'Actualizar artículo';
+
+          const inputTit = document.getElementById('nuevoTitulo');
+          const inputPre = document.getElementById('nuevoPrecio');
+          if (inputTit) inputTit.value = prod.titulo || '';
+          if (inputPre) inputPre.value = (prod.precio || '').toString().replace('€', '').trim();
+
+          const catSelect = document.getElementById('nuevaCategoria');
+          if (catSelect) {
+            const existeOpcion = Array.from(catSelect.options).some(o => o.value === prod.categoria);
+            if (existeOpcion) {
+              catSelect.value = prod.categoria;
+            } else {
+              catSelect.value = '__otra__';
+              alternarNuevaCategoria('__otra__');
+              const inputOtra = document.getElementById('inputNuevaCategoriaTexto');
+              if (inputOtra) inputOtra.value = prod.categoria || '';
+            }
+          }
+
+          const inputImg = document.getElementById('nuevaImagen');
+          if (inputImg) inputImg.value = prod.imagen || '';
+
+          if (prod.imagen) {
+            if (previewImg) {
+              previewImg.src = prod.imagen;
+              previewImg.classList.remove('hidden');
+            }
+            if (previewPlaceholder) previewPlaceholder.classList.add('hidden');
+            if (labelFoto) labelFoto.innerText = 'Conservar imagen actual o elegir otra';
+          }
+
+          if (editorDesc) editorDesc.innerHTML = prod.descripcion || '';
+        }
+      } else {
+        if (inputEditando) inputEditando.value = '';
+        if (tituloModal) tituloModal.innerText = 'Añadir nuevo artículo';
+        if (iconoModal) iconoModal.className = 'fa-solid fa-plus text-xs';
+        if (btn) btn.innerText = 'Publicar en la Tienda';
+        if (previewImg) {
+          previewImg.src = '';
+          previewImg.classList.add('hidden');
+        }
+        if (previewPlaceholder) previewPlaceholder.classList.remove('hidden');
+        if (labelFoto) labelFoto.innerText = 'Seleccionar imagen (JPG, PNG, TIF...)...';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function cerrarModalProducto() {
+      const modal = document.getElementById('modalProductoEtsy');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function poblarCategoriasCatalogo() {
+      const select = document.getElementById('filtroCategoriaCatalogo');
+      if (!select) return;
+      const valorSeleccionado = select.value || 'todas';
+      const categorias = new Set();
+      listaProductosGlobal.forEach(p => {
+        if (p.categoria) categorias.add(p.categoria.trim());
+      });
+
+      let html = '<option value="todas">Todas las categorías</option>';
+      categorias.forEach(cat => {
+        html += `<option value="${cat}">${cat.charAt(0).toUpperCase() + cat.slice(1)}</option>`;
+      });
+      select.innerHTML = html;
+      select.value = valorSeleccionado;
+    }
+
+    function filtrarCatalogoEtsy() {
+      const busqueda = (document.getElementById('inputBuscadorCatalogo')?.value || '').toLowerCase().trim();
+      const categoriaFiltro = document.getElementById('filtroCategoriaCatalogo')?.value || 'todas';
+      const orden = document.getElementById('ordenCatalogo')?.value || 'recientes';
+
+      const statsPorProducto = {};
+      listaPedidosGlobal.forEach(p => {
+        const est = (p.estado || '').toLowerCase();
+        if (est.includes('cancelado')) return;
+        const titulo = (p.producto || '').trim();
+        const precio = parseFloat((p.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
+        if (!statsPorProducto[titulo]) {
+          statsPorProducto[titulo] = { unidades: 0, total: 0 };
+        }
+        statsPorProducto[titulo].unidades += 1;
+        statsPorProducto[titulo].total += precio;
+      });
+
+      let prods = listaProductosGlobal.map((prod, idx) => {
+        const stats = statsPorProducto[(prod.titulo || '').trim()] || { unidades: 0, total: 0 };
+        const precioNum = parseFloat((prod.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
+        return {
+          ...prod,
+          idCalculado: prod.id || `prod-${idx + 1}`,
+          unidadesVendidas: stats.unidades,
+          ingresosTotales: stats.total,
+          precioNum: precioNum,
+          indiceOriginal: idx
+        };
+      });
+
+      prods = prods.filter(prod => {
+        const coincideCat = categoriaFiltro === 'todas' || (prod.categoria || '').toLowerCase() === categoriaFiltro.toLowerCase();
+        const textoCompleto = `${prod.titulo || ''} ${prod.idCalculado || ''} ${prod.categoria || ''}`.toLowerCase();
+        const coincideTexto = !busqueda || textoCompleto.includes(busqueda);
+        return coincideCat && coincideTexto;
+      });
+
+      if (orden === 'recientes') prods.sort((a, b) => b.indiceOriginal - a.indiceOriginal);
+      if (orden === 'mas_vendidos') prods.sort((a, b) => b.unidadesVendidas - a.unidadesVendidas || b.ingresosTotales - a.ingresosTotales);
+      if (orden === 'precio_desc') prods.sort((a, b) => b.precioNum - a.precioNum);
+      if (orden === 'precio_asc') prods.sort((a, b) => a.precioNum - b.precioNum);
+      if (orden === 'titulo') prods.sort((a, b) => (a.titulo || '').localeCompare(b.titulo || ''));
+
+      productosCatalogoFiltrados = prods;
+      pintarTarjetasEtsy(prods);
+    }
+
+    function renderizarProductos() {
+      poblarCategoriasCatalogo();
+      filtrarCatalogoEtsy();
+    }
+
     async function guardarProducto(e) {
       e.preventDefault();
       const btn = document.getElementById('btnGuardarProd');
+      const textoOriginal = btn.innerText;
       btn.innerText = "Guardando...";
 
+      const idEditando = document.getElementById('prodEditandoId').value;
+      const categoriaVal = document.getElementById('nuevaCategoria').value === '__otra__' 
+        ? document.getElementById('inputNuevaCategoriaTexto').value.trim() 
+        : document.getElementById('nuevaCategoria').value;
+
       const nuevo = {
-        accion: "crearProducto",
+        accion: idEditando ? "editarProducto" : "crearProducto",
         clave: tokenClave,
+        id: idEditando || undefined,
         titulo: document.getElementById('nuevoTitulo').value,
         precio: document.getElementById('nuevoPrecio').value,
-        categoria: document.getElementById('nuevaCategoria').value === '__otra__' ? document.getElementById('inputNuevaCategoriaTexto').value.trim() : document.getElementById('nuevaCategoria').value,
+        categoria: categoriaVal,
         imagen: document.getElementById('nuevaImagen').value,
         descripcion: document.getElementById('editorDescripcion').innerHTML.trim()
       };
 
       if (!nuevo.descripcion || nuevo.descripcion === '<br>') {
         alert("Por favor, ingresa una descripción para el producto.");
-        document.getElementById('editorDescripcion').innerHTML = '';
-      document.getElementById('labelTextoFoto').innerText = 'Seleccionar imagen (JPG, PNG, TIF...)...';
-      document.getElementById('labelTextoFoto').className = 'text-xs text-slate-400 truncate';
-        btn.innerText = "Publicar en la Tienda";
+        btn.innerText = textoOriginal;
         return;
       }
 
-      await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(nuevo)
-      });
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(nuevo)
+        });
 
-      document.getElementById('formNuevoProducto').reset();
-      document.getElementById('formNuevoProducto').classList.add('hidden');
-      btn.innerText = "Publicar en la Tienda";
-      cargarDatos();
+        cerrarModalProducto();
+        cargarDatos();
+      } catch (err) {
+        console.error(err);
+        alert("Error al guardar el producto.");
+      } finally {
+        btn.innerText = textoOriginal;
+      }
+    }
+
+    async function confirmarEliminarProducto(prodId, tituloProd) {
+      if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente el artículo "${tituloProd}" (${prodId}) del catálogo?`)) {
+        return;
+      }
+
+      // Eliminar de la vista inmediatamente
+      listaProductosGlobal = listaProductosGlobal.filter(p => (p.id || '') !== prodId);
+      renderizarProductos();
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "eliminarProducto",
+            clave: tokenClave,
+            id: prodId
+          })
+        });
+      } catch (e) {
+        console.error("Error al sincronizar eliminación del producto:", e);
+      }
     }
 
     // Variable global para clientes
@@ -1960,6 +2449,8 @@ async function cambiarEstado(fila, nuevoEstado) {
       document.getElementById('vistaSeccionDashboard').classList.add('hidden');
       document.getElementById('vistaSeccionCatalogo').classList.add('hidden');
       document.getElementById('vistaSeccionClientes').classList.add('hidden');
+      document.getElementById('vistaSeccionEstadisticas').classList.add('hidden');
+      document.getElementById('vistaSeccionFinanzas').classList.add('hidden');
       document.getElementById('vistaSeccionMensajes').classList.add('hidden');
 
       document.querySelectorAll('.nav-item-btn').forEach(b => {
@@ -1974,6 +2465,12 @@ async function cambiarEstado(fila, nuevoEstado) {
       } else if (seccion === 'clientes') {
         document.getElementById('vistaSeccionClientes').classList.remove('hidden');
         renderizarClientes();
+      } else if (seccion === 'estadisticas') {
+        document.getElementById('vistaSeccionEstadisticas').classList.remove('hidden');
+        renderizarEstadisticas();
+      } else if (seccion === 'finanzas') {
+        document.getElementById('vistaSeccionFinanzas').classList.remove('hidden');
+        renderizarFinanzas();
       } else if (seccion === 'mensajes') {
         document.getElementById('vistaSeccionMensajes').classList.remove('hidden');
       }
@@ -2036,6 +2533,429 @@ async function cambiarEstado(fila, nuevoEstado) {
         });
         if (icono) icono.className = 'fa-solid fa-angles-right text-xs';
       }
+    }
+
+    // ==================== SECCIÓN: ESTADÍSTICAS ====================
+    function renderizarEstadisticas() {
+      const contenedor = document.getElementById('contenedorRankingProductos');
+      const badgeTotal = document.getElementById('badgeTotalProductosVendidos');
+      if (!contenedor) return;
+
+      const mapaProductos = {};
+      let totalUnidades = 0;
+      let totalVentasGlobal = 0;
+
+      listaPedidosGlobal.forEach(p => {
+        const est = (p.estado || "").toLowerCase();
+        if (est.includes("cancelado")) return;
+
+        const titulo = (p.producto || "Sin especificar").trim();
+        const precio = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+
+        if (!mapaProductos[titulo]) {
+          mapaProductos[titulo] = {
+            titulo: titulo,
+            unidades: 0,
+            ingresos: 0
+          };
+        }
+
+        mapaProductos[titulo].unidades += 1;
+        mapaProductos[titulo].ingresos += precio;
+        totalUnidades += 1;
+        totalVentasGlobal += precio;
+      });
+
+      const ranking = Object.values(mapaProductos).sort((a, b) => b.unidades - a.unidades || b.ingresos - a.ingresos);
+
+      if (badgeTotal) {
+        badgeTotal.innerText = `${totalUnidades} ${totalUnidades === 1 ? 'unidad vendida' : 'unidades vendidas'}`;
+      }
+
+      if (ranking.length === 0) {
+        contenedor.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">No hay datos suficientes de ventas para mostrar estadísticas.</div>';
+        return;
+      }
+
+      const obtenerFoto = (nombre) => {
+        const prod = listaProductosGlobal.find(pr => 
+          (pr.titulo && pr.titulo.toLowerCase().trim() === nombre.toLowerCase().trim()) ||
+          nombre.toLowerCase().includes((pr.titulo || "").toLowerCase()) ||
+          (pr.titulo || "").toLowerCase().includes(nombre.toLowerCase())
+        );
+        return (prod && prod.imagen) ? prod.imagen : "";
+      };
+
+      const obtenerId = (nombre) => {
+        return (typeof obtenerIdProducto === 'function') ? obtenerIdProducto(nombre) : "PROD";
+      };
+
+      contenedor.innerHTML = ranking.map((item, idx) => {
+        const porcentaje = totalUnidades > 0 ? ((item.unidades / totalUnidades) * 100).toFixed(1) : 0;
+        const foto = obtenerFoto(item.titulo);
+        const idProd = obtenerId(item.titulo);
+        const medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+
+        return `
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 transition hover:border-slate-300">
+            <div class="flex items-center justify-between gap-3 mb-2.5">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-center shrink-0 shadow-2xs">
+                  ${medalla}
+                </span>
+                <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
+                  ${foto ? `
+                    <img src="${foto}" alt="${item.titulo}" class="w-full h-full object-cover">
+                  ` : `
+                    <span class="text-white font-bold text-xs brand-font">Z</span>
+                  `}
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider shadow-2xs shrink-0">${idProd}</span>
+                    <h3 class="font-bold text-slate-900 text-xs sm:text-sm truncate">${item.titulo}</h3>
+                  </div>
+                  <span class="text-[10px] text-slate-400 block mt-0.5">${item.unidades} ${item.unidades === 1 ? 'pedido realizado' : 'pedidos realizados'} (${porcentaje}% del total)</span>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block">Recaudado</span>
+                <span class="text-sm sm:text-base font-bold text-slate-900">${item.ingresos.toFixed(2)} €</span>
+              </div>
+            </div>
+
+            <!-- Barra de progreso visual -->
+            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+              <div class="bg-slate-900 h-2 rounded-full transition-all duration-500" style="width: ${porcentaje}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==================== SECCIÓN: FINANZAS ====================
+    let filtroFinanzasModo = 'todo';
+    let movimientosFinanzasFiltrados = [];
+
+    function setFiltroFinanzasPeriodo(modo, btn) {
+      filtroFinanzasModo = modo;
+      document.getElementById('finanzasFechaDesde').value = '';
+      document.getElementById('finanzasFechaHasta').value = '';
+
+      document.querySelectorAll('.btn-filtro-finanzas').forEach(b => {
+        b.classList.remove('bg-slate-900', 'text-white');
+        b.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+      });
+
+      if (btn) {
+        btn.classList.add('bg-slate-900', 'text-white');
+        btn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+      }
+
+      renderizarFinanzas();
+    }
+
+    function aplicarFiltroFinanzasPersonalizado() {
+      filtroFinanzasModo = 'rango';
+      document.querySelectorAll('.btn-filtro-finanzas').forEach(b => {
+        b.classList.remove('bg-slate-900', 'text-white');
+        b.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+      });
+      renderizarFinanzas();
+    }
+
+    function limpiarFiltroFechasFinanzas() {
+      document.getElementById('finanzasFechaDesde').value = '';
+      document.getElementById('finanzasFechaHasta').value = '';
+      const btnTodo = document.querySelector('.btn-filtro-finanzas');
+      setFiltroFinanzasPeriodo('todo', btnTodo);
+    }
+
+    function parsearFechaPedido(fechaRaw) {
+      if (!fechaRaw) return null;
+      const d = new Date(fechaRaw);
+      if (!isNaN(d.getTime())) return d;
+
+      // Fallback si viene en formato DD/MM/YYYY
+      const partes = fechaRaw.toString().split(/[\/\-]/);
+      if (partes.length === 3) {
+        const d2 = new Date(partes[2], partes[1] - 1, partes[0]);
+        if (!isNaN(d2.getTime())) return d2;
+      }
+      return null;
+    }
+
+    function renderizarFinanzas() {
+      const contenedor = document.getElementById('contenedorMovimientosFinanzas');
+      const sinMov = document.getElementById('sinMovimientosFinanzas');
+      if (!contenedor) return;
+
+      const ahora = new Date();
+      const añoActual = ahora.getFullYear();
+      const mesActual = ahora.getMonth();
+
+      const fDesdeVal = document.getElementById('finanzasFechaDesde').value;
+      const fHastaVal = document.getElementById('finanzasFechaHasta').value;
+      const fDesde = fDesdeVal ? new Date(fDesdeVal + "T00:00:00") : null;
+      const fHasta = fHastaVal ? new Date(fHastaVal + "T23:59:59") : null;
+
+      movimientosFinanzasFiltrados = listaPedidosGlobal.filter(p => {
+        const est = (p.estado || "").toLowerCase();
+        if (est.includes("cancelado")) return false;
+
+        const f = parsearFechaPedido(p.fecha);
+        if (!f) return true;
+
+        if (filtroFinanzasModo === 'mesActual') {
+          return f.getFullYear() === añoActual && f.getMonth() === mesActual;
+        } else if (filtroFinanzasModo === 'mesAnterior') {
+          const añoComp = mesActual === 0 ? añoActual - 1 : añoActual;
+          const mesComp = mesActual === 0 ? 11 : mesActual - 1;
+          return f.getFullYear() === añoComp && f.getMonth() === mesComp;
+        } else if (filtroFinanzasModo === 'anoActual') {
+          return f.getFullYear() === añoActual;
+        } else if (filtroFinanzasModo === 'rango') {
+          if (fDesde && f < fDesde) return false;
+          if (fHasta && f > fHasta) return false;
+          return true;
+        }
+        return true;
+      });
+
+      // Calcular totales del periodo
+      let cobrado = 0;
+      let pendiente = 0;
+
+      movimientosFinanzasFiltrados.forEach(p => {
+        const num = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        const est = (p.estado || "").toLowerCase();
+        const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
+
+        if (esPagado) {
+          cobrado += num;
+        } else {
+          pendiente += num;
+        }
+      });
+
+      document.getElementById('finanzasTotalMovimientos').innerText = movimientosFinanzasFiltrados.length;
+      document.getElementById('finanzasTotalCobrado').innerText = cobrado.toFixed(2) + " €";
+      document.getElementById('finanzasTotalPendiente').innerText = pendiente.toFixed(2) + " €";
+
+      if (movimientosFinanzasFiltrados.length === 0) {
+        contenedor.innerHTML = "";
+        sinMov.classList.remove('hidden');
+        return;
+      }
+      sinMov.classList.add('hidden');
+
+      // Agrupar movimientos por Día (estilo extracto bancario)
+      const gruposPorDia = {};
+      movimientosFinanzasFiltrados.forEach(p => {
+        const f = parsearFechaPedido(p.fecha) || new Date();
+        const claveDia = f.toLocaleDateString("es-ES", { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'Europe/Madrid' });
+        
+        if (!gruposPorDia[claveDia]) {
+          gruposPorDia[claveDia] = {
+            fechaObj: f,
+            clave: claveDia,
+            pedidos: [],
+            totalDia: 0
+          };
+        }
+        gruposPorDia[claveDia].pedidos.push(p);
+        const precio = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        gruposPorDia[claveDia].totalDia += precio;
+      });
+
+      // Ordenar días del más reciente al más antiguo
+      const diasOrdenados = Object.values(gruposPorDia).sort((a, b) => b.fechaObj - a.fechaObj);
+
+      contenedor.innerHTML = diasOrdenados.map(grupo => {
+        const opcionesDiaSemana = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' };
+        let textoDia = new Intl.DateTimeFormat('es-ES', opcionesDiaSemana).format(grupo.fechaObj);
+        textoDia = textoDia.charAt(0).toUpperCase() + textoDia.slice(1);
+
+        const filasMovimientos = grupo.pedidos.map(p => {
+          const precioNum = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+          const precioForm = precioNum.toFixed(2) + " €";
+          const est = (p.estado || "").toLowerCase();
+          const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
+          const hora = parsearFechaPedido(p.fecha) ? new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Madrid' }).format(parsearFechaPedido(p.fecha)) + 'h' : '--:--';
+
+          return `
+            <div class="flex items-center justify-between py-2.5 px-3 hover:bg-slate-50 transition border-b border-slate-100 last:border-b-0 text-xs">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${esPagado ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}">
+                  <i class="fa-solid ${esPagado ? 'fa-arrow-down' : 'fa-clock'} text-xs"></i>
+                </span>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 leading-tight">
+                    <span class="font-bold text-slate-900 truncate">${p.nombre}</span>
+                    <span class="font-mono text-[10px] text-slate-400">(${p.id})</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 block truncate mt-0.5">${p.producto} · ${p.metodoPago || 'Pago'} · ${hora}</span>
+                </div>
+              </div>
+              <div class="text-right shrink-0 ml-2">
+                <span class="font-bold text-sm block ${esPagado ? 'text-emerald-600' : 'text-slate-800'}">+${precioForm}</span>
+                <span class="text-[9px] font-semibold uppercase ${esPagado ? 'text-emerald-500' : 'text-amber-500'}">${esPagado ? 'Ingresado' : 'Pendiente'}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+            <div class="bg-slate-50 border-b border-slate-200 px-4 py-2.5 flex items-center justify-between">
+              <span class="font-bold text-slate-800 text-xs flex items-center gap-2">
+                <i class="fa-regular fa-calendar text-slate-400"></i> ${textoDia}
+              </span>
+              <span class="text-xs font-bold text-slate-900">Total día: ${grupo.totalDia.toFixed(2)} €</span>
+            </div>
+            <div class="divide-y divide-slate-100">
+              ${filasMovimientos}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==================== GENERADOR PDF DE FINANZAS ====================
+    function descargarPdfFinanzas() {
+      if (!movimientosFinanzasFiltrados || movimientosFinanzasFiltrados.length === 0) {
+        alert("No hay movimientos en el período seleccionado para exportar.");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+
+      const hoyString = new Date().toLocaleDateString("es-ES", { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      let cobrado = 0;
+      let pendiente = 0;
+      movimientosFinanzasFiltrados.forEach(p => {
+        const num = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        const est = (p.estado || "").toLowerCase();
+        const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
+        if (esPagado) cobrado += num; else pendiente += num;
+      });
+
+      // Cabecera
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(15, 23, 42);
+      doc.text("ZERONTE", 14, 18);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text("INFORME DE FINANZAS & MOVIMIENTOS BANCARIOS", 14, 23);
+
+      doc.setFontSize(8);
+      doc.text(`Fecha de emisión: ${hoyString}`, 196, 18, { align: "right" });
+
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(14, 27, 196, 27);
+
+      // Tarjeta Resumen
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(14, 32, 182, 26, 3, 3, "F");
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(14, 32, 182, 26, 3, 3, "S");
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text("TOTAL MOVIMIENTOS", 24, 40);
+      doc.text("INGRESOS COBRADOS", 84, 40);
+      doc.text("PENDIENTE DE COBRO", 144, 40);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`${movimientosFinanzasFiltrados.length}`, 24, 50);
+
+      doc.setTextColor(5, 150, 105);
+      doc.text(`${cobrado.toFixed(2)} €`, 84, 50);
+
+      doc.setTextColor(225, 29, 72);
+      doc.text(`${pendiente.toFixed(2)} €`, 144, 50);
+
+      // Tabla de Movimientos
+      const filasTabla = movimientosFinanzasFiltrados.map(p => {
+        // Fecha ultra compacta: DD/MM/AA (ej: 28/10/26)
+        let fechaCorta = "---";
+        const fObj = parsearFechaPedido(p.fecha);
+        if (fObj) {
+          const dia = String(fObj.getDate()).padStart(2, '0');
+          const mes = String(fObj.getMonth() + 1).padStart(2, '0');
+          const anioCorto = String(fObj.getFullYear()).slice(-2);
+          fechaCorta = `${dia}/${mes}/${anioCorto}`;
+        }
+
+        const precioForm = (parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0).toFixed(2) + " €";
+        const est = (p.estado || "").toLowerCase();
+        const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
+
+        return [
+          fechaCorta,
+          p.id,
+          p.nombre,
+          p.producto,
+          p.metodoPago || "Web",
+          esPagado ? "Ingresado" : "Pendiente",
+          precioForm
+        ];
+      });
+
+      doc.autoTable({
+        startY: 65,
+        head: [["Fecha", "ID", "Cliente", "Concepto / Producto", "Método", "Estado", "Importe"]],
+        body: filasTabla,
+        theme: "plain",
+        styles: {
+          font: "helvetica",
+          fontSize: 7.5,
+          textColor: [30, 41, 59],
+          cellPadding: 2.8,
+          valign: "middle"
+        },
+        headStyles: {
+          fillColor: [241, 245, 249],
+          textColor: [71, 85, 105],
+          fontStyle: "bold",
+          fontSize: 7.5
+        },
+        columnStyles: {
+          0: { cellWidth: 16, halign: "center", textColor: [100, 116, 139] },
+          1: { cellWidth: 25, font: "courier", fontStyle: "bold", overflow: "visible" },
+          2: { cellWidth: 32, fontStyle: "bold", overflow: "ellipsize" },
+          3: { cellWidth: 51, overflow: "ellipsize" },
+          4: { cellWidth: 17, overflow: "ellipsize" },
+          5: { cellWidth: 21, halign: "center", fontSize: 7, fontStyle: "bold", overflow: "visible" },
+          6: { cellWidth: 20, halign: "right", fontStyle: "bold", overflow: "visible" }
+        },
+        alternateRowStyles: {
+          fillColor: [250, 250, 250]
+        },
+        didDrawPage: () => {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.setTextColor(148, 163, 184);
+          doc.setDrawColor(226, 232, 240);
+          doc.line(14, 283, 196, 283);
+          doc.text("Zeronte · Extracto Oficial de Finanzas · Documento vectorial", 105, 288, { align: "center" });
+        }
+      });
+
+      doc.save(`Zeronte - Informe Finanzas (${hoyString.replace(/\//g, '-')}).pdf`);
     }
   </script>
 </body>
