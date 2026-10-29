@@ -500,34 +500,86 @@ async function cargarCatalogoDinamico() {
   try {
     const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos`);
     const data = await res.json();
-    if (data.status === "success" && data.productos.length > 0) {
+    if (data.status === "success" && data.productos && data.productos.length > 0) {
       const contenedor = document.querySelector("#catalogo > div");
-      contenedor.innerHTML = data.productos.map(p => `
-        <div class="producto-card ${p.categoria} bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
-          <div>
-            <div class="h-56 bg-zinc-950 relative">
-              <img src="${p.imagen}" alt="${p.titulo}" class="w-full h-full object-cover">
+
+      const limpiarNum = (val) => {
+        if (val === undefined || val === null || val === '') return NaN;
+        return parseFloat(val.toString().replace('€', '').trim().replace(',', '.'));
+      };
+
+      const obtenerFotoPortada = (imgRaw) => {
+        if (!imgRaw) return 'img/logo-zeronte.png';
+        try {
+          const parsed = JSON.parse(imgRaw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+        } catch (e) {}
+        return imgRaw;
+      };
+
+      contenedor.innerHTML = data.productos.map(p => {
+        const pNormal = limpiarNum(p.precio) || 0;
+        const pOfertaRaw = p.precioOferta !== undefined ? p.precioOferta : (p.oferta !== undefined ? p.oferta : p.precio_oferta);
+        const pOferta = limpiarNum(pOfertaRaw);
+
+        const tieneOferta = !isNaN(pOferta) && pOferta > 0 && pOferta < pNormal;
+        const precioCobro = tieneOferta ? pOferta : pNormal;
+        const fotoPortada = obtenerFotoPortada(p.imagen);
+
+        let bloquePrecioHtml = '';
+        if (tieneOferta) {
+          const porcentaje = Math.round(((pNormal - pOferta) / pNormal) * 100);
+          bloquePrecioHtml = `
+            <div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-[10px] text-zinc-400 line-through">${pNormal.toFixed(2)} €</span>
+                <span class="text-xl sm:text-2xl font-bold text-white brand-font">${pOferta.toFixed(2)} €</span>
+                <span class="text-[9px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                  -${porcentaje}%
+                </span>
+              </div>
             </div>
-            <div class="p-4 sm:p-5">
-              <span class="text-[10px] uppercase tracking-wider text-gold font-semibold">${p.categoria}</span>
-              <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">${p.titulo}</h3>
-              <p class="text-xs text-zinc-400 mt-2 leading-relaxed">${p.descripcion}</p>
-            </div>
-          </div>
-          <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
+          `;
+        } else {
+          bloquePrecioHtml = `
             <div>
               <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF</span>
-              <span class="text-xl sm:text-2xl font-bold text-white brand-font">${p.precio.toFixed(2)} €</span>
+              <span class="text-xl sm:text-2xl font-bold text-white brand-font">${pNormal.toFixed(2)} €</span>
             </div>
-            <button onclick="abrirModal('${p.titulo}', ${p.precio})" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
-              Pedir
-            </button>
+          `;
+        }
+
+        const tituloEscapado = (p.titulo || '').replace(/'/g, "\\'");
+
+        return `
+          <div class="producto-card ${p.categoria} bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
+            <div>
+              <div class="h-56 bg-zinc-950 relative overflow-hidden">
+                <img src="${fotoPortada}" alt="${p.titulo}" class="w-full h-full object-cover">
+                ${tieneOferta ? `
+                  <span class="absolute top-3 left-3 bg-emerald-500 text-black text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-md shadow">
+                    Oferta
+                  </span>
+                ` : ''}
+              </div>
+              <div class="p-4 sm:p-5">
+                <span class="text-[10px] uppercase tracking-wider text-gold font-semibold">${p.categoria || 'Partitura'}</span>
+                <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">${p.titulo}</h3>
+                <div class="text-xs text-zinc-400 mt-2 leading-relaxed">${p.descripcion || ''}</div>
+              </div>
+            </div>
+            <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
+              ${bloquePrecioHtml}
+              <button onclick="abrirModal('${tituloEscapado}', ${precioCobro})" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
+                Pedir
+              </button>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
   } catch (e) {
-    console.log("Usando productos predeterminados en caché.");
+    console.log("Usando productos predeterminados en caché.", e);
   }
 }
   </script>
