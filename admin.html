@@ -1488,7 +1488,7 @@
       }).join('');
     }
 
-    async function cambiarEstado(fila, nuevoEstado) {
+async function cambiarEstado(fila, nuevoEstado) {
       const item = listaPedidosGlobal.find(p => p.fila === fila);
       if (item) item.estado = nuevoEstado;
       actualizarMetricas();
@@ -1497,8 +1497,21 @@
       try {
         await fetch(APPS_SCRIPT_URL, {
           method: "POST",
+          mode: "no-cors", // <--- Imprescindible para evitar el bloqueo CORS / Failed to fetch
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ accion: "actualizarEstadoPedido", clave: tokenClave, fila: fila, nuevoEstado: nuevoEstado })
+          body: JSON.stringify({ 
+            accion: "actualizarEstadoPedido", 
+            clave: tokenClave, 
+            fila: fila, 
+            nuevoEstado: nuevoEstado,
+            pedido: item ? {
+              id: item.id,
+              nombre: item.nombre,
+              email: item.email,
+              producto: item.producto,
+              precio: item.precio
+            } : null
+          })
         });
       } catch (e) {
         console.error("Error al actualizar estado:", e);
