@@ -421,14 +421,18 @@
               <form id="formNuevoProducto" onsubmit="guardarProducto(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
                 <input type="hidden" id="prodEditandoId" value="">
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div class="sm:col-span-2">
                     <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Título del artículo *</label>
                     <input type="text" id="nuevoTitulo" required placeholder="Ej: Lámina Partitura San Valentín" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
                   </div>
                   <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Precio (€) *</label>
-                    <input type="number" step="0.01" id="nuevoPrecio" required placeholder="12.99" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Precio Habitual (€) *</label>
+                    <input type="number" step="0.01" id="nuevoPrecio" required placeholder="18.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] uppercase font-bold text-emerald-600 mb-1">Precio Oferta (€) <span class="text-slate-400 font-normal lowercase"></span></label>
+                    <input type="number" step="0.01" id="nuevoPrecioOferta" placeholder="Ej: 12.99" class="w-full bg-emerald-50/50 border border-emerald-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition">
                   </div>
                 </div>
 
@@ -2014,6 +2018,8 @@
           const inputPre = document.getElementById('nuevoPrecio');
           if (inputTit) inputTit.value = prod.titulo || '';
           if (inputPre) inputPre.value = (prod.precio || '').toString().replace('€', '').trim();
+          const inputPreOferta = document.getElementById('nuevoPrecioOferta');
+          if (inputPreOferta) inputPreOferta.value = (prod.precioOferta || prod.oferta || '').toString().replace('€', '').trim();
 
           const catSelect = document.getElementById('nuevaCategoria');
           if (catSelect) {
@@ -2059,6 +2065,9 @@
         if (tituloModal) tituloModal.innerText = 'Añadir nuevo artículo';
         if (iconoModal) iconoModal.className = 'fa-solid fa-plus text-xs';
         if (btn) btn.innerText = 'Publicar en la Tienda';
+
+        const inputPreOferta = document.getElementById('nuevoPrecioOferta');
+        if (inputPreOferta) inputPreOferta.value = '';
       }
 
       modal.classList.remove('hidden');
@@ -2149,12 +2158,48 @@
       }
       sinArt.classList.add('hidden');
 
+      // Función auxiliar para generar el bloque de precio / oferta uniforme con soporte de coma y punto
+      const obtenerBloquePrecio = (item) => {
+        const limpiarNum = (val) => {
+          if (val === undefined || val === null || val === '') return NaN;
+          return parseFloat(val.toString().replace('€', '').trim().replace(',', '.'));
+        };
+
+        const precioOriginalNum = limpiarNum(item.precio) || item.precioNum || 0;
+        const precioOfertaRaw = item.precioOferta !== undefined ? item.precioOferta : (item.oferta !== undefined ? item.oferta : item.precio_oferta);
+        const precioOfertaNum = limpiarNum(precioOfertaRaw);
+
+        const tieneOfertaValida = !isNaN(precioOfertaNum) && precioOfertaNum > 0 && precioOfertaNum < precioOriginalNum;
+
+        if (tieneOfertaValida) {
+          const porcentajeDesc = Math.round(((precioOriginalNum - precioOfertaNum) / precioOriginalNum) * 100);
+          return `
+            <div class="mt-2 space-y-0.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-xs font-bold text-slate-700">Ahora</span>
+                <span class="text-sm font-extrabold text-slate-900">${precioOfertaNum.toFixed(2)} €</span>
+                <span class="text-xs text-slate-400 line-through">${precioOriginalNum.toFixed(2)} €</span>
+                <span class="inline-flex items-center text-[10px] font-extrabold text-emerald-700 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-md">
+                  -${porcentajeDesc}%
+                </span>
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="mt-2">
+              <span class="text-sm font-extrabold text-slate-900">${precioOriginalNum.toFixed(2)} €</span>
+            </div>
+          `;
+        }
+      };
+
       if (modoVistaCatalogo === 'grid') {
         cont.className = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4";
         
         cont.innerHTML = articulos.map(item => {
           const idProd = item.idCalculado;
-          const precioFormateado = item.precioNum.toFixed(2) + ' €';
+          const bloquePrecioHtml = obtenerBloquePrecio(item);
           const fotosArray = extraerFotosProducto(item.imagen);
           const fotoPortada = fotosArray[0] || 'https://zeronte-store.github.io/img/logo-zeronte.png';
 
@@ -2175,9 +2220,9 @@
                     ${item.titulo}
                   </h3>
 
-                  <div class="flex items-center gap-2 mt-2">
-                    <span class="text-sm font-extrabold text-slate-900">${precioFormateado}</span>
-                    <span class="bg-slate-100 text-slate-700 border border-slate-200 font-mono text-[9px] font-bold px-1.5 py-0.5 rounded shadow-2xs">
+                  <div class="flex items-center justify-between gap-2">
+                    ${bloquePrecioHtml}
+                    <span class="bg-slate-100 text-slate-700 border border-slate-200 font-mono text-[9px] font-bold px-1.5 py-0.5 rounded shadow-2xs shrink-0 self-end mb-1">
                       ${idProd}
                     </span>
                   </div>
@@ -2213,7 +2258,7 @@
 
         cont.innerHTML = articulos.map(item => {
           const idProd = item.idCalculado;
-          const precioFormateado = item.precioNum.toFixed(2) + ' €';
+          const bloquePrecioHtml = obtenerBloquePrecio(item);
           const fotosArray = extraerFotosProducto(item.imagen);
           const fotoPortada = fotosArray[0] || 'https://zeronte-store.github.io/img/logo-zeronte.png';
 
@@ -2236,9 +2281,7 @@
                   <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate" title="${item.titulo}">
                     ${item.titulo}
                   </h3>
-                  <span class="text-sm font-extrabold text-slate-900 block mt-1">
-                    ${precioFormateado}
-                  </span>
+                  ${bloquePrecioHtml}
                 </div>
               </div>
 
@@ -2276,57 +2319,103 @@
     }
 
     async function guardarProducto(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnGuardarProd');
-      const textoOriginal = btn.innerText;
+  if (e) e.preventDefault();
+  const btn = document.getElementById('btnGuardarProd');
+  const textoOriginal = btn ? btn.innerText : "Guardar artículo";
 
-      const fotosValidas = arrayFotosEtsy.filter(Boolean);
-      if (fotosValidas.length === 0) {
-        alert("Por favor, sube al menos una fotografía principal para el artículo.");
-        return;
-      }
+  const fotosValidas = arrayFotosEtsy.filter(Boolean);
+  if (fotosValidas.length === 0) {
+    alert("Por favor, sube al menos una fotografía principal para el artículo.");
+    return;
+  }
 
-      btn.innerText = "Guardando...";
+  const idEditando = (document.getElementById('prodEditandoId')?.value || '').trim();
+  const categoriaVal = document.getElementById('nuevaCategoria').value === '__otra__' 
+    ? document.getElementById('inputNuevaCategoriaTexto').value.trim() 
+    : document.getElementById('nuevaCategoria').value;
 
-      const idEditando = document.getElementById('prodEditandoId').value;
-      const categoriaVal = document.getElementById('nuevaCategoria').value === '__otra__' 
-        ? document.getElementById('inputNuevaCategoriaTexto').value.trim() 
-        : document.getElementById('nuevaCategoria').value;
+  const descVal = document.getElementById('editorDescripcion').innerHTML.trim();
+  if (!descVal || descVal === '<br>') {
+    alert("Por favor, ingresa una descripción para el producto.");
+    return;
+  }
 
-      const nuevo = {
-        accion: idEditando ? "editarProducto" : "crearProducto",
-        clave: tokenClave,
-        id: idEditando || undefined,
-        titulo: document.getElementById('nuevoTitulo').value,
-        precio: document.getElementById('nuevoPrecio').value,
-        categoria: categoriaVal,
-        imagen: JSON.stringify(fotosValidas),
-        video: (document.getElementById('nuevoVideoUrl')?.value || '').trim(),
-        descripcion: document.getElementById('editorDescripcion').innerHTML.trim()
-      };
+  // Sanitizar precios para admitir tanto puntos como comas decimales (ej. 1,99 -> 1.99)
+  const rawPrecio = document.getElementById('nuevoPrecio')?.value || '';
+  const rawOferta = document.getElementById('nuevoPrecioOferta')?.value || '';
 
-      if (!nuevo.descripcion || nuevo.descripcion === '<br>') {
-        alert("Por favor, ingresa una descripción para el producto.");
-        btn.innerText = textoOriginal;
-        return;
-      }
+  const precioLimpio = rawPrecio.toString().replace('€', '').trim().replace(',', '.');
+  const ofertaLimpia = rawOferta.toString().replace('€', '').trim().replace(',', '.');
 
-      try {
-        await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(nuevo)
-        });
+  const tituloVal = (document.getElementById('nuevoTitulo')?.value || '').trim();
+  const videoVal = (document.getElementById('nuevoVideoUrl')?.value || '').trim();
 
-        cerrarModalProducto();
-        cargarDatos();
-      } catch (err) {
-        console.error(err);
-        alert("Error al guardar el producto.");
-      } finally {
-        btn.innerText = textoOriginal;
-      }
+  // Obtener la fila real de la memoria para garantizar la ubicación en Sheets
+  let filaReal = "";
+  if (idEditando) {
+    const pEncontrado = listaProductosGlobal.find(p => (p.id || '').toLowerCase() === idEditando.toLowerCase());
+    if (pEncontrado && pEncontrado.fila) {
+      filaReal = pEncontrado.fila;
     }
+  }
+
+  if (btn) {
+    btn.innerText = "Guardando en Sheets...";
+    btn.disabled = true;
+  }
+
+  const datosEnvio = {
+    accion: idEditando ? "editarProducto" : "crearProducto",
+    clave: tokenClave || "zeronte2026",
+    id: idEditando,
+    fila: filaReal,
+    titulo: tituloVal,
+    precio: precioLimpio,
+    precioOferta: ofertaLimpia,
+    categoria: categoriaVal,
+    imagen: JSON.stringify(fotosValidas),
+    video: videoVal,
+    descripcion: descVal
+  };
+
+  // Actualización reactiva local en memoria
+  if (idEditando) {
+    const prodMemoria = listaProductosGlobal.find(p => (p.id || '').toLowerCase() === idEditando.toLowerCase());
+    if (prodMemoria) {
+      prodMemoria.titulo = tituloVal;
+      prodMemoria.precio = parseFloat(precioLimpio) || 0;
+      prodMemoria.precioOferta = ofertaLimpia;
+      prodMemoria.categoria = categoriaVal;
+      prodMemoria.imagen = JSON.stringify(fotosValidas);
+      prodMemoria.video = videoVal;
+      prodMemoria.descripcion = descVal;
+    }
+  }
+
+  renderizarProductos();
+  cerrarModalProducto();
+
+  // Envío mediante POST directo
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(datosEnvio)
+    });
+
+    setTimeout(async () => {
+      await cargarDatos(true);
+    }, 1500);
+
+  } catch (err) {
+    console.log("Error o envío completado:", err);
+  } finally {
+    if (btn) {
+      btn.innerText = textoOriginal;
+      btn.disabled = false;
+    }
+  }
+}
 
     async function confirmarEliminarProducto(prodId, tituloProd) {
       if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente el artículo "${tituloProd}" (${prodId}) del catálogo?`)) {
