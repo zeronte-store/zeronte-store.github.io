@@ -504,6 +504,7 @@
     let filtroEstadoActual = "todos";
     let paginaActualPedidos = 1;
     const pedidosPorPagina = 10;
+    const idsEliminadosLocalmente = new Set();
 
     function autenticar(e) {
       e.preventDefault();
@@ -549,7 +550,8 @@
         const datosCambiaron = JSON.stringify(listaPedidosGlobal) !== JSON.stringify(data.pedidos || []) ||
                                JSON.stringify(listaProductosGlobal) !== JSON.stringify(data.productos || []);
 
-        listaPedidosGlobal = data.pedidos || [];
+        const pedidosServidor = data.pedidos || [];
+        listaPedidosGlobal = pedidosServidor.filter(p => !idsEliminadosLocalmente.has(p.id));
         listaProductosGlobal = data.productos || [];
 
         if (datosCambiaron || !esSilencioso) {
@@ -1239,13 +1241,18 @@
                 <div class="space-y-3 bg-white border border-slate-200/90 p-3 rounded-xl shadow-2xs">
                   <div>
                     <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Cambiar Estado</label>
-                    <select onchange="cambiarEstado(${p.fila}, this.value)" class="w-full bg-slate-50 border border-slate-300 text-xs rounded-xl px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-slate-500 font-medium">
-                      <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
-                      <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
-                      <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🔵 Enviado</option>
-                      <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🟢 Pagado</option>
-                      <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
-                    </select>
+                    <div class="flex items-center gap-2">
+                      <select onchange="cambiarEstado(${p.fila}, this.value)" class="w-full bg-slate-50 border border-slate-300 text-xs rounded-xl px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-slate-500 font-medium">
+                        <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
+                        <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
+                        <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🔵 Enviado</option>
+                        <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🟢 Pagado</option>
+                        <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
+                      </select>
+                      <button type="button" onclick="confirmarEliminarPedido(${p.fila}, '${p.id}')" title="Eliminar pedido definitivamente" class="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 transition active:scale-90 shadow-2xs">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Método de Pago: <strong class="text-slate-700">${p.metodoPago}</strong></span>
@@ -1443,14 +1450,17 @@
                   <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
                 </select>
                 <button type="button" onclick="confirmarLlamadaCliente('${telInfo.visible}', '${telInfo.waNumber}')" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Llamar al cliente">
-                  <i class="fa-solid fa-phone text-xs"></i>
+                  <i class="fa-solid fa-phone text-sm"></i>
                 </button>
                 <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="WhatsApp">
                   <i class="fa-brands fa-whatsapp text-sm"></i>
                 </a>
                 <a href="${mailtoUrl}" class="bg-slate-800 hover:bg-slate-900 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Email">
-                  <i class="fa-regular fa-envelope text-xs"></i>
+                  <i class="fa-regular fa-envelope text-sm"></i>
                 </a>
+                <button type="button" onclick="confirmarEliminarPedido(${p.fila}, '${p.id}')" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Eliminar Pedido">
+                  <i class="fa-solid fa-trash text-sm"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -1492,6 +1502,49 @@
         });
       } catch (e) {
         console.error("Error al actualizar estado:", e);
+      }
+    }
+
+    // Confirmación mediante clave "Eliminar pedido" y borrado directo de la BD sin rebote visual
+    async function confirmarEliminarPedido(fila, orderId) {
+      const claveSeguridad = prompt(`⚠️ ATENCIÓN: Estás a punto de eliminar el pedido ${orderId} de forma permanente.\n\nEscribe "Eliminar pedido" para confirmar:`);
+      
+      if (claveSeguridad === null) return;
+      
+      if (claveSeguridad.trim() !== "Eliminar pedido") {
+        alert("❌ Clave incorrecta. La eliminación ha sido cancelada.");
+        return;
+      }
+
+      // 1. Registrar en el escudo protector para que jamás vuelva a pintarse
+      idsEliminadosLocalmente.add(orderId);
+
+      // 2. Eliminarlo inmediatamente de la vista en pantalla y actualizar contadores
+      listaPedidosGlobal = listaPedidosGlobal.filter(p => p.id !== orderId);
+      localStorage.removeItem(`nota_pedido_${orderId}`);
+      actualizarMetricas();
+      filtrarPedidos();
+
+      // Si la sección de clientes está abierta, actualizarla también
+      const vistaClientes = document.getElementById('vistaSeccionClientes');
+      if (vistaClientes && !vistaClientes.classList.contains('hidden')) {
+        renderizarClientes();
+      }
+
+      // 3. Enviar orden de eliminación definitiva a Google Apps Script
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "eliminarPedido",
+            clave: tokenClave,
+            id: orderId
+          })
+        });
+      } catch (e) {
+        console.error("Error al sincronizar eliminación con la base de datos:", e);
       }
     }
 
