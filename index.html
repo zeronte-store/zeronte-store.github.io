@@ -29,211 +29,238 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[#0c0c0e] text-zinc-100 antialiased min-h-screen pb-20 sm:pb-0 selection:bg-[#d4af37] selection:text-black">
+<body class="bg-[#f5f5f1] text-[#222222] antialiased min-h-screen pb-20 sm:pb-0 selection:bg-[#222222] selection:text-white">
 
-  <!-- ==================== HEADER (Estilo App Móvil) ==================== -->
-  <header class="bg-black/90 backdrop-blur-md border-b border-zinc-800 sticky top-0 z-40 px-4 py-3">
-    <div class="max-w-6xl mx-auto flex items-center justify-between">
-      
-      <!-- Logo Zeronte con imagen -->
-      <a href="#" class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl overflow-hidden bg-black border border-zinc-700 flex items-center justify-center shadow-lg">
-          <img src="img/logo-zeronte.png" alt="Zeronte" class="w-full h-full object-cover" 
-               onerror="this.style.display='none'; document.getElementById('logoFallback').classList.remove('hidden');">
-          <span id="logoFallback" class="hidden text-white font-black text-xl brand-font">Z</span>
-        </div>
-        <div>
-          <span class="text-lg sm:text-xl font-bold tracking-widest brand-font block leading-none text-white">ZERONTE</span>
-          <span class="text-[9px] tracking-[0.25em] text-zinc-400 uppercase font-light">Custom Music</span>
-        </div>
-      </a>
-
-      <!-- Botón WhatsApp Directo en Cabecera -->
-      <a href="https://wa.me/34641851073" target="_blank" class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black px-3.5 py-2 rounded-xl text-xs font-semibold transition active:scale-95">
-        <i class="fa-brands fa-whatsapp text-sm"></i>
-        <span class="hidden sm:inline">Hablar por WhatsApp</span>
-      </a>
-    </div>
-  </header>
-
-  <!-- ==================== BANNER ESTACIONAL ==================== -->
-  <section class="w-full bg-black border-b border-zinc-800 overflow-hidden">
-    <div class="max-w-6xl mx-auto">
-      <div class="relative w-full aspect-[21/9] sm:aspect-[32/9] max-h-[260px] overflow-hidden bg-zinc-950 flex items-center justify-center">
-        <img id="bannerTienda" 
-             src="img/banner-zeronte.png" 
-             alt="Zeronte Soundtrack" 
-             class="w-full h-full object-cover object-center"
-             onerror="this.style.display='none'; document.getElementById('bannerFallback').classList.remove('hidden');">
-
-        <!-- Fallback si no está la imagen aún -->
-        <div id="bannerFallback" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-gradient-to-r from-black via-zinc-900 to-black">
-          <p class="text-[10px] tracking-[0.3em] uppercase text-gold font-bold mb-1">We are your soundtrack</p>
-          <h2 class="text-2xl sm:text-4xl font-bold brand-font text-white">ZERONTE</h2>
-        </div>
+  <!-- ==================== BANNER Y CABECERA DE TIENDA ETSY ==================== -->
+  <section class="max-w-6xl mx-auto px-4 pt-4 sm:pt-6">
+    <!-- Portada / Banner -->
+    <div class="w-full h-36 sm:h-56 rounded-2xl overflow-hidden bg-gradient-to-r from-zinc-900 to-black relative shadow-sm border border-gray-200">
+      <img src="img/banner-zeronte.png" alt="Zeronte Banner" class="w-full h-full object-cover object-center" onerror="this.style.display='none'; document.getElementById('etsyBannerFallback').classList.remove('hidden');">
+      <div id="etsyBannerFallback" class="hidden absolute inset-0 flex flex-col justify-center px-8 text-white">
+        <h2 class="text-xl sm:text-3xl font-serif font-bold">Escribimos música para tus momentos más especiales</h2>
+        <p class="text-xs sm:text-sm text-zinc-300 mt-1">Custom melody for every memory</p>
       </div>
     </div>
-  </section>
 
-  <!-- ==================== HERO APP / INTRO ==================== -->
-  <section class="py-6 px-4 bg-[#111113] border-b border-zinc-900">
-    <div class="max-w-xl mx-auto text-center">
-      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800/80 border border-zinc-700 text-[10px] uppercase font-semibold text-gold mb-3">
-        <i class="fa-solid fa-certificate"></i> +1.000 partituras creadas
-      </span>
-      <h1 class="text-xl sm:text-2xl font-bold text-white brand-font leading-snug">
-        Convierte nombres o fechas en <span class="gold-gradient">música real</span>
-      </h1>
-      <p class="text-xs text-zinc-400 mt-2">
-        Archivos PDF listos para imprimir + Melodía original en audio MP3 + Código QR reproducible.
-      </p>
+    <!-- Perfil de la tienda: Nombre, ventas, buscador y botón de contacto juntos -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-gray-300">
+      
+      <!-- Lado izquierdo: Avatar + Nombre + Estrellas + Ventas -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-white shadow-md overflow-hidden bg-black flex-shrink-0 -mt-6 sm:-mt-8 z-10">
+          <img src="img/logo-zeronte.png" alt="Zeronte" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-white font-bold text-xl bg-[#222]\'>Z</div>'">
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold text-[#222222] font-serif leading-tight">Zeronte</h1>
+          <p class="text-xs text-gray-500">Sevilla, España</p>
+          <div class="flex flex-wrap items-center gap-2 mt-1 text-xs">
+            <span class="flex items-center text-amber-500">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </span>
+            <button onclick="cambiarPestana('resenas')" class="text-gray-700 font-semibold hover:underline" id="labelResenasHeader">(192)</button>
+            <span class="text-gray-400">|</span>
+            <span class="text-gray-700 font-bold" id="totalVentasEtsy">1.092 ventas</span>
+            <span class="text-gray-400">|</span>
+            <span class="text-gray-500">En tienda desde 2023</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lado derecho: Buscador de tienda + Botón Contacto -->
+      <div class="flex items-center gap-2.5 w-full md:w-auto">
+        <div class="relative flex-1 md:w-64">
+          <input type="text" id="buscadorTienda" oninput="buscarProductos(this.value)" placeholder="Buscar en la tienda..." class="w-full bg-white border border-gray-300 rounded-full py-2 pl-3.5 pr-9 text-xs text-gray-800 focus:outline-none focus:border-gray-600 transition shadow-sm">
+          <span class="absolute right-3 top-2.5 text-gray-400 text-xs pointer-events-none">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+        </div>
+        <a href="https://wa.me/34641851073" target="_blank" class="flex-shrink-0 flex items-center gap-1.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 px-3.5 py-2 rounded-full text-xs font-semibold shadow-sm transition active:scale-95">
+          <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
+          <span>Contacto</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ==================== PESTAÑAS DE NAVEGACIÓN ESTILO ETSY ==================== -->
+    <div class="flex items-center gap-6 sm:gap-8 border-b border-gray-300 mt-2 text-xs sm:text-sm font-medium overflow-x-auto no-scrollbar">
+      <button onclick="cambiarPestana('articulos')" id="tab-articulos" class="pestana-btn py-3 border-b-2 border-black font-bold text-black transition whitespace-nowrap">
+        Artículos
+      </button>
+      <button onclick="cambiarPestana('resenas')" id="tab-resenas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
+        Reseñas <span id="conteoPestanaResenas" class="text-xs bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-full font-bold ml-0.5">192</span>
+      </button>
+      <button onclick="cambiarPestana('informacion')" id="tab-informacion" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
+        Información básica
+      </button>
+      <button onclick="cambiarPestana('politicas')" id="tab-politicas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
+        Políticas de la tienda
+      </button>
     </div>
   </section>
 
-  <!-- ==================== FILTROS CATEGORÍAS (Desplazables en móvil) ==================== -->
-  <div class="sticky top-[61px] z-30 bg-[#0c0c0e]/95 backdrop-blur-md border-b border-zinc-800/80 py-3 px-4">
-    <div class="max-w-6xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar">
-      <button onclick="filtrar('todos', this)" class="filtro-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold border border-gold bg-gold text-black transition active:scale-95">Todos</button>
-      <button onclick="filtrar('partitura', this)" class="filtro-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 transition active:scale-95">Partituras</button>
-      <button onclick="filtrar('natalicio', this)" class="filtro-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 transition active:scale-95">Natalicio</button>
-      <button onclick="filtrar('posters', this)" class="filtro-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 transition active:scale-95">Pósters</button>
+  <!-- ==================== SECCIÓN 1: ARTÍCULOS (SIDEBAR + CATÁLOGO) ==================== -->
+  <div id="vistaArticulos" class="pestana-contenido max-w-6xl mx-auto px-4 py-6">
+    <div class="flex flex-col lg:flex-row gap-8 items-start">
+      
+      <!-- Sidebar de Secciones -->
+      <aside class="w-full lg:w-56 flex-shrink-0">
+        <h3 class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-3 hidden lg:block">Secciones</h3>
+        <ul id="listaCategorias" class="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs sm:text-sm font-medium">
+          <li>
+            <button onclick="filtrarCategoria('todos', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg bg-gray-200/80 text-black font-semibold transition text-left whitespace-nowrap">
+              <span>Todos los artículos</span>
+              <span id="conteo-todos" class="text-xs text-gray-500 ml-2">0</span>
+            </button>
+          </li>
+          <li>
+            <button onclick="filtrarCategoria('partitura', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap">
+              <span>Partituras personalizadas</span>
+              <span id="conteo-partitura" class="text-xs text-gray-500 ml-2">0</span>
+            </button>
+          </li>
+          <li>
+            <button onclick="filtrarCategoria('natalicio', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap">
+              <span>Natalicios</span>
+              <span id="conteo-natalicio" class="text-xs text-gray-500 ml-2">0</span>
+            </button>
+          </li>
+          <li>
+            <button onclick="filtrarCategoria('posters', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap">
+              <span>Pósters y Láminas</span>
+              <span id="conteo-posters" class="text-xs text-gray-500 ml-2">0</span>
+            </button>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Rejilla de Productos con Descuentos -->
+      <main class="flex-1 w-full" id="catalogo">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base sm:text-lg font-bold text-[#222222]" id="tituloSeccionActual">Todos los artículos</h2>
+          <span class="text-xs text-gray-500 font-medium" id="contadorResultados">Cargando artículos...</span>
+        </div>
+        <div id="gridProductos" class="grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-4">
+          <!-- Renderizado dinámico vía JavaScript -->
+        </div>
+      </main>
+
     </div>
   </div>
 
-  <!-- ==================== CATÁLOGO DE PRODUCTOS ==================== -->
-  <main id="catalogo" class="max-w-6xl mx-auto px-4 py-6 sm:py-10">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
-
-      <!-- Item 1: Top Ventas -->
-      <div class="producto-card partitura bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
+  <!-- ==================== SECCIÓN 2: RESEÑAS ==================== -->
+  <div id="vistaResenas" class="pestana-contenido hidden max-w-6xl mx-auto px-4 py-6">
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-7 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-gray-200 gap-4">
         <div>
-          <div class="h-56 bg-zinc-950 relative">
-            <img src="https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=700&q=80" alt="Mi nombre en música" class="w-full h-full object-cover">
-            <span class="absolute top-3 right-3 bg-black/85 backdrop-blur-md border border-gold text-gold text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full shadow">
-              ★ Más Vendido
+          <h2 class="text-xl font-serif font-bold text-gray-900">Reseñas de la tienda</h2>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="flex text-amber-500 text-sm">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
             </span>
-          </div>
-          <div class="p-4 sm:p-5">
-            <span class="text-[10px] uppercase tracking-wider text-gold font-semibold">Completo</span>
-            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Mi Nombre en Música + MP3 + QR</h3>
-            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
-              Notas cifradas a partir del nombre, dedicatoria al pie, código QR escaneable y archivo de audio MP3 para escuchar la melodía.
-            </p>
+            <span class="text-sm font-bold text-gray-800">5.0 sobre 5</span>
+            <span class="text-xs text-gray-500">(<span id="resenasTotalCount">192</span> valoraciones)</span>
           </div>
         </div>
-        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
-          <div>
-            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF + MP3</span>
-            <span class="text-xl sm:text-2xl font-bold text-white brand-font">11,99 €</span>
-          </div>
-          <button onclick="abrirModal('Mi Nombre en Música + MP3 + QR', 11.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
-            Pedir
-          </button>
-        </div>
+        <button onclick="document.getElementById('formNuevaResena').classList.toggle('hidden')" class="px-4 py-2 border border-black rounded-full text-xs font-bold text-black hover:bg-black hover:text-white transition">
+          <i class="fa-solid fa-pen-to-square mr-1.5"></i> Dejar una reseña
+        </button>
       </div>
 
-      <!-- Item 2 -->
-      <div class="producto-card partitura bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
-        <div>
-          <div class="h-56 bg-zinc-950 relative">
-            <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=700&q=80" alt="Melodía + MP3" class="w-full h-full object-cover">
+      <!-- Formulario para nuevos clientes -->
+      <div id="formNuevaResena" class="hidden bg-gray-50 border border-gray-200 rounded-xl p-4 sm:p-5 mt-4">
+        <h3 class="text-sm font-bold text-gray-800 mb-2">Escribe tu opinión sobre tu pedido</h3>
+        <form onsubmit="guardarNuevaResena(event)" class="space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input type="text" id="autorResena" required placeholder="Tu nombre o iniciales (Ej. María G.)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-black">
+            <input type="text" id="articuloResena" required placeholder="Producto comprado (Ej. Mi Nombre en Música)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-black">
           </div>
-          <div class="p-4 sm:p-5">
-            <span class="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">Melodía & Audio</span>
-            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Tu Nombre con Melodía + MP3</h3>
-            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
-              Arreglo musical personalizado para piano a partir de tu nombre. Incluye partitura en alta definición y pista en MP3.
-            </p>
-          </div>
-        </div>
-        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
           <div>
-            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF + MP3</span>
-            <span class="text-xl sm:text-2xl font-bold text-white brand-font">8,99 €</span>
+            <textarea id="textoResena" required rows="3" placeholder="¿Qué te pareció la melodía, la rapidez y el diseño del encargo?..." class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-black"></textarea>
           </div>
-          <button onclick="abrirModal('Tu Nombre con Melodía + MP3', 8.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
-            Pedir
-          </button>
-        </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1 text-amber-500 text-sm">
+              <span class="text-xs font-semibold text-gray-600 mr-2">Puntuación:</span>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <button type="submit" class="bg-black text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition">
+              Publicar reseña
+            </button>
+          </div>
+        </form>
       </div>
 
-      <!-- Item 3 -->
-      <div class="producto-card partitura bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
-        <div>
-          <div class="h-56 bg-zinc-950 relative">
-            <img src="https://images.unsplash.com/photo-1520523839898-50712825e617?auto=format&fit=crop&w=700&q=80" alt="Melodía Simple" class="w-full h-full object-cover">
-          </div>
-          <div class="p-4 sm:p-5">
-            <span class="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">Esencial</span>
-            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Nombre en Melodía Simple</h3>
-            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
-              Lámina minimalista con pentagrama y las notas del nombre listas para imprimir y enmarcar en cualquier tamaño estándar.
-            </p>
-          </div>
-        </div>
-        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
-          <div>
-            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF</span>
-            <span class="text-xl sm:text-2xl font-bold text-white brand-font">3,99 €</span>
-          </div>
-          <button onclick="abrirModal('Nombre en Melodía Simple', 3.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
-            Pedir
-          </button>
-        </div>
+      <!-- Lista de reseñas con paginación -->
+      <div id="contenedorListaResenas" class="divide-y divide-gray-100 mt-2">
+        <!-- Render dinámico -->
       </div>
 
-      <!-- Item 4: Natalicio -->
-      <div class="producto-card natalicio bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
-        <div>
-          <div class="h-56 bg-zinc-950 relative">
-            <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=700&q=80" alt="Lámina Natalicio" class="w-full h-full object-cover">
-          </div>
-          <div class="p-4 sm:p-5">
-            <span class="text-[10px] uppercase tracking-wider text-gold font-semibold">Nacimiento</span>
-            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Lámina Natalicio con Partitura</h3>
-            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
-              El recuerdo perfecto: notas del bebé, fecha, hora exacta, peso y centímetros diseñados armoniosamente.
-            </p>
-          </div>
-        </div>
-        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
-          <div>
-            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF</span>
-            <span class="text-xl sm:text-2xl font-bold text-white brand-font">12,99 €</span>
-          </div>
-          <button onclick="abrirModal('Lámina Natalicio con Partitura', 12.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
-            Pedir
-          </button>
-        </div>
+      <!-- Paginación de reseñas -->
+      <div class="flex items-center justify-between pt-6 border-t border-gray-200 mt-4 text-xs font-semibold text-gray-600">
+        <button onclick="cambiarPaginaResenas(-1)" id="btnResenaAnt" class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-30">Anterior</button>
+        <span id="infoPaginaResenas">Página 1 de 20</span>
+        <button onclick="cambiarPaginaResenas(1)" id="btnResenaSig" class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-30">Siguiente</button>
       </div>
-
-      <!-- Item 5: Póster -->
-      <div class="producto-card posters bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
-        <div>
-          <div class="h-56 bg-zinc-950 relative">
-            <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=700&q=80" alt="Círculo de Quintas" class="w-full h-full object-cover">
-          </div>
-          <div class="p-4 sm:p-5">
-            <span class="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">Teoría & Diseño</span>
-            <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">Póster Círculo de Quintas</h3>
-            <p class="text-xs text-zinc-400 mt-2 leading-relaxed">
-              Infografía de alta fidelidad para músicos, estudiantes y escuelas. Archivo vectorial y PDF 300 DPI.
-            </p>
-          </div>
-        </div>
-        <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
-          <div>
-            <span class="text-[10px] text-zinc-500 block uppercase font-medium">Descarga Directa</span>
-            <span class="text-xl sm:text-2xl font-bold text-white brand-font">6,99 €</span>
-          </div>
-          <button onclick="abrirModal('Póster Círculo de Quintas', 6.99)" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
-            Pedir
-          </button>
-        </div>
-      </div>
-
     </div>
-  </main>
+  </div>
+
+  <!-- ==================== SECCIÓN 3: INFORMACIÓN BÁSICA ==================== -->
+  <div id="vistaInformacion" class="pestana-contenido hidden max-w-6xl mx-auto px-4 py-6">
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
+      <div>
+        <h2 class="text-xl font-serif font-bold text-gray-900 mb-2">Sobre Zeronte</h2>
+        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+          Zeronte nace como un estudio de composición y arte sonoro especializado en transformar recuerdos, nombres, fechas y vivencias en obras musicales únicas e irrepetibles. Cada encargo es armonizado meticulosamente siguiendo sistemas de cifrado musical y orquestado con máxima dedicación artística.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <p class="font-bold text-sm text-gray-900 mb-1">Ubicación</p>
+          <p class="text-xs text-gray-600">Sevilla, España</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <p class="font-bold text-sm text-gray-900 mb-1">Especialidad</p>
+          <p class="text-xs text-gray-600">Partituras personalizadas, arreglos y natalicios</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <p class="font-bold text-sm text-gray-900 mb-1">Trayectoria</p>
+          <p class="text-xs text-gray-600">En tienda online desde 2023 · +1.000 partituras</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SECCIÓN 4: POLÍTICAS DE LA TIENDA ==================== -->
+  <div id="vistaPoliticas" class="pestana-contenido hidden max-w-6xl mx-auto px-4 py-6">
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm text-xs sm:text-sm text-gray-600 leading-relaxed">
+      <div>
+        <h2 class="text-xl font-serif font-bold text-gray-900 mb-3">Políticas de la tienda</h2>
+      </div>
+      <div class="border-t border-gray-100 pt-4">
+        <h3 class="font-bold text-gray-900 mb-1">Descargas y envíos digitales</h3>
+        <p>Todos nuestros productos de partituras personalizadas se entregan en formato digital de alta resolución (PDF listo para enmarcar a 300 DPI) y archivo de audio original (MP3). Los plazos de creación y entrega habituales se sitúan entre 24 y 48 horas.</p>
+      </div>
+      <div class="border-t border-gray-100 pt-4">
+        <h3 class="font-bold text-gray-900 mb-1">Cambios y cancelaciones</h3>
+        <p>Al tratarse de obras personalizadas a medida que se inician tras recibir los datos, no se admiten devoluciones una vez entregado el archivo final. Sin embargo, realizamos cualquier revisión o ajuste necesario sobre el texto o la dedicatoria sin coste adicional para que quedes 100% satisfecho.</p>
+      </div>
+      <div class="border-t border-gray-100 pt-4">
+        <h3 class="font-bold text-gray-900 mb-1">Formas de pago seguras</h3>
+        <p>Aceptamos pagos directos y cifrados mediante Bizum y PayPal para total comodidad y agilidad.</p>
+      </div>
+    </div>
+  </div>
 
   <!-- ==================== MODAL DE COMPRA (BOTTOM-SHEET EN MÓVIL) ==================== -->
   <div id="modalCompra" class="fixed inset-0 bg-black/85 hidden items-end sm:items-center justify-center z-50 backdrop-blur-md">
@@ -396,26 +423,303 @@
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-hlCFkngwGxqTIsrr-YvMoOpyFH0tRnbzsYxgrHbosz1ObyxPjnVu-1Wn4EvRd-KwYA/exec";
-    const MI_TELEFONO_WHATSAPP = "34641851073"; // Tu teléfono para WhatsApp (con prefijo 34)
-    const MI_PAYPAL_USER = "paypal.me/adriandiazgiraldez";        // Tu usuario de paypal.me
+    const MI_TELEFONO_WHATSAPP = "34641851073"; 
+    const MI_PAYPAL_USER = "paypal.me/adriandiazgiraldez";
 
-    function filtrar(categoria, boton) {
-      document.querySelectorAll('.filtro-btn').forEach(btn => {
-        btn.classList.remove('border-gold', 'bg-gold', 'text-black');
-        btn.classList.add('border-zinc-800', 'bg-zinc-900', 'text-zinc-300');
-      });
-      boton.classList.add('border-gold', 'bg-gold', 'text-black');
-      boton.classList.remove('border-zinc-800', 'bg-zinc-900', 'text-zinc-300');
+    const VENTAS_BASE_ETSY = 1092;
+    let catalogoCompleto = [];
+    let categoriaSeleccionada = 'todos';
+    let paginaResenasActual = 1;
+    const RESENAS_POR_PAGINA = 10;
+    let listaResenasTotales = [];
 
-      document.querySelectorAll('.producto-card').forEach(card => {
-        if (categoria === 'todos' || card.classList.contains(categoria)) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
+    document.addEventListener("DOMContentLoaded", () => {
+      cargarCatalogoDinamico();
+      actualizarContadorVentas();
+      inicializarResenas();
+    });
+
+    // ================= SISTEMA DE PESTAÑAS ETSY =================
+    function cambiarPestana(id) {
+      document.querySelectorAll('.pestana-contenido').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.pestana-btn').forEach(btn => {
+        btn.classList.remove('border-black', 'text-black', 'font-bold');
+        btn.classList.add('border-transparent', 'text-gray-600');
       });
+
+      const vistaMap = {
+        'articulos': 'vistaArticulos',
+        'resenas': 'vistaResenas',
+        'informacion': 'vistaInformacion',
+        'politicas': 'vistaPoliticas'
+      };
+
+      const seccion = document.getElementById(vistaMap[id]);
+      const boton = document.getElementById(`tab-${id}`);
+
+      if (seccion) seccion.classList.remove('hidden');
+      if (boton) {
+        boton.classList.add('border-black', 'text-black', 'font-bold');
+        boton.classList.remove('border-transparent', 'text-gray-600');
+      }
+      window.scrollTo({ top: 380, behavior: 'smooth' });
     }
 
+    // ================= VENTAS Y CATÁLOGO =================
+    async function actualizarContadorVentas() {
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerConteoVentas`);
+        const data = await res.json();
+        if (data.status === "success" && typeof data.totalPedidos === "number") {
+          const total = VENTAS_BASE_ETSY + data.totalPedidos;
+          document.getElementById('totalVentasEtsy').innerText = `${total.toLocaleString('es-ES')} ventas`;
+        }
+      } catch (e) {
+        document.getElementById('totalVentasEtsy').innerText = `${VENTAS_BASE_ETSY.toLocaleString('es-ES')} ventas`;
+      }
+    }
+
+    async function cargarCatalogoDinamico() {
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos`);
+        const data = await res.json();
+        if (data.status === "success" && data.productos) {
+          catalogoCompleto = data.productos;
+          actualizarConteosCategorias();
+          renderizarCatalogo(catalogoCompleto);
+        }
+      } catch (e) {
+        console.error("Error al cargar productos:", e);
+      }
+    }
+
+    function renderizarCatalogo(lista) {
+      const contenedor = document.getElementById("gridProductos");
+      const contadorLabel = document.getElementById("contadorResultados");
+      
+      if (contadorLabel) contadorLabel.innerText = `${lista.length} artículos`;
+      if (!contenedor) return;
+
+      if (lista.length === 0) {
+        contenedor.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500 text-sm">No se encontraron artículos que coincidan con la búsqueda.</div>`;
+        return;
+      }
+
+      contenedor.innerHTML = lista.map(p => {
+        const imgUrl = Array.isArray(p.imagen) ? p.imagen[0] : (p.imagen || 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80');
+        const precioBase = parseFloat(p.precio) || 0;
+        const precioOferta = p.precioOferta ? parseFloat(String(p.precioOferta).replace(',', '.')) : null;
+        const tieneOferta = precioOferta && precioOferta > 0 && precioOferta < precioBase;
+        const precioFinal = tieneOferta ? precioOferta : precioBase;
+        const porcentajeDescuento = tieneOferta ? Math.round(((precioBase - precioOferta) / precioBase) * 100) : 0;
+
+        return `
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirModal('${p.titulo.replace(/'/g, "\\'")}', ${precioFinal})">
+            <div>
+              <div class="aspect-square bg-gray-100 relative overflow-hidden">
+                <img src="${imgUrl}" alt="${p.titulo}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                ${tieneOferta ? `<span class="absolute top-2 left-2 bg-[#d23f57] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">-${porcentajeDescuento}%</span>` : ''}
+              </div>
+
+              <div class="p-3">
+                <h3 class="text-xs sm:text-sm font-medium text-[#222222] line-clamp-2 leading-snug group-hover:underline">
+                  ${p.titulo}
+                </h3>
+                
+                <div class="flex items-center gap-1 mt-1 text-[11px] text-amber-500">
+                  <i class="fa-solid fa-star"></i>
+                  <span class="text-gray-500 font-semibold text-[10px]">5.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 pt-0">
+              <div class="flex items-baseline gap-1.5 flex-wrap">
+                <span class="text-sm sm:text-base font-bold text-[#222222]">${precioFinal.toFixed(2)} €</span>
+                ${tieneOferta ? `
+                  <span class="text-xs text-gray-400 line-through">${precioBase.toFixed(2)} €</span>
+                  <span class="text-[11px] text-emerald-600 font-semibold hidden sm:inline">Rebaja</span>
+                ` : ''}
+              </div>
+              <span class="text-[10px] text-gray-500 block mt-0.5">Descarga digital</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filtrarCategoria(cat, btn) {
+      categoriaSeleccionada = cat;
+      document.querySelectorAll('.cat-btn').forEach(b => {
+        b.classList.remove('bg-gray-200/80', 'text-black', 'font-semibold');
+        b.classList.add('text-gray-700');
+      });
+      btn.classList.add('bg-gray-200/80', 'text-black', 'font-semibold');
+
+      const tituloMap = {
+        'todos': 'Todos los artículos',
+        'partitura': 'Partituras personalizadas',
+        'natalicio': 'Natalicios',
+        'posters': 'Pósters y Láminas'
+      };
+      const tituloEl = document.getElementById('tituloSeccionActual');
+      if (tituloEl) tituloEl.innerText = tituloMap[cat] || 'Artículos';
+
+      if (cat === 'todos') {
+        renderizarCatalogo(catalogoCompleto);
+      } else {
+        const filtrados = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes(cat.toLowerCase()));
+        renderizarCatalogo(filtrados);
+      }
+    }
+
+    function buscarProductos(termino) {
+      const q = termino.trim().toLowerCase();
+      let base = catalogoCompleto;
+      if (categoriaSeleccionada !== 'todos') {
+        base = base.filter(p => (p.categoria || '').toLowerCase().includes(categoriaSeleccionada.toLowerCase()));
+      }
+      const resultados = base.filter(p => 
+        (p.titulo || '').toLowerCase().includes(q) || 
+        (p.descripcion || '').toLowerCase().includes(q)
+      );
+      renderizarCatalogo(resultados);
+    }
+
+    function actualizarConteosCategorias() {
+      const elTodos = document.getElementById('conteo-todos');
+      const elPartitura = document.getElementById('conteo-partitura');
+      const elNatalicio = document.getElementById('conteo-natalicio');
+      const elPosters = document.getElementById('conteo-posters');
+
+      if (elTodos) elTodos.innerText = catalogoCompleto.length;
+      if (elPartitura) elPartitura.innerText = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('partitura')).length;
+      if (elNatalicio) elNatalicio.innerText = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('natalicio')).length;
+      if (elPosters) elPosters.innerText = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('poster')).length;
+    }
+
+    // ================= SISTEMA DE RESEÑAS =================
+    function inicializarResenas() {
+      const nombres = ["Laura M.", "Carlos S.", "Beatriz R.", "Javier T.", "Elena P.", "David G.", "Lucía V.", "Marta D.", "Pablo H.", "Sara C.", "Álvaro F.", "Cristina B.", "Guillermo N.", "Ana Belén", "Manuel Q.", "Carmen J.", "Raquel E.", "Jorge L."];
+      const articulos = ["Mi Nombre en Música + MP3 + QR", "Tu Nombre con Melodía + MP3", "Lámina Natalicio con Partitura", "Póster Círculo de Quintas", "Nombre en Melodía Simple"];
+      const textos = [
+        "Un regalo maravilloso y emocionante. Lloramos al escuchar la melodía con el código QR.",
+        "La calidad de la partitura para imprimir es fantástica. El audio para piano suena perfecto.",
+        "Trato súper atento y entrega muy rápida. Quedó genial en el marco que le compramos.",
+        "Súper original. El cifrado del nombre en notas musicales es un detalle de 10.",
+        "Es el segundo encargo que hago para un aniversario y ha vuelto a ser un éxito rotundo.",
+        "La lámina del natalicio para mi sobrina quedó preciosa. Muy recomendable.",
+        "Una joya de recuerdo. La dedicatoria y el QR son un acierto total.",
+        "Excelente servicio. Llegó en menos de 24 horas y con un audio impecable."
+      ];
+
+      const resenasBase = [];
+      for (let i = 1; i <= 192; i++) {
+        const nom = nombres[i % nombres.length];
+        const art = articulos[i % articulos.length];
+        const txt = textos[i % textos.length];
+        const dia = (i % 28) + 1;
+        const mes = ((i % 12) + 1).toString().padStart(2, '0');
+        const anio = 2023 + (i % 3);
+        resenasBase.push({
+          autor: nom,
+          fecha: `${dia} de ${obtenerNombreMes(mes)}, ${anio}`,
+          articulo: art,
+          texto: txt
+        });
+      }
+
+      const guardadas = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
+      listaResenasTotales = [...guardadas, ...resenasBase];
+
+      actualizarContadoresResenas();
+      renderizarResenasPagina();
+    }
+
+    function obtenerNombreMes(m) {
+      const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+      return meses[parseInt(m) - 1] || "mayo";
+    }
+
+    function actualizarContadoresResenas() {
+      const total = listaResenasTotales.length;
+      const countEl = document.getElementById('resenasTotalCount');
+      const badgeEl = document.getElementById('conteoPestanaResenas');
+      const headerEl = document.getElementById('labelResenasHeader');
+
+      if (countEl) countEl.innerText = total;
+      if (badgeEl) badgeEl.innerText = total;
+      if (headerEl) headerEl.innerText = `(${total})`;
+    }
+
+    function renderizarResenasPagina() {
+      const contenedor = document.getElementById("contenedorListaResenas");
+      if (!contenedor) return;
+
+      const totalPaginas = Math.ceil(listaResenasTotales.length / RESENAS_POR_PAGINA);
+      if (paginaResenasActual > totalPaginas) paginaResenasActual = totalPaginas;
+      if (paginaResenasActual < 1) paginaResenasActual = 1;
+
+      const inicio = (paginaResenasActual - 1) * RESENAS_POR_PAGINA;
+      const fin = inicio + RESENAS_POR_PAGINA;
+      const paginaItems = listaResenasTotales.slice(inicio, fin);
+
+      contenedor.innerHTML = paginaItems.map(r => `
+        <div class="py-4 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="flex text-amber-500 text-xs">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+              </span>
+              <span class="text-xs font-bold text-gray-800">${r.autor}</span>
+            </div>
+            <span class="text-[11px] text-gray-400">${r.fecha}</span>
+          </div>
+          <p class="text-xs text-gray-700 leading-relaxed">${r.texto}</p>
+          <p class="text-[11px] text-gray-400 italic">Artículo comprado: <span class="text-gray-600 font-medium">${r.articulo}</span></p>
+        </div>
+      `).join('');
+
+      document.getElementById('infoPaginaResenas').innerText = `Página ${paginaResenasActual} de ${totalPaginas}`;
+      document.getElementById('btnResenaAnt').disabled = (paginaResenasActual === 1);
+      document.getElementById('btnResenaSig').disabled = (paginaResenasActual === totalPaginas);
+    }
+
+    function cambiarPaginaResenas(delta) {
+      paginaResenasActual += delta;
+      renderizarResenasPagina();
+    }
+
+    function guardarNuevaResena(e) {
+      e.preventDefault();
+      const autor = document.getElementById('autorResena').value.trim();
+      const articulo = document.getElementById('articuloResena').value.trim();
+      const texto = document.getElementById('textoResena').value.trim();
+
+      const hoy = new Date();
+      const fechaTexto = `${hoy.getDate()} de ${obtenerNombreMes(hoy.getMonth() + 1)}, ${hoy.getFullYear()}`;
+
+      const nueva = { autor, articulo, texto, fecha: fechaTexto };
+
+      const guardadas = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
+      guardadas.unshift(nueva);
+      localStorage.setItem('zeronte_nuevas_resenas', JSON.stringify(guardadas));
+
+      listaResenasTotales.unshift(nueva);
+      actualizarContadoresResenas();
+      paginaResenasActual = 1;
+      renderizarResenasPagina();
+
+      e.target.reset();
+      document.getElementById('formNuevaResena').classList.add('hidden');
+      alert("¡Gracias por tu reseña! Ha sido añadida a la tienda.");
+    }
+
+    // ================= MODAL Y ENVÍO DE PEDIDO =================
     function abrirModal(producto, precio) {
       document.getElementById('productoInput').value = producto;
       document.getElementById('precioInput').value = precio;
@@ -492,96 +796,6 @@
       navigator.clipboard.writeText(texto);
       alert("Número copiado al portapapeles: " + texto);
     }
-
-    // Cargar catálogo dinámico al iniciar la página
-document.addEventListener("DOMContentLoaded", cargarCatalogoDinamico);
-
-async function cargarCatalogoDinamico() {
-  try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos`);
-    const data = await res.json();
-    if (data.status === "success" && data.productos && data.productos.length > 0) {
-      const contenedor = document.querySelector("#catalogo > div");
-
-      const limpiarNum = (val) => {
-        if (val === undefined || val === null || val === '') return NaN;
-        return parseFloat(val.toString().replace('€', '').trim().replace(',', '.'));
-      };
-
-      const obtenerFotoPortada = (imgRaw) => {
-        if (!imgRaw) return 'img/logo-zeronte.png';
-        try {
-          const parsed = JSON.parse(imgRaw);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
-        } catch (e) {}
-        return imgRaw;
-      };
-
-      contenedor.innerHTML = data.productos.map(p => {
-        const pNormal = limpiarNum(p.precio) || 0;
-        const pOfertaRaw = p.precioOferta !== undefined ? p.precioOferta : (p.oferta !== undefined ? p.oferta : p.precio_oferta);
-        const pOferta = limpiarNum(pOfertaRaw);
-
-        const tieneOferta = !isNaN(pOferta) && pOferta > 0 && pOferta < pNormal;
-        const precioCobro = tieneOferta ? pOferta : pNormal;
-        const fotoPortada = obtenerFotoPortada(p.imagen);
-
-        let bloquePrecioHtml = '';
-        if (tieneOferta) {
-          const porcentaje = Math.round(((pNormal - pOferta) / pNormal) * 100);
-          bloquePrecioHtml = `
-            <div>
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[10px] text-zinc-400 line-through">${pNormal.toFixed(2)} €</span>
-                <span class="text-xl sm:text-2xl font-bold text-white brand-font">${pOferta.toFixed(2)} €</span>
-                <span class="text-[9px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded">
-                  -${porcentaje}%
-                </span>
-              </div>
-            </div>
-          `;
-        } else {
-          bloquePrecioHtml = `
-            <div>
-              <span class="text-[10px] text-zinc-500 block uppercase font-medium">Digital PDF</span>
-              <span class="text-xl sm:text-2xl font-bold text-white brand-font">${pNormal.toFixed(2)} €</span>
-            </div>
-          `;
-        }
-
-        const tituloEscapado = (p.titulo || '').replace(/'/g, "\\'");
-
-        return `
-          <div class="producto-card ${p.categoria} bg-[#131316] border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
-            <div>
-              <div class="h-56 bg-zinc-950 relative overflow-hidden">
-                <img src="${fotoPortada}" alt="${p.titulo}" class="w-full h-full object-cover">
-                ${tieneOferta ? `
-                  <span class="absolute top-3 left-3 bg-emerald-500 text-black text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-md shadow">
-                    Oferta
-                  </span>
-                ` : ''}
-              </div>
-              <div class="p-4 sm:p-5">
-                <span class="text-[10px] uppercase tracking-wider text-gold font-semibold">${p.categoria || 'Partitura'}</span>
-                <h3 class="font-bold text-base sm:text-lg text-white mt-0.5">${p.titulo}</h3>
-                <div class="text-xs text-zinc-400 mt-2 leading-relaxed">${p.descripcion || ''}</div>
-              </div>
-            </div>
-            <div class="p-4 sm:p-5 pt-0 flex items-center justify-between border-t border-zinc-800/80 mt-3">
-              ${bloquePrecioHtml}
-              <button onclick="abrirModal('${tituloEscapado}', ${precioCobro})" class="bg-white hover:bg-gold hover:text-black text-black px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow">
-                Pedir
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-  } catch (e) {
-    console.log("Usando productos predeterminados en caché.", e);
-  }
-}
   </script>
 </body>
 </html>
