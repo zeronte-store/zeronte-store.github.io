@@ -278,10 +278,10 @@
             </span>
             <h3 id="formTituloResena" class="text-sm font-bold text-gray-900">Valoración de compra verificada</h3>
           </div>
-          <span class="text-[10px] text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-md font-medium">Solo compradores reales</span>
+          <span class="text-[10px] text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-md font-medium">Solo compradores</span>
         </div>
 
-        <p class="text-xs text-gray-500 mb-4">Solo introduce tu Nº de Pedido. El sistema identificará automáticamente tu compra para que no tengas que escribirla.</p>
+        <p class="text-xs text-gray-500 mb-4">Solo introduce tu Nº de Pedido que recibiste al realizar la compra y nuestro sistema identificará automáticamente tu artículo.</p>
 
         <form onsubmit="guardarNuevaResena(event)" class="space-y-3">
           <div>
@@ -1783,6 +1783,53 @@
       if (headerEl) headerEl.innerText = `(${total})`;
     }
 
+    function normalizarTextoBusqueda(str) {
+      if (!str) return "";
+      return str.toString()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]/g, "");
+    }
+
+    function obtenerImagenArticulo(nombreArticulo) {
+      if (!nombreArticulo) return "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&q=80";
+      
+      const textoNorm = normalizarTextoBusqueda(nombreArticulo);
+
+      // 1. Buscar en el catálogo dinámico de productos cargado desde Google Sheets
+      if (Array.isArray(catalogoCompleto) && catalogoCompleto.length > 0) {
+        const encontrado = catalogoCompleto.find(p => {
+          const titOrig = normalizarTextoBusqueda(p.titulo || "");
+          const titTrad = normalizarTextoBusqueda(traducirTituloProducto(p.titulo, idiomaActual));
+          return titOrig === textoNorm || titTrad === textoNorm || 
+                 (titOrig && textoNorm.includes(titOrig)) || 
+                 (textoNorm && titOrig.includes(textoNorm));
+        });
+
+        if (encontrado && encontrado.imagen) {
+          return Array.isArray(encontrado.imagen) ? encontrado.imagen[0] : encontrado.imagen;
+        }
+      }
+
+      // 2. Mapeo específico por palabras clave a imágenes reales de alta resolución según el producto
+      if (textoNorm.includes("lienzo") || textoNorm.includes("canvas")) {
+        return "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=300&q=80"; // Lienzo/Arte
+      }
+      if (textoNorm.includes("natalicio") || textoNorm.includes("bebe") || textoNorm.includes("nacimiento") || textoNorm.includes("birth")) {
+        return "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=300&q=80"; // Natalicio / Bebé
+      }
+      if (textoNorm.includes("quintas") || textoNorm.includes("poster") || textoNorm.includes("circle") || textoNorm.includes("lamina")) {
+        return "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80"; // Lámina / Póster
+      }
+      if (textoNorm.includes("nuestro") || textoNorm.includes("pareja") || textoNorm.includes("our")) {
+        return "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=300&q=80"; // Parejas / Aniversario
+      }
+
+      // 3. Partitura personalizada para piano / música individual por defecto
+      return "https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=300&q=80";
+    }
+
     function renderizarResenasPagina() {
       const contenedor = document.getElementById("contenedorListaResenas");
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
@@ -1804,9 +1851,10 @@
         }
 
         const nombreAutorLimpio = (r.autor || "Cliente").replace(/\s*\(Compra verificada\)/gi, '').trim();
+        const imgArticulo = obtenerImagenArticulo(r.articuloOriginal || r.articulo);
 
         return `
-        <div class="py-4 space-y-1.5">
+        <div class="py-4 space-y-2">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="flex text-amber-500 text-xs gap-0.5">
@@ -1820,8 +1868,17 @@
             </div>
             <span class="text-[11px] text-gray-400 whitespace-nowrap ml-2">${r.fecha}</span>
           </div>
+
           <p class="text-xs text-gray-700 leading-relaxed">${r.texto}</p>
-          <p class="text-[11px] text-gray-400 italic">${t.articuloComprado} <span class="text-gray-600 font-medium">${r.articulo}</span></p>
+
+          <div class="flex items-center gap-2.5 pt-1">
+            <div class="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0 shadow-xs">
+              <img src="${imgArticulo}" alt="${r.articulo}" class="w-full h-full object-cover">
+            </div>
+            <p class="text-[11px] text-gray-400 italic">
+              ${t.articuloComprado} <span class="text-gray-700 font-medium not-italic">${r.articulo}</span>
+            </p>
+          </div>
         </div>
       `;
       }).join('');
@@ -1829,35 +1886,6 @@
       document.getElementById('infoPaginaResenas').innerText = t.paginaDe.replace('{0}', paginaResenasActual).replace('{1}', totalPaginas);
       document.getElementById('btnResenaAnt').disabled = (paginaResenasActual === 1);
       document.getElementById('btnResenaSig').disabled = (paginaResenasActual === totalPaginas);
-    }
-
-    function fijarPuntuacion(val) {
-      const inputVal = document.getElementById('puntuacionValor');
-      const numTxt = document.getElementById('puntuacionNumero');
-      if (inputVal) inputVal.value = val;
-      if (numTxt) numTxt.innerText = val.toFixed(1);
-      pintarEstrellas(val);
-    }
-
-    function hoverEstrellas(val) {
-      pintarEstrellas(val);
-    }
-
-    function restaurarEstrellas() {
-      const inputVal = document.getElementById('puntuacionValor');
-      const val = parseInt((inputVal ? inputVal.value : '5') || '5', 10);
-      pintarEstrellas(val);
-    }
-
-    function pintarEstrellas(val) {
-      document.querySelectorAll('#selectorEstrellas .estrella-voto').forEach(estrella => {
-        const v = parseInt(estrella.getAttribute('data-valor'), 10);
-        if (v <= val) {
-          estrella.className = "fa-solid fa-star estrella-voto text-amber-500 cursor-pointer";
-        } else {
-          estrella.className = "fa-regular fa-star estrella-voto text-gray-300 cursor-pointer";
-        }
-      });
     }
 
     function cambiarPaginaResenas(delta) {
