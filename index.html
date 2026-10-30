@@ -1074,6 +1074,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       inicializarResenas();
+      cargarResenasDesdeServidor();
       renderizarResenasPagina();
       cargarCatalogoDinamico();
       actualizarContadorVentas();
@@ -1641,14 +1642,21 @@
     let baseEstructuraResenas = [];
 
     function inicializarResenas() {
-      const nombres = ["Laura M.", "Carlos S.", "Beatriz R.", "Javier T.", "Elena P.", "David G.", "Lucía V.", "Marta D.", "Pablo H.", "Sara C.", "Álvaro F.", "Cristina B.", "Guillermo N.", "Ana Belén", "Manuel Q.", "Carmen J.", "Raquel E.", "Jorge L."];
+      const nombresCompletos = [
+        "Laura Morales Benítez", "Carlos Sánchez Ruiz", "Beatriz Romero Delgado", 
+        "Javier Torres Navarro", "Elena Peña Carrasco", "David Gallego Gil", 
+        "Lucía Vázquez Medina", "Marta Domínguez Ramos", "Pablo Herrera Castillo", 
+        "Sara Castro Serrano", "Álvaro Fuentes Vega", "Cristina Blanco Marín", 
+        "Guillermo Nieto Ortega", "Ana Belén Morales Ortiz", "Manuel Quintana Reyes", 
+        "Carmen Jiménez Lozano", "Raquel Espinosa Vidal", "Jorge Lara Pastor"
+      ];
       const articulosEs = ["Mi Nombre en Música + MP3 + QR", "Tu Nombre con Melodía + MP3", "Lámina Natalicio con Partitura", "Póster Círculo de Quintas", "Nombre en Melodía Simple"];
 
       baseEstructuraResenas = [];
       const fechaBaseReciente = new Date(2026, 9, 28); // 28 oct 2026
 
       for (let i = 0; i < 192; i++) {
-        const nom = nombres[i % nombres.length];
+        const nom = nombresCompletos[i % nombresCompletos.length];
         const art = articulosEs[i % articulosEs.length];
         const textoIndice = i % 8;
         
@@ -1670,6 +1678,42 @@
       actualizarTextosResenasIdioma();
     }
 
+    function formatearFechaLegible(fechaEntrada) {
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
+      if (!fechaEntrada) return "";
+
+      const d = new Date(fechaEntrada);
+      if (isNaN(d.getTime())) {
+        return fechaEntrada;
+      }
+
+      const dia = d.getDate();
+      const mesTexto = t.meses[d.getMonth()];
+      const anio = d.getFullYear();
+
+      if (idiomaActual === 'en') return `${mesTexto} ${dia}, ${anio}`;
+      if (idiomaActual === 'zh') return `${anio}年${mesTexto}${dia}日`;
+      if (idiomaActual === 'de') return `${dia}. ${mesTexto} ${anio}`;
+      if (idiomaActual === 'fr') return `${dia} ${mesTexto} ${anio}`;
+      return `${dia} de ${mesTexto}, ${anio}`;
+    }
+
+    let resenasServidorPublicas = [];
+
+    async function cargarResenasDesdeServidor() {
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerResenas`);
+        const data = await res.json();
+        if (data && data.status === "success" && Array.isArray(data.resenas)) {
+          resenasServidorPublicas = data.resenas;
+          actualizarTextosResenasIdioma();
+          renderizarResenasPagina();
+        }
+      } catch (err) {
+        console.warn("No se pudieron cargar reseñas públicas de la hoja de cálculo:", err);
+      }
+    }
+
     function actualizarTextosResenasIdioma() {
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       const resenasMapeadas = baseEstructuraResenas.map(r => {
@@ -1685,14 +1729,45 @@
           fecha: fechaTexto,
           articulo: traducirTituloProducto(r.articuloOriginal, idiomaActual),
           texto: t.textosResenas[r.textoIndice],
-          timestamp: r.timestamp
+          timestamp: r.timestamp,
+          puntuacion: 5
         };
       });
 
-      const guardadas = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
-      
-      // Unir y ordenar estrictamente de más reciente a más antigua
-      listaResenasTotales = [...guardadas, ...resenasMapeadas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      const guardadasLocales = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
+      const mapaResenas = new Map();
+
+      // 1. Reseñas descargadas de Google Sheets
+      resenasServidorPublicas.forEach(r => {
+        const clave = `${r.pedidoId || ''}-${r.texto}`;
+        const nombreLimpio = (r.autor || "Cliente").replace(/\s*\(Compra verificada\)/gi, '').trim();
+
+        mapaResenas.set(clave, {
+          autor: nombreLimpio,
+          articulo: traducirTituloProducto(r.articulo, idiomaActual),
+          texto: r.texto,
+          puntuacion: parseFloat(r.puntuacion) || 5,
+          fecha: formatearFechaLegible(r.fecha),
+          timestamp: r.timestamp || new Date(r.fecha).getTime() || Date.now()
+        });
+      });
+
+      // 2. Reseñas locales
+      guardadasLocales.forEach(r => {
+        const clave = `${r.pedidoId || ''}-${r.texto}`;
+        if (!mapaResenas.has(clave)) {
+          const nombreLimpio = (r.autor || "Cliente").replace(/\s*\(Compra verificada\)/gi, '').trim();
+          mapaResenas.set(clave, {
+            ...r,
+            autor: nombreLimpio,
+            fecha: formatearFechaLegible(r.fecha)
+          });
+        }
+      });
+
+      const arrayNuevas = Array.from(mapaResenas.values());
+
+      listaResenasTotales = [...arrayNuevas, ...resenasMapeadas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
       actualizarContadoresResenas();
     }
@@ -1706,32 +1781,6 @@
       if (countEl) countEl.innerText = total;
       if (badgeEl) badgeEl.innerText = total;
       if (headerEl) headerEl.innerText = `(${total})`;
-    }
-
-    function fijarPuntuacion(val) {
-      document.getElementById('puntuacionValor').value = val;
-      document.getElementById('puntuacionNumero').innerText = val.toFixed(1);
-      pintarEstrellas(val);
-    }
-
-    function hoverEstrellas(val) {
-      pintarEstrellas(val);
-    }
-
-    function restaurarEstrellas() {
-      const val = parseInt(document.getElementById('puntuacionValor').value || '5', 10);
-      pintarEstrellas(val);
-    }
-
-    function pintarEstrellas(val) {
-      document.querySelectorAll('#selectorEstrellas .estrella-voto').forEach(estrella => {
-        const v = parseInt(estrella.getAttribute('data-valor'), 10);
-        if (v <= val) {
-          estrella.className = "fa-solid fa-star estrella-voto text-amber-500";
-        } else {
-          estrella.className = "fa-regular fa-star estrella-voto text-gray-300";
-        }
-      });
     }
 
     function renderizarResenasPagina() {
@@ -1754,16 +1803,22 @@
           estrellasHtml += s <= estrellasNum ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star text-gray-300"></i>';
         }
 
+        const nombreAutorLimpio = (r.autor || "Cliente").replace(/\s*\(Compra verificada\)/gi, '').trim();
+
         return `
         <div class="py-4 space-y-1.5">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
               <span class="flex text-amber-500 text-xs gap-0.5">
                 ${estrellasHtml}
               </span>
-              <span class="text-xs font-bold text-gray-800">${r.autor}</span>
+              <span class="text-xs font-bold text-gray-800">${nombreAutorLimpio}</span>
+              <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500">
+                <i class="fa-solid fa-circle-check text-[#0095f6] text-xs"></i>
+                <span class="text-[11px] font-normal text-gray-500">(Compra verificada)</span>
+              </span>
             </div>
-            <span class="text-[11px] text-gray-400">${r.fecha}</span>
+            <span class="text-[11px] text-gray-400 whitespace-nowrap ml-2">${r.fecha}</span>
           </div>
           <p class="text-xs text-gray-700 leading-relaxed">${r.texto}</p>
           <p class="text-[11px] text-gray-400 italic">${t.articuloComprado} <span class="text-gray-600 font-medium">${r.articulo}</span></p>
@@ -1774,6 +1829,35 @@
       document.getElementById('infoPaginaResenas').innerText = t.paginaDe.replace('{0}', paginaResenasActual).replace('{1}', totalPaginas);
       document.getElementById('btnResenaAnt').disabled = (paginaResenasActual === 1);
       document.getElementById('btnResenaSig').disabled = (paginaResenasActual === totalPaginas);
+    }
+
+    function fijarPuntuacion(val) {
+      const inputVal = document.getElementById('puntuacionValor');
+      const numTxt = document.getElementById('puntuacionNumero');
+      if (inputVal) inputVal.value = val;
+      if (numTxt) numTxt.innerText = val.toFixed(1);
+      pintarEstrellas(val);
+    }
+
+    function hoverEstrellas(val) {
+      pintarEstrellas(val);
+    }
+
+    function restaurarEstrellas() {
+      const inputVal = document.getElementById('puntuacionValor');
+      const val = parseInt((inputVal ? inputVal.value : '5') || '5', 10);
+      pintarEstrellas(val);
+    }
+
+    function pintarEstrellas(val) {
+      document.querySelectorAll('#selectorEstrellas .estrella-voto').forEach(estrella => {
+        const v = parseInt(estrella.getAttribute('data-valor'), 10);
+        if (v <= val) {
+          estrella.className = "fa-solid fa-star estrella-voto text-amber-500 cursor-pointer";
+        } else {
+          estrella.className = "fa-regular fa-star estrella-voto text-gray-300 cursor-pointer";
+        }
+      });
     }
 
     function cambiarPaginaResenas(delta) {
@@ -1818,7 +1902,8 @@
       const fechaTexto = `${hoy.getDate()} de ${mesTexto}, ${hoy.getFullYear()}`;
 
       const nueva = { 
-        autor: `${nombreExtraido} (Compra verificada)`, 
+        pedidoId: pedidoInput,
+        autor: nombreExtraido, 
         articulo: productoExtraido, 
         texto: texto, 
         puntuacion: puntuacion,
@@ -1827,7 +1912,7 @@
       };
 
       try {
-        fetch(APPS_SCRIPT_URL, {
+        await fetch(APPS_SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
@@ -1837,7 +1922,8 @@
             articulo: productoExtraido,
             puntuacion: puntuacion,
             texto: texto,
-            fecha: fechaTexto
+            fecha: fechaTexto,
+            timestamp: hoy.getTime()
           })
         });
       } catch (err) {
@@ -1847,6 +1933,9 @@
       const guardadas = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
       guardadas.unshift(nueva);
       localStorage.setItem('zeronte_nuevas_resenas', JSON.stringify(guardadas));
+
+      // Recargar desde el servidor para sincronizar
+      await cargarResenasDesdeServidor();
 
       actualizarTextosResenasIdioma();
       paginaResenasActual = 1;
