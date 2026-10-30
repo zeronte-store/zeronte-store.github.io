@@ -29,7 +29,7 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[#f5f5f1] text-[#222222] antialiased min-h-screen pb-20 sm:pb-0 selection:bg-[#222222] selection:text-white">
+<body class="bg-[#f5f5f1] text-[#222222] antialiased min-h-screen selection:bg-[#222222] selection:text-white">
 
   <!-- ==================== BANNER Y CABECERA DE TIENDA ETSY ==================== -->
   <section class="max-w-6xl mx-auto px-4 pt-4 sm:pt-6">
@@ -474,26 +474,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ==================== MENÚ APP INFERIOR MÓVIL (Sticky Bottom Nav) ==================== -->
-  <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-[#0c0c0e]/95 backdrop-blur-lg border-t border-zinc-800 z-40 py-2 px-6">
-    <div class="flex items-center justify-around">
-      <a href="#catalogo" class="flex flex-col items-center text-zinc-400 hover:text-gold transition active:scale-90">
-        <i class="fa-solid fa-music text-base"></i>
-        <span id="navMobileCatalogo" class="text-[10px] mt-1 font-medium">Catálogo</span>
-      </a>
-      <button onclick="abrirModal('Mi Nombre en Música + MP3 + QR', 11.99)" class="flex flex-col items-center text-gold transition active:scale-90">
-        <div class="w-10 h-10 -mt-5 bg-gold text-black rounded-full flex items-center justify-center shadow-lg font-bold border-2 border-black">
-          <i class="fa-solid fa-plus text-sm"></i>
-        </div>
-        <span id="navMobilePedir" class="text-[10px] mt-0.5 font-bold text-white">Pedir</span>
-      </button>
-      <a href="https://wa.me/34641851073" target="_blank" class="flex flex-col items-center text-emerald-400 transition active:scale-90">
-        <i class="fa-brands fa-whatsapp text-base"></i>
-        <span id="navMobileChat" class="text-[10px] mt-1 font-medium">Chat</span>
-      </a>
-    </div>
-  </nav>
 
   <!-- ==================== FOOTER ==================== -->
   <footer class="bg-black border-t border-zinc-900 py-8 px-4 text-center text-xs text-zinc-500">
@@ -1334,7 +1314,11 @@
                   <span class="text-[11px] text-emerald-600 font-semibold hidden sm:inline">-${porcentajeDescuento}%</span>
                 ` : ''}
               </div>
-              <span class="text-[10px] text-gray-500 block mt-0.5">${t.descargaDigital}</span>
+              <span class="text-xs font-medium text-blue-600 flex items-center gap-1.5 mt-1">
+  <i class="fa-solid fa-cloud-arrow-down text-sm text-blue-600"></i>
+  <span>${t.descargaDigital}</span>
+</span>
+</span>
             </div>
           </div>
         `;
