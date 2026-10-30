@@ -37,22 +37,22 @@
     <div class="w-full h-36 sm:h-56 rounded-2xl overflow-hidden bg-gradient-to-r from-zinc-900 to-black relative shadow-sm border border-gray-200">
       <img src="img/banner-zeronte.png" alt="Zeronte Banner" class="w-full h-full object-cover object-center" onerror="this.style.display='none'; document.getElementById('etsyBannerFallback').classList.remove('hidden');">
       <div id="etsyBannerFallback" class="hidden absolute inset-0 flex flex-col justify-center px-8 text-white">
-        <h2 class="text-xl sm:text-3xl font-serif font-bold">Escribimos música para tus momentos más especiales</h2>
-        <p class="text-xs sm:text-sm text-zinc-300 mt-1">Custom melody for every memory</p>
+        <h2 id="bannerTitulo" class="text-xl sm:text-3xl font-serif font-bold">Escribimos música para tus momentos más especiales</h2>
+        <p id="bannerSub" class="text-xs sm:text-sm text-zinc-300 mt-1">Custom melody for every memory</p>
       </div>
     </div>
 
-    <!-- Perfil de la tienda: Nombre, ventas, buscador y botón de contacto juntos -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-gray-300">
+    <!-- Perfil de la tienda: Fila Superior Exacta a la Captura -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 py-4 border-b border-gray-200">
       
-      <!-- Lado izquierdo: Avatar + Nombre + Estrellas + Ventas -->
+      <!-- LADO IZQUIERDO: Avatar + Nombre + (Estrellas | 192 | 1.092 ventas | Desde 2023) -->
       <div class="flex items-center gap-3 sm:gap-4">
         <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-white shadow-md overflow-hidden bg-black flex-shrink-0 -mt-6 sm:-mt-8 z-10">
           <img src="img/logo-zeronte.png" alt="Zeronte" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-white font-bold text-xl bg-[#222]\'>Z</div>'">
         </div>
         <div>
           <h1 class="text-xl sm:text-2xl font-bold text-[#222222] font-serif leading-tight">Zeronte</h1>
-          <p class="text-xs text-gray-500">Sevilla, España</p>
+          <p id="txtUbicacion" class="text-xs text-gray-500">Sevilla, España</p>
           <div class="flex flex-wrap items-center gap-2 mt-1 text-xs">
             <span class="flex items-center text-amber-500">
               <i class="fa-solid fa-star"></i>
@@ -62,36 +62,67 @@
               <i class="fa-solid fa-star"></i>
             </span>
             <button onclick="cambiarPestana('resenas')" class="text-gray-700 font-semibold hover:underline" id="labelResenasHeader">(192)</button>
-            <span class="text-gray-400">|</span>
+            <span class="text-gray-300">|</span>
             <span class="text-gray-700 font-bold" id="totalVentasEtsy">1.092 ventas</span>
-            <span class="text-gray-400">|</span>
-            <span class="text-gray-500">En tienda desde 2023</span>
+            <span class="text-gray-300">|</span>
+            <span class="text-gray-500" id="txtEnTiendaDesde">Desde 2023</span>
           </div>
         </div>
       </div>
 
-      <!-- Lado derecho: Buscador de tienda + Botón Contacto -->
-      <div class="flex items-center gap-2.5 w-full md:w-auto">
-        <div class="relative flex-1 md:w-64">
-          <input type="text" id="buscadorTienda" oninput="buscarProductos(this.value)" placeholder="Buscar en la tienda..." class="w-full bg-white border border-gray-300 rounded-full py-2 pl-3.5 pr-9 text-xs text-gray-800 focus:outline-none focus:border-gray-600 transition shadow-sm">
-          <span class="absolute right-3 top-2.5 text-gray-400 text-xs pointer-events-none">
+      <!-- LADO DERECHO: Buscador + Menú Idiomas con Banderas Reales + Contacto -->
+      <div class="flex items-center gap-2.5 self-start lg:self-center">
+        <!-- Buscador de tienda -->
+        <div class="relative w-48 sm:w-60 md:w-64">
+          <input type="text" id="buscadorTienda" oninput="buscarProductos(this.value)" placeholder="Buscar artículo..." class="w-full bg-white border border-gray-300 rounded-full py-1.5 pl-4 pr-8 text-xs text-gray-800 focus:outline-none focus:border-gray-500 transition shadow-sm">
+          <span class="absolute right-3 top-2 text-gray-400 text-xs pointer-events-none">
             <i class="fa-solid fa-magnifying-glass"></i>
           </span>
         </div>
-        <a href="https://wa.me/34641851073" target="_blank" class="flex-shrink-0 flex items-center gap-1.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 px-3.5 py-2 rounded-full text-xs font-semibold shadow-sm transition active:scale-95">
+
+        <!-- Menú desplegable de Idiomas -->
+        <div class="relative flex-shrink-0">
+          <button id="btnSelectorIdioma" onclick="toggleDropdownIdioma(event)" class="flex items-center gap-1.5 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 text-xs font-semibold px-2.5 py-1.5 rounded-full shadow-sm transition">
+            <img id="banderaActualImg" src="https://flagcdn.com/w40/es.png" alt="ES" class="w-4 h-3 object-cover rounded-sm shadow-xs">
+            <span id="codigoIdiomaActual" class="uppercase text-[11px] font-bold">ES</span>
+            <i class="fa-solid fa-chevron-down text-[9px] text-gray-400 ml-0.5"></i>
+          </button>
+
+          <!-- Opciones desplegables -->
+          <div id="menuIdiomas" class="hidden absolute right-0 mt-1.5 w-36 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 text-xs">
+            <button onclick="seleccionarIdioma('es')" class="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-gray-100 text-gray-700">
+              <img src="https://flagcdn.com/w40/es.png" alt="ES" class="w-4 h-3 object-cover rounded-sm"> <span>Español</span>
+            </button>
+            <button onclick="seleccionarIdioma('en')" class="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-gray-100 text-gray-700">
+              <img src="https://flagcdn.com/w40/gb.png" alt="EN" class="w-4 h-3 object-cover rounded-sm"> <span>English</span>
+            </button>
+            <button onclick="seleccionarIdioma('fr')" class="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-gray-100 text-gray-700">
+              <img src="https://flagcdn.com/w40/fr.png" alt="FR" class="w-4 h-3 object-cover rounded-sm"> <span>Français</span>
+            </button>
+            <button onclick="seleccionarIdioma('de')" class="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-gray-100 text-gray-700">
+              <img src="https://flagcdn.com/w40/de.png" alt="DE" class="w-4 h-3 object-cover rounded-sm"> <span>Deutsch</span>
+            </button>
+            <button onclick="seleccionarIdioma('zh')" class="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-gray-100 text-gray-700">
+              <img src="https://flagcdn.com/w40/cn.png" alt="ZH" class="w-4 h-3 object-cover rounded-sm"> <span>中文</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Botón Contacto WhatsApp -->
+        <a href="https://wa.me/34641851073" target="_blank" class="flex-shrink-0 flex items-center gap-1.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-sm transition active:scale-95">
           <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
-          <span>Contacto</span>
+          <span id="btnContactoTxt">Contacto</span>
         </a>
       </div>
     </div>
 
-    <!-- ==================== PESTAÑAS DE NAVEGACIÓN ESTILO ETSY ==================== -->
-    <div class="flex items-center gap-6 sm:gap-8 border-b border-gray-300 mt-2 text-xs sm:text-sm font-medium overflow-x-auto no-scrollbar">
+    <!-- FILA INFERIOR INDEPENDIENTE: Pestañas de Navegación Estilo Etsy -->
+    <div class="flex items-center gap-6 sm:gap-8 border-b border-gray-200 mt-1 text-xs sm:text-sm font-medium overflow-x-auto no-scrollbar">
       <button onclick="cambiarPestana('articulos')" id="tab-articulos" class="pestana-btn py-3 border-b-2 border-black font-bold text-black transition whitespace-nowrap">
         Artículos
       </button>
       <button onclick="cambiarPestana('resenas')" id="tab-resenas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
-        Reseñas <span id="conteoPestanaResenas" class="text-xs bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-full font-bold ml-0.5">192</span>
+        <span id="tabResenasTexto">Reseñas</span> <span id="conteoPestanaResenas" class="text-xs bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-full font-bold ml-0.5">192</span>
       </button>
       <button onclick="cambiarPestana('informacion')" id="tab-informacion" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
         Información básica
@@ -108,29 +139,29 @@
       
       <!-- Sidebar de Secciones -->
       <aside class="w-full lg:w-56 flex-shrink-0">
-        <h3 class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-3 hidden lg:block">Secciones</h3>
+        <h3 id="txtSeccionesSidebar" class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-3 hidden lg:block">Secciones</h3>
         <ul id="listaCategorias" class="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs sm:text-sm font-medium">
           <li>
             <button onclick="filtrarCategoria('todos', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg bg-gray-200/80 text-black font-semibold transition text-left whitespace-nowrap">
-              <span>Todos los artículos</span>
+              <span id="catTxtTodos">Todos los artículos</span>
               <span id="conteo-todos" class="text-xs text-gray-500 ml-2">0</span>
             </button>
           </li>
           <li>
             <button onclick="filtrarCategoria('partitura', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap">
-              <span>Partituras personalizadas</span>
+              <span id="catTxtPartituras">Partituras personalizadas</span>
               <span id="conteo-partitura" class="text-xs text-gray-500 ml-2">0</span>
             </button>
           </li>
           <li>
             <button onclick="filtrarCategoria('natalicio', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap">
-              <span>Natalicios</span>
+              <span id="catTxtNatalicios">Natalicios</span>
               <span id="conteo-natalicio" class="text-xs text-gray-500 ml-2">0</span>
             </button>
           </li>
           <li>
             <button onclick="filtrarCategoria('posters', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap">
-              <span>Pósters y Láminas</span>
+              <span id="catTxtPosters">Pósters y Láminas</span>
               <span id="conteo-posters" class="text-xs text-gray-500 ml-2">0</span>
             </button>
           </li>
@@ -156,7 +187,7 @@
     <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-7 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-gray-200 gap-4">
         <div>
-          <h2 class="text-xl font-serif font-bold text-gray-900">Reseñas de la tienda</h2>
+          <h2 id="txtResenasTitulo" class="text-xl font-serif font-bold text-gray-900">Reseñas de la tienda</h2>
           <div class="flex items-center gap-2 mt-1">
             <span class="flex text-amber-500 text-sm">
               <i class="fa-solid fa-star"></i>
@@ -165,18 +196,18 @@
               <i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i>
             </span>
-            <span class="text-sm font-bold text-gray-800">5.0 sobre 5</span>
-            <span class="text-xs text-gray-500">(<span id="resenasTotalCount">192</span> valoraciones)</span>
+            <span id="txtSobre5" class="text-sm font-bold text-gray-800">5.0 sobre 5</span>
+            <span class="text-xs text-gray-500">(<span id="resenasTotalCount">192</span> <span id="txtValoraciones">valoraciones</span>)</span>
           </div>
         </div>
         <button onclick="document.getElementById('formNuevaResena').classList.toggle('hidden')" class="px-4 py-2 border border-black rounded-full text-xs font-bold text-black hover:bg-black hover:text-white transition">
-          <i class="fa-solid fa-pen-to-square mr-1.5"></i> Dejar una reseña
+          <i class="fa-solid fa-pen-to-square mr-1.5"></i> <span id="btnDejarResenaTxt">Dejar una reseña</span>
         </button>
       </div>
 
       <!-- Formulario para nuevos clientes -->
       <div id="formNuevaResena" class="hidden bg-gray-50 border border-gray-200 rounded-xl p-4 sm:p-5 mt-4">
-        <h3 class="text-sm font-bold text-gray-800 mb-2">Escribe tu opinión sobre tu pedido</h3>
+        <h3 id="formTituloResena" class="text-sm font-bold text-gray-800 mb-2">Escribe tu opinión sobre tu pedido</h3>
         <form onsubmit="guardarNuevaResena(event)" class="space-y-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input type="text" id="autorResena" required placeholder="Tu nombre o iniciales (Ej. María G.)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-black">
@@ -187,14 +218,14 @@
           </div>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-1 text-amber-500 text-sm">
-              <span class="text-xs font-semibold text-gray-600 mr-2">Puntuación:</span>
+              <span id="txtPuntuacionForm" class="text-xs font-semibold text-gray-600 mr-2">Puntuación:</span>
               <i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i>
             </div>
-            <button type="submit" class="bg-black text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition">
+            <button type="submit" id="btnPublicarResena" class="bg-black text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition">
               Publicar reseña
             </button>
           </div>
@@ -219,23 +250,23 @@
   <div id="vistaInformacion" class="pestana-contenido hidden max-w-6xl mx-auto px-4 py-6">
     <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
       <div>
-        <h2 class="text-xl font-serif font-bold text-gray-900 mb-2">Sobre Zeronte</h2>
-        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+        <h2 id="txtSobreZeronteTitulo" class="text-xl font-serif font-bold text-gray-900 mb-2">Sobre Zeronte</h2>
+        <p id="txtSobreZeronteCuerpo" class="text-xs sm:text-sm text-gray-600 leading-relaxed">
           Zeronte nace como un estudio de composición y arte sonoro especializado en transformar recuerdos, nombres, fechas y vivencias en obras musicales únicas e irrepetibles. Cada encargo es armonizado meticulosamente siguiendo sistemas de cifrado musical y orquestado con máxima dedicación artística.
         </p>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
         <div class="p-4 bg-gray-50 rounded-xl">
-          <p class="font-bold text-sm text-gray-900 mb-1">Ubicación</p>
-          <p class="text-xs text-gray-600">Sevilla, España</p>
+          <p id="txtInfoCol1Titulo" class="font-bold text-sm text-gray-900 mb-1">Ubicación</p>
+          <p id="txtInfoCol1Desc" class="text-xs text-gray-600">Sevilla, España</p>
         </div>
         <div class="p-4 bg-gray-50 rounded-xl">
-          <p class="font-bold text-sm text-gray-900 mb-1">Especialidad</p>
-          <p class="text-xs text-gray-600">Partituras personalizadas, arreglos y natalicios</p>
+          <p id="txtInfoCol2Titulo" class="font-bold text-sm text-gray-900 mb-1">Especialidad</p>
+          <p id="txtInfoCol2Desc" class="text-xs text-gray-600">Partituras personalizadas, arreglos y natalicios</p>
         </div>
         <div class="p-4 bg-gray-50 rounded-xl">
-          <p class="font-bold text-sm text-gray-900 mb-1">Trayectoria</p>
-          <p class="text-xs text-gray-600">En tienda online desde 2023 · +1.000 partituras</p>
+          <p id="txtInfoCol3Titulo" class="font-bold text-sm text-gray-900 mb-1">Trayectoria</p>
+          <p id="txtInfoCol3Desc" class="text-xs text-gray-600">En tienda online desde 2023 · +1.000 partituras</p>
         </div>
       </div>
     </div>
@@ -245,19 +276,19 @@
   <div id="vistaPoliticas" class="pestana-contenido hidden max-w-6xl mx-auto px-4 py-6">
     <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm text-xs sm:text-sm text-gray-600 leading-relaxed">
       <div>
-        <h2 class="text-xl font-serif font-bold text-gray-900 mb-3">Políticas de la tienda</h2>
+        <h2 id="txtPoliticasTitulo" class="text-xl font-serif font-bold text-gray-900 mb-3">Políticas de la tienda</h2>
       </div>
       <div class="border-t border-gray-100 pt-4">
-        <h3 class="font-bold text-gray-900 mb-1">Descargas y envíos digitales</h3>
-        <p>Todos nuestros productos de partituras personalizadas se entregan en formato digital de alta resolución (PDF listo para enmarcar a 300 DPI) y archivo de audio original (MP3). Los plazos de creación y entrega habituales se sitúan entre 24 y 48 horas.</p>
+        <h3 id="txtEnviosTitulo" class="font-bold text-gray-900 mb-1">Descargas y envíos digitales</h3>
+        <p id="txtEnviosCuerpo">Todos nuestros productos de partituras personalizadas se entregan en formato digital de alta resolución (PDF listo para enmarcar a 300 DPI) y archivo de audio original (MP3). Los plazos de creación y entrega habituales se sitúan entre 24 y 48 horas.</p>
       </div>
       <div class="border-t border-gray-100 pt-4">
-        <h3 class="font-bold text-gray-900 mb-1">Cambios y cancelaciones</h3>
-        <p>Al tratarse de obras personalizadas a medida que se inician tras recibir los datos, no se admiten devoluciones una vez entregado el archivo final. Sin embargo, realizamos cualquier revisión o ajuste necesario sobre el texto o la dedicatoria sin coste adicional para que quedes 100% satisfecho.</p>
+        <h3 id="txtCambiosTitulo" class="font-bold text-gray-900 mb-1">Cambios y cancelaciones</h3>
+        <p id="txtCambiosCuerpo">Al tratarse de obras personalizadas a medida que se inician tras recibir los datos, no se admiten devoluciones una vez entregado el archivo final. Sin embargo, realizamos cualquier revisión o ajuste necesario sobre el texto o la dedicatoria sin coste adicional para que quedes 100% satisfecho.</p>
       </div>
       <div class="border-t border-gray-100 pt-4">
-        <h3 class="font-bold text-gray-900 mb-1">Formas de pago seguras</h3>
-        <p>Aceptamos pagos directos y cifrados mediante Bizum y PayPal para total comodidad y agilidad.</p>
+        <h3 id="txtPagosTitulo" class="font-bold text-gray-900 mb-1">Formas de pago seguras</h3>
+        <p id="txtPagosCuerpo">Aceptamos pagos directos y cifrados mediante Bizum y PayPal para total comodidad y agilidad.</p>
       </div>
     </div>
   </div>
@@ -275,7 +306,7 @@
 
       <!-- Formulario de Pedido -->
       <div id="pantallaFormulario">
-        <span class="text-[10px] uppercase tracking-widest text-gold font-bold">Personaliza tu obra</span>
+        <span id="modalSubtitulo" class="text-[10px] uppercase tracking-widest text-gold font-bold">Personaliza tu obra</span>
         <h3 class="text-lg sm:text-xl font-bold text-white brand-font mt-0.5 pr-8" id="resumenProducto">Producto</h3>
 
         <form id="formularioPedido" onsubmit="enviarPedido(event)" class="space-y-3.5 mt-4">
@@ -283,29 +314,29 @@
           <input type="hidden" id="precioInput">
 
           <div>
-            <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Nombre y Apellidos *</label>
+            <label id="lblNombreCliente" class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Nombre y Apellidos *</label>
             <input type="text" id="nombreCliente" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-gold" placeholder="Ej. Javier Gómez">
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Teléfono / WhatsApp *</label>
+              <label id="lblTelCliente" class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Teléfono / WhatsApp *</label>
               <input type="tel" inputmode="tel" id="telefonoCliente" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-gold" placeholder="600 000 000">
             </div>
             <div>
-              <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Email *</label>
+              <label id="lblEmailCliente" class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Email *</label>
               <input type="email" inputmode="email" id="emailCliente" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-gold" placeholder="correo@ejemplo.com">
             </div>
           </div>
 
           <div>
-            <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Datos de personalización *</label>
+            <label id="lblDatosCliente" class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Datos de personalización *</label>
             <textarea id="personalizacionCliente" rows="2" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gold" placeholder="Nombre(s) para las notas, dedicatoria o fechas..."></textarea>
           </div>
 
           <!-- SELECTOR DE FORMA DE PAGO CON LOGOS OFICIALES -->
           <div>
-            <label class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-2 font-semibold">Método de pago preferido</label>
+            <label id="lblMetodoPago" class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-2 font-semibold">Método de pago preferido</label>
             <div class="grid grid-cols-2 gap-3">
               
               <!-- Bizum Card -->
@@ -341,7 +372,7 @@
           </div>
 
           <button type="submit" id="btnEnviar" class="w-full mt-3 bg-white hover:bg-gold text-black font-bold py-3.5 rounded-xl uppercase tracking-wider text-xs transition duration-200 active:scale-98 shadow-lg flex items-center justify-center gap-2">
-            <span>Confirmar Pedido</span>
+            <span id="btnConfirmarTxt">Confirmar Pedido</span>
             <span id="btnPrecioTexto"></span>
           </button>
         </form>
@@ -352,30 +383,30 @@
         <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">
           ✓
         </div>
-        <h3 class="text-xl font-bold text-white brand-font mb-1">¡Pedido Registrado!</h3>
-        <p class="text-xs text-zinc-400 mb-5">Identificador de pedido: <strong id="codigoPedido" class="text-gold font-mono text-sm"></strong></p>
+        <h3 id="txtExitoTitulo" class="text-xl font-bold text-white brand-font mb-1">¡Pedido Registrado!</h3>
+        <p class="text-xs text-zinc-400 mb-5"><span id="txtIdPedidoLabel">Identificador de pedido:</span> <strong id="codigoPedido" class="text-gold font-mono text-sm"></strong></p>
 
         <!-- Instrucciones Bizum -->
         <div id="instruccionesBizum" class="bg-zinc-900 border border-zinc-700 rounded-2xl p-4 text-left mb-5 space-y-2">
           <div class="flex items-center gap-2 mb-1">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-            <p class="font-bold text-white text-xs uppercase tracking-wider">Pago por Bizum</p>
+            <p id="txtBizumPaso0" class="font-bold text-white text-xs uppercase tracking-wider">Pago por Bizum</p>
           </div>
-          <p class="text-xs text-zinc-300">1. Envía <strong id="totalBizum" class="text-white text-sm"></strong> al número:</p>
+          <p class="text-xs text-zinc-300"><span id="txtBizumPaso1">1. Envía</span> <strong id="totalBizum" class="text-white text-sm"></strong> <span id="txtBizumPaso1b">al número:</span></p>
           <div class="bg-black/60 p-3 rounded-xl flex items-center justify-between border border-zinc-800">
             <span class="font-mono font-bold text-gold text-base">600 123 456</span>
-            <button onclick="copiarTexto('600123456')" class="text-[11px] text-zinc-400 hover:text-white uppercase font-bold bg-zinc-800 px-2.5 py-1 rounded-lg">Copiar</button>
+            <button onclick="copiarTexto('600123456')" id="btnCopiarBizum" class="text-[11px] text-zinc-400 hover:text-white uppercase font-bold bg-zinc-800 px-2.5 py-1 rounded-lg">Copiar</button>
           </div>
-          <p class="text-xs text-zinc-400">2. Concepto: <strong id="conceptoBizum" class="text-white font-mono"></strong></p>
+          <p class="text-xs text-zinc-400"><span id="txtBizumPaso2">2. Concepto:</span> <strong id="conceptoBizum" class="text-white font-mono"></strong></p>
         </div>
 
         <!-- Instrucciones PayPal -->
         <div id="instruccionesPaypal" class="bg-zinc-900 border border-zinc-700 rounded-2xl p-4 text-left mb-5 space-y-3 hidden">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
-            <p class="font-bold text-white text-xs uppercase tracking-wider">Pago por PayPal</p>
+            <p id="txtPaypalPaso0" class="font-bold text-white text-xs uppercase tracking-wider">Pago por PayPal</p>
           </div>
-          <p class="text-xs text-zinc-300">Pulsa para abonar <strong id="totalPaypal" class="text-white"></strong> con PayPal:</p>
+          <p class="text-xs text-zinc-300"><span id="txtPaypalPaso1">Pulsa para abonar</span> <strong id="totalPaypal" class="text-white"></strong> <span id="txtPaypalPaso1b">con PayPal:</span></p>
           <a id="enlacePaypal" href="#" target="_blank" class="block text-center bg-[#0070BA] hover:bg-[#003087] text-white font-bold py-3 rounded-xl transition text-xs uppercase tracking-wider">
             Abrir PayPal
           </a>
@@ -384,7 +415,7 @@
         <!-- Botón WhatsApp -->
         <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
           <i class="fa-brands fa-whatsapp text-lg"></i>
-          <span>Enviar justificante por WhatsApp</span>
+          <span id="btnWpConfirmarTxt">Enviar justificante por WhatsApp</span>
         </a>
       </div>
 
@@ -396,17 +427,17 @@
     <div class="flex items-center justify-around">
       <a href="#catalogo" class="flex flex-col items-center text-zinc-400 hover:text-gold transition active:scale-90">
         <i class="fa-solid fa-music text-base"></i>
-        <span class="text-[10px] mt-1 font-medium">Catálogo</span>
+        <span id="navMobileCatalogo" class="text-[10px] mt-1 font-medium">Catálogo</span>
       </a>
       <button onclick="abrirModal('Mi Nombre en Música + MP3 + QR', 11.99)" class="flex flex-col items-center text-gold transition active:scale-90">
         <div class="w-10 h-10 -mt-5 bg-gold text-black rounded-full flex items-center justify-center shadow-lg font-bold border-2 border-black">
           <i class="fa-solid fa-plus text-sm"></i>
         </div>
-        <span class="text-[10px] mt-0.5 font-bold text-white">Pedir</span>
+        <span id="navMobilePedir" class="text-[10px] mt-0.5 font-bold text-white">Pedir</span>
       </button>
       <a href="https://wa.me/34641851073" target="_blank" class="flex flex-col items-center text-emerald-400 transition active:scale-90">
         <i class="fa-brands fa-whatsapp text-base"></i>
-        <span class="text-[10px] mt-1 font-medium">Chat</span>
+        <span id="navMobileChat" class="text-[10px] mt-1 font-medium">Chat</span>
       </a>
     </div>
   </nav>
@@ -416,66 +447,756 @@
     <div class="max-w-6xl mx-auto flex flex-col items-center justify-center gap-3">
       <img src="logo-zeronte.png" alt="Zeronte" class="w-8 h-8 rounded-lg opacity-80" onerror="this.style.display='none'">
       <p class="font-bold tracking-widest brand-font text-zinc-300">ZERONTE · WE ARE YOUR SOUNDTRACK</p>
-      <p>© 2026 Todos los derechos reservados.</p>
+      <p id="txtDerechosFooter">© 2026 Todos los derechos reservados.</p>
     </div>
   </footer>
 
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-hlCFkngwGxqTIsrr-YvMoOpyFH0tRnbzsYxgrHbosz1ObyxPjnVu-1Wn4EvRd-KwYA/exec";
-    const MI_TELEFONO_WHATSAPP = "34641851073"; 
+    const MI_TELEFONO_WHATSAPP = "34641851073";
     const MI_PAYPAL_USER = "paypal.me/adriandiazgiraldez";
 
+    // 1092 ventas base de Etsy
     const VENTAS_BASE_ETSY = 1092;
     let catalogoCompleto = [];
     let categoriaSeleccionada = 'todos';
     let paginaResenasActual = 1;
     const RESENAS_POR_PAGINA = 10;
     let listaResenasTotales = [];
+    let idiomaActual = localStorage.getItem('zeronte_idioma') || 'es';
+
+    // ================= DICCIONARIO MULTILINGÜE COMPLETO Y EXHAUSTIVO =================
+    const TRADUCCIONES = {
+      es: {
+        flag: "https://flagcdn.com/w40/es.png", code: "ES",
+        bannerTitulo: "Escribimos música para tus momentos más especiales",
+        bannerSub: "Custom melody for every memory",
+        ubicacion: "Sevilla, España",
+        ventasTexto: "ventas",
+        enTienda: "Desde 2023",
+        buscarPlaceholder: "Buscar artículo...",
+        btnContacto: "Contacto",
+        tabArticulos: "Artículos",
+        tabResenas: "Reseñas",
+        tabInformacion: "Información básica",
+        tabPoliticas: "Políticas de la tienda",
+        seccionesTitulo: "Secciones",
+        catTodos: "Todos los artículos",
+        catPartituras: "Partituras personalizadas",
+        catNatalicios: "Natalicios",
+        catPosters: "Pósters y Láminas",
+        cargandoArticulos: "Cargando artículos...",
+        articulosSufijo: "artículos",
+        noArticulos: "No se encontraron artículos.",
+        descargaDigital: "Descarga digital",
+        btnPedir: "Pedir",
+        resenasTitulo: "Reseñas de la tienda",
+        sobre5: "5.0 sobre 5",
+        valoraciones: "valoraciones",
+        btnDejarResena: "Dejar una reseña",
+        formTituloResena: "Escribe tu opinión sobre tu pedido",
+        puntuacionForm: "Puntuación:",
+        placeholderNombreResena: "Tu nombre o iniciales (Ej. María G.)",
+        placeholderProdResena: "Producto comprado (Ej. Mi Nombre en Música)",
+        placeholderTextoResena: "¿Qué te pareció la melodía, la rapidez y el diseño del encargo?...",
+        btnPublicarResena: "Publicar reseña",
+        btnAnterior: "Anterior",
+        btnSiguiente: "Siguiente",
+        paginaDe: "Página {0} de {1}",
+        articuloComprado: "Artículo comprado:",
+        sobreZeronte: "Sobre Zeronte",
+        sobreTexto: "Zeronte nace como un estudio de composición y arte sonoro especializado en transformar recuerdos, nombres, fechas y vivencias en obras musicales únicas e irrepetibles. Cada encargo es armonizado meticulosamente siguiendo sistemas de cifrado musical y orquestado con máxima dedicación artística.",
+        infoCol1Tit: "Ubicación",
+        infoCol1Desc: "Sevilla, España",
+        infoCol2Tit: "Especialidad",
+        infoCol2Desc: "Partituras personalizadas, arreglos y natalicios",
+        infoCol3Tit: "Trayectoria",
+        infoCol3Desc: "En tienda online desde 2023 · +1.000 partituras",
+        politicasTitulo: "Políticas de la tienda",
+        enviosTitulo: "Descargas y envíos digitales",
+        enviosTexto: "Todos nuestros productos de partituras personalizadas se entregan en formato digital de alta resolución (PDF listo para enmarcar a 300 DPI) y archivo de audio original (MP3). Los plazos de creación y entrega habituales se sitúan entre 24 y 48 horas.",
+        cambiosTitulo: "Cambios y cancelaciones",
+        cambiosTexto: "Al tratarse de obras personalizadas a medida que se inician tras recibir los datos, no se admiten devoluciones una vez entregado el archivo final. Sin embargo, realizamos cualquier revisión o ajuste necesario sobre el texto o la dedicatoria sin coste adicional para que quedes 100% satisfecho.",
+        pagosTitulo: "Formas de pago seguras",
+        pagosTexto: "Aceptamos pagos directos y cifrados mediante Bizum y PayPal para total comodidad y agilidad.",
+        modalSub: "Personaliza tu obra",
+        lblNombre: "Nombre y Apellidos *",
+        placeholderNombre: "Ej. Javier Gómez",
+        lblTel: "Teléfono / WhatsApp *",
+        lblEmail: "Email *",
+        lblDatos: "Datos de personalización *",
+        placeholderDatos: "Nombre(s) para las notas, dedicatoria o fechas...",
+        lblMetodo: "Método de pago preferido",
+        btnConfirmar: "Confirmar Pedido",
+        creandoPedido: "Creando pedido...",
+        exitoTitulo: "¡Pedido Registrado!",
+        idPedidoLabel: "Identificador de pedido:",
+        bizumPaso0: "Pago por Bizum",
+        bizumPaso1: "1. Envía",
+        bizumPaso1b: "al número:",
+        bizumPaso2: "2. Concepto:",
+        btnCopiar: "Copiar",
+        paypalPaso0: "Pago por PayPal",
+        paypalPaso1: "Pulsa para abonar",
+        paypalPaso1b: "con PayPal:",
+        btnWpConfirmar: "Enviar justificante por WhatsApp",
+        navCatalogo: "Catálogo",
+        navPedir: "Pedir",
+        navChat: "Chat",
+        footerDerechos: "© 2026 Todos los derechos reservados.",
+        meses: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+        textosResenas: [
+          "Un regalo maravilloso y emocionante. Lloramos al escuchar la melodía con el código QR.",
+          "La calidad de la partitura para imprimir es fantástica. El audio para piano suena perfecto.",
+          "Trato súper atento y entrega muy rápida. Quedó genial en el marco que le compramos.",
+          "Súper original. El cifrado del nombre en notas musicales es un detalle de 10.",
+          "Es el segundo encargo que hago para un aniversario y ha vuelto a ser un éxito rotundo.",
+          "La lámina del natalicio para mi sobrina quedó preciosa. Muy recomendable.",
+          "Una joya de recuerdo. La dedicatoria y el QR son un acierto total.",
+          "Excelente servicio. Llegó en menos de 24 horas y con un audio impecable."
+        ]
+      },
+      en: {
+        flag: "https://flagcdn.com/w40/gb.png", code: "EN",
+        bannerTitulo: "We compose music for your most special moments",
+        bannerSub: "Custom melody for every memory",
+        ubicacion: "Seville, Spain",
+        ventasTexto: "sales",
+        enTienda: "Since 2023",
+        buscarPlaceholder: "Search item...",
+        btnContacto: "Contact",
+        tabArticulos: "Items",
+        tabResenas: "Reviews",
+        tabInformacion: "Shop info",
+        tabPoliticas: "Shop policies",
+        seccionesTitulo: "Sections",
+        catTodos: "All items",
+        catPartituras: "Custom sheet music",
+        catNatalicios: "Birth milestones",
+        catPosters: "Posters & Prints",
+        cargandoArticulos: "Loading items...",
+        articulosSufijo: "items",
+        noArticulos: "No items found.",
+        descargaDigital: "Digital download",
+        btnPedir: "Order",
+        resenasTitulo: "Shop reviews",
+        sobre5: "5.0 out of 5",
+        valoraciones: "ratings",
+        btnDejarResena: "Write a review",
+        formTituloResena: "Share your thoughts on your order",
+        puntuacionForm: "Rating:",
+        placeholderNombreResena: "Your name or initials (e.g. Mary G.)",
+        placeholderProdResena: "Purchased item (e.g. Name in Music)",
+        placeholderTextoResena: "How did you like the melody, speed and design?...",
+        btnPublicarResena: "Submit review",
+        btnAnterior: "Previous",
+        btnSiguiente: "Next",
+        paginaDe: "Page {0} of {1}",
+        articuloComprado: "Purchased item:",
+        sobreZeronte: "About Zeronte",
+        sobreTexto: "Zeronte is a musical art studio specialized in turning memories, names, dates and life moments into unique musical pieces. Each piece is meticulously arranged following musical ciphering and orchestrated with true artistic passion.",
+        infoCol1Tit: "Location",
+        infoCol1Desc: "Seville, Spain",
+        infoCol2Tit: "Specialty",
+        infoCol2Desc: "Custom sheet music, arrangements & birth milestones",
+        infoCol3Tit: "Experience",
+        infoCol3Desc: "Online shop since 2023 · 1,000+ sheet music prints",
+        politicasTitulo: "Shop Policies",
+        enviosTitulo: "Digital downloads & delivery",
+        enviosTexto: "All our custom sheet music products are delivered digitally in high-resolution printable PDF (300 DPI) and original audio (MP3). Typical turnaround time is 24 to 48 hours.",
+        cambiosTitulo: "Exchanges & cancellations",
+        cambiosTexto: "Since these are bespoke made-to-order commissions, returns are not accepted once final files are delivered. However, revisions to dedication texts are included free of charge.",
+        pagosTitulo: "Secure payment methods",
+        pagosTexto: "We accept encrypted direct payments via Bizum and PayPal for your convenience.",
+        modalSub: "Customize your piece",
+        lblNombre: "Full Name *",
+        placeholderNombre: "e.g. John Smith",
+        lblTel: "Phone / WhatsApp *",
+        lblEmail: "Email *",
+        lblDatos: "Customization Details *",
+        placeholderDatos: "Name(s) for the notes, dedication or dates...",
+        lblMetodo: "Preferred payment method",
+        btnConfirmar: "Confirm Order",
+        creandoPedido: "Creating order...",
+        exitoTitulo: "Order Registered!",
+        idPedidoLabel: "Order ID:",
+        bizumPaso0: "Payment via Bizum",
+        bizumPaso1: "1. Send",
+        bizumPaso1b: "to number:",
+        bizumPaso2: "2. Reference:",
+        btnCopiar: "Copy",
+        paypalPaso0: "Payment via PayPal",
+        paypalPaso1: "Click to pay",
+        paypalPaso1b: "with PayPal:",
+        btnWpConfirmar: "Send receipt via WhatsApp",
+        navCatalogo: "Catalog",
+        navPedir: "Order",
+        navChat: "Chat",
+        footerDerechos: "© 2026 All rights reserved.",
+        meses: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        textosResenas: [
+          "A wonderful and emotional gift. We cried hearing the melody from the QR code.",
+          "Top quality printable sheet music. The piano audio sounds absolutely perfect.",
+          "Super attentive customer service and fast delivery. Looks great in the wooden frame.",
+          "So original! Ciphering our names into musical notes was a 10/10 idea.",
+          "This is the second order I place for an anniversary and it was a huge success again.",
+          "The birth milestone print for my niece turned out gorgeous. Highly recommended.",
+          "A treasure keepsake. The custom dedication and QR code make it truly special.",
+          "Outstanding service. Delivered in less than 24 hours with pristine audio quality."
+        ]
+      },
+      fr: {
+        flag: "https://flagcdn.com/w40/fr.png", code: "FR",
+        bannerTitulo: "Nous composons la musique de vos moments les plus précieux",
+        bannerSub: "Custom melody for every memory",
+        ubicacion: "Séville, Espagne",
+        ventasTexto: "ventes",
+        enTienda: "Depuis 2023",
+        buscarPlaceholder: "Rechercher un article...",
+        btnContacto: "Contact",
+        tabArticulos: "Articles",
+        tabResenas: "Avis",
+        tabInformacion: "Infos boutique",
+        tabPoliticas: "Conditions de vente",
+        seccionesTitulo: "Rayons",
+        catTodos: "Tous les articles",
+        catPartituras: "Partitions personnalisées",
+        catNatalicios: "Naissances",
+        catPosters: "Affiches & Posters",
+        cargandoArticulos: "Chargement des articles...",
+        articulosSufijo: "articles",
+        noArticulos: "Aucun article trouvé.",
+        descargaDigital: "Téléchargement numérique",
+        btnPedir: "Commander",
+        resenasTitulo: "Avis sur la boutique",
+        sobre5: "5,0 sur 5",
+        valoraciones: "évaluations",
+        btnDejarResena: "Laisser un avis",
+        formTituloResena: "Donnez votre avis sur votre commande",
+        puntuacionForm: "Note :",
+        placeholderNombreResena: "Votre nom ou initiales (ex. Marie L.)",
+        placeholderProdResena: "Produit acheté (ex. Mon Prénom en Musique)",
+        placeholderTextoResena: "Qu'avez-vous pensé de la mélodie, du délai et du design?...",
+        btnPublicarResena: "Publier l'avis",
+        btnAnterior: "Précédent",
+        btnSiguiente: "Suivant",
+        paginaDe: "Page {0} sur {1}",
+        articuloComprado: "Article acheté :",
+        sobreZeronte: "À propos de Zeronte",
+        sobreTexto: "Zeronte est un studio de création musicale dédié à transformer prénoms, dates et émotions en pièces musicales harmonisées sur mesure avec dévouement artistique.",
+        infoCol1Tit: "Emplacement",
+        infoCol1Desc: "Séville, Espagne",
+        infoCol2Tit: "Spécialité",
+        infoCol2Desc: "Partitions personnalisées, arrangements et naissances",
+        infoCol3Tit: "Expérience",
+        infoCol3Desc: "Boutique en ligne depuis 2023 · +1.000 partitions",
+        politicasTitulo: "Conditions de vente",
+        enviosTitulo: "Livraisons et téléchargements",
+        enviosTexto: "Toutes nos partitions sont livrées en format numérique haute résolution (PDF 300 DPI) et audio MP3 original en 24 à 48 heures.",
+        cambiosTitulo: "Retours et annulations",
+        cambiosTexto: "S'agissant d'œuvres personnalisées à la demande, les retours ne sont pas acceptés une fois le fichier livré. Révisions de texte gratuites.",
+        pagosTitulo: "Paiements sécurisés",
+        pagosTexto: "Nous acceptons les paiements sécurisés par Bizum et PayPal.",
+        modalSub: "Personnalisez votre œuvre",
+        lblNombre: "Nom et Prénom *",
+        placeholderNombre: "ex. Claire Dupont",
+        lblTel: "Téléphone / WhatsApp *",
+        lblEmail: "Email *",
+        lblDatos: "Détails de personnalisation *",
+        placeholderDatos: "Prénom(s) pour les notes, dédicace ou dates...",
+        lblMetodo: "Mode de paiement préféré",
+        btnConfirmar: "Confirmer la commande",
+        creandoPedido: "Création de la commande...",
+        exitoTitulo: "Commande enregistrée !",
+        idPedidoLabel: "Numéro de commande :",
+        bizumPaso0: "Paiement par Bizum",
+        bizumPaso1: "1. Envoyez",
+        bizumPaso1b: "au numéro :",
+        bizumPaso2: "2. Motif :",
+        btnCopiar: "Copier",
+        paypalPaso0: "Paiement par PayPal",
+        paypalPaso1: "Cliquez pour régler",
+        paypalPaso1b: "avec PayPal :",
+        btnWpConfirmar: "Envoyer le justificatif via WhatsApp",
+        navCatalogo: "Catalogue",
+        navPedir: "Commander",
+        navChat: "Discussion",
+        footerDerechos: "© 2026 Tous droits réservés.",
+        meses: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+        textosResenas: [
+          "Un cadeau magnifique et très émouvant. Nous avons adoré la mélodie du QR code.",
+          "Superbe qualité d'impression de la partition. Le piano sonne à la perfection.",
+          "Service client très attentionné et livraison rapide. Parfait dans notre cadre.",
+          "Très original ! Coder les lettres du prénom en notes est une idée géniale.",
+          "Deuxième commande passée pour un anniversaire, toujours autant de succès.",
+          "L'affiche de naissance pour ma nièce est ravissante. Je recommande vivement.",
+          "Un souvenir précieux. La dédicace et le QR code sont un vrai plus.",
+          "Service impeccable, reçu en moins de 24 heures avec une piste audio parfaite."
+        ]
+      },
+      de: {
+        flag: "https://flagcdn.com/w40/de.png", code: "DE",
+        bannerTitulo: "Wir komponieren Musik für Ihre besonderen Momente",
+        bannerSub: "Custom melody for every memory",
+        ubicacion: "Sevilla, Spanien",
+        ventasTexto: "Verkäufe",
+        enTienda: "Seit 2023",
+        buscarPlaceholder: "Artikel suchen...",
+        btnContacto: "Kontakt",
+        tabArticulos: "Artikel",
+        tabResenas: "Bewertungen",
+        tabInformacion: "Shop-Details",
+        tabPoliticas: "Shop-Richtlinien",
+        seccionesTitulo: "Kategorien",
+        catTodos: "Alle Artikel",
+        catPartituras: "Personalisierte Noten",
+        catNatalicios: "Geburtsposter",
+        catPosters: "Poster & Drucke",
+        cargandoArticulos: "Artikel werden geladen...",
+        articulosSufijo: "Artikel",
+        noArticulos: "Keine Artikel gefunden.",
+        descargaDigital: "Digitaler Download",
+        btnPedir: "Bestellen",
+        resenasTitulo: "Shop-Bewertungen",
+        sobre5: "5,0 von 5",
+        valoraciones: "Bewertungen",
+        btnDejarResena: "Bewertung schreiben",
+        formTituloResena: "Schreiben Sie eine Bewertung zu Ihrer Bestellung",
+        puntuacionForm: "Bewertung:",
+        placeholderNombreResena: "Ihr Name (z. B. Julia K.)",
+        placeholderProdResena: "Gekaufter Artikel",
+        placeholderTextoResena: "Wie hat Ihnen die Melodie, die Schnelligkeit und das Design gefallen?...",
+        btnPublicarResena: "Bewertung veröffentlichen",
+        btnAnterior: "Zurück",
+        btnSiguiente: "Weiter",
+        paginaDe: "Seite {0} von {1}",
+        articuloComprado: "Gekaufter Artikel:",
+        sobreZeronte: "Über Zeronte",
+        sobreTexto: "Zeronte verwandelt Namen, Daten und besondere Erinnerungen in maßgeschneiderte musikalische Kunstwerke mit höchster kompositorischer Hingabe.",
+        infoCol1Tit: "Standort",
+        infoCol1Desc: "Sevilla, Spanien",
+        infoCol2Tit: "Spezialität",
+        infoCol2Desc: "Personalisierte Noten, Arrangements und Geburtsposter",
+        infoCol3Tit: "Erfahrung",
+        infoCol3Desc: "Online-Shop seit 2023 · +1.000 Notenblätter",
+        politicasTitulo: "Shop-Richtlinien",
+        enviosTitulo: "Digitaler Download & Lieferung",
+        enviosTexto: "Alle Notenblätter werden hochauflösend als PDF (300 DPI) und MP3-Audio innerhalb von 24–48 Stunden digital geliefert.",
+        cambiosTitulo: "Rückgabe & Stornierung",
+        cambiosTexto: "Da es sich um Sonderanfertigungen handelt, ist eine Rücknahme nach Fertigstellung ausgeschlossen. Widmungskorrekturen sind kostenlos.",
+        pagosTitulo: "Sichere Zahlung",
+        pagosTexto: "Wir akzeptieren sichere Zahlungen via Bizum und PayPal.",
+        modalSub: "Personalisieren Sie Ihr Kunstwerk",
+        lblNombre: "Vor- und Nachname *",
+        placeholderNombre: "z. B. Michael Weber",
+        lblTel: "Telefon / WhatsApp *",
+        lblEmail: "E-Mail *",
+        lblDatos: "Personalisierungsdaten *",
+        placeholderDatos: "Name(n) für die Noten, Widmung oder Daten...",
+        lblMetodo: "Bevorzugte Zahlungsart",
+        btnConfirmar: "Bestellung bestätigen",
+        creandoPedido: "Bestellung wird erstellt...",
+        exitoTitulo: "Bestellung registriert!",
+        idPedidoLabel: "Bestellnummer:",
+        bizumPaso0: "Zahlung per Bizum",
+        bizumPaso1: "1. Senden Sie",
+        bizumPaso1b: "an die Nummer:",
+        bizumPaso2: "2. Verwendungszweck:",
+        btnCopiar: "Kopieren",
+        paypalPaso0: "Zahlung per PayPal",
+        paypalPaso1: "Klicken Sie zum Bezahlen",
+        paypalPaso1b: "mit PayPal:",
+        btnWpConfirmar: "Beleg per WhatsApp senden",
+        navCatalogo: "Katalog",
+        navPedir: "Bestellen",
+        navChat: "Chat",
+        footerDerechos: "© 2026 Alle Rechte vorbehalten.",
+        meses: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+        textosResenas: [
+          "Ein wundervolles und emotionales Geschenk. Die Melodie per QR-Code ist genial.",
+          "Erstklassige Notenqualität zum Ausdrucken. Das Klavierstück klingt traumhaft.",
+          "Sehr zuvorkommender Kundenservice und schnelle Lieferung. Sieht gerahmt toll aus.",
+          "Unglaublich originell! Den Namen in Noten zu verschlüsseln ist fantastisch.",
+          "Bereits meine zweite Bestellung für ein Jubiläum und wieder ein voller Erfolg.",
+          "Das Geburtsposter für meine Nichte ist wunderschön geworden. Sehr zu empfehlen.",
+          "Eine unvergessliche Erinnerung mit persönlicher Widmung und Audio.",
+          "Hervorragender Service, Lieferung in unter 24 Stunden mit makellosem Klang."
+        ]
+      },
+      zh: {
+        flag: "https://flagcdn.com/w40/cn.png", code: "ZH",
+        bannerTitulo: "为您生命中最特别的时刻谱写专属旋律",
+        bannerSub: "Custom melody for every memory",
+        ubicacion: "西班牙塞维利亚",
+        ventasTexto: "笔交易",
+        enTienda: "始于2023年",
+        buscarPlaceholder: "在店内搜索宝贝...",
+        btnContacto: "联系我们",
+        tabArticulos: "宝贝列表",
+        tabResenas: "买家评价",
+        tabInformacion: "店铺详情",
+        tabPoliticas: "定制须知",
+        seccionesTitulo: "宝贝分类",
+        catTodos: "全部宝贝",
+        catPartituras: "姓名专属乐谱",
+        catNatalicios: "新生儿诞生纪念",
+        catPosters: "音乐艺术海报",
+        cargandoArticulos: "加载宝贝中...",
+        articulosSufijo: "件宝贝",
+        noArticulos: "未找到相关宝贝。",
+        descargaDigital: "高清数字下载",
+        btnPedir: "立即定制",
+        resenasTitulo: "店铺评价",
+        sobre5: "5.0 / 5.0",
+        valoraciones: "条真实评价",
+        btnDejarResena: "发表评价",
+        formTituloResena: "分享您的定制体验",
+        puntuacionForm: "评分：",
+        placeholderNombreResena: "您的姓名或昵称",
+        placeholderProdResena: "定制商品名称",
+        placeholderTextoResena: "您对专属旋律、交付速度与乐谱设计满意吗？...",
+        btnPublicarResena: "提交评价",
+        btnAnterior: "上一页",
+        btnSiguiente: "下一页",
+        paginaDe: "第 {0} 页 / 共 {1} 页",
+        articuloComprado: "已购商品：",
+        sobreZeronte: "关于 Zeronte",
+        sobreTexto: "Zeronte 音乐工坊致力于将您的姓名、纪念日与珍贵回忆转化为独一无二的专属钢琴旋律与乐谱艺术品，每一份作品均由专业作曲家悉心创作与编配。",
+        infoCol1Tit: "工作室所在地",
+        infoCol1Desc: "西班牙塞维利亚",
+        infoCol2Tit: "主营业务",
+        infoCol2Desc: "姓名专属乐谱、纪念旋律编配、新生儿纪念谱",
+        infoCol3Tit: "创作经验",
+        infoCol3Desc: "始于2023年 · 已创作1,000+份专属乐谱",
+        politicasTitulo: "定制须知与政策",
+        enviosTitulo: "电子文件交付方式",
+        enviosTexto: "所有定制作品均以 300 DPI 印刷级可打印 PDF 格式及高清 MP3 原声文件交付，通常在 24 至 48 小时内完成发送。",
+        cambiosTitulo: "退款与售后说明",
+        cambiosTexto: "由于作品属于专属定制，电子文件交付后不支持退款。但免费提供题字、日期等文字细节修正服务，确保满意。",
+        pagosTitulo: "安全支付方式",
+        pagosTexto: "支持通过 Bizum 及 PayPal 进行安全加密付款。",
+        modalSub: "定制您的专属乐谱",
+        lblNombre: "您的姓名 *",
+        placeholderNombre: "例如：张先生 / 李女士",
+        lblTel: "联系电话 / WhatsApp *",
+        lblEmail: "电子邮箱 *",
+        lblDatos: "定制信息（姓名/寄语/日期）*",
+        placeholderDatos: "需要谱曲的名字、赠言题字或纪念日期...",
+        lblMetodo: "付款方式选择",
+        btnConfirmar: "确认并提交订单",
+        creandoPedido: "正在创建订单...",
+        exitoTitulo: "订单提交成功！",
+        idPedidoLabel: "订单编号：",
+        bizumPaso0: "Bizum 付款指引",
+        bizumPaso1: "1. 请转账",
+        bizumPaso1b: "至号码：",
+        bizumPaso2: "2. 附言请填写：",
+        btnCopiar: "复制号码",
+        paypalPaso0: "PayPal 付款指引",
+        paypalPaso1: "点击下方按钮支付",
+        paypalPaso1b: "通过 PayPal：",
+        btnWpConfirmar: "通过 WhatsApp 发送凭证",
+        navCatalogo: "商品目录",
+        navPedir: "立即定制",
+        navChat: "在线客服",
+        footerDerechos: "© 2026 Zeronte 版权所有。",
+        meses: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+        textosResenas: [
+          "非常感人且有意义的礼物！扫描乐谱上的二维码听到旋律的那一刻大家都感动哭了。",
+          "乐谱打印出来的质感太棒了，琴谱清晰，配套的钢琴音频超级好听！",
+          "客服服务态度极佳，交付很迅速，装裱在木质相框里摆在家里特别显高级。",
+          "极具创意！用姓名字母转换成音符的想法简直绝了，10分好评！",
+          "这是我第二次为纪念日订购了，每一次都带来极大的惊喜。",
+          "为侄女定制的新生儿乐谱画太漂亮了，细节很走心，强烈推荐！",
+          "一辈子珍藏的浪漫纪念品，独一无二的专属旋律。",
+          "交付非常快，不到24小时就收到了乐谱和MP3音频，品质无可挑剔。"
+        ]
+      }
+    };
+
+    // Diccionario de traducción de títulos de productos
+    const DICCIONARIO_TITULOS = {
+      en: {
+        "Mi Nombre en Música + MP3 + QR": "My Name in Music + MP3 + QR",
+        "Mi Nombre en Música": "My Name in Music",
+        "Tu Nombre con Melodía + MP3": "Your Name with Melody + MP3",
+        "Tu Nombre con Melodía": "Your Name with Melody",
+        "Nombre en Melodía Simple": "Name in Simple Melody",
+        "Lámina Natalicio con Partitura": "Birth Milestone Sheet Music Print",
+        "Póster Círculo de Quintas": "Circle of Fifths Poster",
+        "Nuestro Nombre en Música + MP3": "Our Names in Music + MP3",
+        "Prueba Partitura en Lienzo": "Sheet Music Canvas Print"
+      },
+      fr: {
+        "Mi Nombre en Música + MP3 + QR": "Mon Prénom en Musique + MP3 + QR",
+        "Mi Nombre en Música": "Mon Prénom en Musique",
+        "Tu Nombre con Melodía + MP3": "Ton Prénom en Mélodie + MP3",
+        "Tu Nombre con Melodía": "Ton Prénom en Mélodie",
+        "Nombre en Melodía Simple": "Prénom en Mélodie Simple",
+        "Lámina Natalicio con Partitura": "Affiche de Naissance avec Partition",
+        "Póster Círculo de Quintas": "Poster Cercle des Quintes",
+        "Nuestro Nombre en Música + MP3": "Nos Prénoms en Musique + MP3",
+        "Prueba Partitura en Lienzo": "Impression Partition sur Toile"
+      },
+      de: {
+        "Mi Nombre en Música + MP3 + QR": "Mein Name in Noten + MP3 + QR",
+        "Mi Nombre en Música": "Mein Name in Noten",
+        "Tu Nombre con Melodía + MP3": "Dein Name als Melodie + MP3",
+        "Tu Nombre con Melodía": "Dein Name als Melodie",
+        "Nombre en Melodía Simple": "Name als einfache Melodie",
+        "Lámina Natalicio con Partitura": "Geburtsposter mit Notenblatt",
+        "Póster Círculo de Quintas": "Quintenzirkel Poster",
+        "Nuestro Nombre en Música + MP3": "Unsere Namen in Musik + MP3",
+        "Prueba Partitura en Lienzo": "Notenblatt auf Leinwand"
+      },
+      zh: {
+        "Mi Nombre en Música + MP3 + QR": "姓名专属乐谱定制 + MP3 + QR二维码",
+        "Mi Nombre en Música": "姓名专属乐谱",
+        "Tu Nombre con Melodía + MP3": "定制姓名旋律 + MP3伴奏",
+        "Tu Nombre con Melodía": "定制姓名旋律",
+        "Nombre en Melodía Simple": "简约姓名旋律乐谱",
+        "Lámina Natalicio con Partitura": "新生儿诞生纪念乐谱画",
+        "Póster Círculo de Quintas": "五度相生圈教学海报",
+        "Nuestro Nombre en Música + MP3": "情侣姓名专属乐谱 + MP3",
+        "Prueba Partitura en Lienzo": "艺术油画布乐谱"
+      }
+    };
 
     document.addEventListener("DOMContentLoaded", () => {
+      inicializarResenas();
       cargarCatalogoDinamico();
       actualizarContadorVentas();
-      inicializarResenas();
+      aplicarIdioma(idiomaActual);
+
+      document.addEventListener("click", (e) => {
+        const btn = document.getElementById("btnSelectorIdioma");
+        const menu = document.getElementById("menuIdiomas");
+        if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+          menu.classList.add("hidden");
+        }
+      });
     });
 
-    // ================= SISTEMA DE PESTAÑAS ETSY =================
-    function cambiarPestana(id) {
-      document.querySelectorAll('.pestana-contenido').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.pestana-btn').forEach(btn => {
-        btn.classList.remove('border-black', 'text-black', 'font-bold');
-        btn.classList.add('border-transparent', 'text-gray-600');
-      });
+    // ================= SELECTOR DE IDIOMAS =================
+    function toggleDropdownIdioma(e) {
+      e.stopPropagation();
+      const menu = document.getElementById("menuIdiomas");
+      if (menu) menu.classList.toggle("hidden");
+    }
 
-      const vistaMap = {
-        'articulos': 'vistaArticulos',
-        'resenas': 'vistaResenas',
-        'informacion': 'vistaInformacion',
-        'politicas': 'vistaPoliticas'
-      };
+    function seleccionarIdioma(lang) {
+      idiomaActual = lang;
+      localStorage.setItem('zeronte_idioma', lang);
+      const menu = document.getElementById("menuIdiomas");
+      if (menu) menu.classList.add("hidden");
+      
+      // Aplicar traducciones a toda la web
+      aplicarIdioma(lang);
+      actualizarTextosResenasIdioma();
+      renderizarCatalogo(catalogoCompleto);
+      renderizarResenasPagina();
+    }
 
-      const seccion = document.getElementById(vistaMap[id]);
-      const boton = document.getElementById(`tab-${id}`);
+    function aplicarIdioma(lang) {
+      const t = TRADUCCIONES[lang] || TRADUCCIONES.es;
 
-      if (seccion) seccion.classList.remove('hidden');
-      if (boton) {
-        boton.classList.add('border-black', 'text-black', 'font-bold');
-        boton.classList.remove('border-transparent', 'text-gray-600');
+      // Bandera y código
+      const imgBandera = document.getElementById("banderaActualImg");
+      if (imgBandera) {
+        imgBandera.src = t.flag;
+        imgBandera.alt = t.code;
       }
-      window.scrollTo({ top: 380, behavior: 'smooth' });
+      const codIdioma = document.getElementById("codigoIdiomaActual");
+      if (codIdioma) codIdioma.innerText = t.code;
+
+      // Banner y perfil superior
+      const bTit = document.getElementById("bannerTitulo");
+      if (bTit) bTit.innerText = t.bannerTitulo;
+      const bSub = document.getElementById("bannerSub");
+      if (bSub) bSub.innerText = t.bannerSub;
+      const ubi = document.getElementById("txtUbicacion");
+      if (ubi) ubi.innerText = t.ubicacion;
+      const enTienda = document.getElementById("txtEnTiendaDesde");
+      if (enTienda) enTienda.innerText = t.enTienda;
+
+      // Buscador y Contacto
+      const buscador = document.getElementById("buscadorTienda");
+      if (buscador) buscador.placeholder = t.buscarPlaceholder;
+      const btnC = document.getElementById("btnContactoTxt");
+      if (btnC) btnC.innerText = t.btnContacto;
+
+      // Pestañas
+      const tabArt = document.getElementById("tab-articulos");
+      if (tabArt) tabArt.innerText = t.tabArticulos;
+      const tabRes = document.getElementById("tabResenasTexto");
+      if (tabRes) tabRes.innerText = t.tabResenas;
+      const tabInfo = document.getElementById("tab-informacion");
+      if (tabInfo) tabInfo.innerText = t.tabInformacion;
+      const tabPol = document.getElementById("tab-politicas");
+      if (tabPol) tabPol.innerText = t.tabPoliticas;
+
+      // Sidebar Categorías
+      const secSidebar = document.getElementById("txtSeccionesSidebar");
+      if (secSidebar) secSidebar.innerText = t.seccionesTitulo;
+      const catTod = document.getElementById("catTxtTodos");
+      if (catTod) catTod.innerText = t.catTodos;
+      const catPart = document.getElementById("catTxtPartituras");
+      if (catPart) catPart.innerText = t.catPartituras;
+      const catNat = document.getElementById("catTxtNatalicios");
+      if (catNat) catNat.innerText = t.catNatalicios;
+      const catPost = document.getElementById("catTxtPosters");
+      if (catPost) catPost.innerText = t.catPosters;
+
+      // Título sección actual en catálogo
+      const tituloMap = {
+        'todos': t.catTodos,
+        'partitura': t.catPartituras,
+        'natalicio': t.catNatalicios,
+        'posters': t.catPosters
+      };
+      const tSec = document.getElementById('tituloSeccionActual');
+      if (tSec) tSec.innerText = tituloMap[categoriaSeleccionada] || t.catTodos;
+
+      // Sección Reseñas
+      const resTit = document.getElementById("txtResenasTitulo");
+      if (resTit) resTit.innerText = t.resenasTitulo;
+      const s5 = document.getElementById("txtSobre5");
+      if (s5) s5.innerText = t.sobre5;
+      const val = document.getElementById("txtValoraciones");
+      if (val) val.innerText = t.valoraciones;
+      const btnDej = document.getElementById("btnDejarResenaTxt");
+      if (btnDej) btnDej.innerText = t.btnDejarResena;
+      const fTit = document.getElementById("formTituloResena");
+      if (fTit) fTit.innerText = t.formTituloResena;
+      const autR = document.getElementById("autorResena");
+      if (autR) autR.placeholder = t.placeholderNombreResena;
+      const artR = document.getElementById("articuloResena");
+      if (artR) artR.placeholder = t.placeholderProdResena;
+      const txtR = document.getElementById("textoResena");
+      if (txtR) txtR.placeholder = t.placeholderTextoResena;
+      const pF = document.getElementById("txtPuntuacionForm");
+      if (pF) pF.innerText = t.puntuacionForm;
+      const btnPub = document.getElementById("btnPublicarResena");
+      if (btnPub) btnPub.innerText = t.btnPublicarResena;
+      const bAnt = document.getElementById("btnResenaAnt");
+      if (bAnt) bAnt.innerText = t.btnAnterior;
+      const bSig = document.getElementById("btnResenaSig");
+      if (bSig) bSig.innerText = t.btnSiguiente;
+
+      // Sección Información Básica
+      const infoTit = document.getElementById("txtSobreZeronteTitulo");
+      if (infoTit) infoTit.innerText = t.sobreZeronte;
+      const infoCuerpo = document.getElementById("txtSobreZeronteCuerpo");
+      if (infoCuerpo) infoCuerpo.innerText = t.sobreTexto;
+      const i1t = document.getElementById("txtInfoCol1Titulo");
+      if (i1t) i1t.innerText = t.infoCol1Tit;
+      const i1d = document.getElementById("txtInfoCol1Desc");
+      if (i1d) i1d.innerText = t.infoCol1Desc;
+      const i2t = document.getElementById("txtInfoCol2Titulo");
+      if (i2t) i2t.innerText = t.infoCol2Tit;
+      const i2d = document.getElementById("txtInfoCol2Desc");
+      if (i2d) i2d.innerText = t.infoCol2Desc;
+      const i3t = document.getElementById("txtInfoCol3Titulo");
+      if (i3t) i3t.innerText = t.infoCol3Tit;
+      const i3d = document.getElementById("txtInfoCol3Desc");
+      if (i3d) i3d.innerText = t.infoCol3Desc;
+
+      // Sección Políticas
+      const polTit = document.getElementById("txtPoliticasTitulo");
+      if (polTit) polTit.innerText = t.politicasTitulo;
+      const envTit = document.getElementById("txtEnviosTitulo");
+      if (envTit) envTit.innerText = t.enviosTitulo;
+      const envCuerpo = document.getElementById("txtEnviosCuerpo");
+      if (envCuerpo) envCuerpo.innerText = t.enviosTexto;
+      const camTit = document.getElementById("txtCambiosTitulo");
+      if (camTit) camTit.innerText = t.cambiosTitulo;
+      const camCuerpo = document.getElementById("txtCambiosCuerpo");
+      if (camCuerpo) camCuerpo.innerText = t.cambiosTexto;
+      const pagTit = document.getElementById("txtPagosTitulo");
+      if (pagTit) pagTit.innerText = t.pagosTitulo;
+      const pagCuerpo = document.getElementById("txtPagosCuerpo");
+      if (pagCuerpo) pagCuerpo.innerText = t.pagosTexto;
+
+      // Modal de Compra y Formulario
+      const mSub = document.getElementById("modalSubtitulo");
+      if (mSub) mSub.innerText = t.modalSub;
+      const lNom = document.getElementById("lblNombreCliente");
+      if (lNom) lNom.innerText = t.lblNombre;
+      const iNom = document.getElementById("nombreCliente");
+      if (iNom) iNom.placeholder = t.placeholderNombre;
+      const lTel = document.getElementById("lblTelCliente");
+      if (lTel) lTel.innerText = t.lblTel;
+      const lEm = document.getElementById("lblEmailCliente");
+      if (lEm) lEm.innerText = t.lblEmail;
+      const lDat = document.getElementById("lblDatosCliente");
+      if (lDat) lDat.innerText = t.lblDatos;
+      const iDat = document.getElementById("personalizacionCliente");
+      if (iDat) iDat.placeholder = t.placeholderDatos;
+      const lMet = document.getElementById("lblMetodoPago");
+      if (lMet) lMet.innerText = t.lblMetodo;
+      const bConf = document.getElementById("btnConfirmarTxt");
+      if (bConf) bConf.innerText = t.btnConfirmar;
+
+      // Pantalla Éxito
+      const eTit = document.getElementById("txtExitoTitulo");
+      if (eTit) eTit.innerText = t.exitoTitulo;
+      const idPedL = document.getElementById("txtIdPedidoLabel");
+      if (idPedL) idPedL.innerText = t.idPedidoLabel;
+      const bz0 = document.getElementById("txtBizumPaso0");
+      if (bz0) bz0.innerText = t.bizumPaso0;
+      const bz1 = document.getElementById("txtBizumPaso1");
+      if (bz1) bz1.innerText = t.bizumPaso1;
+      const bz1b = document.getElementById("txtBizumPaso1b");
+      if (bz1b) bz1b.innerText = t.bizumPaso1b;
+      const bz2 = document.getElementById("txtBizumPaso2");
+      if (bz2) bz2.innerText = t.bizumPaso2;
+      const bCop = document.getElementById("btnCopiarBizum");
+      if (bCop) bCop.innerText = t.btnCopiar;
+      const py0 = document.getElementById("txtPaypalPaso0");
+      if (py0) py0.innerText = t.paypalPaso0;
+      const py1 = document.getElementById("txtPaypalPaso1");
+      if (py1) py1.innerText = t.paypalPaso1;
+      const py1b = document.getElementById("txtPaypalPaso1b");
+      if (py1b) py1b.innerText = t.paypalPaso1b;
+      const bWp = document.getElementById("btnWpConfirmarTxt");
+      if (bWp) bWp.innerText = t.btnWpConfirmar;
+
+      // Navegación móvil y Footer
+      const nCat = document.getElementById("navMobileCatalogo");
+      if (nCat) nCat.innerText = t.navCatalogo;
+      const nPed = document.getElementById("navMobilePedir");
+      if (nPed) nPed.innerText = t.navPedir;
+      const nChat = document.getElementById("navMobileChat");
+      if (nChat) nChat.innerText = t.navChat;
+      const fDer = document.getElementById("txtDerechosFooter");
+      if (fDer) fDer.innerText = t.footerDerechos;
+
+      actualizarContadorVentas();
     }
 
     // ================= VENTAS Y CATÁLOGO =================
     async function actualizarContadorVentas() {
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
+      const pedidosLocales = parseInt(localStorage.getItem('zeronte_pedidos_locales_count') || '0', 10);
+      let pedidosRemotos = 0;
+
       try {
         const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerConteoVentas`);
         const data = await res.json();
         if (data.status === "success" && typeof data.totalPedidos === "number") {
-          const total = VENTAS_BASE_ETSY + data.totalPedidos;
-          document.getElementById('totalVentasEtsy').innerText = `${total.toLocaleString('es-ES')} ventas`;
+          pedidosRemotos = data.totalPedidos;
         }
       } catch (e) {
-        document.getElementById('totalVentasEtsy').innerText = `${VENTAS_BASE_ETSY.toLocaleString('es-ES')} ventas`;
+        pedidosRemotos = 0;
+      }
+
+      const extra = Math.max(pedidosLocales, pedidosRemotos);
+      const totalVentas = VENTAS_BASE_ETSY + extra;
+
+      const elVentas = document.getElementById('totalVentasEtsy');
+      if (elVentas) {
+        elVentas.innerText = `${totalVentas.toLocaleString('es-ES')} ${t.ventasTexto}`;
       }
     }
 
@@ -493,15 +1214,33 @@
       }
     }
 
+    function traducirTituloProducto(tituloOriginal, lang) {
+      if (!tituloOriginal) return "";
+      if (lang === 'es' || !DICCIONARIO_TITULOS[lang]) return tituloOriginal;
+
+      const valoresIdioma = Object.values(DICCIONARIO_TITULOS[lang]);
+      if (valoresIdioma.includes(tituloOriginal)) {
+        return tituloOriginal;
+      }
+
+      for (const [claveEs, traduccion] of Object.entries(DICCIONARIO_TITULOS[lang])) {
+        if (tituloOriginal.toLowerCase() === claveEs.toLowerCase()) {
+          return traduccion;
+        }
+      }
+      return tituloOriginal;
+    }
+
     function renderizarCatalogo(lista) {
       const contenedor = document.getElementById("gridProductos");
       const contadorLabel = document.getElementById("contadorResultados");
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       
-      if (contadorLabel) contadorLabel.innerText = `${lista.length} artículos`;
+      if (contadorLabel) contadorLabel.innerText = `${lista.length} ${t.articulosSufijo}`;
       if (!contenedor) return;
 
       if (lista.length === 0) {
-        contenedor.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500 text-sm">No se encontraron artículos que coincidan con la búsqueda.</div>`;
+        contenedor.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500 text-sm">${t.noArticulos}</div>`;
         return;
       }
 
@@ -512,18 +1251,19 @@
         const tieneOferta = precioOferta && precioOferta > 0 && precioOferta < precioBase;
         const precioFinal = tieneOferta ? precioOferta : precioBase;
         const porcentajeDescuento = tieneOferta ? Math.round(((precioBase - precioOferta) / precioBase) * 100) : 0;
+        const tituloTraducido = traducirTituloProducto(p.titulo, idiomaActual);
 
         return `
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirModal('${p.titulo.replace(/'/g, "\\'")}', ${precioFinal})">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirModal('${tituloTraducido.replace(/'/g, "\\'")}', ${precioFinal})">
             <div>
               <div class="aspect-square bg-gray-100 relative overflow-hidden">
-                <img src="${imgUrl}" alt="${p.titulo}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                 ${tieneOferta ? `<span class="absolute top-2 left-2 bg-[#d23f57] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">-${porcentajeDescuento}%</span>` : ''}
               </div>
 
               <div class="p-3">
                 <h3 class="text-xs sm:text-sm font-medium text-[#222222] line-clamp-2 leading-snug group-hover:underline">
-                  ${p.titulo}
+                  ${tituloTraducido}
                 </h3>
                 
                 <div class="flex items-center gap-1 mt-1 text-[11px] text-amber-500">
@@ -538,10 +1278,10 @@
                 <span class="text-sm sm:text-base font-bold text-[#222222]">${precioFinal.toFixed(2)} €</span>
                 ${tieneOferta ? `
                   <span class="text-xs text-gray-400 line-through">${precioBase.toFixed(2)} €</span>
-                  <span class="text-[11px] text-emerald-600 font-semibold hidden sm:inline">Rebaja</span>
+                  <span class="text-[11px] text-emerald-600 font-semibold hidden sm:inline">-${porcentajeDescuento}%</span>
                 ` : ''}
               </div>
-              <span class="text-[10px] text-gray-500 block mt-0.5">Descarga digital</span>
+              <span class="text-[10px] text-gray-500 block mt-0.5">${t.descargaDigital}</span>
             </div>
           </div>
         `;
@@ -550,6 +1290,8 @@
 
     function filtrarCategoria(cat, btn) {
       categoriaSeleccionada = cat;
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
+
       document.querySelectorAll('.cat-btn').forEach(b => {
         b.classList.remove('bg-gray-200/80', 'text-black', 'font-semibold');
         b.classList.add('text-gray-700');
@@ -557,13 +1299,13 @@
       btn.classList.add('bg-gray-200/80', 'text-black', 'font-semibold');
 
       const tituloMap = {
-        'todos': 'Todos los artículos',
-        'partitura': 'Partituras personalizadas',
-        'natalicio': 'Natalicios',
-        'posters': 'Pósters y Láminas'
+        'todos': t.catTodos,
+        'partitura': t.catPartituras,
+        'natalicio': t.catNatalicios,
+        'posters': t.catPosters
       };
       const tituloEl = document.getElementById('tituloSeccionActual');
-      if (tituloEl) tituloEl.innerText = tituloMap[cat] || 'Artículos';
+      if (tituloEl) tituloEl.innerText = tituloMap[cat] || t.catTodos;
 
       if (cat === 'todos') {
         renderizarCatalogo(catalogoCompleto);
@@ -598,47 +1340,75 @@
       if (elPosters) elPosters.innerText = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('poster')).length;
     }
 
-    // ================= SISTEMA DE RESEÑAS =================
-    function inicializarResenas() {
-      const nombres = ["Laura M.", "Carlos S.", "Beatriz R.", "Javier T.", "Elena P.", "David G.", "Lucía V.", "Marta D.", "Pablo H.", "Sara C.", "Álvaro F.", "Cristina B.", "Guillermo N.", "Ana Belén", "Manuel Q.", "Carmen J.", "Raquel E.", "Jorge L."];
-      const articulos = ["Mi Nombre en Música + MP3 + QR", "Tu Nombre con Melodía + MP3", "Lámina Natalicio con Partitura", "Póster Círculo de Quintas", "Nombre en Melodía Simple"];
-      const textos = [
-        "Un regalo maravilloso y emocionante. Lloramos al escuchar la melodía con el código QR.",
-        "La calidad de la partitura para imprimir es fantástica. El audio para piano suena perfecto.",
-        "Trato súper atento y entrega muy rápida. Quedó genial en el marco que le compramos.",
-        "Súper original. El cifrado del nombre en notas musicales es un detalle de 10.",
-        "Es el segundo encargo que hago para un aniversario y ha vuelto a ser un éxito rotundo.",
-        "La lámina del natalicio para mi sobrina quedó preciosa. Muy recomendable.",
-        "Una joya de recuerdo. La dedicatoria y el QR son un acierto total.",
-        "Excelente servicio. Llegó en menos de 24 horas y con un audio impecable."
-      ];
+    // ================= PESTAÑAS =================
+    function cambiarPestana(id) {
+      document.querySelectorAll('.pestana-contenido').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.pestana-btn').forEach(btn => {
+        btn.classList.remove('border-black', 'text-black', 'font-bold');
+        btn.classList.add('border-transparent', 'text-gray-600');
+      });
 
-      const resenasBase = [];
-      for (let i = 1; i <= 192; i++) {
-        const nom = nombres[i % nombres.length];
-        const art = articulos[i % articulos.length];
-        const txt = textos[i % textos.length];
-        const dia = (i % 28) + 1;
-        const mes = ((i % 12) + 1).toString().padStart(2, '0');
-        const anio = 2023 + (i % 3);
-        resenasBase.push({
-          autor: nom,
-          fecha: `${dia} de ${obtenerNombreMes(mes)}, ${anio}`,
-          articulo: art,
-          texto: txt
-        });
+      const vistaMap = {
+        'articulos': 'vistaArticulos',
+        'resenas': 'vistaResenas',
+        'informacion': 'vistaInformacion',
+        'politicas': 'vistaPoliticas'
+      };
+
+      const seccion = document.getElementById(vistaMap[id]);
+      const boton = document.getElementById(`tab-${id}`);
+
+      if (seccion) seccion.classList.remove('hidden');
+      if (boton) {
+        boton.classList.add('border-black', 'text-black', 'font-bold');
+        boton.classList.remove('border-transparent', 'text-gray-600');
       }
-
-      const guardadas = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
-      listaResenasTotales = [...guardadas, ...resenasBase];
-
-      actualizarContadoresResenas();
-      renderizarResenasPagina();
+      window.scrollTo({ top: 380, behavior: 'smooth' });
     }
 
-    function obtenerNombreMes(m) {
-      const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-      return meses[parseInt(m) - 1] || "mayo";
+    // ================= RESEÑAS TOTALES Y TRADUCIDAS =================
+    let baseEstructuraResenas = [];
+
+    function inicializarResenas() {
+      const nombres = ["Laura M.", "Carlos S.", "Beatriz R.", "Javier T.", "Elena P.", "David G.", "Lucía V.", "Marta D.", "Pablo H.", "Sara C.", "Álvaro F.", "Cristina B.", "Guillermo N.", "Ana Belén", "Manuel Q.", "Carmen J.", "Raquel E.", "Jorge L."];
+      const articulosEs = ["Mi Nombre en Música + MP3 + QR", "Tu Nombre con Melodía + MP3", "Lámina Natalicio con Partitura", "Póster Círculo de Quintas", "Nombre en Melodía Simple"];
+
+      baseEstructuraResenas = [];
+      for (let i = 1; i <= 192; i++) {
+        const nom = nombres[i % nombres.length];
+        const art = articulosEs[i % articulosEs.length];
+        const textoIndice = i % 8;
+        const dia = (i % 28) + 1;
+        const mesIndice = i % 12;
+        const anio = 2023 + (i % 3);
+        baseEstructuraResenas.push({ autor: nom, articuloOriginal: art, textoIndice, dia, mesIndice, anio });
+      }
+
+      actualizarTextosResenasIdioma();
+    }
+
+    function actualizarTextosResenasIdioma() {
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
+      const resenasMapeadas = baseEstructuraResenas.map(r => {
+        const mesTexto = t.meses[r.mesIndice];
+        let fechaTexto = `${r.dia} de ${mesTexto}, ${r.anio}`;
+        if (idiomaActual === 'en') fechaTexto = `${mesTexto} ${r.dia}, ${r.anio}`;
+        if (idiomaActual === 'zh') fechaTexto = `${r.anio}年${mesTexto}${r.dia}日`;
+        if (idiomaActual === 'de') fechaTexto = `${r.dia}. ${mesTexto} ${r.anio}`;
+        if (idiomaActual === 'fr') fechaTexto = `${r.dia} ${mesTexto} ${r.anio}`;
+
+        return {
+          autor: r.autor,
+          fecha: fechaTexto,
+          articulo: traducirTituloProducto(r.articuloOriginal, idiomaActual),
+          texto: t.textosResenas[r.textoIndice]
+        };
+      });
+
+      const guardadas = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
+      listaResenasTotales = [...guardadas, ...resenasMapeadas];
+
+      actualizarContadoresResenas();
     }
 
     function actualizarContadoresResenas() {
@@ -654,6 +1424,7 @@
 
     function renderizarResenasPagina() {
       const contenedor = document.getElementById("contenedorListaResenas");
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       if (!contenedor) return;
 
       const totalPaginas = Math.ceil(listaResenasTotales.length / RESENAS_POR_PAGINA);
@@ -680,11 +1451,11 @@
             <span class="text-[11px] text-gray-400">${r.fecha}</span>
           </div>
           <p class="text-xs text-gray-700 leading-relaxed">${r.texto}</p>
-          <p class="text-[11px] text-gray-400 italic">Artículo comprado: <span class="text-gray-600 font-medium">${r.articulo}</span></p>
+          <p class="text-[11px] text-gray-400 italic">${t.articuloComprado} <span class="text-gray-600 font-medium">${r.articulo}</span></p>
         </div>
       `).join('');
 
-      document.getElementById('infoPaginaResenas').innerText = `Página ${paginaResenasActual} de ${totalPaginas}`;
+      document.getElementById('infoPaginaResenas').innerText = t.paginaDe.replace('{0}', paginaResenasActual).replace('{1}', totalPaginas);
       document.getElementById('btnResenaAnt').disabled = (paginaResenasActual === 1);
       document.getElementById('btnResenaSig').disabled = (paginaResenasActual === totalPaginas);
     }
@@ -696,12 +1467,14 @@
 
     function guardarNuevaResena(e) {
       e.preventDefault();
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       const autor = document.getElementById('autorResena').value.trim();
       const articulo = document.getElementById('articuloResena').value.trim();
       const texto = document.getElementById('textoResena').value.trim();
 
       const hoy = new Date();
-      const fechaTexto = `${hoy.getDate()} de ${obtenerNombreMes(hoy.getMonth() + 1)}, ${hoy.getFullYear()}`;
+      const mesTexto = t.meses[hoy.getMonth()];
+      const fechaTexto = `${hoy.getDate()} de ${mesTexto}, ${hoy.getFullYear()}`;
 
       const nueva = { autor, articulo, texto, fecha: fechaTexto };
 
@@ -716,7 +1489,6 @@
 
       e.target.reset();
       document.getElementById('formNuevaResena').classList.add('hidden');
-      alert("¡Gracias por tu reseña! Ha sido añadida a la tienda.");
     }
 
     // ================= MODAL Y ENVÍO DE PEDIDO =================
@@ -740,8 +1512,9 @@
     async function enviarPedido(e) {
       e.preventDefault();
       const btn = document.getElementById('btnEnviar');
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Creando pedido...`;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> ${t.creandoPedido}`;
 
       const datos = {
         nombre: document.getElementById('nombreCliente').value,
@@ -762,12 +1535,23 @@
 
         const respuesta = await res.json();
         const orderId = respuesta.orderId || ("PED-" + Math.floor(1000 + Math.random() * 9000));
+        
+        registrarPedidoExitoso();
         mostrarExito(orderId, datos);
       } catch (err) {
-        console.error("Error:", err);
+        console.error("Error al registrar:", err);
         const orderIdFallback = "PED-" + Math.floor(1000 + Math.random() * 9000);
+        
+        registrarPedidoExitoso();
         mostrarExito(orderIdFallback, datos);
       }
+    }
+
+    function registrarPedidoExitoso() {
+      let count = parseInt(localStorage.getItem('zeronte_pedidos_locales_count') || '0', 10);
+      count += 1;
+      localStorage.setItem('zeronte_pedidos_locales_count', count.toString());
+      actualizarContadorVentas();
     }
 
     function mostrarExito(orderId, datos) {
@@ -794,7 +1578,7 @@
 
     function copiarTexto(texto) {
       navigator.clipboard.writeText(texto);
-      alert("Número copiado al portapapeles: " + texto);
+      alert(texto);
     }
   </script>
 </body>
