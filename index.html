@@ -381,6 +381,139 @@
     </div>
   </div>
 
+  <!-- ==================== MODAL FICHA DE ARTÍCULO ESTILO ETSY ==================== -->
+  <div id="modalFichaArticulo" class="fixed inset-0 w-screen h-screen bg-white hidden z-50 overflow-y-auto select-none">
+    
+    <!-- Barra superior fija con botón volver estilo Etsy -->
+    <header class="sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-40 px-4 sm:px-8 py-3 flex items-center justify-between">
+      <button onclick="cerrarFichaArticulo()" class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-700 hover:text-black transition group">
+        <span class="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center transition">
+          <i class="fa-solid fa-arrow-left text-xs"></i>
+        </span>
+        <span>Volver a la tienda</span>
+      </button>
+
+      <span class="font-serif font-bold text-base text-gray-900 tracking-wider">ZERONTE</span>
+
+      <button onclick="cerrarFichaArticulo()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold transition">
+        ✕
+      </button>
+    </header>
+
+    <!-- Contenedor Principal a pantalla completa -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        
+        <!-- COLUMNA IZQUIERDA: Miniaturas y Visor Cuadrado 1:1 (Lg: 7 cols) -->
+        <div class="lg:col-span-7 flex flex-col-reverse sm:flex-row gap-4 items-start">
+          
+          <!-- Miniaturas cuadradas -->
+          <div id="carruselMiniaturasFicha" class="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto w-full sm:w-20 max-h-[580px] no-scrollbar flex-shrink-0">
+            <!-- Miniaturas generadas dinámicamente -->
+          </div>
+
+          <!-- Mockup Principal Cuadrado 1:1 -->
+          <div class="relative w-full aspect-square bg-[#f9f9f9] rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center shadow-xs">
+            <span id="badgeFichaTop" class="absolute top-3 left-3 bg-[#FDEBD2] text-[#593d00] text-[11px] font-bold px-2.5 py-1 rounded-full shadow-xs border border-[#593d00]/30 z-10 flex items-center gap-1 pointer-events-none">
+              <i class="fa-solid fa-medal text-[10px]"></i> Selección de Etsy
+            </span>
+
+            <img id="imgPrincipalFicha" src="" alt="Mockup" class="w-full h-full object-cover aspect-square">
+            <video id="videoPrincipalFicha" controls class="w-full h-full object-cover aspect-square hidden" playsinline></video>
+
+            <!-- Flechas de navegación -->
+            <button onclick="navegarMediaFicha(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95">
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <button onclick="navegarMediaFicha(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- COLUMNA DERECHA: Ficha Técnica, Precio, Box Personalización y Compra (Lg: 5 cols) -->
+        <div class="lg:col-span-5 space-y-5">
+          
+          <!-- Título -->
+          <h1 id="tituloFichaArticulo" class="text-xl sm:text-2xl font-serif font-bold text-gray-900 leading-snug"></h1>
+
+          <!-- Precios -->
+          <div>
+            <div class="flex items-baseline gap-2.5 flex-wrap">
+              <span id="precioFichaActual" class="text-2xl sm:text-3xl font-bold text-gray-900">0,00 €</span>
+              <span id="precioFichaTachado" class="text-base text-gray-400 line-through hidden">0,00 €</span>
+              <span id="badgeDescuentoFicha" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md hidden">-15%</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">IVA incluido. <span class="text-blue-600 font-semibold">Descarga digital directa sin gastos de envío</span>.</p>
+          </div>
+
+          <!-- BOX DE PERSONALIZACIÓN ESTILO ETSY -->
+          <div class="border border-gray-300 rounded-2xl p-4 sm:p-5 bg-[#fafafa]/80 space-y-3">
+            <div class="flex items-center gap-1.5 text-xs font-bold text-gray-800">
+              <i class="fa-solid fa-pen-nib text-gray-600"></i>
+              <span>Personalización</span>
+            </div>
+
+            <ol class="text-[11px] text-gray-600 space-y-1 leading-relaxed pl-1">
+              <li><strong>1. Título:</strong> a quién va dirigida la obra.</li>
+              <li><strong>2. Nombre:</strong> nombre de la persona.</li>
+              <li><strong>3. Dedicatoria:</strong> escribe una frase con un máximo de 90 caracteres. Puede incluir fecha si lo deseas. Aparecerá en el margen inferior de la partitura.</li>
+              <li><strong>4. Compositor:</strong> (opcional).</li>
+            </ol>
+
+            <div class="relative">
+              <textarea id="textoBoxPersonalizacion" rows="4" maxlength="450" oninput="actualizarContadorFicha(this.value)" placeholder="1. Para María&#10;2. María&#10;3. Gracias por llenar mi vida de armonía. 24/09/2024&#10;4. Zeronte" class="w-full bg-white border border-gray-300 rounded-xl p-3 text-xs text-gray-800 focus:outline-none focus:border-black transition resize-none"></textarea>
+              <div class="text-right text-[10px] text-gray-400 font-mono mt-1">
+                <span id="contadorCaracteresFicha">0</span>/450
+              </div>
+            </div>
+          </div>
+
+          <!-- Selector Cantidad -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1.5">Cantidad</label>
+            <div class="relative w-32">
+              <select id="cantidadFicha" class="w-full appearance-none bg-white border border-gray-300 rounded-xl py-2 pl-3 pr-8 text-xs font-bold text-gray-800 focus:outline-none focus:border-black cursor-pointer">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-[10px] text-gray-400 pointer-events-none"></i>
+            </div>
+          </div>
+
+          <!-- Botón Comprar -->
+          <button type="button" onclick="procederCompraDesdeFicha()" class="w-full bg-black hover:bg-gray-800 text-white font-bold py-4 rounded-full text-xs sm:text-sm uppercase tracking-wider transition active:scale-98 shadow-md flex items-center justify-center gap-2">
+            <span>Añadir al carrito y Comprar</span>
+          </button>
+
+          <!-- Acordeón Detalles del artículo -->
+          <div class="border-t border-gray-200 pt-3">
+            <details open class="group">
+              <summary class="flex justify-between items-center cursor-pointer list-none font-bold text-xs text-gray-900 py-2">
+                <span>Detalles del artículo</span>
+                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition text-xs"></i>
+              </summary>
+              <div class="pt-2 text-xs text-gray-600 space-y-2.5">
+                <p id="descripcionFichaArticulo" class="leading-relaxed whitespace-pre-line"></p>
+                <div class="bg-gray-50 p-3.5 rounded-xl space-y-1.5 border border-gray-100 text-[11px]">
+                  <p><strong class="text-gray-800"><i class="fa-solid fa-file-pdf text-red-500 mr-1.5"></i> Formato:</strong> Archivo digital PDF en ultra-alta resolución (300 DPI) listo para imprimir y enmarcar.</p>
+                  <p><strong class="text-gray-800"><i class="fa-solid fa-music text-blue-500 mr-1.5"></i> Audio:</strong> Archivo de audio original en MP3 con la melodía al piano.</p>
+                  <p><strong class="text-gray-800"><i class="fa-solid fa-bolt text-amber-500 mr-1.5"></i> Entrega:</strong> Directa a tu email y WhatsApp (24 a 48 horas).</p>
+                </div>
+              </div>
+            </details>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
   <!-- ==================== MODAL DE COMPRA (BOTTOM-SHEET EN MÓVIL) ==================== -->
   <div id="modalCompra" class="fixed inset-0 bg-black/85 hidden items-end sm:items-center justify-center z-50 backdrop-blur-md">
     
@@ -1712,7 +1845,7 @@
         return;
       }
 
-      contenedor.innerHTML = lista.map(p => {
+      contenedor.innerHTML = lista.map((p, index) => {
         const imgUrl = Array.isArray(p.imagen) ? p.imagen[0] : (p.imagen || 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80');
         const precioBase = parseFloat(p.precio) || 0;
         const precioOferta = p.precioOferta ? parseFloat(String(p.precioOferta).replace(',', '.')) : null;
@@ -1722,7 +1855,7 @@
         const tituloTraducido = traducirTituloProducto(p.titulo, idiomaActual);
 
         return `
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirModal('${tituloTraducido.replace(/'/g, "\\'")}', ${precioFinal})">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(${index})">
             <div>
               <div class="aspect-square bg-gray-100 relative overflow-hidden">
                 <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
@@ -1758,14 +1891,171 @@
                 ` : ''}
               </div>
               <span class="text-xs font-medium text-blue-600 flex items-center gap-1.5 mt-1">
-  <i class="fa-solid fa-cloud-arrow-down text-sm text-blue-600"></i>
-  <span>${t.descargaDigital}</span>
-</span>
-</span>
+                <i class="fa-solid fa-cloud-arrow-down text-sm text-blue-600"></i>
+                <span>${t.descargaDigital}</span>
+              </span>
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    // ================= LÓGICA DE LA FICHA DETALLADA ESTILO ETSY =================
+    let articuloFichaActual = null;
+    let galeriaFichaActual = [];
+    let indiceMediaFicha = 0;
+
+    function abrirFichaArticulo(indiceOProducto) {
+      const p = typeof indiceOProducto === 'number' ? catalogoCompleto[indiceOProducto] : indiceOProducto;
+      if (!p) return;
+
+      articuloFichaActual = p;
+      const tituloTrad = traducirTituloProducto(p.titulo, idiomaActual);
+      document.getElementById('tituloFichaArticulo').innerText = tituloTrad;
+      document.getElementById('descripcionFichaArticulo').innerText = p.descripcion || "Partitura personalizada y armonizada a medida con sistema de cifrado musical exclusivo, entregada en formato PDF de alta resolución listo para imprimir y archivo MP3 para piano.";
+
+      const precioBase = parseFloat(p.precio) || 0;
+      const precioOferta = p.precioOferta ? parseFloat(String(p.precioOferta).replace(',', '.')) : null;
+      const tieneOferta = precioOferta && precioOferta > 0 && precioOferta < precioBase;
+      const precioFinal = tieneOferta ? precioOferta : precioBase;
+
+      document.getElementById('precioFichaActual').innerText = `${precioFinal.toFixed(2)} €`;
+
+      const elTachado = document.getElementById('precioFichaTachado');
+      const elBadgeDto = document.getElementById('badgeDescuentoFicha');
+
+      if (tieneOferta) {
+        const dto = Math.round(((precioBase - precioOferta) / precioBase) * 100);
+        elTachado.innerText = `${precioBase.toFixed(2)} €`;
+        elTachado.classList.remove('hidden');
+        elBadgeDto.innerText = `-${dto}%`;
+        elBadgeDto.classList.remove('hidden');
+      } else {
+        elTachado.classList.add('hidden');
+        elBadgeDto.classList.add('hidden');
+      }
+
+      // Limpiar y resetear el box de personalización
+      const txtBox = document.getElementById('textoBoxPersonalizacion');
+      if (txtBox) txtBox.value = '';
+      actualizarContadorFicha('');
+
+      // Galería cuadrada 1:1 (hasta 10 elementos y vídeo si existe)
+      galeriaFichaActual = [];
+      if (Array.isArray(p.imagen)) {
+        galeriaFichaActual.push(...p.imagen.map(url => ({ tipo: 'img', url })));
+      } else if (p.imagen) {
+        galeriaFichaActual.push({ tipo: 'img', url: p.imagen });
+      }
+
+      if (Array.isArray(p.galeria)) {
+        p.galeria.forEach(url => {
+          if (url) galeriaFichaActual.push({ tipo: 'img', url });
+        });
+      }
+      if (p.video) {
+        galeriaFichaActual.push({ tipo: 'video', url: p.video });
+      }
+
+      const fotosMockCuadradas = [
+        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&h=600&q=80",
+        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&h=600&q=80",
+        "https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&h=600&q=80"
+      ];
+      while (galeriaFichaActual.length < 4) {
+        galeriaFichaActual.push({ tipo: 'img', url: fotosMockCuadradas[galeriaFichaActual.length % fotosMockCuadradas.length] });
+      }
+
+      galeriaFichaActual = galeriaFichaActual.slice(0, 10);
+
+      // Render miniaturas cuadradas 1:1
+      const cMiniaturas = document.getElementById('carruselMiniaturasFicha');
+      cMiniaturas.innerHTML = galeriaFichaActual.map((item, idx) => `
+        <button onclick="seleccionarMediaFicha(${idx})" class="w-16 h-16 sm:w-20 sm:h-20 aspect-square rounded-xl overflow-hidden border-2 transition flex-shrink-0 ${idx === 0 ? 'border-black' : 'border-transparent opacity-75 hover:opacity-100'}">
+          ${item.tipo === 'video' ? `
+            <div class="w-full h-full bg-black text-white flex items-center justify-center text-xs aspect-square"><i class="fa-solid fa-play"></i></div>
+          ` : `
+            <img src="${item.url}" class="w-full h-full object-cover aspect-square">
+          `}
+        </button>
+      `).join('');
+
+      indiceMediaFicha = 0;
+      mostrarMediaFicha(0);
+
+      // Bloquear scroll de la página de fondo y mostrar la vista completa
+      document.body.style.overflow = 'hidden';
+      document.getElementById('modalFichaArticulo').classList.remove('hidden');
+    }
+
+    function mostrarMediaFicha(idx) {
+      if (!galeriaFichaActual[idx]) return;
+      indiceMediaFicha = idx;
+      const item = galeriaFichaActual[idx];
+      const img = document.getElementById('imgPrincipalFicha');
+      const vid = document.getElementById('videoPrincipalFicha');
+
+      if (item.tipo === 'video') {
+        img.classList.add('hidden');
+        vid.classList.remove('hidden');
+        vid.src = item.url;
+      } else {
+        vid.pause();
+        vid.classList.add('hidden');
+        img.classList.remove('hidden');
+        img.src = item.url;
+      }
+
+      const botones = document.getElementById('carruselMiniaturasFicha').children;
+      for (let i = 0; i < botones.length; i++) {
+        botones[i].className = `w-16 h-16 sm:w-20 sm:h-20 aspect-square rounded-xl overflow-hidden border-2 transition flex-shrink-0 ${i === idx ? 'border-black opacity-100' : 'border-transparent opacity-75 hover:opacity-100'}`;
+      }
+    }
+
+    function seleccionarMediaFicha(idx) {
+      mostrarMediaFicha(idx);
+    }
+
+    function navegarMediaFicha(delta) {
+      let nuevo = indiceMediaFicha + delta;
+      if (nuevo < 0) nuevo = galeriaFichaActual.length - 1;
+      if (nuevo >= galeriaFichaActual.length) nuevo = 0;
+      mostrarMediaFicha(nuevo);
+    }
+
+    function cerrarFichaArticulo() {
+      const vid = document.getElementById('videoPrincipalFicha');
+      if (vid) vid.pause();
+      document.body.style.overflow = '';
+      document.getElementById('modalFichaArticulo').classList.add('hidden');
+    }
+
+    function actualizarContadorFicha(texto) {
+      const el = document.getElementById('contadorCaracteresFicha');
+      if (el) el.innerText = (texto || '').length;
+    }
+
+    function procederCompraDesdeFicha() {
+      if (!articuloFichaActual) return;
+      const cant = parseInt(document.getElementById('cantidadFicha').value || '1', 10);
+      const precioBase = parseFloat(articuloFichaActual.precio) || 0;
+      const precioOferta = articuloFichaActual.precioOferta ? parseFloat(String(articuloFichaActual.precioOferta).replace(',', '.')) : null;
+      const precioUnitario = (precioOferta && precioOferta > 0 && precioOferta < precioBase) ? precioOferta : precioBase;
+      const total = precioUnitario * cant;
+
+      const titulo = traducirTituloProducto(articuloFichaActual.titulo, idiomaActual);
+      const sufijo = cant > 1 ? ` (x${cant})` : '';
+
+      const personalizacionEscrita = document.getElementById('textoBoxPersonalizacion').value.trim();
+
+      cerrarFichaArticulo();
+      abrirModal(`${titulo}${sufijo}`, total);
+
+      // Traspasar el texto introducido en la ficha directamente al formulario de compra
+      if (personalizacionEscrita) {
+        const campoPedido = document.getElementById('personalizacionCliente');
+        if (campoPedido) campoPedido.value = personalizacionEscrita;
+      }
     }
 
     function filtrarCategoria(cat, btn) {
