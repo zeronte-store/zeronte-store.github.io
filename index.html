@@ -251,7 +251,7 @@
     <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-7 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-gray-200 gap-4">
         <div>
-          <h2 id="txtResenasTitulo" class="text-xl font-serif font-bold text-gray-900">Reseñas de la tienda</h2>
+          <h2 id="txtResenasTitulo" class="text-xl font-serif font-bold text-gray-900">Reseñas de los artículos</h2>
           <div class="flex items-center gap-2 mt-1">
             <span class="flex text-amber-500 text-sm">
               <i class="fa-solid fa-star"></i>
@@ -582,7 +582,7 @@
         noArticulos: "No se encontraron artículos.",
         descargaDigital: "Descarga digital",
         btnPedir: "Pedir",
-        resenasTitulo: "Reseñas de la tienda",
+        resenasTitulo: "Reseñas de los artículos",
         sobre5: "5.0 sobre 5",
         valoraciones: "valoraciones",
         btnDejarResena: "Dejar una reseña",
@@ -1601,14 +1601,26 @@
       const articulosEs = ["Mi Nombre en Música + MP3 + QR", "Tu Nombre con Melodía + MP3", "Lámina Natalicio con Partitura", "Póster Círculo de Quintas", "Nombre en Melodía Simple"];
 
       baseEstructuraResenas = [];
-      for (let i = 1; i <= 192; i++) {
+      const fechaBaseReciente = new Date(2026, 9, 28); // 28 oct 2026
+
+      for (let i = 0; i < 192; i++) {
         const nom = nombres[i % nombres.length];
         const art = articulosEs[i % articulosEs.length];
         const textoIndice = i % 8;
-        const dia = (i % 28) + 1;
-        const mesIndice = i % 12;
-        const anio = 2023 + (i % 3);
-        baseEstructuraResenas.push({ autor: nom, articuloOriginal: art, textoIndice, dia, mesIndice, anio });
+        
+        // Cada reseña se genera progresivamente más antigua hacia el pasado
+        const fechaObj = new Date(fechaBaseReciente);
+        fechaObj.setDate(fechaObj.getDate() - Math.floor(i * 5.5));
+
+        baseEstructuraResenas.push({ 
+          autor: nom, 
+          articuloOriginal: art, 
+          textoIndice, 
+          dia: fechaObj.getDate(), 
+          mesIndice: fechaObj.getMonth(), 
+          anio: fechaObj.getFullYear(),
+          timestamp: fechaObj.getTime()
+        });
       }
 
       actualizarTextosResenasIdioma();
@@ -1628,12 +1640,15 @@
           autor: r.autor,
           fecha: fechaTexto,
           articulo: traducirTituloProducto(r.articuloOriginal, idiomaActual),
-          texto: t.textosResenas[r.textoIndice]
+          texto: t.textosResenas[r.textoIndice],
+          timestamp: r.timestamp
         };
       });
 
       const guardadas = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
-      listaResenasTotales = [...guardadas, ...resenasMapeadas];
+      
+      // Unir y ordenar estrictamente de más reciente a más antigua
+      listaResenasTotales = [...guardadas, ...resenasMapeadas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
       actualizarContadoresResenas();
     }
@@ -1703,14 +1718,19 @@
       const mesTexto = t.meses[hoy.getMonth()];
       const fechaTexto = `${hoy.getDate()} de ${mesTexto}, ${hoy.getFullYear()}`;
 
-      const nueva = { autor, articulo, texto, fecha: fechaTexto };
+      const nueva = { 
+        autor, 
+        articulo, 
+        texto, 
+        fecha: fechaTexto, 
+        timestamp: hoy.getTime() 
+      };
 
       const guardadas = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
       guardadas.unshift(nueva);
       localStorage.setItem('zeronte_nuevas_resenas', JSON.stringify(guardadas));
 
-      listaResenasTotales.unshift(nueva);
-      actualizarContadoresResenas();
+      actualizarTextosResenasIdioma();
       paginaResenasActual = 1;
       renderizarResenasPagina();
 
