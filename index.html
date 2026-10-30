@@ -436,12 +436,18 @@
           <!-- Título -->
           <h1 id="tituloFichaArticulo" class="text-xl sm:text-2xl font-serif font-bold text-gray-900 leading-snug"></h1>
 
-          <!-- Precios -->
+          <!-- Precios y distintivo Descarga digital a su derecha -->
           <div>
-            <div class="flex items-baseline gap-2.5 flex-wrap">
+            <div class="flex items-center gap-3.5 flex-wrap">
               <span id="precioFichaActual" class="text-2xl sm:text-3xl font-bold text-gray-900">0,00 €</span>
               <span id="precioFichaTachado" class="text-base text-gray-400 line-through hidden">0,00 €</span>
               <span id="badgeDescuentoFicha" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md hidden">-15%</span>
+              
+              <!-- Distintivo Descarga Digital idéntico a la portada -->
+              <span class="text-xs font-semibold text-blue-600 flex items-center gap-1.5 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+                <i class="fa-solid fa-cloud-arrow-down text-sm text-blue-600"></i>
+                <span id="txtDescargaFichaBadge">Descarga digital</span>
+              </span>
             </div>
           </div>
 
@@ -467,17 +473,24 @@
             </div>
           </div>
 
-          <!-- Selector Cantidad editable (1 a 999 con flechas o teclado) -->
+          <!-- Selector Cantidad sin flechas nativas interiores + Total a su derecha -->
           <div>
             <label class="block text-xs font-bold text-gray-700 mb-1.5">Cantidad</label>
-            <div class="flex items-center border border-gray-300 rounded-xl w-36 bg-white overflow-hidden shadow-xs focus-within:border-black">
-              <button type="button" onclick="ajustarCantidadFicha(-1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 text-sm font-bold transition active:bg-gray-200">
-                -
-              </button>
-              <input type="number" id="cantidadFicha" value="1" min="1" max="999" oninput="validarCantidadInput(this)" class="w-16 h-10 text-center font-bold text-xs text-gray-900 border-x border-gray-200 focus:outline-none">
-              <button type="button" onclick="ajustarCantidadFicha(1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 text-sm font-bold transition active:bg-gray-200">
-                +
-              </button>
+            <div class="flex items-center gap-3.5">
+              <div class="flex items-center border border-gray-300 rounded-xl w-32 bg-white overflow-hidden shadow-xs focus-within:border-black">
+                <button type="button" onclick="ajustarCantidadFicha(-1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 text-sm font-bold transition active:bg-gray-200">
+                  -
+                </button>
+                <input type="text" inputmode="numeric" id="cantidadFicha" value="1" oninput="validarCantidadInput(this)" class="w-12 h-10 text-center font-bold text-xs text-gray-900 border-x border-gray-200 focus:outline-none bg-transparent">
+                <button type="button" onclick="ajustarCantidadFicha(1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 text-sm font-bold transition active:bg-gray-200">
+                  +
+                </button>
+              </div>
+
+              <!-- Total dinámico calculado -->
+              <div class="text-xs font-medium text-gray-500">
+                Total: <strong id="subtotalCalculadoFicha" class="text-base font-bold text-gray-900">0.00 €</strong>
+              </div>
             </div>
           </div>
 
@@ -1912,20 +1925,38 @@
     let galeriaFichaActual = [];
     let indiceMediaFicha = 0;
 
+    function recalcularSubtotalFicha() {
+      if (!articuloFichaActual) return;
+      const input = document.getElementById('cantidadFicha');
+      let cant = parseInt(input ? input.value : '1', 10);
+      if (isNaN(cant) || cant < 1) cant = 1;
+
+      const precioBase = parseFloat(articuloFichaActual.precio) || 0;
+      const precioOferta = articuloFichaActual.precioOferta ? parseFloat(String(articuloFichaActual.precioOferta).replace(',', '.')) : null;
+      const precioUnitario = (precioOferta && precioOferta > 0 && precioOferta < precioBase) ? precioOferta : precioBase;
+      const total = precioUnitario * cant;
+
+      const elSubtotal = document.getElementById('subtotalCalculadoFicha');
+      if (elSubtotal) elSubtotal.innerText = `${total.toFixed(2)} €`;
+    }
+
     function ajustarCantidadFicha(delta) {
       const input = document.getElementById('cantidadFicha');
       if (!input) return;
-      let val = parseInt(input.value || '1', 10) + delta;
+      let val = (parseInt(input.value, 10) || 1) + delta;
       if (val < 1) val = 1;
       if (val > 999) val = 999;
       input.value = val;
+      recalcularSubtotalFicha();
     }
 
     function validarCantidadInput(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
       let val = parseInt(input.value, 10);
       if (isNaN(val) || val < 1) val = 1;
       if (val > 999) val = 999;
       input.value = val;
+      recalcularSubtotalFicha();
     }
 
     function abrirFichaArticulo(indiceOProducto) {
@@ -1964,6 +1995,8 @@
       actualizarContadorFicha('');
       const inputCant = document.getElementById('cantidadFicha');
       if (inputCant) inputCant.value = '1';
+
+      recalcularSubtotalFicha();
 
       // Galería cuadrada 1:1
       galeriaFichaActual = [];
@@ -2049,6 +2082,7 @@
     function cerrarFichaArticulo() {
       const vid = document.getElementById('videoPrincipalFicha');
       if (vid) vid.pause();
+      articuloFichaActual = null;
       document.body.style.overflow = '';
       document.getElementById('modalFichaArticulo').classList.add('hidden');
     }
@@ -2073,16 +2107,14 @@
       const titulo = traducirTituloProducto(articuloFichaActual.titulo, idiomaActual);
       const personalizacionEscrita = document.getElementById('textoBoxPersonalizacion').value.trim();
 
-      cerrarFichaArticulo();
-      
-      // Abrir modal indicando cantidad exacta y total en el botón "Confirmar X pedido(s) · XX,XX €"
+      // Abrir modal de compra sin cerrar la ficha de fondo (para que si el usuario cancela, vuelva al producto)
       abrirModal(titulo, total, cant);
 
       const campoOculto = document.getElementById('personalizacionCliente');
       if (campoOculto) campoOculto.value = personalizacionEscrita;
     }
 
-    // Adaptación de abrirModal para admitir cantidad
+    // Modal de compra adaptado para mostrar siempre la cantidad exacta en el botón
     function abrirModal(producto, precio, cantidad = 1) {
       const cantTexto = cantidad === 1 ? '1 pedido' : `${cantidad} pedidos`;
       document.getElementById('productoInput').value = `${producto} (x${cantidad})`;
@@ -2099,6 +2131,17 @@
       document.getElementById('pantallaExito').classList.add('hidden');
       document.getElementById('modalCompra').classList.remove('hidden');
       document.getElementById('modalCompra').classList.add('flex');
+    }
+
+    function cerrarModal() {
+      document.getElementById('modalCompra').classList.add('hidden');
+      document.getElementById('modalCompra').classList.remove('flex');
+      // Si la ficha del producto sigue activa, mantiene el scroll bloqueado en ella
+      if (articuloFichaActual) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
     }
 
     function filtrarCategoria(cat, btn) {
