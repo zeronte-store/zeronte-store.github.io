@@ -384,7 +384,7 @@
   <!-- ==================== MODAL FICHA DE ARTÍCULO ESTILO ETSY ==================== -->
   <div id="modalFichaArticulo" class="fixed inset-0 w-screen h-screen bg-white hidden z-50 overflow-y-auto select-none">
     
-    <!-- Barra superior fija con botón volver estilo Etsy -->
+    <!-- Barra superior fija -->
     <header class="sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-40 px-4 sm:px-8 py-3 flex items-center justify-between">
       <button onclick="cerrarFichaArticulo()" class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-700 hover:text-black transition group">
         <span class="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center transition">
@@ -400,8 +400,10 @@
       </button>
     </header>
 
-    <!-- Contenedor Principal a pantalla completa -->
+    <!-- Contenedor Principal a ancho completo -->
     <main class="max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+      
+      <!-- Fila superior: Galería izquierda y Formulario compra derecha -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
         <!-- COLUMNA IZQUIERDA: Miniaturas y Visor Cuadrado 1:1 (Lg: 7 cols) -->
@@ -414,10 +416,6 @@
 
           <!-- Mockup Principal Cuadrado 1:1 -->
           <div class="relative w-full aspect-square bg-[#f9f9f9] rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center shadow-xs">
-            <span id="badgeFichaTop" class="absolute top-3 left-3 bg-[#FDEBD2] text-[#593d00] text-[11px] font-bold px-2.5 py-1 rounded-full shadow-xs border border-[#593d00]/30 z-10 flex items-center gap-1 pointer-events-none">
-              <i class="fa-solid fa-medal text-[10px]"></i> Selección de Etsy
-            </span>
-
             <img id="imgPrincipalFicha" src="" alt="Mockup" class="w-full h-full object-cover aspect-square">
             <video id="videoPrincipalFicha" controls class="w-full h-full object-cover aspect-square hidden" playsinline></video>
 
@@ -432,7 +430,7 @@
 
         </div>
 
-        <!-- COLUMNA DERECHA: Ficha Técnica, Precio, Box Personalización y Compra (Lg: 5 cols) -->
+        <!-- COLUMNA DERECHA: Ficha Técnica, Precio, Box Personalización y Cantidad (Lg: 5 cols) -->
         <div class="lg:col-span-5 space-y-5">
           
           <!-- Título -->
@@ -445,10 +443,9 @@
               <span id="precioFichaTachado" class="text-base text-gray-400 line-through hidden">0,00 €</span>
               <span id="badgeDescuentoFicha" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md hidden">-15%</span>
             </div>
-            <p class="text-xs text-gray-500 mt-1">IVA incluido. <span class="text-blue-600 font-semibold">Descarga digital directa sin gastos de envío</span>.</p>
           </div>
 
-          <!-- BOX DE PERSONALIZACIÓN ESTILO ETSY -->
+          <!-- BOX DE PERSONALIZACIÓN -->
           <div class="border border-gray-300 rounded-2xl p-4 sm:p-5 bg-[#fafafa]/80 space-y-3">
             <div class="flex items-center gap-1.5 text-xs font-bold text-gray-800">
               <i class="fa-solid fa-pen-nib text-gray-600"></i>
@@ -470,18 +467,17 @@
             </div>
           </div>
 
-          <!-- Selector Cantidad -->
+          <!-- Selector Cantidad editable (1 a 999 con flechas o teclado) -->
           <div>
             <label class="block text-xs font-bold text-gray-700 mb-1.5">Cantidad</label>
-            <div class="relative w-32">
-              <select id="cantidadFicha" class="w-full appearance-none bg-white border border-gray-300 rounded-xl py-2 pl-3 pr-8 text-xs font-bold text-gray-800 focus:outline-none focus:border-black cursor-pointer">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </select>
-              <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-[10px] text-gray-400 pointer-events-none"></i>
+            <div class="flex items-center border border-gray-300 rounded-xl w-36 bg-white overflow-hidden shadow-xs focus-within:border-black">
+              <button type="button" onclick="ajustarCantidadFicha(-1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 text-sm font-bold transition active:bg-gray-200">
+                -
+              </button>
+              <input type="number" id="cantidadFicha" value="1" min="1" max="999" oninput="validarCantidadInput(this)" class="w-16 h-10 text-center font-bold text-xs text-gray-900 border-x border-gray-200 focus:outline-none">
+              <button type="button" onclick="ajustarCantidadFicha(1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 text-sm font-bold transition active:bg-gray-200">
+                +
+              </button>
             </div>
           </div>
 
@@ -490,27 +486,40 @@
             <span>Añadir al carrito y Comprar</span>
           </button>
 
-          <!-- Acordeón Detalles del artículo -->
-          <div class="border-t border-gray-200 pt-3">
-            <details open class="group">
-              <summary class="flex justify-between items-center cursor-pointer list-none font-bold text-xs text-gray-900 py-2">
-                <span>Detalles del artículo</span>
-                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition text-xs"></i>
-              </summary>
-              <div class="pt-2 text-xs text-gray-600 space-y-2.5">
-                <p id="descripcionFichaArticulo" class="leading-relaxed whitespace-pre-line"></p>
-                <div class="bg-gray-50 p-3.5 rounded-xl space-y-1.5 border border-gray-100 text-[11px]">
-                  <p><strong class="text-gray-800"><i class="fa-solid fa-file-pdf text-red-500 mr-1.5"></i> Formato:</strong> Archivo digital PDF en ultra-alta resolución (300 DPI) listo para imprimir y enmarcar.</p>
-                  <p><strong class="text-gray-800"><i class="fa-solid fa-music text-blue-500 mr-1.5"></i> Audio:</strong> Archivo de audio original en MP3 con la melodía al piano.</p>
-                  <p><strong class="text-gray-800"><i class="fa-solid fa-bolt text-amber-500 mr-1.5"></i> Entrega:</strong> Directa a tu email y WhatsApp (24 a 48 horas).</p>
-                </div>
-              </div>
-            </details>
-          </div>
-
         </div>
 
       </div>
+
+      <!-- SECCIÓN A ANCHO COMPLETO: Detalles del artículo ocupando todo el ancho hasta los márgenes -->
+      <div class="mt-12 pt-8 border-t border-gray-200 w-full">
+        <details open class="group">
+          <summary class="flex justify-between items-center cursor-pointer list-none font-bold text-sm sm:text-base text-gray-900 py-2 border-b border-gray-100">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-circle-info text-gray-500 text-sm"></i>
+              <span>Detalles del artículo</span>
+            </span>
+            <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition text-xs"></i>
+          </summary>
+          <div class="pt-5 text-xs sm:text-sm text-gray-700 space-y-4">
+            <p id="descripcionFichaArticulo" class="leading-relaxed whitespace-pre-line"></p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 text-xs">
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-file-pdf text-red-500 text-base mt-0.5"></i>
+                <p><strong class="text-gray-900 block">Formato Digital:</strong> Archivo PDF a 300 DPI listo para imprimir y enmarcar.</p>
+              </div>
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-music text-blue-500 text-base mt-0.5"></i>
+                <p><strong class="text-gray-900 block">Audio Original:</strong> Pista MP3 original con la melodía al piano.</p>
+              </div>
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-bolt text-amber-500 text-base mt-0.5"></i>
+                <p><strong class="text-gray-900 block">Entrega Inmediata:</strong> Directa a tu email y WhatsApp en 24-48h.</p>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+
     </main>
   </div>
 
@@ -550,10 +559,8 @@
             </div>
           </div>
 
-          <div>
-            <label id="lblDatosCliente" class="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-semibold">Datos de personalización *</label>
-            <textarea id="personalizacionCliente" rows="2" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gold" placeholder="Nombre(s) para las notas, dedicatoria o fechas..."></textarea>
-          </div>
+          <!-- Almacén oculto de personalización introducida en la ficha -->
+          <input type="hidden" id="personalizacionCliente">
 
           <!-- SELECTOR DE FORMA DE PAGO CON LOGOS OFICIALES -->
           <div>
@@ -1905,6 +1912,22 @@
     let galeriaFichaActual = [];
     let indiceMediaFicha = 0;
 
+    function ajustarCantidadFicha(delta) {
+      const input = document.getElementById('cantidadFicha');
+      if (!input) return;
+      let val = parseInt(input.value || '1', 10) + delta;
+      if (val < 1) val = 1;
+      if (val > 999) val = 999;
+      input.value = val;
+    }
+
+    function validarCantidadInput(input) {
+      let val = parseInt(input.value, 10);
+      if (isNaN(val) || val < 1) val = 1;
+      if (val > 999) val = 999;
+      input.value = val;
+    }
+
     function abrirFichaArticulo(indiceOProducto) {
       const p = typeof indiceOProducto === 'number' ? catalogoCompleto[indiceOProducto] : indiceOProducto;
       if (!p) return;
@@ -1935,12 +1958,14 @@
         elBadgeDto.classList.add('hidden');
       }
 
-      // Limpiar y resetear el box de personalización
+      // Resetear box de personalización y cantidad
       const txtBox = document.getElementById('textoBoxPersonalizacion');
       if (txtBox) txtBox.value = '';
       actualizarContadorFicha('');
+      const inputCant = document.getElementById('cantidadFicha');
+      if (inputCant) inputCant.value = '1';
 
-      // Galería cuadrada 1:1 (hasta 10 elementos y vídeo si existe)
+      // Galería cuadrada 1:1
       galeriaFichaActual = [];
       if (Array.isArray(p.imagen)) {
         galeriaFichaActual.push(...p.imagen.map(url => ({ tipo: 'img', url })));
@@ -1968,7 +1993,6 @@
 
       galeriaFichaActual = galeriaFichaActual.slice(0, 10);
 
-      // Render miniaturas cuadradas 1:1
       const cMiniaturas = document.getElementById('carruselMiniaturasFicha');
       cMiniaturas.innerHTML = galeriaFichaActual.map((item, idx) => `
         <button onclick="seleccionarMediaFicha(${idx})" class="w-16 h-16 sm:w-20 sm:h-20 aspect-square rounded-xl overflow-hidden border-2 transition flex-shrink-0 ${idx === 0 ? 'border-black' : 'border-transparent opacity-75 hover:opacity-100'}">
@@ -1983,7 +2007,6 @@
       indiceMediaFicha = 0;
       mostrarMediaFicha(0);
 
-      // Bloquear scroll de la página de fondo y mostrar la vista completa
       document.body.style.overflow = 'hidden';
       document.getElementById('modalFichaArticulo').classList.remove('hidden');
     }
@@ -2037,25 +2060,45 @@
 
     function procederCompraDesdeFicha() {
       if (!articuloFichaActual) return;
-      const cant = parseInt(document.getElementById('cantidadFicha').value || '1', 10);
+      const inputCant = document.getElementById('cantidadFicha');
+      let cant = parseInt(inputCant ? inputCant.value : '1', 10);
+      if (isNaN(cant) || cant < 1) cant = 1;
+      if (cant > 999) cant = 999;
+
       const precioBase = parseFloat(articuloFichaActual.precio) || 0;
       const precioOferta = articuloFichaActual.precioOferta ? parseFloat(String(articuloFichaActual.precioOferta).replace(',', '.')) : null;
       const precioUnitario = (precioOferta && precioOferta > 0 && precioOferta < precioBase) ? precioOferta : precioBase;
       const total = precioUnitario * cant;
 
       const titulo = traducirTituloProducto(articuloFichaActual.titulo, idiomaActual);
-      const sufijo = cant > 1 ? ` (x${cant})` : '';
-
       const personalizacionEscrita = document.getElementById('textoBoxPersonalizacion').value.trim();
 
       cerrarFichaArticulo();
-      abrirModal(`${titulo}${sufijo}`, total);
+      
+      // Abrir modal indicando cantidad exacta y total en el botón "Confirmar X pedido(s) · XX,XX €"
+      abrirModal(titulo, total, cant);
 
-      // Traspasar el texto introducido en la ficha directamente al formulario de compra
-      if (personalizacionEscrita) {
-        const campoPedido = document.getElementById('personalizacionCliente');
-        if (campoPedido) campoPedido.value = personalizacionEscrita;
-      }
+      const campoOculto = document.getElementById('personalizacionCliente');
+      if (campoOculto) campoOculto.value = personalizacionEscrita;
+    }
+
+    // Adaptación de abrirModal para admitir cantidad
+    function abrirModal(producto, precio, cantidad = 1) {
+      const cantTexto = cantidad === 1 ? '1 pedido' : `${cantidad} pedidos`;
+      document.getElementById('productoInput').value = `${producto} (x${cantidad})`;
+      document.getElementById('precioInput').value = precio;
+      document.getElementById('resumenProducto').innerText = `${producto} (x${cantidad}) · ${precio.toFixed(2)} €`;
+      
+      const btnConfirmar = document.getElementById('btnConfirmarTxt');
+      if (btnConfirmar) btnConfirmar.innerText = `Confirmar ${cantTexto}`;
+      
+      const btnPrecio = document.getElementById('btnPrecioTexto');
+      if (btnPrecio) btnPrecio.innerText = `· ${precio.toFixed(2)} €`;
+
+      document.getElementById('pantallaFormulario').classList.remove('hidden');
+      document.getElementById('pantallaExito').classList.add('hidden');
+      document.getElementById('modalCompra').classList.remove('hidden');
+      document.getElementById('modalCompra').classList.add('flex');
     }
 
     function filtrarCategoria(cat, btn) {
