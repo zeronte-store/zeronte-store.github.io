@@ -71,9 +71,9 @@
       </div>
 
       <!-- LADO DERECHO: Buscador + Menú Idiomas con Banderas Reales + Contacto -->
-      <div class="flex items-center gap-2.5 self-start lg:self-center">
-        <!-- Buscador de tienda -->
-        <div class="relative w-48 sm:w-60 md:w-64">
+      <div class="flex items-center gap-2.5 w-full lg:w-auto justify-center lg:justify-end lg:self-center">
+        <!-- Buscador de tienda (oculto en móvil, activo en escritorio) -->
+        <div class="relative w-48 sm:w-60 md:w-64 hidden lg:block">
           <input type="text" id="buscadorTienda" oninput="buscarProductos(this.value)" placeholder="Buscar artículo..." class="w-full bg-white border border-gray-300 rounded-full py-1.5 pl-4 pr-8 text-xs text-gray-800 focus:outline-none focus:border-gray-500 transition shadow-sm">
           <span class="absolute right-3 top-2 text-gray-400 text-xs pointer-events-none">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -133,20 +133,70 @@
       <button onclick="cambiarPestana('informacion')" id="tab-informacion" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
         Información básica
       </button>
-      <button onclick="cambiarPestana('politicas')" id="tab-politicas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
+      <button onclick="cambiarPestana('politicas')" id="tab-politicas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap hidden sm:inline-block">
         Políticas de la tienda
       </button>
     </div>
   </section>
 
   <!-- ==================== SECCIÓN 1: ARTÍCULOS (SIDEBAR + CATÁLOGO) ==================== -->
-  <div id="vistaArticulos" class="pestana-contenido max-w-6xl mx-auto px-4 py-6">
+  <div id="vistaArticulos" class="pestana-contenido max-w-6xl mx-auto px-4 py-4 sm:py-6">
+
+    <!-- BLOQUE MÓVIL ESTILO ETSY: Buscador con total + Desplegable Categorías + Ordenación -->
+    <div class="block lg:hidden mb-5 space-y-3">
+      <!-- Buscador estilo píldora Etsy con conteo dinámico -->
+      <div class="relative w-full">
+        <input type="text" id="buscadorTiendaMovil" oninput="buscarProductos(this.value)" placeholder="Buscar entre los artículos..." class="w-full bg-[#ebebeb]/70 border-0 rounded-full py-3 pl-5 pr-11 text-sm text-[#222222] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black transition shadow-inner">
+        <span class="absolute right-4 top-3.5 text-gray-700 pointer-events-none text-base">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+      </div>
+
+      <!-- Fila inferior: Desplegable de Categorías centrado + Botón de Ordenar -->
+      <div class="flex items-center gap-2">
+        <div class="relative flex-1">
+          <select id="selectCategoriasMovil" onchange="filtrarCategoria(this.value, null)" class="w-full appearance-none bg-white border border-gray-300 rounded-full py-2.5 pl-4 pr-10 text-xs font-semibold text-gray-800 shadow-sm focus:outline-none focus:border-black transition">
+            <option value="todos">Todos los artículos</option>
+            <option value="partitura">Partituras personalizadas</option>
+            <option value="natalicio">Natalicios</option>
+            <option value="posters">Pósters y Láminas</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3.5 top-3.5 text-[10px] text-gray-500 pointer-events-none"></i>
+        </div>
+
+        <!-- Botón / Menú desplegable de Ordenar estilo Etsy -->
+        <div class="relative flex-shrink-0">
+          <button type="button" onclick="toggleMenuOrdenar(event)" class="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-full text-gray-700 shadow-sm hover:border-black active:scale-95 transition">
+            <i class="fa-solid fa-sliders text-sm"></i>
+          </button>
+          <div id="menuOrdenarMovil" class="hidden absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-2xl shadow-xl z-30 py-2 text-xs font-medium divide-y divide-gray-100">
+            <button onclick="ordenarCatalogo('relevancia')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
+              <span id="txtOrdRelevancia">Relevancia</span>
+              <i id="check-relevancia" class="fa-solid fa-check text-black text-[11px]"></i>
+            </button>
+            <button onclick="ordenarCatalogo('reciente')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
+              <span id="txtOrdReciente">Más reciente</span>
+              <i id="check-reciente" class="fa-solid fa-check text-black text-[11px] hidden"></i>
+            </button>
+            <button onclick="ordenarCatalogo('precio_asc')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
+              <span id="txtOrdBarato">Más barato</span>
+              <i id="check-precio_asc" class="fa-solid fa-check text-black text-[11px] hidden"></i>
+            </button>
+            <button onclick="ordenarCatalogo('precio_desc')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
+              <span id="txtOrdCaro">Más caro</span>
+              <i id="check-precio_desc" class="fa-solid fa-check text-black text-[11px] hidden"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="flex flex-col lg:flex-row gap-8 items-start">
       
-      <!-- Sidebar de Secciones -->
-      <aside class="w-full lg:w-56 flex-shrink-0">
-        <h3 id="txtSeccionesSidebar" class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-3 hidden lg:block">Secciones</h3>
-        <ul id="listaCategorias" class="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs sm:text-sm font-medium">
+      <!-- Sidebar de Secciones (solo escritorio) -->
+      <aside class="w-full lg:w-56 flex-shrink-0 hidden lg:block">
+        <h3 id="txtSeccionesSidebar" class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-3">Secciones</h3>
+        <ul id="listaCategorias" class="flex flex-col gap-1 text-sm font-medium">
           <li>
             <button onclick="filtrarCategoria('todos', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg bg-gray-200/80 text-black font-semibold transition text-left whitespace-nowrap">
               <span id="catTxtTodos">Todos los artículos</span>
@@ -182,6 +232,14 @@
         </div>
         <div id="gridProductos" class="grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-4">
           <!-- Renderizado dinámico vía JavaScript -->
+        </div>
+
+        <!-- Enlace / Botón a Políticas de la tienda al final de los artículos en móvil -->
+        <div class="sm:hidden mt-8 pt-6 border-t border-gray-200 text-center">
+          <button onclick="cambiarPestana('politicas')" class="w-full py-3 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-800 shadow-sm flex items-center justify-between px-4 hover:border-black transition">
+            <span id="txtBtnPoliticasAbajo">Políticas de la tienda</span>
+            <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+          </button>
         </div>
       </main>
 
@@ -998,6 +1056,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       inicializarResenas();
+      renderizarResenasPagina();
       cargarCatalogoDinamico();
       actualizarContadorVentas();
       aplicarIdioma(idiomaActual);
@@ -1007,6 +1066,11 @@
         const menu = document.getElementById("menuIdiomas");
         if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
           menu.classList.add("hidden");
+        }
+
+        const menuOrd = document.getElementById("menuOrdenarMovil");
+        if (menuOrd && !e.target.closest('#menuOrdenarMovil') && !e.target.closest('button[onclick*="toggleMenuOrdenar"]')) {
+          menuOrd.classList.add("hidden");
         }
       });
     });
@@ -1352,8 +1416,103 @@
       }
     }
 
+    let criterioOrdenActual = 'relevancia';
+
+    function toggleMenuOrdenar(e) {
+      e.stopPropagation();
+      const menu = document.getElementById("menuOrdenarMovil");
+      if (menu) menu.classList.toggle("hidden");
+    }
+
+    function ordenarCatalogo(criterio) {
+      criterioOrdenActual = criterio;
+      const menu = document.getElementById("menuOrdenarMovil");
+      if (menu) menu.classList.add("hidden");
+
+      ['relevancia', 'reciente', 'precio_asc', 'precio_desc'].forEach(c => {
+        const check = document.getElementById(`check-${c}`);
+        if (check) check.classList.toggle('hidden', c !== criterio);
+      });
+
+      filtrarCategoria(categoriaSeleccionada, null);
+    }
+
+    function aplicarOrden(lista) {
+      const copia = [...lista];
+      if (criterioOrdenActual === 'reciente') {
+        return copia.reverse();
+      } else if (criterioOrdenActual === 'precio_asc') {
+        return copia.sort((a, b) => {
+          const pa = a.precioOferta ? parseFloat(String(a.precioOferta).replace(',', '.')) : (parseFloat(a.precio) || 0);
+          const pb = b.precioOferta ? parseFloat(String(b.precioOferta).replace(',', '.')) : (parseFloat(b.precio) || 0);
+          return pa - pb;
+        });
+      } else if (criterioOrdenActual === 'precio_desc') {
+        return copia.sort((a, b) => {
+          const pa = a.precioOferta ? parseFloat(String(a.precioOferta).replace(',', '.')) : (parseFloat(a.precio) || 0);
+          const pb = b.precioOferta ? parseFloat(String(b.precioOferta).replace(',', '.')) : (parseFloat(b.precio) || 0);
+          return pb - pa;
+        });
+      }
+      return copia;
+    }
+
+    function filtrarCategoria(cat, btn) {
+      categoriaSeleccionada = cat;
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
+
+      // Sincronizar select móvil
+      const selectMovil = document.getElementById('selectCategoriasMovil');
+      if (selectMovil && selectMovil.value !== cat) {
+        selectMovil.value = cat;
+      }
+
+      // Sincronizar botones de escritorio
+      document.querySelectorAll('.cat-btn').forEach(b => {
+        b.classList.remove('bg-gray-200/80', 'text-black', 'font-semibold');
+        b.classList.add('text-gray-700');
+      });
+      if (btn) {
+        btn.classList.add('bg-gray-200/80', 'text-black', 'font-semibold');
+      }
+
+      const tituloMap = {
+        'todos': t.catTodos,
+        'partitura': t.catPartituras,
+        'natalicio': t.catNatalicios,
+        'posters': t.catPosters
+      };
+      const tituloEl = document.getElementById('tituloSeccionActual');
+      if (tituloEl) tituloEl.innerText = tituloMap[cat] || t.catTodos;
+
+      let filtrados = catalogoCompleto;
+      if (cat !== 'todos') {
+        filtrados = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes(cat.toLowerCase()));
+      }
+
+      const inputMovil = document.getElementById('buscadorTiendaMovil');
+      const inputEscritorio = document.getElementById('buscadorTienda');
+      const q = ((inputMovil ? inputMovil.value : '') || (inputEscritorio ? inputEscritorio.value : '')).trim().toLowerCase();
+
+      if (q) {
+        filtrados = filtrados.filter(p => 
+          (p.titulo || '').toLowerCase().includes(q) || 
+          (p.descripcion || '').toLowerCase().includes(q)
+        );
+      }
+
+      renderizarCatalogo(aplicarOrden(filtrados));
+    }
+
     function buscarProductos(termino) {
       const q = termino.trim().toLowerCase();
+
+      // Sincronizar ambos buscadores
+      const bM = document.getElementById('buscadorTiendaMovil');
+      const bE = document.getElementById('buscadorTienda');
+      if (bM && bM.value !== termino) bM.value = termino;
+      if (bE && bE.value !== termino) bE.value = termino;
+
       let base = catalogoCompleto;
       if (categoriaSeleccionada !== 'todos') {
         base = base.filter(p => (p.categoria || '').toLowerCase().includes(categoriaSeleccionada.toLowerCase()));
@@ -1362,7 +1521,7 @@
         (p.titulo || '').toLowerCase().includes(q) || 
         (p.descripcion || '').toLowerCase().includes(q)
       );
-      renderizarCatalogo(resultados);
+      renderizarCatalogo(aplicarOrden(resultados));
     }
 
     function actualizarConteosCategorias() {
@@ -1371,10 +1530,35 @@
       const elNatalicio = document.getElementById('conteo-natalicio');
       const elPosters = document.getElementById('conteo-posters');
 
-      if (elTodos) elTodos.innerText = catalogoCompleto.length;
-      if (elPartitura) elPartitura.innerText = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('partitura')).length;
-      if (elNatalicio) elNatalicio.innerText = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('natalicio')).length;
-      if (elPosters) elPosters.innerText = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('poster')).length;
+      const cTodos = catalogoCompleto.length;
+      const cPart = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('partitura')).length;
+      const cNat = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('natalicio')).length;
+      const cPost = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('poster')).length;
+
+      if (elTodos) elTodos.innerText = cTodos;
+      if (elPartitura) elPartitura.innerText = cPart;
+      if (elNatalicio) elNatalicio.innerText = cNat;
+      if (elPosters) elPosters.innerText = cPost;
+
+      // Actualizar opciones del select móvil con sus conteos
+      const selectMovil = document.getElementById('selectCategoriasMovil');
+      if (selectMovil) {
+        const valActual = selectMovil.value;
+        const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
+        selectMovil.innerHTML = `
+          <option value="todos">${t.catTodos} (${cTodos})</option>
+          <option value="partitura">${t.catPartituras} (${cPart})</option>
+          <option value="natalicio">${t.catNatalicios} (${cNat})</option>
+          <option value="posters">${t.catPosters} (${cPost})</option>
+        `;
+        selectMovil.value = valActual || 'todos';
+      }
+
+      // Actualizar placeholder del buscador móvil estilo Etsy: "Buscar entre los X artículos"
+      const buscadorMovil = document.getElementById('buscadorTiendaMovil');
+      if (buscadorMovil) {
+        buscadorMovil.placeholder = `Buscar entre los ${cTodos} artículos`;
+      }
     }
 
     // ================= PESTAÑAS =================
@@ -1400,6 +1584,12 @@
         boton.classList.add('border-black', 'text-black', 'font-bold');
         boton.classList.remove('border-transparent', 'text-gray-600');
       }
+
+      // Si se abre la pestaña de reseñas, renderizar inmediatamente la lista
+      if (id === 'resenas') {
+        renderizarResenasPagina();
+      }
+
       window.scrollTo({ top: 380, behavior: 'smooth' });
     }
 
