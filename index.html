@@ -1642,47 +1642,184 @@
     let baseEstructuraResenas = [];
 
     function inicializarResenas() {
-      const nombresCompletos = [
-        // España / Latinoamérica
-        "Laura Morales Benítez", "Carlos Sánchez Ruiz", "Beatriz Romero Delgado", 
-        "Javier Torres Navarro", "Elena Peña Carrasco", "David Gallego Gil",
-        // Estados Unidos / Reino Unido / Australia
-        "Emily Watson", "James Miller", "Sarah Jenkins", "Michael O'Connor", 
-        "Charlotte Davies", "Oliver Smith", "Jessica Taylor", "Liam Brown",
-        // Francia / Bélgica
-        "Camille Laurent", "Thomas Dubois", "Élodie Martin", "Julien Moreau", 
-        "Chloé Bernard", "Nicolas Petit", "Manon Lefebvre",
-        // Alemania / Austria / Suiza
-        "Maximilian Weber", "Sophie Schneider", "Lukas Fischer", "Hannah Hoffmann", 
-        "Felix Wagner", "Emma Zimmermann", "Leon Becker",
-        // Italia
-        "Matteo Rossi", "Giulia Bianchi", "Alessandro Ricci", "Chiara Romano", 
-        "Leonardo Ferrari", "Francesca Conti", "Marco Moretti",
-        // China / Taiwán / Singapur
-        "Li Wei (李伟)", "Chen Jing (陈静)", "Wang Yong (王勇)", 
-        "Zhang Min (张敏)", "Liu Yang (刘洋)", "Lin Xin (林昕)"
+      // Clientes internacionales vinculados a su idioma nativo
+      const autoresPorIdioma = [
+        // es (Español)
+        { nom: "Laura Morales Benítez", lang: "es" },
+        { nom: "Carlos Sánchez Ruiz", lang: "es" },
+        { nom: "Beatriz Romero Delgado", lang: "es" },
+        { nom: "Javier Torres Navarro", lang: "es" },
+        { nom: "Elena Peña Carrasco", lang: "es" },
+        { nom: "David Gallego Gil", lang: "es" },
+        // en (Inglés)
+        { nom: "Emily Watson", lang: "en" },
+        { nom: "James Miller", lang: "en" },
+        { nom: "Sarah Jenkins", lang: "en" },
+        { nom: "Michael O'Connor", lang: "en" },
+        { nom: "Charlotte Davies", lang: "en" },
+        { nom: "Oliver Smith", lang: "en" },
+        { nom: "Jessica Taylor", lang: "en" },
+        { nom: "Liam Brown", lang: "en" },
+        // fr (Francés)
+        { nom: "Camille Laurent", lang: "fr" },
+        { nom: "Thomas Dubois", lang: "fr" },
+        { nom: "Élodie Martin", lang: "fr" },
+        { nom: "Julien Moreau", lang: "fr" },
+        { nom: "Chloé Bernard", lang: "fr" },
+        { nom: "Nicolas Petit", lang: "fr" },
+        { nom: "Manon Lefebvre", lang: "fr" },
+        // de (Alemán)
+        { nom: "Maximilian Weber", lang: "de" },
+        { nom: "Sophie Schneider", lang: "de" },
+        { nom: "Lukas Fischer", lang: "de" },
+        { nom: "Hannah Hoffmann", lang: "de" },
+        { nom: "Felix Wagner", lang: "de" },
+        { nom: "Emma Zimmermann", lang: "de" },
+        { nom: "Leon Becker", lang: "de" },
+        // it (Italiano)
+        { nom: "Matteo Rossi", lang: "it" },
+        { nom: "Giulia Bianchi", lang: "it" },
+        { nom: "Alessandro Ricci", lang: "it" },
+        { nom: "Chiara Romano", lang: "it" },
+        { nom: "Leonardo Ferrari", lang: "it" },
+        { nom: "Francesca Conti", lang: "it" },
+        { nom: "Marco Moretti", lang: "it" },
+        // zh (Chino)
+        { nom: "Li Wei (李伟)", lang: "zh" },
+        { nom: "Chen Jing (陈静)", lang: "zh" },
+        { nom: "Wang Yong (王勇)", lang: "zh" },
+        { nom: "Zhang Min (张敏)", lang: "zh" },
+        { nom: "Liu Yang (刘洋)", lang: "zh" },
+        { nom: "Lin Xin (林昕)", lang: "zh" }
       ];
+
+      const resenasPorIdioma = {
+        es: {
+          cinco: [
+            "Un regalo maravilloso y emocionante. Lloramos al escuchar la melodía con el código QR.",
+            "La calidad de la partitura para imprimir es fantástica. El audio para piano suena perfecto.",
+            "Trato súper atento y entrega muy rápida. Quedó genial en el marco que le compramos.",
+            "Súper original. El cifrado del nombre en notas musicales es un detalle de 10.",
+            "Es el segundo encargo que hago para un aniversario y ha vuelto a ser un éxito rotundo.",
+            "La lámina del natalicio para mi sobrina quedó preciosa. Muy recomendable.",
+            "Una joya de recuerdo. La dedicatoria y el QR son un acierto total.",
+            "Excelente servicio. Llegó en menos de 24 horas y con un audio impecable."
+          ],
+          cuatro: [
+            "Muy buen trabajo y melodía preciosa. Tardó un poquito más de lo esperado pero el resultado mereció la pena.",
+            "La calidad de la partitura es impecable. El audio del piano suena genial, muy buena compra.",
+            "El diseño quedó genial y el QR funciona a la perfección. Contento con el encargo."
+          ]
+        },
+        en: {
+          cinco: [
+            "A wonderful and emotional gift. We cried hearing the melody from the QR code.",
+            "Top quality printable sheet music. The piano audio sounds absolutely perfect.",
+            "Super attentive customer service and fast delivery. Looks great in the wooden frame.",
+            "So original! Ciphering our names into musical notes was a 10/10 idea.",
+            "This is the second order I place for an anniversary and it was a huge success again.",
+            "The birth milestone print for my niece turned out gorgeous. Highly recommended.",
+            "A treasure keepsake. The custom dedication and QR code make it truly special.",
+            "Outstanding service. Delivered in less than 24 hours with pristine audio quality."
+          ],
+          cuatro: [
+            "Very nice work and lovely melody. Took a little longer than expected but totally worth it.",
+            "Great sheet music quality. The piano audio sounds very nice, good purchase overall.",
+            "The design turned out great and the QR code works smoothly. Happy with the order."
+          ]
+        },
+        fr: {
+          cinco: [
+            "Un cadeau magnifique et très émouvant. Nous avons adoré la mélodie du QR code.",
+            "Superbe qualité d'impression de la partition. Le piano sonne à la perfection.",
+            "Service client très attentionné et livraison rapide. Parfait dans notre cadre.",
+            "Très original ! Coder les lettres du prénom en notes est une idée géniale.",
+            "Deuxième commande passée pour un anniversaire, toujours autant de succès.",
+            "L'affiche de naissance pour ma nièce est ravissante. Je recommande vivement.",
+            "Un souvenir précieux. La dédicace et le QR code sont un vrai plus.",
+            "Service impeccable, reçu en moins de 24 heures avec une piste audio parfaite."
+          ],
+          cuatro: [
+            "Très beau travail et belle mélodie. Un peu plus long que prévu mais le résultat est superbe.",
+            "Qualité de partition impeccable. Le piano sonne très bien, bon achat.",
+            "Le rendu est très soigné et le QR code fonctionne parfaitement."
+          ]
+        },
+        de: {
+          cinco: [
+            "Ein wundervolles und emotionales Geschenk. Die Melodie per QR-Code ist genial.",
+            "Erstklassige Notenqualität zum Ausdrucken. Das Klavierstück klingt traumhaft.",
+            "Sehr zuvorkommender Kundenservice und schnelle Lieferung. Sieht gerahmt toll aus.",
+            "Unglaublich originell! Den Namen in Noten zu verschlüsseln ist fantastisch.",
+            "Bereits meine zweite Bestellung für ein Jubiläum und wieder ein voller Erfolg.",
+            "Das Geburtsposter für meine Nichte ist wunderschön geworden. Sehr zu empfehlen.",
+            "Eine unvergessliche Erinnerung mit persönlicher Widmung und Audio.",
+            "Hervorragender Service, Lieferung in unter 24 Stunden mit makellosem Klang."
+          ],
+          cuatro: [
+            "Sehr schöne Arbeit und wunderbare Melodie. Hat etwas länger gedauert, aber das Ergebnis lohnt sich.",
+            "Tolle Notenblatt-Qualität. Der Klavierklang ist sehr schön, guter Kauf.",
+            "Das Design sieht gerahmt super aus und der QR-Code funktioniert einwandfrei."
+          ]
+        },
+        it: {
+          cinco: [
+            "Un regalo meraviglioso ed emozionante. Abbiamo pianto ascoltando la melodia con il codice QR.",
+            "Qualità dello spartito per la stampa fantastica. Il pianoforte suona in modo perfetto.",
+            "Servizio attento e consegna velocissima. Fa un figurone nella cornice che abbiamo comprato.",
+            "Super originale! La trasposizione del nome in note musicali è un'idea da 10 e lode.",
+            "È il secondo ordine che faccio per un anniversario ed è stato un successo strepitoso.",
+            "Il quadretto per la nascita di mia nipote è venuto bellissimo. Consigliatissimo.",
+            "Un ricordo prezioso. La dedica e il QR code sono un tocco di classe.",
+            "Servizio eccellente. Arrivato in meno di 24 ore con un audio impeccabile."
+          ],
+          cuatro: [
+            "Ottimo lavoro e melodia bellissima. Ci è voluto un pochino più del previsto ma ne è valsa la pena.",
+            "Qualità impeccabile dello spartito. L'audio del pianoforte è stupendo.",
+            "Il design finale è favoloso e il QR code funziona alla perfezione."
+          ]
+        },
+        zh: {
+          cinco: [
+            "非常感人且有意义的礼物！扫描乐谱上的二维码听到旋律的那一刻大家都感动哭了。",
+            "乐谱打印出来的质感太棒了，琴谱清晰，配套的钢琴音频超级好听！",
+            "客服服务态度极佳，交付很迅速，装裱在木质相框里摆在家里特别显高级。",
+            "极具创意！用姓名字母转换成音符的想法简直绝了，10分好评！",
+            "这是我第二次为纪念日订购了，每一次都带来极大的惊喜。",
+            "为侄女定制的新生儿乐谱画太漂亮了，细节很走心，强烈推荐！",
+            "一辈子珍藏的浪漫纪念品，独一无二的专属旋律。",
+            "交付非常快，不到24小时就收到了乐谱和MP3音频，品质无可挑剔。"
+          ],
+          cuatro: [
+            "整体很不错，旋律很好听。制作时间稍微比预期久了一点点，但成品效果很满意。",
+            "乐谱排版与打印质量很好，钢琴试听很悦耳，不错的定制体验。",
+            "装裱后的设计感很好，二维码试听顺畅，整体好评。"
+          ]
+        }
+      };
+
       const articulosEs = ["Mi Nombre en Música + MP3 + QR", "Tu Nombre con Melodía + MP3", "Lámina Natalicio con Partitura", "Póster Círculo de Quintas", "Nombre en Melodía Simple"];
 
       baseEstructuraResenas = [];
       const fechaBaseReciente = new Date(2026, 9, 28); // 28 oct 2026
 
       for (let i = 0; i < 192; i++) {
-        const nom = nombresCompletos[i % nombresCompletos.length];
+        const autorObj = autoresPorIdioma[i % autoresPorIdioma.length];
         const art = articulosEs[i % articulosEs.length];
-        const textoIndice = i % 8;
-        
-        // Asignar 4 estrellas de forma intercalada en reseñas antiguas (i >= 8) para dar naturalidad
         const puntuacionBase = (i >= 8 && (i % 7 === 0 || i % 11 === 0)) ? 4 : 5;
 
-        // Cada reseña se genera progresivamente más antigua hacia el pasado
+        const packIdioma = resenasPorIdioma[autorObj.lang] || resenasPorIdioma.es;
+        const listaFrases = (puntuacionBase === 4) ? packIdioma.cuatro : packIdioma.cinco;
+        const textoNativo = listaFrases[i % listaFrases.length];
+
         const fechaObj = new Date(fechaBaseReciente);
         fechaObj.setDate(fechaObj.getDate() - Math.floor(i * 5.5));
 
         baseEstructuraResenas.push({ 
-          autor: nom, 
+          autor: autorObj.nom, 
+          idiomaOrigen: autorObj.lang,
           articuloOriginal: art, 
-          textoIndice, 
+          textoOriginalNativo: textoNativo, 
           dia: fechaObj.getDate(), 
           mesIndice: fechaObj.getMonth(), 
           anio: fechaObj.getFullYear(),
@@ -1740,44 +1877,13 @@
         if (idiomaActual === 'de') fechaTexto = `${r.dia}. ${mesTexto} ${r.anio}`;
         if (idiomaActual === 'fr') fechaTexto = `${r.dia} ${mesTexto} ${r.anio}`;
 
-        let textoFinal = t.textosResenas[r.textoIndice];
-        if (r.puntuacion === 4) {
-          const textosCuatroEstrellas = {
-            es: [
-              "Muy buen trabajo y melodía preciosa. Tardó un poquito más de lo esperado pero el resultado mereció la pena.",
-              "La calidad de la partitura es impecable. El audio del piano suena genial, muy buena compra.",
-              "El diseño quedó genial y el QR funciona a la perfección. Contento con el encargo."
-            ],
-            en: [
-              "Very nice work and lovely melody. Took a little longer than expected but totally worth it.",
-              "Great sheet music quality. The piano audio sounds very nice, good purchase overall.",
-              "The design turned out great and the QR code works smoothly. Happy with the order."
-            ],
-            fr: [
-              "Très beau travail et belle mélodie. Un peu plus long que prévu mais le résultat est superbe.",
-              "Qualité de partition impeccable. Le piano sonne très bien, bon achat.",
-              "Le rendu est très soigné et le QR code fonctionne parfaitement."
-            ],
-            de: [
-              "Sehr schöne Arbeit und wunderbare Melodie. Hat etwas länger gedauert, aber das Ergebnis lohnt sich.",
-              "Tolle Notenblatt-Qualität. Der Klavierklang ist sehr schön, guter Kauf.",
-              "Das Design sieht gerahmt super aus und der QR-Code funktioniert einwandfrei."
-            ],
-            zh: [
-              "整体很不错，旋律很好听。制作时间稍微比预期久了一点点，但成品效果很满意。",
-              "乐谱排版与打印质量很好，钢琴试听很悦耳，不错的定制体验。",
-              "装裱后的设计感很好，二维码试听顺畅，整体好评。"
-            ]
-          };
-          const lista4 = textosCuatroEstrellas[idiomaActual] || textosCuatroEstrellas.es;
-          textoFinal = lista4[r.textoIndice % lista4.length];
-        }
-
         return {
           autor: r.autor,
+          idiomaOrigen: r.idiomaOrigen || 'es',
           fecha: fechaTexto,
           articulo: traducirTituloProducto(r.articuloOriginal, idiomaActual),
-          texto: textoFinal,
+          articuloOriginal: r.articuloOriginal,
+          texto: r.textoOriginalNativo,
           timestamp: r.timestamp,
           puntuacion: r.puntuacion || 5
         };
@@ -1793,7 +1899,9 @@
 
         mapaResenas.set(clave, {
           autor: nombreLimpio,
+          idiomaOrigen: r.idiomaOrigen || 'es',
           articulo: traducirTituloProducto(r.articulo, idiomaActual),
+          articuloOriginal: r.articulo,
           texto: r.texto,
           puntuacion: parseFloat(r.puntuacion) || 5,
           fecha: formatearFechaLegible(r.fecha),
@@ -1809,6 +1917,7 @@
           mapaResenas.set(clave, {
             ...r,
             autor: nombreLimpio,
+            idiomaOrigen: r.idiomaOrigen || 'es',
             fecha: formatearFechaLegible(r.fecha)
           });
         }
@@ -1846,7 +1955,6 @@
       
       const textoNorm = normalizarTextoBusqueda(nombreArticulo);
 
-      // 1. Buscar en el catálogo dinámico de productos cargado desde Google Sheets
       if (Array.isArray(catalogoCompleto) && catalogoCompleto.length > 0) {
         const encontrado = catalogoCompleto.find(p => {
           const titOrig = normalizarTextoBusqueda(p.titulo || "");
@@ -1861,22 +1969,62 @@
         }
       }
 
-      // 2. Mapeo específico por palabras clave a imágenes reales de alta resolución según el producto
       if (textoNorm.includes("lienzo") || textoNorm.includes("canvas")) {
-        return "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=300&q=80"; // Lienzo/Arte
+        return "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=300&q=80";
       }
       if (textoNorm.includes("natalicio") || textoNorm.includes("bebe") || textoNorm.includes("nacimiento") || textoNorm.includes("birth")) {
-        return "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=300&q=80"; // Natalicio / Bebé
+        return "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=300&q=80";
       }
       if (textoNorm.includes("quintas") || textoNorm.includes("poster") || textoNorm.includes("circle") || textoNorm.includes("lamina")) {
-        return "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80"; // Lámina / Póster
+        return "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80";
       }
       if (textoNorm.includes("nuestro") || textoNorm.includes("pareja") || textoNorm.includes("our")) {
-        return "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=300&q=80"; // Parejas / Aniversario
+        return "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=300&q=80";
       }
 
-      // 3. Partitura personalizada para piano / música individual por defecto
       return "https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=300&q=80";
+    }
+
+    async function traducirTextoResena(idElemento, textoOriginal, btnElement) {
+      const pTexto = document.getElementById(idElemento);
+      if (!pTexto) return;
+
+      if (btnElement.getAttribute('data-traducido') === 'true') {
+        pTexto.innerText = decodeURIComponent(textoOriginal);
+        btnElement.setAttribute('data-traducido', 'false');
+        btnElement.innerHTML = `<i class="fa-solid fa-language text-xs"></i> <span>Traducir reseña</span>`;
+        return;
+      }
+
+      btnElement.disabled = true;
+      const textoPrevioBtn = btnElement.innerHTML;
+      btnElement.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Traduciendo...</span>`;
+
+      try {
+        const textoDecodificado = decodeURIComponent(textoOriginal);
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(idiomaActual)}&dt=t&q=${encodeURIComponent(textoDecodificado)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        let textoTraducido = "";
+        if (data && data[0]) {
+          data[0].forEach(parte => {
+            if (parte[0]) textoTraducido += parte[0];
+          });
+        }
+
+        if (textoTraducido) {
+          pTexto.innerText = textoTraducido;
+          btnElement.setAttribute('data-traducido', 'true');
+          btnElement.innerHTML = `<i class="fa-solid fa-rotate-left text-xs"></i> <span>Ver original</span>`;
+        } else {
+          btnElement.innerHTML = textoPrevioBtn;
+        }
+      } catch (err) {
+        console.warn("No se pudo traducir:", err);
+        btnElement.innerHTML = textoPrevioBtn;
+      }
+      btnElement.disabled = false;
     }
 
     function renderizarResenasPagina() {
@@ -1892,7 +2040,16 @@
       const fin = inicio + RESENAS_POR_PAGINA;
       const paginaItems = listaResenasTotales.slice(inicio, fin);
 
-      contenedor.innerHTML = paginaItems.map(r => {
+      const labelsTraducir = {
+        es: "Traducir reseña",
+        en: "Translate review",
+        fr: "Traduire le commentaire",
+        de: "Bewertung übersetzen",
+        zh: "翻译评价"
+      };
+      const labelBoton = labelsTraducir[idiomaActual] || labelsTraducir.es;
+
+      contenedor.innerHTML = paginaItems.map((r, index) => {
         const estrellasNum = Math.round(r.puntuacion || 5);
         let estrellasHtml = '';
         for (let s = 1; s <= 5; s++) {
@@ -1901,6 +2058,12 @@
 
         const nombreAutorLimpio = (r.autor || "Cliente").replace(/\s*\(Compra verificada\)/gi, '').trim();
         const imgArticulo = obtenerImagenArticulo(r.articuloOriginal || r.articulo);
+        const idTextoUnico = `texto-resena-${paginaResenasActual}-${index}`;
+        const textoCodificado = encodeURIComponent(r.texto || "");
+
+        // Solo mostrar botón de traducir si el idioma de la reseña es DISTINTO al idioma seleccionado en la web
+        const idiomaOrigen = r.idiomaOrigen || 'es';
+        const necesitaTraduccion = (idiomaOrigen !== idiomaActual);
 
         return `
         <div class="py-4 space-y-2">
@@ -1918,9 +2081,18 @@
             <span class="text-[11px] text-gray-400 whitespace-nowrap ml-2">${r.fecha}</span>
           </div>
 
-          <p class="text-xs text-gray-700 leading-relaxed">${r.texto}</p>
+          <p id="${idTextoUnico}" class="text-xs text-gray-700 leading-relaxed">${r.texto}</p>
 
-          <div class="flex items-center gap-2.5 pt-1">
+          ${necesitaTraduccion ? `
+            <div>
+              <button onclick="traducirTextoResena('${idTextoUnico}', '${textoCodificado}', this)" data-traducido="false" class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-gray-500 hover:text-black underline underline-offset-2 transition active:scale-95">
+                <i class="fa-solid fa-language text-xs text-gray-400"></i>
+                <span>${labelBoton}</span>
+              </button>
+            </div>
+          ` : ''}
+
+          <div class="flex items-center gap-2.5 pt-0.5">
             <div class="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0 shadow-xs">
               <img src="${imgArticulo}" alt="${r.articulo}" class="w-full h-full object-cover">
             </div>
