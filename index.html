@@ -297,7 +297,12 @@
 
           <div>
             <label class="block text-[11px] font-semibold text-gray-600 mb-1">Artículo comprado *</label>
-            <input type="text" id="articuloResena" required placeholder="Ej. Mi Nombre en Música + MP3 + QR" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 focus:outline-none focus:border-black transition">
+            <div class="relative">
+              <select id="articuloResena" required class="w-full appearance-none bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 focus:outline-none focus:border-black transition pr-10 cursor-pointer shadow-sm">
+                <option value="" disabled selected>Selecciona el producto que encargaste...</option>
+              </select>
+              <i class="fa-solid fa-chevron-down absolute right-3.5 top-3.5 text-[10px] text-gray-400 pointer-events-none"></i>
+            </div>
           </div>
 
           <div>
@@ -1331,10 +1336,36 @@
           catalogoCompleto = data.productos;
           actualizarConteosCategorias();
           renderizarCatalogo(catalogoCompleto);
+          actualizarSelectProductosResena();
         }
       } catch (e) {
         console.error("Error al cargar productos:", e);
       }
+    }
+
+    function actualizarSelectProductosResena() {
+      const select = document.getElementById("articuloResena");
+      if (!select || !catalogoCompleto || catalogoCompleto.length === 0) return;
+
+      // Ordenar alfabéticamente por título traducido
+      const productosOrdenados = [...catalogoCompleto].sort((a, b) => {
+        const titA = traducirTituloProducto(a.titulo, idiomaActual);
+        const titB = traducirTituloProducto(b.titulo, idiomaActual);
+        return titA.localeCompare(titB, 'es', { sensitivity: 'base' });
+      });
+
+      const opcionesHTML = productosOrdenados.map(p => {
+        const tit = traducirTituloProducto(p.titulo, idiomaActual);
+        const precioBase = parseFloat(p.precio) || 0;
+        const precioOferta = p.precioOferta ? parseFloat(String(p.precioOferta).replace(',', '.')) : null;
+        const precioFinal = (precioOferta && precioOferta > 0 && precioOferta < precioBase) ? precioOferta : precioBase;
+        return `<option value="${tit.replace(/"/g, '&quot;')}">${tit} — ${precioFinal.toFixed(2)} €</option>`;
+      }).join('');
+
+      select.innerHTML = `
+        <option value="" disabled selected>Selecciona el producto que encargaste...</option>
+        ${opcionesHTML}
+      `;
     }
 
     function traducirTituloProducto(tituloOriginal, lang) {
