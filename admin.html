@@ -716,13 +716,12 @@
             </div>
 
             <!-- Lista de Mensajes -->
-            <div id="contenedorMensajes" class="space-y-3">
-              <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 text-center py-8">
-                <i class="fa-solid fa-inbox text-slate-300 text-2xl mb-2 block"></i>
-                <p class="text-xs text-slate-500 font-medium">Bandeja de mensajes lista para recibir consultas.</p>
-                <span class="text-[10px] text-slate-400 block mt-1">Al integrar el formulario en index.html, los mensajes aparecerán automáticamente aquí.</span>
-              </div>
-            </div>
+      <div id="contenedorMensajes" class="space-y-3">
+        <div class="p-12 text-center text-slate-400">
+          <i class="fa-solid fa-inbox text-3xl mb-2 opacity-50"></i>
+          <p class="text-xs">No hay mensajes de clientes por ahora.</p>
+        </div>
+      </div>
           </section>
         </div>
 
@@ -737,10 +736,12 @@
     let tokenClave = "";
     let listaPedidosGlobal = [];
     let listaProductosGlobal = [];
+    let mensajesClientes = [];
     let filtroEstadoActual = "todos";
     let paginaActualPedidos = 1;
     const pedidosPorPagina = 10;
     const idsEliminadosLocalmente = new Set();
+    const filasLeidasLocalmente = new Set();
 
     function autenticar(e) {
       e.preventDefault();
@@ -789,6 +790,15 @@
         const pedidosServidor = data.pedidos || [];
         listaPedidosGlobal = pedidosServidor.filter(p => !idsEliminadosLocalmente.has(p.id));
         listaProductosGlobal = data.productos || [];
+
+        const mensajesServidor = data.mensajes || [];
+        mensajesClientes = mensajesServidor.map(m => {
+          if (filasLeidasLocalmente.has(m.fila)) {
+            return { ...m, estado: "Leído" };
+          }
+          return m;
+        });
+        renderizarMensajesAdmin(mensajesClientes);
 
         if (datosCambiaron || !esSilencioso) {
           actualizarMetricas();
@@ -2788,6 +2798,7 @@
         renderizarFinanzas();
       } else if (seccion === 'mensajes') {
         document.getElementById('vistaSeccionMensajes').classList.remove('hidden');
+        renderizarMensajesAdmin(mensajesClientes);
       }
 
       btn.classList.add('bg-slate-900', 'text-white', 'shadow-sm');
@@ -3271,6 +3282,138 @@
       });
 
       doc.save(`Zeronte - Informe Finanzas (${hoyString.replace(/\//g, '-')}).pdf`);
+    }
+
+    // ================= RENDERIZAR MENSAJES EN EL PANEL ADMIN =================
+    function renderizarMensajesAdmin(lista) {
+      const contenedor = document.getElementById("contenedorMensajes");
+      const badgeMenu = document.getElementById("badgeMensajes");
+      
+      const noLeidos = (lista || []).filter(m => (m.estado || "").toLowerCase() !== "leído").length;
+      
+      if (badgeMenu) {
+        badgeMenu.innerText = noLeidos;
+        badgeMenu.className = noLeidos > 0 
+          ? "sidebar-badge text-[10px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full font-bold shrink-0 animate-pulse" 
+          : "sidebar-badge text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold shrink-0";
+      }
+
+      if (!contenedor) return;
+
+      if (!lista || lista.length === 0) {
+        contenedor.innerHTML = `
+          <div class="p-12 text-center text-slate-400 border border-slate-100 rounded-2xl bg-slate-50/50">
+            <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-300"></i>
+            <p class="text-xs font-medium">Bandeja al día. No hay mensajes recibidos.</p>
+          </div>`;
+        return;
+      }
+
+      contenedor.innerHTML = lista.map((m, idx) => {
+        const esNoLeido = (m.estado || "").toLowerCase() !== "leído";
+        const fechaFormateada = formatearFechaEspanol(m.fecha);
+        const estaAbiertoPorDefecto = (idx === 0);
+        const cuerpoId = `cuerpo-mensaje-${idx}`;
+        const iconoId = `icono-flecha-msg-${idx}`;
+
+        return `
+          <div class="border ${esNoLeido ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200 bg-white'} rounded-2xl p-4 sm:p-5 transition hover:shadow-xs">
+            <!-- Cabecera Clicable (Nombre, Email, Fecha, Estado y Flecha) -->
+            <div onclick="toggleDetallePedido('${cuerpoId}')" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-xl ${esNoLeido ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-white'} flex items-center justify-center font-bold text-xs shrink-0">
+                  ${(m.nombre || "C").charAt(0).toUpperCase()}
+                </div>
+                <div class="min-w-0">
+                  <h4 class="text-xs sm:text-sm font-bold text-slate-900 truncate">${m.nombre || "Sin nombre"}</h4>
+                  <a href="mailto:${m.email}" onclick="event.stopPropagation()" class="text-[11px] text-blue-600 hover:underline flex items-center gap-1 truncate">
+                    <i class="fa-regular fa-envelope text-[10px]"></i> ${m.email}
+                  </a>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-2 self-start sm:self-center shrink-0">
+                <span class="text-[11px] text-slate-500 font-medium">${fechaFormateada}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${esNoLeido ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-slate-100 text-slate-600 border border-slate-200'}">
+                  ${m.estado || 'No leído'}
+                </span>
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 transition ml-1">
+                  <i id="icon-${cuerpoId}" class="fa-solid fa-chevron-down text-[11px] transition-transform duration-200 ${estaAbiertoPorDefecto ? 'rotate-180' : ''}"></i>
+                </span>
+              </div>
+            </div>
+
+            <!-- Contenido desplegable: Texto del mensaje y botones de acción -->
+            <div id="${cuerpoId}" class="${estaAbiertoPorDefecto ? '' : 'hidden'} mt-3 pt-3 border-t border-slate-100">
+              <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">${m.mensaje}</p>
+
+              <div class="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-slate-100">
+                <a href="mailto:${m.email}?subject=Respuesta a tu consulta en Zeronte" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-xs">
+                  <i class="fa-solid fa-reply text-[10px]"></i> Responder por Email
+                </a>
+                
+                ${esNoLeido ? `
+                  <button onclick="marcarMensajeLeido(${m.fila})" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 active:scale-95">
+                    <i class="fa-solid fa-check text-[10px] text-emerald-600"></i> Marcar como leído
+                  </button>
+                ` : ''}
+
+                <button onclick="borrarMensajeAdmin(${m.fila})" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-xl text-xs transition active:scale-90" title="Eliminar">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Marcar como leído sin efecto rebote
+    async function marcarMensajeLeido(fila) {
+      // 1. Guardar en memoria blindada local
+      filasLeidasLocalmente.add(fila);
+
+      // 2. Actualizar inmediatamente la vista
+      const item = mensajesClientes.find(m => m.fila === fila);
+      if (item) item.estado = "Leído";
+      renderizarMensajesAdmin(mensajesClientes);
+
+      // 3. Enviar a Google Sheets
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "actualizarEstadoMensaje",
+            clave: tokenClave || "zeronte2026",
+            fila: fila,
+            nuevoEstado: "Leído"
+          })
+        });
+      } catch (e) {
+        console.error("Error al actualizar estado del mensaje:", e);
+      }
+    }
+
+    // Eliminar mensaje
+    async function borrarMensajeAdmin(fila) {
+      if (!confirm("¿Deseas eliminar este mensaje permanentemente?")) return;
+      try {
+        mensajesClientes = mensajesClientes.filter(m => m.fila !== fila);
+        renderizarMensajesAdmin(mensajesClientes);
+
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "eliminarMensaje",
+            clave: tokenClave || "zeronte2026",
+            fila: fila
+          })
+        });
+      } catch (e) {
+        console.error("Error al eliminar mensaje:", e);
+      }
     }
   </script>
 </body>
