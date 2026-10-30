@@ -1542,34 +1542,93 @@
       `;
     }
 
-    // Caché en memoria para no repetir peticiones de traducción de títulos nuevos
+    // Glosario musical y artístico para auto-traducir productos nuevos sin retardo
+    const GLOSARIO_TERMINOS = {
+      en: {
+        "lámina": "print", "lamina": "print", "violín": "violin", "violin": "violin",
+        "al estilo de carboncillo": "charcoal style", "carboncillo": "charcoal",
+        "piano": "piano", "partitura": "sheet music", "lienzo": "canvas",
+        "póster": "poster", "poster": "poster", "de": "of", "con": "with"
+      },
+      fr: {
+        "lámina": "affiche", "lamina": "affiche", "violín": "violon", "violin": "violon",
+        "al estilo de carboncillo": "style fusain", "carboncillo": "fusain",
+        "piano": "piano", "partitura": "partition", "lienzo": "toile",
+        "póster": "poster", "poster": "poster", "de": "de", "con": "avec"
+      },
+      de: {
+        "lámina": "kunstdruck", "lamina": "kunstdruck", "violín": "geige", "violin": "violine",
+        "al estilo de carboncillo": "im kohle-stil", "carboncillo": "kohlezeichnung",
+        "piano": "klavier", "partitura": "notenblatt", "lienzo": "leinwand",
+        "póster": "poster", "poster": "poster", "de": "von", "con": "mit"
+      },
+      it: {
+        "lámina": "stampa", "lamina": "stampa", "violín": "violino", "violin": "violino",
+        "al estilo de carboncillo": "in stile carboncino", "carboncillo": "carboncino",
+        "piano": "pianoforte", "partitura": "spartito", "lienzo": "tela",
+        "póster": "poster", "poster": "poster", "de": "di", "con": "con"
+      },
+      pt: {
+        "lámina": "estampa", "lamina": "estampa", "violín": "violino", "violin": "violino",
+        "al estilo de carboncillo": "ao estilo de carvão", "carboncillo": "carvão",
+        "piano": "piano", "partitura": "partitura", "lienzo": "tela",
+        "póster": "póster", "poster": "póster", "de": "de", "con": "com"
+      },
+      zh: {
+        "lámina": "艺术画", "lamina": "艺术画", "violín": "小提琴", "violin": "小提琴",
+        "al estilo de carboncillo": "素描炭笔风", "carboncillo": "炭笔画",
+        "piano": "钢琴", "partitura": "乐谱", "lienzo": "油画布",
+        "póster": "海报", "poster": "海报"
+      }
+    };
+
     const cacheTraduccionTitulos = {};
 
     function traducirTituloProducto(tituloOriginal, lang) {
       if (!tituloOriginal) return "";
-      if (lang === 'es' || !DICCIONARIO_TITULOS[lang]) return tituloOriginal;
+      if (lang === 'es') return tituloOriginal;
 
-      // 1. Si ya está en el diccionario manual fijo, usarlo prioritariamente
-      const valoresIdioma = Object.values(DICCIONARIO_TITULOS[lang]);
-      if (valoresIdioma.includes(tituloOriginal)) {
-        return tituloOriginal;
-      }
-
-      for (const [claveEs, traduccion] of Object.entries(DICCIONARIO_TITULOS[lang])) {
-        if (tituloOriginal.toLowerCase() === claveEs.toLowerCase()) {
-          return traduccion;
+      // 1. Comprobar en el diccionario de títulos manuales exactos
+      if (DICCIONARIO_TITULOS[lang]) {
+        for (const [claveEs, traduccion] of Object.entries(DICCIONARIO_TITULOS[lang])) {
+          if (tituloOriginal.trim().toLowerCase() === claveEs.trim().toLowerCase()) {
+            return traduccion;
+          }
         }
       }
 
-      // 2. Si ya fue traducido dinámicamente antes en esta sesión, recuperarlo de la memoria
+      // 2. Comprobar si ya está en la memoria de la sesión
       const claveCache = `${lang}_${tituloOriginal}`;
       if (cacheTraduccionTitulos[claveCache]) {
         return cacheTraduccionTitulos[claveCache];
       }
 
-      // 3. Si es un producto NUEVO de Google Sheets no registrado, traducirlo automáticamente de fondo
-      traducirTituloNuevoEnSegundoPlano(tituloOriginal, lang);
+      // 3. Traducción inteligente inmediata por glosario de términos artísticos
+      if (GLOSARIO_TERMINOS[lang]) {
+        let textoProcesado = tituloOriginal.toLowerCase();
+        let huboCambios = false;
 
+        // Ordenar términos de más largos a más cortos para no pisar frases compuestas
+        const terminosOrdenados = Object.keys(GLOSARIO_TERMINOS[lang]).sort((a, b) => b.length - a.length);
+
+        terminosOrdenados.forEach(termino => {
+          const reg = new RegExp(termino, 'gi');
+          if (reg.test(textoProcesado)) {
+            textoProcesado = textoProcesado.replace(reg, GLOSARIO_TERMINOS[lang][termino]);
+            huboCambios = true;
+          }
+        });
+
+        if (huboCambios) {
+          // Capitalizar la primera letra
+          const resultadoGlosario = textoProcesado.charAt(0).toUpperCase() + textoProcesado.slice(1);
+          cacheTraduccionTitulos[claveCache] = resultadoGlosario;
+          return resultadoGlosario;
+        }
+      }
+
+      // 4. Si no coincide con ninguna palabra clave, traducir en segundo plano
+      traducirTituloNuevoEnSegundoPlano(tituloOriginal, lang);
       return tituloOriginal;
     }
 
@@ -1589,13 +1648,12 @@
 
         if (textoTrad) {
           cacheTraduccionTitulos[claveCache] = textoTrad;
-          // Actualizar en pantalla el título si el usuario sigue viendo ese idioma
           document.querySelectorAll(`[data-titulo-orig="${encodeURIComponent(tituloOriginal)}"]`).forEach(el => {
             el.innerText = textoTrad;
           });
         }
       } catch (e) {
-        console.warn("Traducción automática de producto nuevo omitida:", e);
+        console.warn("Traducción automática omitida:", e);
       }
     }
 
@@ -1630,7 +1688,7 @@
               </div>
 
               <div class="p-3">
-                <h3 class="text-xs sm:text-sm font-medium text-[#222222] line-clamp-2 leading-snug group-hover:underline">
+                <h3 data-titulo-orig="${encodeURIComponent(p.titulo)}" class="text-xs sm:text-sm font-medium text-[#222222] line-clamp-2 leading-snug group-hover:underline">
                   ${tituloTraducido}
                 </h3>
                 
