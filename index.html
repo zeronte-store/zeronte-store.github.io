@@ -108,6 +108,12 @@
           </div>
         </div>
 
+        <!-- Botón Enviar Mensaje (Contacto Dashboard / Email) -->
+        <button onclick="abrirModalContacto()" class="flex-shrink-0 flex items-center gap-1.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-sm transition active:scale-95">
+          <i class="fa-solid fa-envelope text-blue-600 text-sm"></i>
+          <span id="btnMensajeTxt">Enviar Mensaje</span>
+        </button>
+
         <!-- Botón Contacto WhatsApp -->
         <a href="https://wa.me/34641851073" target="_blank" class="flex-shrink-0 flex items-center gap-1.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-sm transition active:scale-95">
           <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
@@ -419,6 +425,53 @@
         </a>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DE ENVIAR MENSAJE ==================== -->
+  <div id="modalContactoDirecto" class="fixed inset-0 bg-black/80 hidden items-end sm:items-center justify-center z-50 backdrop-blur-sm">
+    <div class="bg-white border border-gray-200 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto text-left">
+      <!-- Drag bar móvil -->
+      <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3 sm:hidden"></div>
+      
+      <!-- Botón Cerrar -->
+      <button onclick="cerrarModalContacto()" class="absolute top-4 right-4 w-7 h-7 rounded-full bg-gray-100 text-gray-500 hover:text-black flex items-center justify-center transition">✕</button>
+
+      <div class="flex items-center gap-2 mb-1">
+        <i class="fa-solid fa-envelope text-blue-600 text-base"></i>
+        <h3 id="txtModalMensajeTitulo" class="text-base font-bold text-gray-900">Escríbenos tu consulta</h3>
+      </div>
+      <p id="txtModalMensajeDesc" class="text-xs text-gray-500 mb-4">Te responderemos a tu email en la mayor brevedad posible.</p>
+
+      <form id="formContactoCliente" onsubmit="enviarMensajeCliente(event)" class="space-y-3">
+        <div>
+          <label id="lblMsgNombre" class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Tu Nombre *</label>
+          <input type="text" id="contactoNombre" required placeholder="Ej. Clara Santos" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 focus:outline-none focus:border-black focus:bg-white transition">
+        </div>
+
+        <div>
+          <label id="lblMsgEmail" class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Tu Correo Electrónico *</label>
+          <input type="email" inputmode="email" id="contactoEmail" required placeholder="correo@ejemplo.com" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 focus:outline-none focus:border-black focus:bg-white transition">
+        </div>
+
+        <div>
+          <label id="lblMsgTexto" class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Mensaje o Duda *</label>
+          <textarea id="contactoMensaje" rows="3" required placeholder="Escribe aquí tu consulta sobre pedidos, plazos, personalizaciones..." class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 focus:outline-none focus:border-black focus:bg-white transition"></textarea>
+        </div>
+
+        <button type="submit" id="btnEnviarMensajeSubmit" class="w-full mt-2 bg-black hover:bg-gray-800 text-white font-bold py-3 rounded-xl uppercase tracking-wider text-xs transition duration-200 active:scale-98 shadow-md flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane text-xs"></i>
+          <span id="btnEnviarMsgTxt">Enviar Mensaje</span>
+        </button>
+      </form>
+
+      <!-- Mensaje de confirmación -->
+      <div id="contactoExitoAviso" class="hidden text-center py-6">
+        <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-lg font-bold">✓</div>
+        <h4 id="txtMsgEnviado" class="text-sm font-bold text-gray-900">¡Mensaje enviado correctamente!</h4>
+        <p id="txtMsgEnviadoSub" class="text-xs text-gray-500 mt-1">Hemos recibido tu consulta y nos pondremos en contacto contigo pronto.</p>
+        <button onclick="cerrarModalContacto()" class="mt-4 px-4 py-1.5 border border-gray-300 rounded-full text-xs font-semibold text-gray-700 hover:bg-gray-100">Cerrar</button>
+      </div>
     </div>
   </div>
 
@@ -1579,6 +1632,53 @@
     function copiarTexto(texto) {
       navigator.clipboard.writeText(texto);
       alert(texto);
+    }
+
+    // ================= FUNCIONES DE ENVÍO DE MENSAJE A DASHBOARD Y EMAIL =================
+    function abrirModalContacto() {
+      document.getElementById('formContactoCliente').reset();
+      document.getElementById('formContactoCliente').classList.remove('hidden');
+      document.getElementById('contactoExitoAviso').classList.add('hidden');
+      document.getElementById('modalContactoDirecto').classList.remove('hidden');
+      document.getElementById('modalContactoDirecto').classList.add('flex');
+    }
+
+    function cerrarModalContacto() {
+      document.getElementById('modalContactoDirecto').classList.add('hidden');
+      document.getElementById('modalContactoDirecto').classList.remove('flex');
+    }
+
+    async function enviarMensajeCliente(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnEnviarMensajeSubmit');
+      const btnTxt = document.getElementById('btnEnviarMsgTxt');
+      
+      btn.disabled = true;
+      btnTxt.innerText = "Enviando...";
+
+      const datosMensaje = {
+        accion: "guardarMensaje",
+        nombre: document.getElementById('contactoNombre').value.trim(),
+        email: document.getElementById('contactoEmail').value.trim(),
+        mensaje: document.getElementById('contactoMensaje').value.trim(),
+        destinatarioNotificacion: "zeronte.store@gmail.com",
+        fecha: new Date().toISOString()
+      };
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(datosMensaje)
+        });
+      } catch (err) {
+        console.warn("Mensaje emitido hacia el backend:", err);
+      }
+
+      btn.disabled = false;
+      btnTxt.innerText = "Enviar Mensaje";
+      document.getElementById('formContactoCliente').classList.add('hidden');
+      document.getElementById('contactoExitoAviso').classList.remove('hidden');
     }
   </script>
 </body>
