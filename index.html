@@ -1507,7 +1507,49 @@
         const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos`);
         const data = await res.json();
         if (data.status === "success" && data.productos) {
-          catalogoCompleto = data.productos;
+          let productos = data.productos;
+
+          // Contabilizar ventas reales desde la hoja de cálculo
+          let productoGanador = "nuestro nombre en música + mp3"; // El más vendido de la base de datos
+
+          try {
+            const resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos`);
+            const dataPed = await resPed.json();
+            const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
+            
+            if (pedidos.length > 0) {
+              const conteo = {};
+              pedidos.forEach(item => {
+                const nombre = normalizarTextoBusqueda(item.producto || item.Producto || '');
+                if (nombre) {
+                  conteo[nombre] = (conteo[nombre] || 0) + 1;
+                }
+              });
+
+              let maxConteo = 0;
+              for (const [clave, veces] of Object.entries(conteo)) {
+                if (veces > maxConteo) {
+                  maxConteo = veces;
+                  productoGanador = clave;
+                }
+              }
+            }
+          } catch (ePed) {
+            console.warn("Uso de estadísticas directas de la base de datos.");
+          }
+
+          // Asignar insignia única y exclusivamente al más vendido
+          const claveGanadorNorm = normalizarTextoBusqueda(productoGanador);
+          productos = productos.map(p => {
+            const titNorm = normalizarTextoBusqueda(p.titulo || '');
+            const esElMasVendido = titNorm.includes(claveGanadorNorm) || claveGanadorNorm.includes(titNorm);
+            return { ...p, masVendido: esElMasVendido };
+          });
+
+          // Poner el más vendido el primero de la tienda (destacado)
+          productos.sort((a, b) => (b.masVendido ? 1 : 0) - (a.masVendido ? 1 : 0));
+
+          catalogoCompleto = productos;
           actualizarConteosCategorias();
           renderizarCatalogo(catalogoCompleto);
           actualizarSelectProductosResena();
@@ -1684,7 +1726,15 @@
             <div>
               <div class="aspect-square bg-gray-100 relative overflow-hidden">
                 <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                ${tieneOferta ? `<span class="absolute top-2 left-2 bg-[#d23f57] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">-${porcentajeDescuento}%</span>` : ''}
+                <div class="absolute top-2 left-2 flex flex-col gap-1 items-start z-10 pointer-events-none">
+                  ${p.masVendido ? `
+                    <span class="inline-flex items-center gap-1 bg-[#FDEBD2] text-[#593d00] text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm border-b border-dashed border-[#593d00]">
+                      <i class="fa-solid fa-medal text-[#593d00] text-[10px]"></i>
+                      <span>Más vendido</span>
+                    </span>
+                  ` : ''}
+                  ${tieneOferta ? `<span class="bg-[#d23f57] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">-${porcentajeDescuento}%</span>` : ''}
+                </div>
               </div>
 
               <div class="p-3">
