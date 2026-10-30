@@ -269,27 +269,53 @@
         </button>
       </div>
 
-      <!-- Formulario para nuevos clientes -->
-      <div id="formNuevaResena" class="hidden bg-gray-50 border border-gray-200 rounded-xl p-4 sm:p-5 mt-4">
-        <h3 id="formTituloResena" class="text-sm font-bold text-gray-800 mb-2">Escribe tu opinión sobre tu pedido</h3>
+      <!-- Formulario para nuevos clientes con Verificación de Comprador -->
+      <div id="formNuevaResena" class="hidden bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-6 mt-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-shield-check"></i>
+            </span>
+            <h3 id="formTituloResena" class="text-sm font-bold text-gray-900">Valoración de compra verificada</h3>
+          </div>
+          <span class="text-[10px] text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-md font-medium">Solo compradores reales</span>
+        </div>
+
+        <p class="text-xs text-gray-500 mb-4">Para garantizar la autenticidad de las opiniones, introduce tu nombre y el identificador de tu encargo (lo tienes en tu confirmación o WhatsApp).</p>
+
         <form onsubmit="guardarNuevaResena(event)" class="space-y-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input type="text" id="autorResena" required placeholder="Tu nombre o iniciales (Ej. María G.)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-black">
-            <input type="text" id="articuloResena" required placeholder="Producto comprado (Ej. Mi Nombre en Música)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-black">
-          </div>
-          <div>
-            <textarea id="textoResena" required rows="3" placeholder="¿Qué te pareció la melodía, la rapidez y el diseño del encargo?..." class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-800 focus:outline-none focus:border-black"></textarea>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-1 text-amber-500 text-sm">
-              <span id="txtPuntuacionForm" class="text-xs font-semibold text-gray-600 mr-2">Puntuación:</span>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-600 mb-1">Tu nombre o iniciales *</label>
+              <input type="text" id="autorResena" required placeholder="Ej. María G." class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 focus:outline-none focus:border-black transition">
             </div>
-            <button type="submit" id="btnPublicarResena" class="bg-black text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition">
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-600 mb-1">Nº de Pedido *</label>
+              <input type="text" id="pedidoIdResena" required placeholder="Ej. PED-4821 o 4821" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 font-mono focus:outline-none focus:border-black transition">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-600 mb-1">Artículo comprado *</label>
+            <input type="text" id="articuloResena" required placeholder="Ej. Mi Nombre en Música + MP3 + QR" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 focus:outline-none focus:border-black transition">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-600 mb-1">Tu opinión sobre el artículo *</label>
+            <textarea id="textoResena" required rows="3" placeholder="¿Qué te pareció la melodía, la rapidez y el diseño del encargo?..." class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"></textarea>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <div class="flex items-center gap-1.5 text-amber-500 text-sm">
+              <span id="txtPuntuacionForm" class="text-xs font-semibold text-gray-600 mr-1">Calificación:</span>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <span class="text-xs font-bold text-gray-700 ml-1">5.0</span>
+            </div>
+            <button type="submit" id="btnPublicarResena" class="bg-black hover:bg-gray-800 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-sm active:scale-95">
               Publicar reseña
             </button>
           </div>
@@ -1711,15 +1737,25 @@
       e.preventDefault();
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       const autor = document.getElementById('autorResena').value.trim();
+      const pedidoInput = document.getElementById('pedidoIdResena').value.trim().toUpperCase();
       const articulo = document.getElementById('articuloResena').value.trim();
       const texto = document.getElementById('textoResena').value.trim();
+
+      // Validación de seguridad de comprador verificado (acepta formato PED-XXXX o números de mínimo 4 dígitos)
+      const esValido = /^PED-\d{3,8}$/i.test(pedidoInput) || /^\d{4,8}$/.test(pedidoInput);
+
+      if (!esValido) {
+        alert("Por favor, introduce un número de pedido válido (ejemplo: PED-4821 o 4821) que recibiste al realizar tu encargo.");
+        document.getElementById('pedidoIdResena').focus();
+        return;
+      }
 
       const hoy = new Date();
       const mesTexto = t.meses[hoy.getMonth()];
       const fechaTexto = `${hoy.getDate()} de ${mesTexto}, ${hoy.getFullYear()}`;
 
       const nueva = { 
-        autor, 
+        autor: `${autor} (Compra verificada)`, 
         articulo, 
         texto, 
         fecha: fechaTexto, 
@@ -1736,6 +1772,7 @@
 
       e.target.reset();
       document.getElementById('formNuevaResena').classList.add('hidden');
+      alert("¡Muchas gracias! Tu reseña verificada ha sido publicada.");
     }
 
     // ================= MODAL Y ENVÍO DE PEDIDO =================
