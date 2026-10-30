@@ -1660,6 +1660,9 @@
         const art = articulosEs[i % articulosEs.length];
         const textoIndice = i % 8;
         
+        // Asignar 4 estrellas de forma intercalada en reseñas antiguas (i >= 8) para dar naturalidad
+        const puntuacionBase = (i >= 8 && (i % 7 === 0 || i % 11 === 0)) ? 4 : 5;
+
         // Cada reseña se genera progresivamente más antigua hacia el pasado
         const fechaObj = new Date(fechaBaseReciente);
         fechaObj.setDate(fechaObj.getDate() - Math.floor(i * 5.5));
@@ -1671,7 +1674,8 @@
           dia: fechaObj.getDate(), 
           mesIndice: fechaObj.getMonth(), 
           anio: fechaObj.getFullYear(),
-          timestamp: fechaObj.getTime()
+          timestamp: fechaObj.getTime(),
+          puntuacion: puntuacionBase
         });
       }
 
@@ -1724,13 +1728,46 @@
         if (idiomaActual === 'de') fechaTexto = `${r.dia}. ${mesTexto} ${r.anio}`;
         if (idiomaActual === 'fr') fechaTexto = `${r.dia} ${mesTexto} ${r.anio}`;
 
+        let textoFinal = t.textosResenas[r.textoIndice];
+        if (r.puntuacion === 4) {
+          const textosCuatroEstrellas = {
+            es: [
+              "Muy buen trabajo y melodía preciosa. Tardó un poquito más de lo esperado pero el resultado mereció la pena.",
+              "La calidad de la partitura es impecable. El audio del piano suena genial, muy buena compra.",
+              "El diseño quedó genial y el QR funciona a la perfección. Contento con el encargo."
+            ],
+            en: [
+              "Very nice work and lovely melody. Took a little longer than expected but totally worth it.",
+              "Great sheet music quality. The piano audio sounds very nice, good purchase overall.",
+              "The design turned out great and the QR code works smoothly. Happy with the order."
+            ],
+            fr: [
+              "Très beau travail et belle mélodie. Un peu plus long que prévu mais le résultat est superbe.",
+              "Qualité de partition impeccable. Le piano sonne très bien, bon achat.",
+              "Le rendu est très soigné et le QR code fonctionne parfaitement."
+            ],
+            de: [
+              "Sehr schöne Arbeit und wunderbare Melodie. Hat etwas länger gedauert, aber das Ergebnis lohnt sich.",
+              "Tolle Notenblatt-Qualität. Der Klavierklang ist sehr schön, guter Kauf.",
+              "Das Design sieht gerahmt super aus und der QR-Code funktioniert einwandfrei."
+            ],
+            zh: [
+              "整体很不错，旋律很好听。制作时间稍微比预期久了一点点，但成品效果很满意。",
+              "乐谱排版与打印质量很好，钢琴试听很悦耳，不错的定制体验。",
+              "装裱后的设计感很好，二维码试听顺畅，整体好评。"
+            ]
+          };
+          const lista4 = textosCuatroEstrellas[idiomaActual] || textosCuatroEstrellas.es;
+          textoFinal = lista4[r.textoIndice % lista4.length];
+        }
+
         return {
           autor: r.autor,
           fecha: fechaTexto,
           articulo: traducirTituloProducto(r.articuloOriginal, idiomaActual),
-          texto: t.textosResenas[r.textoIndice],
+          texto: textoFinal,
           timestamp: r.timestamp,
-          puntuacion: 5
+          puntuacion: r.puntuacion || 5
         };
       });
 
