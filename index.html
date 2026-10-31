@@ -89,7 +89,7 @@
           </button>
 
           <!-- Opciones desplegables -->
-          <div id="menuIdiomas" class="hidden absolute right-0 mt-1.5 w-36 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 text-xs">
+          <div id="menuIdiomas" class="hidden absolute left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 mt-1.5 w-36 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 text-xs">
             <button onclick="seleccionarIdioma('es')" class="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-gray-100 text-gray-700">
               <img src="https://flagcdn.com/w40/es.png" alt="ES" class="w-4 h-3 object-cover rounded-sm"> <span>Español</span>
             </button>
@@ -177,20 +177,20 @@
           </button>
           <div id="menuOrdenarMovil" class="hidden absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-2xl shadow-xl z-30 py-2 text-xs font-medium divide-y divide-gray-100">
             <button onclick="ordenarCatalogo('relevancia')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
-              <span id="txtOrdRelevancia">Relevancia</span>
-              <i id="check-relevancia" class="fa-solid fa-check text-black text-[11px]"></i>
+              <span id="txtOrdRelevancia">Más vendido</span>
+              <i data-check-criterio="relevancia" id="check-relevancia" class="fa-solid fa-check text-black text-[11px]"></i>
             </button>
             <button onclick="ordenarCatalogo('reciente')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
               <span id="txtOrdReciente">Más reciente</span>
-              <i id="check-reciente" class="fa-solid fa-check text-black text-[11px] hidden"></i>
+              <i data-check-criterio="reciente" id="check-reciente" class="fa-solid fa-check text-black text-[11px] hidden"></i>
             </button>
             <button onclick="ordenarCatalogo('precio_asc')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
               <span id="txtOrdBarato">Más barato</span>
-              <i id="check-precio_asc" class="fa-solid fa-check text-black text-[11px] hidden"></i>
+              <i data-check-criterio="precio_asc" id="check-precio_asc" class="fa-solid fa-check text-black text-[11px] hidden"></i>
             </button>
             <button onclick="ordenarCatalogo('precio_desc')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
               <span id="txtOrdCaro">Más caro</span>
-              <i id="check-precio_desc" class="fa-solid fa-check text-black text-[11px] hidden"></i>
+              <i data-check-criterio="precio_desc" id="check-precio_desc" class="fa-solid fa-check text-black text-[11px] hidden"></i>
             </button>
           </div>
         </div>
@@ -234,7 +234,33 @@
       <main class="flex-1 w-full" id="catalogo">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base sm:text-lg font-bold text-[#222222]" id="tituloSeccionActual">Todos los artículos</h2>
-          <span class="text-xs text-gray-500 font-medium" id="contadorResultados">Cargando artículos...</span>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-gray-500 font-medium" id="contadorResultados">Cargando artículos...</span>
+            <!-- Único Botón y Menú flotante para versión web -->
+            <div class="relative hidden lg:block">
+              <button type="button" onclick="toggleMenuOrdenar(event, 'web')" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded-full text-gray-700 shadow-sm hover:border-black active:scale-95 transition" title="Ordenar artículos">
+                <i class="fa-solid fa-sliders text-xs"></i>
+              </button>
+              <div id="menuOrdenarWeb" class="hidden absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-2xl shadow-xl z-30 py-2 text-xs font-medium divide-y divide-gray-100">
+                <button onclick="ordenarCatalogo('relevancia')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
+                  <span>Más vendido</span>
+                  <i data-check-criterio="relevancia" class="fa-solid fa-check text-black text-[11px]"></i>
+                </button>
+                <button onclick="ordenarCatalogo('reciente')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
+                  <span>Más reciente</span>
+                  <i data-check-criterio="reciente" class="fa-solid fa-check text-black text-[11px] hidden"></i>
+                </button>
+                <button onclick="ordenarCatalogo('precio_asc')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
+                  <span>Más barato</span>
+                  <i data-check-criterio="precio_asc" class="fa-solid fa-check text-black text-[11px] hidden"></i>
+                </button>
+                <button onclick="ordenarCatalogo('precio_desc')" class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between text-gray-800">
+                  <span>Más caro</span>
+                  <i data-check-criterio="precio_desc" class="fa-solid fa-check text-black text-[11px] hidden"></i>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
         <div id="gridProductos" class="grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-4">
           <!-- Renderizado dinámico vía JavaScript -->
@@ -1477,9 +1503,13 @@
           menu.classList.add("hidden");
         }
 
-        const menuOrd = document.getElementById("menuOrdenarMovil");
-        if (menuOrd && !e.target.closest('#menuOrdenarMovil') && !e.target.closest('button[onclick*="toggleMenuOrdenar"]')) {
-          menuOrd.classList.add("hidden");
+        const menuOrdM = document.getElementById("menuOrdenarMovil");
+        const menuOrdW = document.getElementById("menuOrdenarWeb");
+        if (menuOrdM && !e.target.closest('#menuOrdenarMovil') && !e.target.closest('button[onclick*="toggleMenuOrdenar"]')) {
+          menuOrdM.classList.add("hidden");
+        }
+        if (menuOrdW && !e.target.closest('#menuOrdenarWeb') && !e.target.closest('button[onclick*="toggleMenuOrdenar"]')) {
+          menuOrdW.classList.add("hidden");
         }
       });
     });
@@ -2269,20 +2299,30 @@
 
     let criterioOrdenActual = 'relevancia';
 
-    function toggleMenuOrdenar(e) {
+    function toggleMenuOrdenar(e, tipo = 'movil') {
       e.stopPropagation();
-      const menu = document.getElementById("menuOrdenarMovil");
-      if (menu) menu.classList.toggle("hidden");
+      const menuM = document.getElementById("menuOrdenarMovil");
+      const menuW = document.getElementById("menuOrdenarWeb");
+
+      if (tipo === 'web') {
+        if (menuW) menuW.classList.toggle("hidden");
+        if (menuM) menuM.classList.add("hidden");
+      } else {
+        if (menuM) menuM.classList.toggle("hidden");
+        if (menuW) menuW.classList.add("hidden");
+      }
     }
 
     function ordenarCatalogo(criterio) {
       criterioOrdenActual = criterio;
-      const menu = document.getElementById("menuOrdenarMovil");
-      if (menu) menu.classList.add("hidden");
+      const menuM = document.getElementById("menuOrdenarMovil");
+      const menuW = document.getElementById("menuOrdenarWeb");
+      if (menuM) menuM.classList.add("hidden");
+      if (menuW) menuW.classList.add("hidden");
 
-      ['relevancia', 'reciente', 'precio_asc', 'precio_desc'].forEach(c => {
-        const check = document.getElementById(`check-${c}`);
-        if (check) check.classList.toggle('hidden', c !== criterio);
+      document.querySelectorAll('[data-check-criterio]').forEach(icono => {
+        const crit = icono.getAttribute('data-check-criterio');
+        icono.classList.toggle('hidden', crit !== criterio);
       });
 
       filtrarCategoria(categoriaSeleccionada, null);
@@ -2290,7 +2330,9 @@
 
     function aplicarOrden(lista) {
       const copia = [...lista];
-      if (criterioOrdenActual === 'reciente') {
+      if (criterioOrdenActual === 'relevancia') {
+        return copia.sort((a, b) => (b.masVendido ? 1 : 0) - (a.masVendido ? 1 : 0));
+      } else if (criterioOrdenActual === 'reciente') {
         return copia.reverse();
       } else if (criterioOrdenActual === 'precio_asc') {
         return copia.sort((a, b) => {
