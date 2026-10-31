@@ -499,7 +499,7 @@
             </div>
           </div>
 
-          <!-- Selector Cantidad sin flechas nativas interiores + Total a su derecha -->
+          <!-- Selector Cantidad y Subtotal -->
           <div>
             <label class="block text-xs font-bold text-gray-700 mb-1.5">Cantidad</label>
             <div class="flex items-center gap-3.5">
@@ -517,6 +517,30 @@
               <div class="text-xs font-medium text-gray-500">
                 Total: <strong id="subtotalCalculadoFicha" class="text-base font-bold text-gray-900">0.00 €</strong>
               </div>
+            </div>
+          </div>
+
+          <!-- BOX DE PERSONALIZACIÓN DINÁMICA -->
+          <div class="border border-gray-300 rounded-2xl p-4 sm:p-5 bg-[#fafafa]/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 text-xs font-bold text-gray-800">
+                <i class="fa-solid fa-pen-nib text-gray-600"></i>
+                <span>Personalización</span>
+              </div>
+              <span id="badgeIndicadorCopias" class="text-[10px] font-semibold text-gray-500 bg-white border border-gray-200 px-2 py-0.5 rounded-md">1 unidad</span>
+            </div>
+
+            <!-- Opción para fijar misma personalización salvo el nombre -->
+            <div id="wrapperCheckMismaPers" class="hidden pt-1 pb-1 border-b border-gray-200">
+              <label class="flex items-start gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="checkMismaPersonalizacion" onchange="toggleMismaPersonalizacion(this.checked)" class="mt-0.5 rounded border-gray-300 text-black focus:ring-0 cursor-pointer">
+                <span class="text-xs font-medium text-gray-700">Usar la misma personalización para todos excepto el nombre (2. Nombre)</span>
+              </label>
+            </div>
+
+            <!-- Contenedor dinámico de formularios por cada unidad -->
+            <div id="contenedorPersonalizacionesDinamicas" class="space-y-4 max-h-[360px] overflow-y-auto pr-1">
+              <!-- Se generará mediante JS según la cantidad seleccionada -->
             </div>
           </div>
 
@@ -717,7 +741,7 @@
           </div>
           <p class="text-xs text-gray-600"><span id="txtBizumPaso1">1. Envía</span> <strong id="totalBizum" class="text-gray-900 text-sm"></strong> <span id="txtBizumPaso1b">al número:</span></p>
           <div class="bg-[#f0f0eb] p-3 rounded-xl flex items-center justify-between border border-gray-300">
-            <span class="font-mono font-bold text-gray-900 text-base">600 123 456</span>
+            <span class="font-mono font-bold text-gray-900 text-base">(+34) 641 851 073</span>
             <button onclick="copiarTexto('600123456')" id="btnCopiarBizum" class="text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-2.5 py-1 rounded-lg">Copiar</button>
           </div>
           <p class="text-xs text-gray-500"><span id="txtBizumPaso2">2. Concepto:</span> <strong id="conceptoBizum" class="text-gray-900 font-mono"></strong></p>
@@ -2015,6 +2039,8 @@
     let galeriaFichaActual = [];
     let indiceMediaFicha = 0;
 
+    let datosPersonalizaciones = [];
+
     function recalcularSubtotalFicha() {
       if (!articuloFichaActual) return;
       const input = document.getElementById('cantidadFicha');
@@ -2028,6 +2054,100 @@
 
       const elSubtotal = document.getElementById('subtotalCalculadoFicha');
       if (elSubtotal) elSubtotal.innerText = `${total.toFixed(2)} €`;
+
+      const badge = document.getElementById('badgeIndicadorCopias');
+      if (badge) badge.innerText = `${cant} ${cant === 1 ? 'unidad' : 'unidades'}`;
+
+      const checkWrapper = document.getElementById('wrapperCheckMismaPers');
+      if (checkWrapper) {
+        if (cant > 1) {
+          checkWrapper.classList.remove('hidden');
+        } else {
+          checkWrapper.classList.add('hidden');
+          const chk = document.getElementById('checkMismaPersonalizacion');
+          if (chk) chk.checked = false;
+        }
+      }
+
+      renderizarCamposPersonalizacion(cant);
+    }
+
+    function renderizarCamposPersonalizacion(cant) {
+      const contenedor = document.getElementById('contenedorPersonalizacionesDinamicas');
+      if (!contenedor) return;
+
+      const chkMisma = document.getElementById('checkMismaPersonalizacion');
+      const replicarComunes = chkMisma ? chkMisma.checked : false;
+
+      while (datosPersonalizaciones.length < cant) {
+        datosPersonalizaciones.push({ titulo: '', nombre: '', dedicatoria: '', compositor: '' });
+      }
+      if (datosPersonalizaciones.length > cant) {
+        datosPersonalizaciones = datosPersonalizaciones.slice(0, cant);
+      }
+
+      contenedor.innerHTML = datosPersonalizaciones.map((item, idx) => {
+        const esSecundarioReplicado = replicarComunes && idx > 0;
+        return `
+          <div class="bg-white border border-gray-200 rounded-xl p-3 text-xs space-y-2 shadow-2xs">
+            <div class="flex items-center justify-between pb-1 border-b border-gray-100">
+              <span class="font-bold text-gray-800 text-[11px] uppercase tracking-wide">
+                ${cant > 1 ? `Personalización unidad ${idx + 1} de ${cant}` : 'Detalles de la obra'}
+              </span>
+              ${esSecundarioReplicado ? '<span class="text-[10px] text-amber-600 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">Datos compartidos de #1</span>' : ''}
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">1. Cambiar Título (Opcional):</label>
+              <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].titulo || '') : (item.titulo || '')}" 
+                placeholder="Ej. Eres mi armonía" 
+                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'titulo', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"`}>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold text-gray-700 mb-0.5">2. Nombre * :</label>
+              <input type="text" value="${item.nombre || ''}" 
+                placeholder="Ej. María / Carlos" 
+                oninput="actualizarDatoPers(${idx}, 'nombre', this.value)" 
+                class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 font-medium focus:outline-none focus:border-black transition">
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">3. Dedicatoria (máx. 90 car.):</label>
+              <input type="text" maxlength="90" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].dedicatoria || '') : (item.dedicatoria || '')}" 
+                placeholder="Ej. Gracias por llenar mi vida de armonía. 24/09/2024" 
+                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'dedicatoria', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"`}>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">4. Compositor (Opcional):</label>
+              <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].compositor || '') : (item.compositor || '')}" 
+                placeholder="Ej. W. A. Mozart (por defecto Zeronte)" 
+                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'compositor', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"`}>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function actualizarDatoPers(idx, campo, valor) {
+      if (!datosPersonalizaciones[idx]) {
+        datosPersonalizaciones[idx] = { titulo: '', nombre: '', dedicatoria: '', compositor: '' };
+      }
+      datosPersonalizaciones[idx][campo] = valor;
+
+      const chkMisma = document.getElementById('checkMismaPersonalizacion');
+      if (chkMisma && chkMisma.checked && idx === 0 && campo !== 'nombre') {
+        const inputCant = document.getElementById('cantidadFicha');
+        const cant = parseInt(inputCant ? inputCant.value : '1', 10) || 1;
+        renderizarCamposPersonalizacion(cant);
+      }
+    }
+
+    function toggleMismaPersonalizacion(activado) {
+      const inputCant = document.getElementById('cantidadFicha');
+      const cant = parseInt(inputCant ? inputCant.value : '1', 10) || 1;
+      renderizarCamposPersonalizacion(cant);
     }
 
     function ajustarCantidadFicha(delta) {
@@ -2221,13 +2341,33 @@
       const precioUnitario = (precioOferta && precioOferta > 0 && precioOferta < precioBase) ? precioOferta : precioBase;
       const total = precioUnitario * cant;
 
+      const chkMisma = document.getElementById('checkMismaPersonalizacion');
+      const replicar = chkMisma ? chkMisma.checked : false;
+
+      const bloquesFormateados = [];
+      for (let i = 0; i < cant; i++) {
+        const datosItem = datosPersonalizaciones[i] || { titulo: '', nombre: '', dedicatoria: '', compositor: '' };
+        const tituloU = (replicar && i > 0) ? (datosPersonalizaciones[0].titulo || '') : (datosItem.titulo || '');
+        const nombreU = datosItem.nombre || '';
+        const dedicatoriaU = (replicar && i > 0) ? (datosPersonalizaciones[0].dedicatoria || '') : (datosItem.dedicatoria || '');
+        const compositorU = (replicar && i > 0) ? (datosPersonalizaciones[0].compositor || '') : (datosItem.compositor || '');
+
+        let txtUnidad = `[UNIDAD ${i + 1}/${cant}]`;
+        if (tituloU) txtUnidad += ` | 1. Título: ${tituloU}`;
+        txtUnidad += ` | 2. Nombre: ${nombreU || 'Sin especificar'}`;
+        if (dedicatoriaU) txtUnidad += ` | 3. Dedicatoria: ${dedicatoriaU}`;
+        if (compositorU) txtUnidad += ` | 4. Compositor: ${compositorU}`;
+
+        bloquesFormateados.push(txtUnidad);
+      }
+
+      const personalizacionFinal = bloquesFormateados.join('\n');
       const titulo = traducirTituloProducto(articuloFichaActual.titulo, idiomaActual);
-      const personalizacionEscrita = document.getElementById('textoBoxPersonalizacion') ? document.getElementById('textoBoxPersonalizacion').value.trim() : '';
 
       abrirModal(titulo, total, cant);
 
       const campoOculto = document.getElementById('personalizacionCliente');
-      if (campoOculto) campoOculto.value = personalizacionEscrita;
+      if (campoOculto) campoOculto.value = personalizacionFinal;
     }
 
     function abrirModal(producto, precio, cantidad = 1) {
@@ -3112,12 +3252,18 @@
       const inputPrecio = document.getElementById('precioInput');
       const radioPago = document.querySelector('input[name="metodoPago"]:checked');
 
+      // Detectar cantidad exacta seleccionada
+      const matchCant = (inputProd ? inputProd.value : '').match(/\(x(\d+)\)/);
+      const cantidadReal = matchCant ? parseInt(matchCant[1], 10) : 1;
+
       const datos = {
         nombre: inputNombre ? inputNombre.value : '',
         telefono: `${prefijo} ${numTel}`.trim(),
         email: inputEmail ? inputEmail.value : '',
         personalizacion: inputPers ? inputPers.value : '',
         producto: inputProd ? inputProd.value : 'Partitura personalizada',
+        cantidad: cantidadReal,
+        desgloseFracciones: Array.from({ length: cantidadReal }, (_, i) => `${i + 1}/${cantidadReal}`),
         precio: (inputPrecio ? inputPrecio.value : '0.00') + " €",
         metodoPago: radioPago ? radioPago.value : 'Bizum'
       };
@@ -3132,20 +3278,20 @@
         const respuesta = await res.json();
         const orderId = respuesta.orderId || ("PED-" + Math.floor(1000 + Math.random() * 9000));
         
-        registrarPedidoExitoso();
+        registrarPedidoExitoso(cantidadReal);
         mostrarExito(orderId, datos);
       } catch (err) {
         console.error("Error al registrar:", err);
         const orderIdFallback = "PED-" + Math.floor(1000 + Math.random() * 9000);
         
-        registrarPedidoExitoso();
+        registrarPedidoExitoso(cantidadReal);
         mostrarExito(orderIdFallback, datos);
       }
     }
 
-    function registrarPedidoExitoso() {
+    function registrarPedidoExitoso(cantidadSumar = 1) {
       let count = parseInt(localStorage.getItem('zeronte_pedidos_locales_count') || '0', 10);
-      count += 1;
+      count += cantidadSumar;
       localStorage.setItem('zeronte_pedidos_locales_count', count.toString());
       actualizarContadorVentas();
     }
