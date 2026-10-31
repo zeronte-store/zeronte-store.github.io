@@ -3275,6 +3275,23 @@
     }
 
     function mostrarExito(orderId, datos) {
+      // 1. Forzar reseteo del formulario de encargo (Nombre, Email, Teléfono)
+      const formPedido = document.getElementById('formularioPedido');
+      if (formPedido) formPedido.reset();
+
+      // 2. Forzar vaciado y reseteo completo de la personalización de la obra
+      datosPersonalizaciones = [{ titulo: '', nombre: '', dedicatoria: '', compositor: '' }];
+      const chkMisma = document.getElementById('checkMismaPersonalizacion');
+      if (chkMisma) chkMisma.checked = false;
+
+      const inputCant = document.getElementById('cantidadFicha');
+      if (inputCant) inputCant.value = '1';
+
+      const campoPersOculto = document.getElementById('personalizacionCliente');
+      if (campoPersOculto) campoPersOculto.value = '';
+
+      // Re-renderizar la caja de personalización limpia con 1 unidad
+      recalcularSubtotalFicha();
       document.getElementById('pantallaFormulario').classList.add('hidden');
       document.getElementById('pantallaExito').classList.remove('hidden');
 
