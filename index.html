@@ -3295,6 +3295,16 @@
 
       // Re-renderizar la caja de personalización limpia con 1 unidad
       recalcularSubtotalFicha();
+
+      // 3. Reactivar el botón de confirmar y restaurar su texto para futuros pedidos
+      const btnEnv = document.getElementById('btnEnviar');
+      if (btnEnv) {
+        btnEnv.disabled = false;
+        const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
+        const accion = (t.btnConfirmar ? t.btnConfirmar.toUpperCase() : 'CONFIRMAR').replace(/\s*PEDIDO\b/i, '').trim();
+        btnEnv.innerHTML = `<span id="btnConfirmarTxt">${accion}</span><span id="btnPrecioTexto"></span>`;
+      }
+      
       document.getElementById('pantallaFormulario').classList.add('hidden');
       document.getElementById('pantallaExito').classList.remove('hidden');
 
