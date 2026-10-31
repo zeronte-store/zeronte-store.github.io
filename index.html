@@ -3235,6 +3235,9 @@
       const cantidadReal = matchCant ? parseInt(matchCant[1], 10) : 1;
 
       const datos = {
+        accion: "nuevoPedido",
+        notificarEmail: true,
+        destinatarioNotificacion: "zeronte.store@gmail.com",
         nombre: inputNombre ? inputNombre.value : '',
         telefono: `'${prefijo} ${numTel}`.trim(),
         email: inputEmail ? inputEmail.value : '',
