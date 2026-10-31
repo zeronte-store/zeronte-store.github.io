@@ -440,18 +440,55 @@
             <!-- Miniaturas generadas dinámicamente -->
           </div>
 
-          <!-- Mockup Principal Cuadrado 1:1 -->
-          <div class="relative w-full aspect-square bg-[#f9f9f9] rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center shadow-xs">
-            <img id="imgPrincipalFicha" src="" alt="Mockup" class="w-full h-full object-cover aspect-square">
+          <!-- Mockup Principal Cuadrado 1:1 con botón de expansión al hacer hover -->
+          <div class="relative w-full aspect-square bg-[#f9f9f9] rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center shadow-xs group/visor">
+            <img id="imgPrincipalFicha" src="" alt="Mockup" class="w-full h-full object-cover aspect-square cursor-pointer" onclick="abrirZoomEtsy()">
             <video id="videoPrincipalFicha" controls class="w-full h-full object-cover aspect-square hidden" playsinline></video>
 
+            <!-- Botón de expandir estilo Etsy garantizado y visible -->
+            <button id="btnAbrirZoomHover" type="button" onclick="abrirZoomEtsy()" class="absolute top-3 right-3 w-10 h-10 rounded-full bg-white hover:bg-gray-100 text-gray-800 shadow-xl flex items-center justify-center transition-all duration-200 opacity-0 group-hover/visor:opacity-100 z-20 active:scale-95 border border-gray-200" title="Ampliar imagen">
+              <i class="fa-solid fa-expand text-sm text-[#222222]"></i>
+            </button>
+
             <!-- Flechas de navegación -->
-            <button onclick="navegarMediaFicha(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95">
+            <button onclick="navegarMediaFicha(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95 z-10">
               <i class="fa-solid fa-chevron-left text-xs"></i>
             </button>
-            <button onclick="navegarMediaFicha(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95">
+            <button onclick="navegarMediaFicha(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95 z-10">
               <i class="fa-solid fa-chevron-right text-xs"></i>
             </button>
+          </div>
+
+          <!-- MODAL LIGHTBOX / ZOOM FLOTANTE MAXIMIZADO ESTILO ETSY -->
+          <div id="modalZoomEtsy" class="fixed inset-0 bg-[#222222]/80 backdrop-blur-xs hidden items-center justify-center z-[60] select-none p-3 sm:p-6" onclick="if(event.target === this) cerrarZoomEtsy()">
+            <!-- Botón cerrar superior derecho idéntico a Etsy -->
+            <button type="button" onclick="cerrarZoomEtsy()" class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white text-gray-800 hover:text-black flex items-center justify-center text-xl font-bold shadow-2xl transition hover:scale-105 active:scale-95 z-40">
+              ✕
+            </button>
+
+            <!-- Bloque conjunto: Marco ceñido a la imagen + Miniaturas adyacentes -->
+            <div class="relative flex items-center justify-center gap-3 sm:gap-4 max-h-[90vh]">
+              
+              <!-- Marco ceñido a la imagen (w-fit y h-fit) para que las flechas queden sobre sus bordes reales -->
+              <div class="relative w-fit h-fit max-w-[85vw] sm:max-w-[78vw] max-h-[88vh] rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center bg-black/10">
+                <div id="wrapperImagenZoom" class="w-fit h-fit max-h-[88vh] overflow-hidden flex items-center justify-center cursor-zoom-in" onclick="alternarLupaZoom(event)" onmousemove="moverLupaZoom(event)">
+                  <img id="imgZoomEtsy" src="" alt="Detalle ampliado" class="max-w-[85vw] sm:max-w-[78vw] max-h-[88vh] w-auto h-auto object-contain select-none pointer-events-auto transition-[transform] duration-75 block">
+                </div>
+
+                <!-- Flechas de navegación pegadas sobre los laterales de la imagen -->
+                <button type="button" onclick="navegarMediaFicha(-1); sincronizarVisorZoom();" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-xl flex items-center justify-center text-sm sm:text-base transition active:scale-95 z-20">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button type="button" onclick="navegarMediaFicha(1); sincronizarVisorZoom();" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-xl flex items-center justify-center text-sm sm:text-base transition active:scale-95 z-20">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+
+              <!-- Miniaturas laterales pegadas a la derecha de la imagen -->
+              <div id="carruselMiniaturasZoom" class="hidden sm:flex flex-col gap-2.5 overflow-y-auto max-h-[85vh] no-scrollbar p-1 z-20 flex-shrink-0">
+                <!-- Se generan dinámicamente -->
+              </div>
+            </div>
           </div>
 
         </div>
@@ -2284,6 +2321,88 @@
 
     function seleccionarMediaFicha(idx) {
       mostrarMediaFicha(idx);
+      sincronizarVisorZoom();
+    }
+
+    let zoomAplicado = false;
+
+    function abrirZoomEtsy() {
+      const modal = document.getElementById('modalZoomEtsy');
+      if (!modal) return;
+      sincronizarVisorZoom();
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function cerrarZoomEtsy() {
+      const modal = document.getElementById('modalZoomEtsy');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      resetearLupa();
+    }
+
+    function sincronizarVisorZoom() {
+      if (!galeriaFichaActual || !galeriaFichaActual[indiceMediaFicha]) return;
+      const item = galeriaFichaActual[indiceMediaFicha];
+      const imgZoom = document.getElementById('imgZoomEtsy');
+      if (imgZoom) {
+        imgZoom.src = item.url;
+      }
+      resetearLupa();
+
+      // Renderizar miniaturas flotantes dentro del modal de Zoom
+      const cMiniaturas = document.getElementById('carruselMiniaturasZoom');
+      if (cMiniaturas) {
+        cMiniaturas.innerHTML = galeriaFichaActual.map((it, idx) => `
+          <button type="button" onclick="seleccionarMediaFicha(${idx})" class="w-16 h-16 sm:w-20 sm:h-20 aspect-square rounded-xl overflow-hidden border-2 transition flex-shrink-0 bg-white shadow-md ${idx === indiceMediaFicha ? 'border-white ring-2 ring-black opacity-100 scale-105' : 'border-transparent opacity-75 hover:opacity-100'}">
+            <img src="${it.url}" class="w-full h-full object-cover">
+          </button>
+        `).join('');
+      }
+    }
+
+    function alternarLupaZoom(e) {
+      const wrapper = document.getElementById('wrapperImagenZoom');
+      const img = document.getElementById('imgZoomEtsy');
+      if (!img || !wrapper) return;
+
+      zoomAplicado = !zoomAplicado;
+
+      if (zoomAplicado) {
+        moverLupaZoom(e);
+        img.style.transform = "scale(2.5)";
+        wrapper.className = "w-full h-full overflow-hidden flex items-center justify-center cursor-zoom-out";
+      } else {
+        resetearLupa();
+      }
+    }
+
+    function moverLupaZoom(e) {
+      if (!zoomAplicado) return;
+      const wrapper = document.getElementById('wrapperImagenZoom');
+      const img = document.getElementById('imgZoomEtsy');
+      if (!img || !wrapper) return;
+
+      const rect = wrapper.getBoundingClientRect();
+      const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+
+      img.style.transformOrigin = `${x}% ${y}%`;
+    }
+
+    function resetearLupa() {
+      zoomAplicado = false;
+      const wrapper = document.getElementById('wrapperImagenZoom');
+      const img = document.getElementById('imgZoomEtsy');
+      if (img) {
+        img.style.transform = "scale(1)";
+        img.style.transformOrigin = "center center";
+      }
+      if (wrapper) {
+        wrapper.className = "w-full h-full overflow-hidden flex items-center justify-center cursor-zoom-in";
+      }
     }
 
     function navegarMediaFicha(delta) {
