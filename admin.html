@@ -155,7 +155,7 @@
     <!-- CONTENEDOR PRINCIPAL DERECHO -->
     <div class="flex-grow flex flex-col min-w-0">
       
-      <!-- Topbar Superior Limpia -->
+      <!-- Topbar Superior Limpia con Reloj y Fecha -->
       <header class="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 sticky top-0 z-20 flex items-center justify-between shadow-xs">
         <div class="flex items-center gap-3">
           <!-- Botón hamburguesa exclusivo para móvil -->
@@ -163,6 +163,12 @@
             <i class="fa-solid fa-bars text-sm"></i>
           </button>
           <span class="font-bold text-slate-800 text-sm md:hidden">ZERONTE</span>
+        </div>
+
+        <!-- RELOJ DIGITAL Y FECHA EN VIVO CENTRADOS -->
+        <div class="flex flex-col items-center justify-center text-center">
+          <span id="relojDigitalHeader" class="font-mono font-extrabold text-sm sm:text-base text-slate-900 tracking-wider leading-none">--:--:--</span>
+          <span id="fechaActualHeader" class="text-[10px] sm:text-[11px] font-semibold text-slate-400 leading-tight mt-0.5">Cargando fecha...</span>
         </div>
         
         <div class="flex items-center gap-2">
@@ -3599,6 +3605,49 @@
         console.error("Error al eliminar mensaje:", e);
       }
     }
+
+    // Reloj digital en vivo y fecha actual formateada
+    function iniciarRelojDigital() {
+      const elReloj = document.getElementById('relojDigitalHeader');
+      const elFecha = document.getElementById('fechaActualHeader');
+
+      function actualizar() {
+        const ahora = new Date();
+
+        // 1. Hora en formato HH:mm:ss
+        if (elReloj) {
+          const hora = ahora.toLocaleTimeString('es-ES', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit', 
+            hour12: false, 
+            timeZone: 'Europe/Madrid' 
+          });
+          elReloj.innerText = hora;
+        }
+
+        // 2. Fecha: "Sábado, 31 de octubre de 2026"
+        if (elFecha) {
+          const opciones = { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric', 
+            timeZone: 'Europe/Madrid' 
+          };
+          let textoFecha = new Intl.DateTimeFormat('es-ES', opciones).format(ahora);
+          // Capitalizar la primera letra del día de la semana
+          textoFecha = textoFecha.charAt(0).toUpperCase() + textoFecha.slice(1);
+          elFecha.innerText = textoFecha;
+        }
+      }
+
+      actualizar();
+      setInterval(actualizar, 1000);
+    }
+
+    // Iniciar de forma automática
+    iniciarRelojDigital();
   </script>
 </body>
 </html>
