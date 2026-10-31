@@ -590,6 +590,11 @@
           </div>
 
           <div>
+            <label id="lblEmailCliente" class="block text-[11px] uppercase tracking-wider text-gray-600 mb-1 font-semibold">Email *</label>
+            <input type="email" id="emailCliente" required class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-3 text-sm text-gray-900 focus:outline-none focus:border-black transition" placeholder="tucorreo@ejemplo.com">
+          </div>
+
+          <div>
               <label id="lblTelCliente" class="block text-[11px] uppercase tracking-wider text-gray-600 mb-1 font-semibold">Teléfono / WhatsApp *</label>
               <div class="flex items-center w-full bg-white border border-gray-300 rounded-xl overflow-hidden focus-within:border-black transition shadow-xs">
                 <select id="prefijoPaisCliente" class="bg-gray-50 text-gray-800 text-xs font-semibold py-3 pl-2.5 pr-1 border-r border-gray-300 focus:outline-none cursor-pointer">
@@ -3097,16 +3102,24 @@
       btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> ${t.creandoPedido}`;
 
       const prefijo = document.getElementById('prefijoPaisCliente') ? document.getElementById('prefijoPaisCliente').value : '';
-      const numTel = (document.getElementById('telefonoCliente').value || '').replace(/[^0-9]/g, '');
+      const inputTel = document.getElementById('telefonoCliente');
+      const numTel = (inputTel ? inputTel.value : '').replace(/[^0-9]/g, '');
+
+      const inputNombre = document.getElementById('nombreCliente');
+      const inputEmail = document.getElementById('emailCliente');
+      const inputPers = document.getElementById('personalizacionCliente');
+      const inputProd = document.getElementById('productoInput');
+      const inputPrecio = document.getElementById('precioInput');
+      const radioPago = document.querySelector('input[name="metodoPago"]:checked');
 
       const datos = {
-        nombre: document.getElementById('nombreCliente').value,
-        telefono: `${prefijo} ${numTel}`,
-        email: document.getElementById('emailCliente').value,
-        personalizacion: document.getElementById('personalizacionCliente').value,
-        producto: document.getElementById('productoInput').value,
-        precio: document.getElementById('precioInput').value + " €",
-        metodoPago: document.querySelector('input[name="metodoPago"]:checked').value
+        nombre: inputNombre ? inputNombre.value : '',
+        telefono: `${prefijo} ${numTel}`.trim(),
+        email: inputEmail ? inputEmail.value : '',
+        personalizacion: inputPers ? inputPers.value : '',
+        producto: inputProd ? inputProd.value : 'Partitura personalizada',
+        precio: (inputPrecio ? inputPrecio.value : '0.00') + " €",
+        metodoPago: radioPago ? radioPago.value : 'Bizum'
       };
 
       try {
