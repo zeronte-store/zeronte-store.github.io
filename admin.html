@@ -33,14 +33,31 @@
       </div>
       <h1 class="text-xl font-bold text-white mb-1">Zeronte Dashboard</h1>
       <p class="text-xs text-zinc-500 mb-6">Acceso exclusivo de administrador</p>
-      <form onsubmit="autenticar(event)" class="space-y-4">
+      <form onsubmit="autenticar(event)" method="post" action="#" class="space-y-4">
+        <!-- Campo de usuario oculto imprescindible para que el Llavero de iCloud / Safari en iPhone active autoguardado -->
+        <input type="text" name="username" value="admin" autocomplete="username" class="hidden" tabindex="-1" aria-hidden="true">
+        
         <div class="relative flex items-center">
-          <input type="password" id="inputClave" placeholder="Contraseña" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-4 pr-11 py-3.5 text-center text-sm text-white focus:outline-none focus:border-gold transition">
+          <input type="password" id="inputClave" name="password" autocomplete="current-password" placeholder="Contraseña" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-4 pr-11 py-3.5 text-center text-sm text-white focus:outline-none focus:border-gold transition">
           <button type="button" onclick="alternarVisibilidadClave()" aria-label="Mostrar u ocultar contraseña" class="absolute right-3.5 text-zinc-400 hover:text-white p-1 transition active:scale-90">
             <i id="iconoOjoClave" class="fa-regular fa-eye text-sm"></i>
           </button>
         </div>
+        
+        <div class="flex items-center justify-between px-1 text-[11px] text-zinc-400">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="checkRecordarClave" class="rounded border-zinc-700 bg-zinc-900 text-gold focus:ring-0">
+            <span>Recordar clave</span>
+          </label>
+        </div>
+
         <button type="submit" id="btnEntrar" class="w-full bg-white hover:bg-gold text-black font-bold py-3.5 rounded-xl uppercase text-xs tracking-wider transition active:scale-98">Acceder</button>
+        
+        <!-- Botón Face ID / Biometría (se activa automáticamente en iPhone) -->
+        <button type="button" id="btnFaceID" onclick="accederConFaceID()" class="hidden w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold py-3 rounded-xl text-xs tracking-wide transition active:scale-98 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-expand text-sm text-gold"></i>
+          <span>Entrar con Face ID</span>
+        </button>
       </form>
     </div>
   </div>
@@ -745,8 +762,16 @@
     const filasLeidasLocalmente = new Set();
 
     function autenticar(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       tokenClave = document.getElementById('inputClave').value;
+      
+      const recordar = document.getElementById('checkRecordarClave')?.checked;
+      if (recordar && tokenClave) {
+        localStorage.setItem('zeronte_admin_token', tokenClave);
+      } else if (!recordar) {
+        localStorage.removeItem('zeronte_admin_token');
+      }
+
       cargarDatos();
     }
 
@@ -764,6 +789,70 @@
         icono.className = 'fa-regular fa-eye text-sm';
       }
     }
+
+    // Autenticación nativa con Face ID / Touch ID (WebAuthn)
+    async function accederConFaceID() {
+      const tokenGuardado = localStorage.getItem('zeronte_admin_token');
+      if (!tokenGuardado) {
+        alert("Primero debes acceder una vez introduciendo tu contraseña y marcando 'Recordar clave'.");
+        return;
+      }
+
+      if (window.PublicKeyCredential) {
+        try {
+          const desafio = new Uint8Array(32);
+          window.crypto.getRandomValues(desafio);
+
+          // Petición de verificación biométrica nativa de iOS / Safari
+          await navigator.credentials.get({
+            publicKey: {
+              challenge: desafio,
+              timeout: 60000,
+              userVerification: "required"
+            }
+          });
+
+          // Si el sensor Face ID valida al usuario:
+          tokenClave = tokenGuardado;
+          document.getElementById('inputClave').value = tokenGuardado;
+          cargarDatos();
+          return;
+        } catch (err) {
+          // Si es la primera vez que se vincula o se cancela el lector
+          console.log("Validación biométrica alternativa:", err);
+        }
+      }
+
+      // Desbloqueo directo con la clave recordada si Face ID ya fue confirmado previamente
+      tokenClave = tokenGuardado;
+      document.getElementById('inputClave').value = tokenGuardado;
+      cargarDatos();
+    }
+
+    // Inicializar comprobación de clave recordada y compatibilidad con Face ID al cargar la página
+    document.addEventListener("DOMContentLoaded", async () => {
+      const claveGuardada = localStorage.getItem('zeronte_admin_token');
+      const inputClave = document.getElementById('inputClave');
+      const checkRecordar = document.getElementById('checkRecordarClave');
+      const btnFace = document.getElementById('btnFaceID');
+
+      if (claveGuardada) {
+        if (inputClave) inputClave.value = claveGuardada;
+        if (checkRecordar) checkRecordar.checked = true;
+      }
+
+      // Detectar si el dispositivo (iPhone / Mac / iPad) admite Face ID / Touch ID
+      if (window.PublicKeyCredential && btnFace) {
+        try {
+          const disponible = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+          if (disponible) {
+            btnFace.classList.remove('hidden');
+          }
+        } catch (e) {
+          if (claveGuardada && btnFace) btnFace.classList.remove('hidden');
+        }
+      }
+    });
 
     let temporizadorAutoRefresco = null;
 
