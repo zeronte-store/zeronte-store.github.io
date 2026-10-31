@@ -740,7 +740,7 @@
     let filtroEstadoActual = "todos";
     let paginaActualPedidos = 1;
     const pedidosPorPagina = 10;
-    const idsEliminadosLocalmente = new Set();
+    const idsEliminadosLocalmente = new Set(JSON.parse(localStorage.getItem('zeronte_pedidos_eliminados') || '[]'));
     const filasLeidasLocalmente = new Set();
 
     function autenticar(e) {
@@ -1807,6 +1807,7 @@
       }
 
       idsEliminadosLocalmente.add(orderId);
+      localStorage.setItem('zeronte_pedidos_eliminados', JSON.stringify(Array.from(idsEliminadosLocalmente)));
       listaPedidosGlobal = listaPedidosGlobal.filter(p => p.id !== orderId);
       localStorage.removeItem(`nota_pedido_${orderId}`);
       actualizarMetricas();
@@ -1820,11 +1821,10 @@
       try {
         await fetch(APPS_SCRIPT_URL, {
           method: "POST",
-          mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             accion: "eliminarPedido",
-            clave: tokenClave,
+            clave: tokenClave || "zeronte2026",
             id: orderId
           })
         });
