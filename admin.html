@@ -873,6 +873,12 @@
         document.getElementById('pantallaLogin').classList.add('hidden');
         document.getElementById('panelDashboard').classList.remove('hidden');
 
+        // Dejar el botón en su estado natural ("Acceder") para futuros cierres de sesión
+        if (btn) {
+          btn.innerText = "Acceder";
+          btn.disabled = false;
+        }
+
         // Comparar si hubo cambios antes de re-renderizar para evitar parpadeos
         const datosCambiaron = JSON.stringify(listaPedidosGlobal) !== JSON.stringify(data.pedidos || []) ||
                                JSON.stringify(listaProductosGlobal) !== JSON.stringify(data.productos || []);
@@ -2917,6 +2923,14 @@
         temporizadorAutoRefresco = null;
       }
       tokenClave = "";
+
+      // Restablecer el botón de entrar para que no se quede bloqueado en "Cargando..."
+      const btn = document.getElementById('btnEntrar');
+      if (btn) {
+        btn.innerText = "Acceder";
+        btn.disabled = false;
+      }
+
       document.getElementById('pantallaLogin').classList.remove('hidden');
       document.getElementById('panelDashboard').classList.add('hidden');
     }
