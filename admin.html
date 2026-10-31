@@ -81,7 +81,7 @@
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-chart-pie text-sm"></i>
             </div>
-            <span class="sidebar-text truncate">Inicio & Pedidos</span>
+            <span class="sidebar-text truncate">Pedidos Recibidos</span>
           </button>
           
           <button onclick="cambiarSeccion('catalogo', this)" title="Catálogo" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
@@ -166,94 +166,6 @@
 
         <!-- ================= SECCIÓN 1: INICIO & PEDIDOS ================= -->
         <div id="vistaSeccionDashboard" class="space-y-6">
-          
-          <!-- 1. BLOQUE DE FINANZAS (4 Tarjetas) -->
-          <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <!-- Total de Hoy -->
-            <div onclick="filtrarDesdeTarjeta('hoy')" class="bg-white border border-slate-200 border-l-4 border-l-blue-500 p-4 sm:p-5 rounded-2xl shadow-xs cursor-pointer hover:shadow-md hover:border-slate-300 transition active:scale-98">
-              <div class="flex items-center justify-between">
-                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Total de Hoy</span>
-                <i class="fa-solid fa-calendar-day text-blue-500 text-xs"></i>
-              </div>
-              <p id="statHoyDinero" class="text-2xl sm:text-3xl font-bold text-blue-600 mt-1.5">0.00 €</p>
-              <span class="text-[10px] text-slate-400 mt-1 block">Facturado hoy</span>
-            </div>
-
-            <!-- Total Acumulado -->
-            <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs">
-              <div class="flex items-center justify-between">
-                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Total Ingresos</span>
-                <i class="fa-solid fa-chart-line text-slate-400 text-xs"></i>
-              </div>
-              <p id="statIngresos" class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5">0.00 €</p>
-              <span class="text-[10px] text-slate-400 mt-1 block">Facturación total</span>
-            </div>
-
-            <!-- Cantidad Pendiente -->
-            <div onclick="filtrarDesdeTarjeta('pendiente')" class="bg-white border border-slate-200 border-l-4 border-l-rose-500 p-4 sm:p-5 rounded-2xl shadow-xs cursor-pointer hover:shadow-md hover:border-slate-300 transition active:scale-98">
-              <div class="flex items-center justify-between">
-                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pendiente</span>
-                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-              </div>
-              <p id="statPendienteDinero" class="text-2xl sm:text-3xl font-bold text-rose-600 mt-1.5">0.00 €</p>
-              <span class="text-[10px] text-slate-400 mt-1 block">Dinero por cobrar</span>
-            </div>
-
-            <!-- Cantidad Pagada -->
-            <div onclick="filtrarDesdeTarjeta('pagado')" class="bg-white border border-slate-200 border-l-4 border-l-emerald-500 p-4 sm:p-5 rounded-2xl shadow-xs cursor-pointer hover:shadow-md hover:border-slate-300 transition active:scale-98">
-              <div class="flex items-center justify-between">
-                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pagada</span>
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-              </div>
-              <p id="statPagado" class="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1.5">0.00 €</p>
-              <span class="text-[10px] text-slate-400 mt-1 block">Dinero ingresado</span>
-            </div>
-          </section>
-
-          <!-- 2. MINI INDICADORES CLICABLES DE VOLUMEN (7 Tarjetas) -->
-          <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-4">
-            <!-- Total Pedidos -->
-            <div onclick="filtrarDesdeTarjeta('todos')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-slate-400 hover:shadow-sm transition active:scale-95">
-              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Total Pedidos</span>
-              <span id="statPedidos" class="text-lg sm:text-xl font-bold text-slate-800">0</span>
-            </div>
-
-            <!-- Pendientes -->
-            <div onclick="filtrarDesdeTarjeta('pendiente')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-rose-300 hover:shadow-sm transition active:scale-95">
-              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pendientes</span>
-              <span id="statPendientesCount" class="text-lg sm:text-xl font-bold text-rose-600">0</span>
-            </div>
-
-            <!-- En Proceso (NUEVA) -->
-            <div onclick="filtrarDesdeTarjeta('proceso')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-amber-300 hover:shadow-sm transition active:scale-95">
-              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">En Proceso</span>
-              <span id="statProcesoCount" class="text-lg sm:text-xl font-bold text-amber-500">0</span>
-            </div>
-
-            <!-- Enviados (AZUL) -->
-            <div onclick="filtrarDesdeTarjeta('completado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-blue-300 hover:shadow-sm transition active:scale-95">
-              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Enviados</span>
-              <span id="statCompletadosCount" class="text-lg sm:text-xl font-bold text-blue-600">0</span>
-            </div>
-
-            <!-- Pagados (VERDE - NUEVA) -->
-            <div onclick="filtrarDesdeTarjeta('pagado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-emerald-300 hover:shadow-sm transition active:scale-95">
-              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pagados</span>
-              <span id="statPagadosCount" class="text-lg sm:text-xl font-bold text-emerald-600">0</span>
-            </div>
-
-            <!-- Cancelados -->
-            <div onclick="filtrarDesdeTarjeta('cancelado')" class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-slate-400 hover:shadow-sm transition active:scale-95">
-              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Cancelados</span>
-              <span id="statCanceladosCount" class="text-lg sm:text-xl font-bold text-slate-400">0</span>
-            </div>
-
-            <!-- Hoy -->
-            <div onclick="filtrarDesdeTarjeta('hoy')" class="col-span-2 sm:col-span-1 bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs cursor-pointer hover:border-blue-400 hover:shadow-sm transition active:scale-95">
-              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Hoy</span>
-              <span id="statHoyPedidos" class="text-lg sm:text-xl font-bold text-blue-600">0</span>
-            </div>
-          </section>
 
           <!-- 3. GESTOR DE PEDIDOS -->
           <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
@@ -616,6 +528,95 @@
 
         <!-- ================= SECCIÓN: ESTADÍSTICAS ================= -->
         <div id="vistaSeccionEstadisticas" class="hidden space-y-6">
+          
+          <!-- 1. BLOQUE DE FINANZAS (4 Tarjetas) -->
+          <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <!-- Total de Hoy -->
+            <div class="bg-white border border-slate-200 border-l-4 border-l-blue-500 p-4 sm:p-5 rounded-2xl shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Total de Hoy</span>
+                <i class="fa-solid fa-calendar-day text-blue-500 text-xs"></i>
+              </div>
+              <p id="statHoyDinero" class="text-2xl sm:text-3xl font-bold text-blue-600 mt-1.5">0.00 €</p>
+              <span class="text-[10px] text-slate-400 mt-1 block">Facturado hoy</span>
+            </div>
+
+            <!-- Total Acumulado -->
+            <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Total Ingresos</span>
+                <i class="fa-solid fa-chart-line text-slate-400 text-xs"></i>
+              </div>
+              <p id="statIngresos" class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5">0.00 €</p>
+              <span class="text-[10px] text-slate-400 mt-1 block">Facturación total</span>
+            </div>
+
+            <!-- Cantidad Pendiente -->
+            <div class="bg-white border border-slate-200 border-l-4 border-l-rose-500 p-4 sm:p-5 rounded-2xl shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pendiente</span>
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              </div>
+              <p id="statPendienteDinero" class="text-2xl sm:text-3xl font-bold text-rose-600 mt-1.5">0.00 €</p>
+              <span class="text-[10px] text-slate-400 mt-1 block">Dinero por cobrar</span>
+            </div>
+
+            <!-- Cantidad Pagada -->
+            <div class="bg-white border border-slate-200 border-l-4 border-l-emerald-500 p-4 sm:p-5 rounded-2xl shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cantidad Pagada</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              </div>
+              <p id="statPagado" class="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1.5">0.00 €</p>
+              <span class="text-[10px] text-slate-400 mt-1 block">Dinero ingresado</span>
+            </div>
+          </section>
+
+          <!-- 2. MINI INDICADORES DE VOLUMEN (7 Tarjetas) -->
+          <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-4">
+            <!-- Total Pedidos -->
+            <div class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Total Pedidos</span>
+              <span id="statPedidos" class="text-lg sm:text-xl font-bold text-slate-800">0</span>
+            </div>
+
+            <!-- Pendientes -->
+            <div class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pendientes</span>
+              <span id="statPendientesCount" class="text-lg sm:text-xl font-bold text-rose-600">0</span>
+            </div>
+
+            <!-- En Proceso -->
+            <div class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">En Proceso</span>
+              <span id="statProcesoCount" class="text-lg sm:text-xl font-bold text-amber-500">0</span>
+            </div>
+
+            <!-- Enviados -->
+            <div class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Enviados</span>
+              <span id="statCompletadosCount" class="text-lg sm:text-xl font-bold text-blue-600">0</span>
+            </div>
+
+            <!-- Pagados -->
+            <div class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Pagados</span>
+              <span id="statPagadosCount" class="text-lg sm:text-xl font-bold text-emerald-600">0</span>
+            </div>
+
+            <!-- Cancelados -->
+            <div class="bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Cancelados</span>
+              <span id="statCanceladosCount" class="text-lg sm:text-xl font-bold text-slate-400">0</span>
+            </div>
+
+            <!-- Hoy -->
+            <div class="col-span-2 sm:col-span-1 bg-white border border-slate-200 p-3 sm:p-4 rounded-xl text-center shadow-xs">
+              <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block">Hoy</span>
+              <span id="statHoyPedidos" class="text-lg sm:text-xl font-bold text-blue-600">0</span>
+            </div>
+          </section>
+
           <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div>
