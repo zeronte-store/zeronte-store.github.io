@@ -498,18 +498,18 @@
         <div class="lg:col-span-5 space-y-5">
           
           <!-- Título -->
-          <h1 id="tituloFichaArticulo" class="text-xl sm:text-2xl font-serif font-bold text-gray-900 leading-snug"></h1>
+          <h1 id="tituloFichaArticulo" class="text-2xl sm:text-3xl font-serif font-extrabold text-[#111111] leading-tight tracking-tight"></h1>
 
           <!-- Precios y distintivo Descarga digital a su derecha -->
           <div>
             <div class="flex items-center gap-3.5 flex-wrap">
-              <span id="precioFichaActual" class="text-2xl sm:text-3xl font-bold text-gray-900">0,00 €</span>
-              <span id="precioFichaTachado" class="text-base text-gray-400 line-through hidden">0,00 €</span>
-              <span id="badgeDescuentoFicha" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md hidden">-15%</span>
+              <span id="precioFichaActual" class="text-3xl sm:text-3xl font-extrabold text-[#111111]">0,00 €</span>
+              <span id="precioFichaTachado" class="text-base text-gray-500 line-through hidden">0,00 €</span>
+              <span id="badgeDescuentoFicha" class="text-sm font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-md hidden">-15%</span>
               
               <!-- Distintivo Descarga Digital idéntico a la portada -->
-              <span class="text-xs font-semibold text-blue-600 flex items-center gap-1.5 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
-                <i class="fa-solid fa-cloud-arrow-down text-sm text-blue-600"></i>
+              <span class="text-sm font-semibold text-blue-700 flex items-center gap-1.5 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
+                <i class="fa-solid fa-cloud-arrow-down text-base text-blue-600"></i>
                 <span id="txtDescargaFichaBadge">Descarga digital</span>
               </span>
             </div>
@@ -517,51 +517,51 @@
 
           <!-- Selector Cantidad y Subtotal -->
           <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1.5">Cantidad</label>
-            <div class="flex items-center gap-3.5">
-              <div class="flex items-center border border-gray-300 rounded-xl w-32 bg-white overflow-hidden shadow-xs focus-within:border-black">
-                <button type="button" onclick="ajustarCantidadFicha(-1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 text-sm font-bold transition active:bg-gray-200">
+            <label class="block text-sm font-bold text-[#111111] mb-2">Cantidad</label>
+            <div class="flex items-center gap-4">
+              <div class="flex items-center border border-gray-400 rounded-xl w-36 bg-white overflow-hidden shadow-xs focus-within:border-black">
+                <button type="button" onclick="ajustarCantidadFicha(-1)" class="w-12 h-12 flex items-center justify-center text-[#111111] hover:bg-gray-100 text-lg font-bold transition active:bg-gray-200">
                   -
                 </button>
-                <input type="text" inputmode="numeric" id="cantidadFicha" value="1" oninput="validarCantidadInput(this)" class="w-12 h-10 text-center font-bold text-xs text-gray-900 border-x border-gray-200 focus:outline-none bg-transparent">
-                <button type="button" onclick="ajustarCantidadFicha(1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 text-sm font-bold transition active:bg-gray-200">
+                <input type="text" inputmode="numeric" id="cantidadFicha" value="1" oninput="validarCantidadInput(this)" class="w-12 h-12 text-center font-bold text-base text-[#111111] border-x border-gray-300 focus:outline-none bg-transparent">
+                <button type="button" onclick="ajustarCantidadFicha(1)" class="w-12 h-12 flex items-center justify-center text-[#111111] hover:bg-gray-100 text-lg font-bold transition active:bg-gray-200">
                   +
                 </button>
               </div>
 
               <!-- Total dinámico calculado -->
-              <div class="text-xs font-medium text-gray-500">
-                Total: <strong id="subtotalCalculadoFicha" class="text-base font-bold text-gray-900">0.00 €</strong>
+              <div class="text-sm font-medium text-gray-700">
+                Total: <strong id="subtotalCalculadoFicha" class="text-xl font-extrabold text-[#111111]">0.00 €</strong>
               </div>
             </div>
           </div>
 
           <!-- BOX DE PERSONALIZACIÓN DINÁMICA -->
-          <div class="border border-gray-300 rounded-2xl p-4 sm:p-5 bg-[#fafafa]/80 space-y-3">
+          <div class="border border-gray-300 rounded-2xl p-4 sm:p-5 bg-[#fafafa] space-y-3.5">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5 text-xs font-bold text-gray-800">
-                <i class="fa-solid fa-pen-nib text-gray-600"></i>
+              <div class="flex items-center gap-2 text-sm sm:text-base font-bold text-[#111111]">
+                <i class="fa-solid fa-pen-nib text-[#111111]"></i>
                 <span>Personalización</span>
               </div>
-              <span id="badgeIndicadorCopias" class="text-[10px] font-semibold text-gray-500 bg-white border border-gray-200 px-2 py-0.5 rounded-md">1 unidad</span>
+              <span id="badgeIndicadorCopias" class="text-xs font-bold text-gray-700 bg-white border border-gray-300 px-2.5 py-1 rounded-md">1 unidad</span>
             </div>
 
             <!-- Opción para fijar misma personalización salvo el nombre -->
-            <div id="wrapperCheckMismaPers" class="hidden pt-1 pb-1 border-b border-gray-200">
-              <label class="flex items-start gap-2 cursor-pointer select-none">
-                <input type="checkbox" id="checkMismaPersonalizacion" onchange="toggleMismaPersonalizacion(this.checked)" class="mt-0.5 rounded border-gray-300 text-black focus:ring-0 cursor-pointer">
-                <span class="text-xs font-medium text-gray-700">Usar la misma personalización para todos excepto el nombre (2. Nombre)</span>
+            <div id="wrapperCheckMismaPers" class="hidden pt-1.5 pb-1.5 border-b border-gray-200">
+              <label class="flex items-start gap-2.5 cursor-pointer select-none">
+                <input type="checkbox" id="checkMismaPersonalizacion" onchange="toggleMismaPersonalizacion(this.checked)" class="mt-1 w-4 h-4 rounded border-gray-400 text-black focus:ring-0 cursor-pointer">
+                <span class="text-xs sm:text-sm font-semibold text-[#111111]">Usar la misma personalización para todos excepto el nombre (2. Nombre)</span>
               </label>
             </div>
 
             <!-- Contenedor dinámico de formularios por cada unidad -->
-            <div id="contenedorPersonalizacionesDinamicas" class="space-y-4 max-h-[360px] overflow-y-auto pr-1">
+            <div id="contenedorPersonalizacionesDinamicas" class="space-y-4 max-h-[420px] overflow-y-auto pr-1">
               <!-- Se genera dinámicamente según la cantidad -->
             </div>
           </div>
 
           <!-- Botón Comprar -->
-          <button type="button" onclick="procederCompraDesdeFicha()" class="w-full bg-black hover:bg-gray-800 text-white font-bold py-4 rounded-full text-xs sm:text-sm uppercase tracking-wider transition active:scale-98 shadow-md flex items-center justify-center gap-2">
+          <button type="button" onclick="procederCompraDesdeFicha()" class="w-full bg-black hover:bg-gray-800 text-white font-bold py-4 rounded-full text-sm sm:text-base uppercase tracking-wider transition active:scale-98 shadow-md flex items-center justify-center gap-2">
             <span>Añadir al carrito y Comprar</span>
           </button>
 
@@ -572,15 +572,29 @@
       <!-- SECCIÓN A ANCHO COMPLETO: Detalles del artículo ocupando todo el ancho hasta los márgenes -->
       <div class="mt-12 pt-8 border-t border-gray-200 w-full">
         <details open class="group">
-          <summary class="flex justify-between items-center cursor-pointer list-none font-bold text-sm sm:text-base text-gray-900 py-2 border-b border-gray-100">
-            <span class="flex items-center gap-2">
-              <i class="fa-solid fa-circle-info text-gray-500 text-sm"></i>
+          <summary class="flex justify-between items-center cursor-pointer list-none font-bold text-base sm:text-lg text-[#111111] py-3 border-b border-gray-200 select-none">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-circle-info text-[#111111] text-base"></i>
               <span>Detalles del artículo</span>
             </span>
-            <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition text-xs"></i>
+
+            <div class="flex items-center gap-3">
+              <!-- Selector tamaño de fuente (A- / A+) -->
+              <div class="flex items-center bg-gray-100 rounded-lg p-0.5 border border-gray-300" onclick="event.stopPropagation()">
+                <button type="button" onclick="cambiarTamanoFuenteDesc(-1)" title="Reducir letra" class="w-7 h-7 flex items-center justify-center rounded-md text-gray-700 hover:text-black hover:bg-white transition active:scale-90 text-xs font-bold">
+                  A-
+                </button>
+                <span class="w-[1px] h-3.5 bg-gray-300"></span>
+                <button type="button" onclick="cambiarTamanoFuenteDesc(1)" title="Aumentar letra" class="w-7 h-7 flex items-center justify-center rounded-md text-gray-700 hover:text-black hover:bg-white transition active:scale-90 text-sm font-extrabold">
+                  A+
+                </button>
+              </div>
+
+              <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition text-sm"></i>
+            </div>
           </summary>
-          <div class="pt-5 text-xs sm:text-sm text-gray-700 space-y-4">
-            <p id="descripcionFichaArticulo" class="leading-relaxed whitespace-pre-line"></p>
+          <div class="pt-6 text-sm sm:text-base text-[#111111] space-y-4">
+            <p id="descripcionFichaArticulo" class="leading-relaxed sm:leading-loose whitespace-pre-line font-medium text-[#111111]"></p>
           </div>
         </details>
       </div>
@@ -2055,6 +2069,19 @@
 
     let datosPersonalizaciones = [];
 
+    // Control dinámico de tamaño de fuente para la descripción (fluido y sin bloqueos)
+    let tamanoFuenteActualPx = 15; // Tamaño base ideal para móviles
+
+    function cambiarTamanoFuenteDesc(delta) {
+      const el = document.getElementById('descripcionFichaArticulo');
+      if (!el) return;
+
+      // Sube o baja de 2 en 2 píxeles (entre un mínimo de 12px y un máximo de 24px)
+      tamanoFuenteActualPx = Math.max(12, Math.min(24, tamanoFuenteActualPx + (delta * 2)));
+      el.style.fontSize = tamanoFuenteActualPx + 'px';
+      el.style.lineHeight = (tamanoFuenteActualPx * 1.55) + 'px';
+    }
+
     function recalcularSubtotalFicha() {
       if (!articuloFichaActual) return;
       const input = document.getElementById('cantidadFicha');
@@ -2103,41 +2130,41 @@
       contenedor.innerHTML = datosPersonalizaciones.map((item, idx) => {
         const esSecundarioReplicado = replicarComunes && idx > 0;
         return `
-          <div class="bg-white border border-gray-200 rounded-xl p-3 text-xs space-y-2 shadow-2xs">
-            <div class="flex items-center justify-between pb-1 border-b border-gray-100">
-              <span class="font-bold text-gray-800 text-[11px] uppercase tracking-wide">
+          <div class="bg-white border border-gray-300 rounded-xl p-3.5 sm:p-4 text-sm space-y-3 shadow-2xs">
+            <div class="flex items-center justify-between pb-1.5 border-b border-gray-200">
+              <span class="font-bold text-[#111111] text-xs sm:text-sm uppercase tracking-wide">
                 ${cant > 1 ? `Personalización unidad ${idx + 1} de ${cant}` : 'Detalles de la obra'}
               </span>
-              ${esSecundarioReplicado ? '<span class="text-[10px] text-amber-600 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">Datos compartidos de #1</span>' : ''}
+              ${esSecundarioReplicado ? '<span class="text-xs text-amber-800 font-bold bg-amber-100 px-2 py-0.5 rounded">Datos compartidos de #1</span>' : ''}
             </div>
 
             <div>
-              <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">1. Cambiar Título (Opcional):</label>
+              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">1. Cambiar Título (Opcional):</label>
               <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].titulo || '') : (item.titulo || '')}" 
                 placeholder="Ej. Eres mi armonía" 
-                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'titulo', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"`}>
+                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'titulo', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
             </div>
 
             <div>
-              <label class="block text-[10px] font-bold text-gray-700 mb-0.5">2. Nombre * :</label>
+              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">2. Nombre * :</label>
               <input type="text" value="${item.nombre || ''}" 
                 placeholder="Ej. María / Carlos" 
                 oninput="actualizarDatoPers(${idx}, 'nombre', this.value)" 
-                class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 font-medium focus:outline-none focus:border-black transition">
+                class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-semibold focus:outline-none focus:border-black transition">
             </div>
 
             <div>
-              <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">3. Dedicatoria (máx. 90 car.):</label>
+              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">3. Dedicatoria (máx. 90 car.):</label>
               <input type="text" maxlength="90" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].dedicatoria || '') : (item.dedicatoria || '')}" 
                 placeholder="Ej. Gracias por llenar mi vida de armonía. 24/09/2024" 
-                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'dedicatoria', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"`}>
+                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'dedicatoria', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
             </div>
 
             <div>
-              <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">4. Compositor (Opcional):</label>
+              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">4. Compositor (Opcional):</label>
               <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].compositor || '') : (item.compositor || '')}" 
-                placeholder="Ej. W. A. Mozart (por defecto Zeronte)" 
-                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'compositor', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"`}>
+                placeholder="Ej. W. A. Mozart" 
+                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'compositor', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
             </div>
           </div>
         `;
