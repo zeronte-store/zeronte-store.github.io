@@ -1793,7 +1793,8 @@
           let productos = data.productos;
 
           // Contabilizar ventas reales desde la hoja de cálculo
-          let productoGanador = "nuestro nombre en música + mp3"; // El más vendido de la base de datos
+          let productoGanador = "nuestro nombre en música + mp3";
+          const mapaVentasPorProducto = {};
 
           try {
             const resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos`);
@@ -1801,16 +1802,23 @@
             const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
             
             if (pedidos.length > 0) {
-              const conteo = {};
               pedidos.forEach(item => {
-                const nombre = normalizarTextoBusqueda(item.producto || item.Producto || '');
-                if (nombre) {
-                  conteo[nombre] = (conteo[nombre] || 0) + 1;
+                const textoProdRaw = (item.producto || item.Producto || '').toString();
+                // Extraer la cantidad comprada: si viene "(x3)" suma 3, de lo contrario suma 1
+                const matchCantidad = textoProdRaw.match(/\(x(\d+)\)/i);
+                const cantidadComprada = matchCantidad ? parseInt(matchCantidad[1], 10) : 1;
+
+                // Limpiar el sufijo (x1), (x2)... para que coincida exactamente con el título del catálogo
+                const tituloLimpio = textoProdRaw.replace(/\(x\d+\)/gi, '').trim();
+                const nombreNorm = normalizarTextoBusqueda(tituloLimpio);
+
+                if (nombreNorm) {
+                  mapaVentasPorProducto[nombreNorm] = (mapaVentasPorProducto[nombreNorm] || 0) + cantidadComprada;
                 }
               });
 
               let maxConteo = 0;
-              for (const [clave, veces] of Object.entries(conteo)) {
+              for (const [clave, veces] of Object.entries(mapaVentasPorProducto)) {
                 if (veces > maxConteo) {
                   maxConteo = veces;
                   productoGanador = clave;
@@ -1821,12 +1829,21 @@
             console.warn("Uso de estadísticas directas de la base de datos.");
           }
 
-          // Asignar insignia única y exclusivamente al más vendido
+          // Asignar ventas reales e insignia de más vendido a cada artículo
           const claveGanadorNorm = normalizarTextoBusqueda(productoGanador);
           productos = productos.map(p => {
             const titNorm = normalizarTextoBusqueda(p.titulo || '');
             const esElMasVendido = titNorm.includes(claveGanadorNorm) || claveGanadorNorm.includes(titNorm);
-            return { ...p, masVendido: esElMasVendido };
+
+            // Buscar coincidencias de ventas en el mapa
+            let totalVendidoArticulo = 0;
+            for (const [claveProd, totalVendido] of Object.entries(mapaVentasPorProducto)) {
+              if (titNorm === claveProd || titNorm.includes(claveProd) || claveProd.includes(titNorm)) {
+                totalVendidoArticulo += totalVendido;
+              }
+            }
+
+            return { ...p, masVendido: esElMasVendido, totalVentas: totalVendidoArticulo };
           });
 
           // Poner el más vendido el primero de la tienda (destacado)
@@ -2037,9 +2054,15 @@
                   ${tituloTraducido}
                 </h3>
                 
-                <div class="flex items-center gap-1 mt-1 text-[11px] text-amber-500">
-                  <i class="fa-solid fa-star"></i>
-                  <span class="text-gray-500 font-semibold text-[10px]">5.0</span>
+                <div class="flex items-center gap-1.5 mt-1.5 text-xs text-amber-500">
+                  <div class="flex items-center gap-1">
+                    <i class="fa-solid fa-star"></i>
+                    <span class="text-gray-700 font-bold text-xs">5.0</span>
+                  </div>
+                  <span class="text-gray-300">|</span>
+                  <span class="text-gray-600 font-semibold text-xs">
+                    ${(p.totalVentas || 0).toLocaleString('es-ES')} ${(p.totalVentas === 1) ? 'venta' : 'ventas'}
+                  </span>
                 </div>
               </div>
             </div>
