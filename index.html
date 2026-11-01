@@ -1807,59 +1807,80 @@
         if (data.status === "success" && data.productos) {
           let productos = data.productos;
 
-          // Contabilizar ventas reales desde la hoja de cálculo
-          let productoGanador = "nuestro nombre en música + mp3";
-          const mapaVentasPorProducto = {};
+          // Contabilizar ventas reales acumuladas por producto
+          const conteoVentas = new Array(productos.length).fill(0);
 
           try {
-            const resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
-            const dataPed = await resPed.json();
-            const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
+            // Intentar leer pedidos mediante la API pública de pedidos
+            let resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
+            let dataPed = await resPed.json();
             
+            // Si no responde con obtenerPedidos, intentar con la acción datosPublicos
+            if (!dataPed || (!dataPed.pedidos && !Array.isArray(dataPed))) {
+              resPed = await fetch(`${APPS_SCRIPT_URL}?accion=datosPublicos&_nocache=${Date.now()}`);
+              dataPed = await resPed.json();
+            }
+
+            const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
+
             if (pedidos.length > 0) {
               pedidos.forEach(item => {
+                const est = (item.estado || item.Estado || '').toString().toLowerCase();
+                if (est.includes('cancelado')) return;
+
                 const textoProdRaw = (item.producto || item.Producto || '').toString();
-                // Extraer la cantidad comprada: si viene "(x3)" suma 3, de lo contrario suma 1
-                const matchCantidad = textoProdRaw.match(/\(x(\d+)\)/i);
-                const cantidadComprada = matchCantidad ? parseInt(matchCantidad[1], 10) : 1;
+                if (!textoProdRaw) return;
 
-                // Limpiar el sufijo (x1), (x2)... para que coincida exactamente con el título del catálogo
-                const tituloLimpio = textoProdRaw.replace(/\(x\d+\)/gi, '').trim();
-                const nombreNorm = normalizarTextoBusqueda(tituloLimpio);
+                // Limpiar el texto: quitar (x2), [UNIDAD 1/2], etc.
+                const tituloLimpio = textoProdRaw.replace(/\(x\d+\)/gi, '').replace(/\[UNIDAD\s+\d+\/\d+\].*$/i, '').trim();
+                const normPedido = normalizarTextoBusqueda(tituloLimpio);
+                if (!normPedido) return;
 
-                if (nombreNorm) {
-                  mapaVentasPorProducto[nombreNorm] = (mapaVentasPorProducto[nombreNorm] || 0) + cantidadComprada;
+                // Buscar coincidencia estricta con el título real del producto
+                let idxCoincidente = -1;
+                
+                // 1. Coincidencia exacta estricta
+                idxCoincidente = productos.findIndex(p => {
+                  const normTitulo = normalizarTextoBusqueda(p.titulo || '');
+                  return normPedido === normTitulo;
+                });
+
+                // 2. Si no es exacto, comprobar cuál contiene a cuál sin cruzar idiomas
+                if (idxCoincidente === -1) {
+                  idxCoincidente = productos.findIndex(p => {
+                    const normTitulo = normalizarTextoBusqueda(p.titulo || '');
+                    return normPedido.startsWith(normTitulo) || normTitulo.startsWith(normPedido);
+                  });
+                }
+
+                if (idxCoincidente !== -1) {
+                  // Cada fila en Sheets equivale a 1 unidad vendida de ese producto
+                  conteoVentas[idxCoincidente] += 1;
                 }
               });
-
-              let maxConteo = 0;
-              for (const [clave, veces] of Object.entries(mapaVentasPorProducto)) {
-                if (veces > maxConteo) {
-                  maxConteo = veces;
-                  productoGanador = clave;
-                }
-              }
             }
           } catch (ePed) {
-            console.warn("Uso de estadísticas directas de la base de datos.");
+            console.warn("Uso de estadísticas directas de la base de datos:", ePed);
           }
 
-          // Asignar ventas reales e insignia de más vendido a cada artículo
-          const claveGanadorNorm = normalizarTextoBusqueda(productoGanador);
-          productos = productos.map(p => {
-            const titNorm = normalizarTextoBusqueda(p.titulo || '');
-            const esElMasVendido = titNorm.includes(claveGanadorNorm) || claveGanadorNorm.includes(titNorm);
+          // Asignar el total de ventas exacto a cada producto
+          let maxVentas = -1;
+          let idxMasVendido = -1;
 
-            // Buscar coincidencias de ventas en el mapa
-            let totalVendidoArticulo = 0;
-            for (const [claveProd, totalVendido] of Object.entries(mapaVentasPorProducto)) {
-              if (titNorm === claveProd || titNorm.includes(claveProd) || claveProd.includes(titNorm)) {
-                totalVendidoArticulo += totalVendido;
-              }
+          productos = productos.map((p, idx) => {
+            const totalVentasReal = conteoVentas[idx] || 0;
+            if (totalVentasReal > maxVentas) {
+              maxVentas = totalVentasReal;
+              idxMasVendido = idx;
             }
-
-            return { ...p, masVendido: esElMasVendido, totalVentas: totalVendidoArticulo };
+            return { ...p, totalVentas: totalVentasReal };
           });
+
+          // Marcar la insignia del más vendido
+          productos = productos.map((p, idx) => ({
+            ...p,
+            masVendido: maxVentas > 0 && (idx === idxMasVendido)
+          }));
 
           // Poner el más vendido el primero de la tienda (destacado)
           productos.sort((a, b) => (b.masVendido ? 1 : 0) - (a.masVendido ? 1 : 0));
