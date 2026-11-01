@@ -381,6 +381,95 @@
                   <input type="text" id="inputNuevaCategoriaTexto" placeholder="Escribe la nueva categoría" class="hidden mt-2 w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
                 </div>
 
+                <!-- ================= FORMATOS Y DISTINTIVOS DEL PRODUCTO (TIPO IPHONE) ================= -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2.5">
+                  <style>
+                    .switch-ios-input { display: none !important; }
+                    .switch-ios-track {
+                      width: 42px;
+                      height: 24px;
+                      background-color: #e5e5ea;
+                      border-radius: 9999px;
+                      position: relative;
+                      transition: background-color 0.25s ease-in-out;
+                      cursor: pointer;
+                      flex-shrink: 0;
+                    }
+                    .switch-ios-thumb {
+                      width: 20px;
+                      height: 20px;
+                      background-color: #ffffff;
+                      border-radius: 50%;
+                      position: absolute;
+                      top: 2px;
+                      left: 2px;
+                      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    }
+                    .switch-ios-input:checked + .switch-ios-track {
+                      background-color: #34C759 !important; /* Verde iOS auténtico */
+                    }
+                    .switch-ios-input:checked + .switch-ios-track .switch-ios-thumb {
+                      transform: translateX(18px);
+                    }
+                  </style>
+
+                  <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-700">Formatos y Entrega del Producto</label>
+                    <p class="text-[10px] text-slate-400">Activa los sellos informativos que verá el cliente junto al precio en la ficha.</p>
+                  </div>
+
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+                    <!-- 1. Descarga Digital -->
+                    <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition">
+                      <div class="flex items-center gap-2 min-w-0 pr-1">
+                        <i class="fa-solid fa-cloud-arrow-down text-blue-600 text-xs"></i>
+                        <span class="text-xs font-semibold text-slate-800 truncate">Descarga</span>
+                      </div>
+                      <input type="checkbox" id="checkBadgeDescarga" checked class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+
+                    <!-- 2. PDF -->
+                    <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition">
+                      <div class="flex items-center gap-2 min-w-0 pr-1">
+                        <i class="fa-solid fa-file-pdf text-rose-600 text-xs"></i>
+                        <span class="text-xs font-semibold text-slate-800 truncate">PDF</span>
+                      </div>
+                      <input type="checkbox" id="checkBadgePdf" checked class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+
+                    <!-- 3. Audio -->
+                    <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition">
+                      <div class="flex items-center gap-2 min-w-0 pr-1">
+                        <i class="fa-solid fa-headphones text-slate-900 text-xs"></i>
+                        <span class="text-xs font-semibold text-slate-800 truncate">Audio</span>
+                      </div>
+                      <input type="checkbox" id="checkBadgeAudio" class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+
+                    <!-- 4. Soporte Físico -->
+                    <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition">
+                      <div class="flex items-center gap-2 min-w-0 pr-1">
+                        <i class="fa-solid fa-box text-orange-600 text-xs"></i>
+                        <span class="text-xs font-semibold text-slate-800 truncate">Físico</span>
+                      </div>
+                      <input type="checkbox" id="checkBadgeFisico" class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
                 <!-- ================= SECCIÓN FOTOS ESTILO ETSY (HASTA 10) ================= -->
                 <div class="space-y-2">
                   <div class="flex items-center justify-between">
@@ -1084,14 +1173,56 @@
       }
     }
 
+    // Normalizar texto para comparaciones seguras de títulos
+    function normalizarAdminTexto(str) {
+      if (!str) return "";
+      return str.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+    }
+
+    // Calcula el importe real unitario por fila evitando duplicar totales en pedidos fraccionados (ej: 1/2)
+    function obtenerImporteRealFila(pedido) {
+      if (!pedido) return 0;
+      const numTotal = parseFloat((pedido.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+      const idRaw = (pedido.id || "").toString();
+      const prodRaw = (pedido.producto || "").toString();
+
+      const matchId = idRaw.match(/\((\d+)\/(\d+)\)/);
+      const matchProd = prodRaw.match(/\(x(\d+)\)/i);
+
+      if (matchId && matchId[2]) {
+        const totalPartes = parseInt(matchId[2], 10);
+        if (totalPartes > 1) return numTotal / totalPartes;
+      } else if (matchProd && matchProd[1]) {
+        const cant = parseInt(matchProd[1], 10);
+        // Si hay multiplicador (x2) y existen varias filas con el mismo ID base
+        const idBase = idRaw.split(' ')[0].trim();
+        const filasMismoId = listaPedidosGlobal.filter(p => (p.id || '').startsWith(idBase));
+        if (filasMismoId.length > 1 && cant > 1) {
+          return numTotal / cant;
+        }
+      }
+      return numTotal;
+    }
+
+    // Busca el producto en el catálogo reconociendo traducciones y títulos limpios
+    function buscarProductoEnCatalogo(nombreProducto) {
+      if (!nombreProducto) return null;
+      let limpio = nombreProducto.toString().replace(/\(x\d+\)/gi, '').replace(/\[UNIDAD\s+\d+\/\d+\].*$/i, '').trim();
+      const normBuscado = normalizarAdminTexto(limpio);
+
+      return listaProductosGlobal.find(pr => {
+        const normCatalogo = normalizarAdminTexto(pr.titulo || "");
+        return normBuscado === normCatalogo || 
+               normBuscado.includes(normCatalogo) || 
+               normCatalogo.includes(normBuscado) ||
+               (normBuscado.includes("mynameinmusic") && normCatalogo.includes("nombreenmusica")) ||
+               (normBuscado.includes("nombreenmusica") && normCatalogo.includes("mynameinmusic"));
+      }) || null;
+    }
+
     // Busca el ID exacto que tienes en tu columna A de Google Sheets (prod-1, prod-2...)
     function obtenerIdProducto(nombreProducto) {
-      if (!nombreProducto) return "PROD";
-      const prod = listaProductosGlobal.find(pr => 
-        (pr.titulo && pr.titulo.toLowerCase().trim() === nombreProducto.toLowerCase().trim()) ||
-        nombreProducto.toLowerCase().includes((pr.titulo || "").toLowerCase()) ||
-        (pr.titulo || "").toLowerCase().includes(nombreProducto.toLowerCase())
-      );
+      const prod = buscarProductoEnCatalogo(nombreProducto);
       return (prod && prod.id) ? prod.id : "prod-1";
     }
 
@@ -1178,7 +1309,7 @@
       const hoyES = `${dia}/${mes}/${año}`;
 
       listaPedidosGlobal.forEach(p => {
-        const num = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        const num = obtenerImporteRealFila(p);
         const est = (p.estado !== undefined && p.estado !== null) ? p.estado.toString().toLowerCase().trim() : "";
         const fechaPedido = (p.fecha || "").toString();
 
@@ -1546,7 +1677,8 @@
       tablaPC.innerHTML = pedidosPaginados.map((p, idx) => {
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
-        const precioFormateado = formatearMonedaEuro(p.precio);
+        const precioRealUnitario = obtenerImporteRealFila(p);
+        const precioFormateado = formatearMonedaEuro(precioRealUnitario);
         const msg = encodeURIComponent(`Hola ${p.nombre}! Te escribo de Zeronte respecto a tu pedido ${p.id}...`);
 
         const asuntoEmail = encodeURIComponent(`Información sobre tu pedido ${p.id} - Zeronte`);
@@ -1719,7 +1851,8 @@
       vistaMovil.innerHTML = pedidosPaginados.map((p, idx) => {
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
-        const precioFormateado = formatearMonedaEuro(p.precio);
+        const precioRealUnitario = obtenerImporteRealFila(p);
+        const precioFormateado = formatearMonedaEuro(precioRealUnitario);
         const msg = encodeURIComponent(`Hola ${p.nombre}! Te escribo de Zeronte respecto a tu pedido ${p.id}...`);
 
         const asuntoEmail = encodeURIComponent(`Información sobre tu pedido ${p.id} - Zeronte`);
@@ -2200,6 +2333,17 @@
           }
 
           if (editorDesc) editorDesc.innerHTML = prod.descripcion || '';
+
+          // Cargar badges/sellos guardados
+          const sellosArray = Array.isArray(prod.badges) ? prod.badges : (prod.badges ? String(prod.badges).split(',').map(s=>s.trim()) : ['descarga', 'pdf']);
+          const chkDescarga = document.getElementById('checkBadgeDescarga');
+          const chkPdf = document.getElementById('checkBadgePdf');
+          const chkAudio = document.getElementById('checkBadgeAudio');
+          const chkFisico = document.getElementById('checkBadgeFisico');
+          if (chkDescarga) chkDescarga.checked = sellosArray.includes('descarga');
+          if (chkPdf) chkPdf.checked = sellosArray.includes('pdf');
+          if (chkAudio) chkAudio.checked = sellosArray.includes('audio');
+          if (chkFisico) chkFisico.checked = sellosArray.includes('fisico');
         }
       } else {
         if (inputEditando) inputEditando.value = '';
@@ -2209,6 +2353,16 @@
 
         const inputPreOferta = document.getElementById('nuevoPrecioOferta');
         if (inputPreOferta) inputPreOferta.value = '';
+
+        // Valores por defecto al crear: Descarga y PDF activados
+        const chkDescarga = document.getElementById('checkBadgeDescarga');
+        const chkPdf = document.getElementById('checkBadgePdf');
+        const chkAudio = document.getElementById('checkBadgeAudio');
+        const chkFisico = document.getElementById('checkBadgeFisico');
+        if (chkDescarga) chkDescarga.checked = true;
+        if (chkPdf) chkPdf.checked = true;
+        if (chkAudio) chkAudio.checked = false;
+        if (chkFisico) chkFisico.checked = false;
       }
 
       modal.classList.remove('hidden');
@@ -2241,25 +2395,28 @@
       const categoriaFiltro = document.getElementById('filtroCategoriaCatalogo')?.value || 'todas';
       const orden = document.getElementById('ordenCatalogo')?.value || 'recientes';
 
-      const statsPorProducto = {};
+      const statsPorProductoId = {};
       listaPedidosGlobal.forEach(p => {
         const est = (p.estado || '').toLowerCase();
         if (est.includes('cancelado')) return;
-        const titulo = (p.producto || '').trim();
-        const precio = parseFloat((p.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
-        if (!statsPorProducto[titulo]) {
-          statsPorProducto[titulo] = { unidades: 0, total: 0 };
+        const prodAsociado = buscarProductoEnCatalogo(p.producto);
+        const idClave = prodAsociado ? prodAsociado.id : (p.producto || '').trim();
+        const precioReal = obtenerImporteRealFila(p);
+
+        if (!statsPorProductoId[idClave]) {
+          statsPorProductoId[idClave] = { unidades: 0, total: 0 };
         }
-        statsPorProducto[titulo].unidades += 1;
-        statsPorProducto[titulo].total += precio;
+        statsPorProductoId[idClave].unidades += 1;
+        statsPorProductoId[idClave].total += precioReal;
       });
 
       let prods = listaProductosGlobal.map((prod, idx) => {
-        const stats = statsPorProducto[(prod.titulo || '').trim()] || { unidades: 0, total: 0 };
+        const prodId = prod.id || `prod-${idx + 1}`;
+        const stats = statsPorProductoId[prodId] || statsPorProductoId[(prod.titulo || '').trim()] || { unidades: 0, total: 0 };
         const precioNum = parseFloat((prod.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
         return {
           ...prod,
-          idCalculado: prod.id || `prod-${idx + 1}`,
+          idCalculado: prodId,
           unidadesVendidas: stats.unidades,
           ingresosTotales: stats.total,
           precioNum: precioNum,
@@ -2499,6 +2656,13 @@
   const tituloVal = (document.getElementById('nuevoTitulo')?.value || '').trim();
   const videoVal = (document.getElementById('nuevoVideoUrl')?.value || '').trim();
 
+  // Recoger sellos seleccionados
+  const sellosSeleccionados = [];
+  if (document.getElementById('checkBadgeDescarga')?.checked) sellosSeleccionados.push('descarga');
+  if (document.getElementById('checkBadgePdf')?.checked) sellosSeleccionados.push('pdf');
+  if (document.getElementById('checkBadgeAudio')?.checked) sellosSeleccionados.push('audio');
+  if (document.getElementById('checkBadgeFisico')?.checked) sellosSeleccionados.push('fisico');
+
   let filaReal = "";
   if (idEditando) {
     const pEncontrado = listaProductosGlobal.find(p => (p.id || '').toLowerCase() === idEditando.toLowerCase());
@@ -2523,9 +2687,11 @@
     categoria: categoriaVal,
     imagenes: fotosValidas,
     video: videoVal,
-    descripcion: descVal
+    descripcion: descVal,
+    badges: sellosSeleccionados
   };
 
+  // Persistir inmediatamente en memoria y almacenamiento local
   if (idEditando) {
     const prodMemoria = listaProductosGlobal.find(p => (p.id || '').toLowerCase() === idEditando.toLowerCase());
     if (prodMemoria) {
@@ -2536,7 +2702,9 @@
       prodMemoria.imagen = fotosValidas;
       prodMemoria.video = videoVal;
       prodMemoria.descripcion = descVal;
+      prodMemoria.badges = sellosSeleccionados;
     }
+    localStorage.setItem(`badges_prod_${idEditando}`, JSON.stringify(sellosSeleccionados));
   }
 
   renderizarProductos();
@@ -2613,7 +2781,7 @@
         if (!mapa[clave].telefono && p.telefono) mapa[clave].telefono = p.telefono;
         if (!mapa[clave].email && p.email) mapa[clave].email = p.email;
 
-        const precioNum = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        const precioNum = obtenerImporteRealFila(p);
         if (!(p.estado || "").toLowerCase().includes("cancelado")) {
           mapa[clave].totalGastado += precioNum;
         }
@@ -2714,7 +2882,7 @@
 
           const pedidosHTML = c.pedidos.map(ped => {
             const fechaForm = formatearFechaEspanol(ped.fecha);
-            const precioForm = (parseFloat((ped.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0).toFixed(2) + " €";
+            const precioForm = obtenerImporteRealFila(ped).toFixed(2) + " €";
             const persLimpia = (ped.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
 
             return `
@@ -3099,8 +3267,9 @@
         const est = (p.estado || "").toLowerCase();
         if (est.includes("cancelado")) return;
 
-        const titulo = (p.producto || "Sin especificar").trim();
-        const precio = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        const prodCatalogo = buscarProductoEnCatalogo(p.producto);
+        const titulo = prodCatalogo ? prodCatalogo.titulo : (p.producto || "Sin especificar").trim();
+        const precio = obtenerImporteRealFila(p);
 
         if (!mapaProductos[titulo]) {
           mapaProductos[titulo] = {
@@ -3277,7 +3446,7 @@
       let pendiente = 0;
 
       movimientosFinanzasFiltrados.forEach(p => {
-        const num = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        const num = obtenerImporteRealFila(p);
         const est = (p.estado || "").toLowerCase();
         const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
 
@@ -3314,7 +3483,7 @@
           };
         }
         gruposPorDia[claveDia].pedidos.push(p);
-        const precio = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+        const precio = obtenerImporteRealFila(p);
         gruposPorDia[claveDia].totalDia += precio;
       });
 
@@ -3327,7 +3496,7 @@
         textoDia = textoDia.charAt(0).toUpperCase() + textoDia.slice(1);
 
         const filasMovimientos = grupo.pedidos.map(p => {
-          const precioNum = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
+          const precioNum = obtenerImporteRealFila(p);
           const precioForm = precioNum.toFixed(2) + " €";
           const est = (p.estado || "").toLowerCase();
           const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
