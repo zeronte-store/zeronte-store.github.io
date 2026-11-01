@@ -7,6 +7,8 @@
   <title>Zeronte | Personalización Musical & Partituras</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Motor de generación de Recibo PDF Vectorial estilo Etsy -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap');
     
@@ -500,18 +502,17 @@
           <!-- Título -->
           <h1 id="tituloFichaArticulo" class="text-3xl sm:text-4xl font-serif font-extrabold text-[#111111] leading-tight tracking-tight"></h1>
 
-          <!-- Precios y distintivo Descarga digital a su derecha -->
+          <!-- Precios y distintivos dinámicos a su derecha -->
           <div>
-            <div class="flex items-center gap-3.5 flex-wrap">
+            <div class="flex items-center gap-3 flex-wrap">
               <span id="precioFichaActual" class="text-3xl sm:text-3xl font-extrabold text-[#111111]">0,00 €</span>
               <span id="precioFichaTachado" class="text-base text-gray-500 line-through hidden">0,00 €</span>
               <span id="badgeDescuentoFicha" class="text-sm font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-md hidden">-15%</span>
               
-              <!-- Distintivo Descarga Digital idéntico a la portada -->
-              <span class="text-sm font-semibold text-blue-700 flex items-center gap-1.5 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
-                <i class="fa-solid fa-cloud-arrow-down text-base text-blue-600"></i>
-                <span id="txtDescargaFichaBadge">Descarga digital</span>
-              </span>
+              <!-- Contenedor dinámico de sellos según selección de admin -->
+              <div id="contenedorSellosFicha" class="flex items-center gap-2 flex-wrap">
+                <!-- Se generan dinámicamente: Descarga Digital, PDF, Audio, Soporte Físico -->
+              </div>
             </div>
           </div>
 
@@ -2312,6 +2313,64 @@
         if (elAvisoOferta) elAvisoOferta.classList.add('hidden');
       }
 
+      // Renderizar sellos dinámicos configurados desde admin
+      const contSellos = document.getElementById('contenedorSellosFicha');
+      if (contSellos) {
+        let sellosConfigurados = p.badges;
+        if (!sellosConfigurados && p.id) {
+          try {
+            const sellosGuardadosLocales = localStorage.getItem(`badges_prod_${p.id}`);
+            if (sellosGuardadosLocales) sellosConfigurados = JSON.parse(sellosGuardadosLocales);
+          } catch(e) {}
+        }
+        
+        let sellosLista = [];
+        if (Array.isArray(sellosConfigurados)) {
+          sellosLista = sellosConfigurados;
+        } else if (typeof sellosConfigurados === 'string') {
+          sellosLista = sellosConfigurados.split(',').map(s => s.trim().toLowerCase());
+        } else {
+          // Por defecto: Descarga Digital y PDF
+          sellosLista = ['descarga', 'pdf'];
+        }
+
+        let htmlSellos = '';
+
+        if (sellosLista.includes('descarga')) {
+          htmlSellos += `
+            <span class="text-xs font-semibold text-blue-700 flex items-center gap-1.5 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 shadow-2xs">
+              <i class="fa-solid fa-cloud-arrow-down text-blue-600 text-sm"></i>
+              <span>Descarga digital</span>
+            </span>`;
+        }
+
+        if (sellosLista.includes('pdf')) {
+          htmlSellos += `
+            <span class="text-xs font-semibold text-rose-700 flex items-center gap-1.5 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 shadow-2xs">
+              <i class="fa-solid fa-file-pdf text-rose-600 text-sm"></i>
+              <span>PDF</span>
+            </span>`;
+        }
+
+        if (sellosLista.includes('audio')) {
+          htmlSellos += `
+            <span class="text-xs font-semibold text-slate-900 flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-300 shadow-2xs">
+              <i class="fa-solid fa-headphones text-slate-900 text-sm"></i>
+              <span>Audio</span>
+            </span>`;
+        }
+
+        if (sellosLista.includes('fisico')) {
+          htmlSellos += `
+            <span class="text-xs font-semibold text-orange-700 flex items-center gap-1.5 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200 shadow-2xs">
+              <i class="fa-solid fa-box text-orange-600 text-sm"></i>
+              <span>Soporte Físico</span>
+            </span>`;
+        }
+
+        contSellos.innerHTML = htmlSellos;
+      }
+
       // Resetear box de personalización y cantidad
       const txtBox = document.getElementById('textoBoxPersonalizacion');
       if (txtBox) txtBox.value = '';
@@ -3426,6 +3485,201 @@
       }
     }
 
+    function formatearTelefonoRecibo(prefijo, numTel) {
+      const p = (prefijo || "+34").replace(/[^0-9+]/g, '');
+      const n = (numTel || "").replace(/[^0-9]/g, '');
+      if (!n) return "";
+      const bloques = n.match(/.{1,3}/g) || [n];
+      return `(${p}) ${bloques.join(' ')}`;
+    }
+
+    async function obtenerBase64Seguro(url) {
+      if (!url) return null;
+      try {
+        // Intento 1: Fetch directo con Blob
+        const res = await fetch(url, { mode: 'cors' });
+        if (res.ok) {
+          const blob = await res.blob();
+          return await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (e) {}
+
+      // Intento 2: Proxy CORS público en caso de bloqueo por Google Drive
+      try {
+        const proxyUrl = "https://images.weserv.nl/?url=" + encodeURIComponent(url) + "&w=300&output=jpg";
+        const resProxy = await fetch(proxyUrl);
+        if (resProxy.ok) {
+          const blob = await resProxy.blob();
+          return await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (e) {}
+
+      return null;
+    }
+
+    async function generarPdfReciboEtsy(orderId, datosPedido, urlPortada) {
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const logoUrl = "https://zeronte-store.github.io/img/logo-zeronte.png";
+
+        // Obtener Base64 sin problemas de CORS tanto del Logo como de la Portada
+        const [base64Logo, base64FotoProd] = await Promise.all([
+          obtenerBase64Seguro(logoUrl),
+          obtenerBase64Seguro(urlPortada)
+        ]);
+
+        // Cabecera: Pedido n.º (margen ajustado a 20mm para evitar cortes en visores)
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.setTextColor(34, 34, 34);
+        const numPuro = (orderId || "").replace(/[^0-9]/g, '') || Math.floor(100000000 + Math.random() * 900000000).toString();
+        doc.text(`Pedido n.º ${numPuro}`, 20, 25);
+
+        // Logo Zeronte superior derecho
+        if (base64Logo) {
+          try {
+            doc.addImage(base64Logo, "PNG", 158, 12, 32, 32);
+          } catch(e) {}
+        } else {
+          doc.setFillColor(0, 0, 0);
+          doc.roundedRect(160, 14, 28, 28, 3, 3, "F");
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(14);
+          doc.setTextColor(255, 255, 255);
+          doc.text("ZERONTE", 174, 30, { align: "center" });
+        }
+
+        // Columna Izquierda: Datos del cliente y de la tienda
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(34, 34, 34);
+        doc.text("Enviar a", 20, 55);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(80, 80, 80);
+        doc.text(datosPedido.nombre || "Cliente", 20, 62);
+        // Teléfono limpio sin comilla y con prefijo entre paréntesis: (+34) 626 582 608
+        doc.text(datosPedido.telefonoVisible || "", 20, 68);
+        doc.text(datosPedido.email || "", 20, 74);
+
+        doc.setDrawColor(210, 210, 210);
+        doc.setLineWidth(0.3);
+        doc.line(20, 80, 75, 80);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(34, 34, 34);
+        doc.text("Tienda", 20, 88);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(80, 80, 80);
+        doc.text("Zeronte", 20, 95);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(34, 34, 34);
+        doc.text("Fecha del pedido", 20, 107);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(80, 80, 80);
+        const hoy = new Date();
+        const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+        doc.text(`${hoy.getDate()} ${meses[hoy.getMonth()]} ${hoy.getFullYear()}`, 20, 114);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(34, 34, 34);
+        doc.text("Forma de pago", 20, 126);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(80, 80, 80);
+        doc.text(`Pagado con ${datosPedido.metodoPago || 'Bizum'}`, 20, 133);
+
+        // Columna Derecha: Cabecera de artículo
+        const cant = datosPedido.cantidad || 1;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(34, 34, 34);
+        doc.text(`${cant} ${cant === 1 ? 'artículo' : 'artículos'}`, 82, 55);
+
+        doc.setDrawColor(180, 180, 180);
+        doc.setLineWidth(0.4);
+        doc.line(82, 59, 192, 59);
+
+        // Foto real de portada del artículo en miniatura cuadrada
+        if (base64FotoProd) {
+          try {
+            doc.addImage(base64FotoProd, "JPEG", 82, 65, 18, 18);
+            doc.setDrawColor(210, 210, 210);
+            doc.setLineWidth(0.2);
+            doc.rect(82, 65, 18, 18, "S");
+          } catch(errImg) {
+            doc.setFillColor(245, 245, 245);
+            doc.roundedRect(82, 65, 18, 18, 1, 1, "F");
+          }
+        } else {
+          doc.setFillColor(245, 245, 245);
+          doc.roundedRect(82, 65, 18, 18, 1, 1, "F");
+        }
+
+        // Título del artículo y desglose de precio
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(34, 34, 34);
+        const tituloLimpio = (datosPedido.producto || "").replace(/\(x\d+\)/gi, '').trim();
+        const lineasTitulo = doc.splitTextToSize(tituloLimpio, 66);
+        doc.text(lineasTitulo, 104, 69);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text(`${cant} x ${datosPedido.precio}`, 192, 69, { align: "right" });
+
+        // Personalización
+        let yPers = 69 + (lineasTitulo.length * 5) + 3;
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        const persLimpia = (datosPedido.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+        const lineasPers = doc.splitTextToSize(`Personalización: ${persLimpia}`, 86);
+        doc.text(lineasPers, 104, yPers);
+
+        // Línea divisoria total
+        const yLineaFinal = Math.max(yPers + (lineasPers.length * 4.5) + 6, 120);
+        doc.setDrawColor(180, 180, 180);
+        doc.setLineWidth(0.4);
+        doc.line(82, yLineaFinal, 192, yLineaFinal);
+
+        // Fila Total del pedido
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(34, 34, 34);
+        doc.text("Total del pedido", 130, yLineaFinal + 12);
+        doc.setFontSize(12);
+        doc.text(datosPedido.precio || "0.00 €", 192, yLineaFinal + 12, { align: "right" });
+
+        // Pie de página oficial
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(160, 160, 160);
+        doc.line(20, 275, 192, 275);
+        doc.text("Zeronte · We Are Your Soundtrack · Documento oficial de compra", 105, 281, { align: "center" });
+
+        return doc.output("datauristring").split(',')[1];
+      } catch (err) {
+        console.warn("No se pudo compilar el recibo PDF:", err);
+        return null;
+      }
+    }
+
     async function enviarPedido(e) {
       e.preventDefault();
       const btn = document.getElementById('btnEnviar');
@@ -3433,7 +3687,7 @@
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> ${t.creandoPedido}`;
 
-      const prefijo = document.getElementById('prefijoPaisCliente') ? document.getElementById('prefijoPaisCliente').value : '';
+      const prefijo = document.getElementById('prefijoPaisCliente') ? document.getElementById('prefijoPaisCliente').value : '+34';
       const inputTel = document.getElementById('telefonoCliente');
       const numTel = (inputTel ? inputTel.value : '').replace(/[^0-9]/g, '');
 
@@ -3447,13 +3701,19 @@
       // Detectar cantidad exacta seleccionada
       const matchCant = (inputProd ? inputProd.value : '').match(/\(x(\d+)\)/);
       const cantidadReal = matchCant ? parseInt(matchCant[1], 10) : 1;
+      const orderIdGenerado = "PED-" + Math.floor(1000 + Math.random() * 9000);
+
+      // Teléfono formateado limpio para el PDF: "(+34) 626 582 608"
+      const telefonoLimpioPDF = formatearTelefonoRecibo(prefijo, numTel);
 
       const datos = {
         accion: "nuevoPedido",
         notificarEmail: true,
         destinatarioNotificacion: "zeronte.store@gmail.com",
+        orderId: orderIdGenerado,
         nombre: inputNombre ? inputNombre.value : '',
-        telefono: `'${prefijo} ${numTel}`.trim(),
+        telefono: `'${prefijo} ${numTel}`.trim(), // Con apóstrofe para Sheets
+        telefonoVisible: telefonoLimpioPDF,       // Sin apóstrofe y formateado para el PDF
         email: inputEmail ? inputEmail.value : '',
         personalizacion: inputPers ? inputPers.value : '',
         producto: inputProd ? inputProd.value : 'Partitura personalizada',
@@ -3463,6 +3723,33 @@
         metodoPago: radioPago ? radioPago.value : 'Bizum'
       };
 
+      // Detectar la URL exacta de la portada del artículo
+      let urlPortada = "";
+      if (articuloFichaActual && articuloFichaActual.imagen) {
+        if (Array.isArray(articuloFichaActual.imagen)) {
+          urlPortada = articuloFichaActual.imagen[0];
+        } else if (typeof articuloFichaActual.imagen === 'string' && articuloFichaActual.imagen.trim().startsWith('[')) {
+          try {
+            const arr = JSON.parse(articuloFichaActual.imagen);
+            urlPortada = arr[0] || "";
+          } catch(e) {
+            urlPortada = articuloFichaActual.imagen;
+          }
+        } else {
+          urlPortada = articuloFichaActual.imagen;
+        }
+      }
+      if (!urlPortada && typeof obtenerImagenArticulo === 'function') {
+        urlPortada = obtenerImagenArticulo(datos.producto);
+      }
+
+      // Generar el recibo PDF vectorial con la foto y el teléfono formateado
+      const pdfBase64 = await generarPdfReciboEtsy(orderIdGenerado, datos, urlPortada);
+      if (pdfBase64) {
+        datos.reciboPdfBase64 = pdfBase64;
+        datos.nombreReciboPdf = `Recibo_${orderIdGenerado}_Zeronte.pdf`;
+      }
+
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
           method: "POST",
@@ -3471,16 +3758,14 @@
         });
 
         const respuesta = await res.json();
-        const orderId = respuesta.orderId || ("PED-" + Math.floor(1000 + Math.random() * 9000));
+        const orderIdFinal = respuesta.orderId || orderIdGenerado;
         
         registrarPedidoExitoso(cantidadReal);
-        mostrarExito(orderId, datos);
+        mostrarExito(orderIdFinal, datos);
       } catch (err) {
         console.error("Error al registrar:", err);
-        const orderIdFallback = "PED-" + Math.floor(1000 + Math.random() * 9000);
-        
         registrarPedidoExitoso(cantidadReal);
-        mostrarExito(orderIdFallback, datos);
+        mostrarExito(orderIdGenerado, datos);
       }
     }
 
