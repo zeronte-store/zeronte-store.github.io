@@ -1541,6 +1541,21 @@
       actualizarContadorVentas();
       aplicarIdioma(idiomaActual);
 
+      // Auto-refresco en segundo plano cada 15 segundos sin F5
+      setInterval(() => {
+        cargarCatalogoDinamico();
+        actualizarContadorVentas();
+      }, 15000);
+
+      // Si el cliente o administrador vuelve a poner la pestaña en primer plano, sincroniza al instante
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          cargarCatalogoDinamico();
+          actualizarContadorVentas();
+          cargarResenasDesdeServidor();
+        }
+      });
+
       document.addEventListener("click", (e) => {
         const btn = document.getElementById("btnSelectorIdioma");
         const menu = document.getElementById("menuIdiomas");
@@ -1787,7 +1802,7 @@
 
     async function cargarCatalogoDinamico() {
       try {
-        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos`);
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos&_nocache=${Date.now()}`);
         const data = await res.json();
         if (data.status === "success" && data.productos) {
           let productos = data.productos;
@@ -1797,7 +1812,7 @@
           const mapaVentasPorProducto = {};
 
           try {
-            const resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos`);
+            const resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
             const dataPed = await resPed.json();
             const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
             
