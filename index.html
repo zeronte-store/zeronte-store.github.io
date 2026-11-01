@@ -2467,38 +2467,6 @@
       if (campoOculto) campoOculto.value = personalizacionFinal;
     }
 
-    function abrirModal(producto, precio, cantidad = 1) {
-      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
-      const cantTexto = cantidad > 1 ? `(${cantidad}) ` : '';
-
-      const prodInput = document.getElementById('productoInput');
-      if (prodInput) prodInput.value = `${producto} (x${cantidad})`;
-
-      const precInput = document.getElementById('precioInput');
-      if (precInput) precInput.value = precio;
-      
-      const resProd = document.getElementById('resumenProducto');
-      if (resProd) resProd.innerText = producto;
-      
-      const btnConfirmar = document.getElementById('btnConfirmarTxt');
-      if (btnConfirmar) {
-        const textoBase = (t.btnConfirmar ? t.btnConfirmar.toUpperCase() : 'CONFIRMAR').replace(/\s*PEDIDO\b/i, '').trim();
-        btnConfirmar.innerText = `${textoBase} ${cantTexto}· ${precio.toFixed(2)} €`.trim();
-      }
-
-      const pForm = document.getElementById('pantallaFormulario');
-      if (pForm) pForm.classList.remove('hidden');
-
-      const pExit = document.getElementById('pantallaExito');
-      if (pExit) pExit.classList.add('hidden');
-
-      const mCompra = document.getElementById('modalCompra');
-      if (mCompra) {
-        mCompra.classList.remove('hidden');
-        mCompra.classList.add('flex');
-      }
-    }
-
     function cerrarModal() {
       const mCompra = document.getElementById('modalCompra');
       if (mCompra) {
@@ -2509,33 +2477,6 @@
         document.body.style.overflow = 'hidden';
       } else {
         document.body.style.overflow = '';
-      }
-    }
-
-    function filtrarCategoria(cat, btn) {
-      categoriaSeleccionada = cat;
-      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
-
-      document.querySelectorAll('.cat-btn').forEach(b => {
-        b.classList.remove('bg-gray-200/80', 'text-black', 'font-semibold');
-        b.classList.add('text-gray-700');
-      });
-      btn.classList.add('bg-gray-200/80', 'text-black', 'font-semibold');
-
-      const tituloMap = {
-        'todos': t.catTodos,
-        'partitura': t.catPartituras,
-        'natalicio': t.catNatalicios,
-        'posters': t.catPosters
-      };
-      const tituloEl = document.getElementById('tituloSeccionActual');
-      if (tituloEl) tituloEl.innerText = tituloMap[cat] || t.catTodos;
-
-      if (cat === 'todos') {
-        renderizarCatalogo(catalogoCompleto);
-      } else {
-        const filtrados = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes(cat.toLowerCase()));
-        renderizarCatalogo(filtrados);
       }
     }
 
