@@ -2239,28 +2239,27 @@
 
       // Galería cuadrada 1:1
       galeriaFichaActual = [];
-      if (Array.isArray(p.imagen)) {
-        galeriaFichaActual.push(...p.imagen.map(url => ({ tipo: 'img', url })));
-      } else if (p.imagen) {
-        galeriaFichaActual.push({ tipo: 'img', url: p.imagen });
+      let fotosCargadas = [];
+      try {
+        if (typeof p.imagen === 'string' && (p.imagen.trim().startsWith('[') || p.imagen.trim().startsWith('{'))) {
+          fotosCargadas = JSON.parse(p.imagen);
+        } else if (Array.isArray(p.imagen)) {
+          fotosCargadas = p.imagen;
+        } else if (p.imagen) {
+          fotosCargadas = [p.imagen];
+        }
+      } catch (errJson) {
+        fotosCargadas = p.imagen ? [p.imagen] : [];
       }
 
-      if (Array.isArray(p.galeria)) {
-        p.galeria.forEach(url => {
-          if (url) galeriaFichaActual.push({ tipo: 'img', url });
+      if (Array.isArray(fotosCargadas)) {
+        fotosCargadas.filter(Boolean).forEach(url => {
+          galeriaFichaActual.push({ tipo: 'img', url: url });
         });
       }
+
       if (p.video) {
         galeriaFichaActual.push({ tipo: 'video', url: p.video });
-      }
-
-      const fotosMockCuadradas = [
-        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&h=600&q=80",
-        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&h=600&q=80",
-        "https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&h=600&q=80"
-      ];
-      while (galeriaFichaActual.length < 4) {
-        galeriaFichaActual.push({ tipo: 'img', url: fotosMockCuadradas[galeriaFichaActual.length % fotosMockCuadradas.length] });
       }
 
       galeriaFichaActual = galeriaFichaActual.slice(0, 10);
