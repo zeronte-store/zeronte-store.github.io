@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
   <title>Zeronte | Panel de Control Shop Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -2009,6 +2010,38 @@
       actualizarContadorFotosEtsy();
     }
 
+    function comprimirImagenWeb(file, callback) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const MAX_SIZE = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          callback(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
     function procesarFotosEtsyMultiples(input) {
       const files = Array.from(input.files || []);
       if (!files.length) return;
@@ -2022,14 +2055,13 @@
         }
 
         if (destino >= 0 && destino < 10) {
-          const reader = new FileReader();
           const targetSlot = destino;
-          reader.onload = function(e) {
-            arrayFotosEtsy[targetSlot] = e.target.result;
+          comprimirImagenWeb(file, function(base64Optimizada) {
+            arrayFotosEtsy[targetSlot] = base64Optimizada;
             const img = document.getElementById(`imgSlot-${targetSlot}`);
             const slot = document.getElementById(`slotFoto-${targetSlot}`);
             if (img) {
-              img.src = e.target.result;
+              img.src = base64Optimizada;
               img.classList.remove('hidden');
             }
             if (slot) {
@@ -2037,8 +2069,7 @@
               if (btnDel) btnDel.classList.remove('hidden');
             }
             actualizarContadorFotosEtsy();
-          };
-          reader.readAsDataURL(file);
+          });
         }
       });
 
@@ -2450,7 +2481,6 @@
     return;
   }
 
-  // Sanitizar precios para admitir tanto puntos como comas decimales (ej. 1,99 -> 1.99)
   const rawPrecio = document.getElementById('nuevoPrecio')?.value || '';
   const rawOferta = document.getElementById('nuevoPrecioOferta')?.value || '';
 
@@ -2460,7 +2490,6 @@
   const tituloVal = (document.getElementById('nuevoTitulo')?.value || '').trim();
   const videoVal = (document.getElementById('nuevoVideoUrl')?.value || '').trim();
 
-  // Obtener la fila real de la memoria para garantizar la ubicación en Sheets
   let filaReal = "";
   if (idEditando) {
     const pEncontrado = listaProductosGlobal.find(p => (p.id || '').toLowerCase() === idEditando.toLowerCase());
@@ -2483,12 +2512,11 @@
     precio: precioLimpio,
     precioOferta: ofertaLimpia,
     categoria: categoriaVal,
-    imagen: JSON.stringify(fotosValidas),
+    imagenes: fotosValidas,
     video: videoVal,
     descripcion: descVal
   };
 
-  // Actualización reactiva local en memoria
   if (idEditando) {
     const prodMemoria = listaProductosGlobal.find(p => (p.id || '').toLowerCase() === idEditando.toLowerCase());
     if (prodMemoria) {
@@ -2496,7 +2524,7 @@
       prodMemoria.precio = parseFloat(precioLimpio) || 0;
       prodMemoria.precioOferta = ofertaLimpia;
       prodMemoria.categoria = categoriaVal;
-      prodMemoria.imagen = JSON.stringify(fotosValidas);
+      prodMemoria.imagen = fotosValidas;
       prodMemoria.video = videoVal;
       prodMemoria.descripcion = descVal;
     }
@@ -2505,7 +2533,6 @@
   renderizarProductos();
   cerrarModalProducto();
 
-  // Envío mediante POST directo
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: "POST",
