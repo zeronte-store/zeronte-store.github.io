@@ -1996,7 +1996,19 @@
       }
 
       contenedor.innerHTML = lista.map((p, index) => {
-        const imgUrl = Array.isArray(p.imagen) ? p.imagen[0] : (p.imagen || 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80');
+        let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
+        try {
+          if (Array.isArray(p.imagen)) {
+            imgUrl = p.imagen[0] || imgUrl;
+          } else if (typeof p.imagen === 'string' && (p.imagen.trim().startsWith('[') || p.imagen.trim().startsWith('{'))) {
+            const arrParsed = JSON.parse(p.imagen);
+            imgUrl = Array.isArray(arrParsed) && arrParsed.length > 0 ? arrParsed[0] : imgUrl;
+          } else if (p.imagen) {
+            imgUrl = p.imagen;
+          }
+        } catch(e) {
+          if (p.imagen) imgUrl = p.imagen;
+        }
         const precioBase = parseFloat(p.precio) || 0;
         const precioOferta = p.precioOferta ? parseFloat(String(p.precioOferta).replace(',', '.')) : null;
         const tieneOferta = precioOferta && precioOferta > 0 && precioOferta < precioBase;
