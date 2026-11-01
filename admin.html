@@ -2534,25 +2534,27 @@
   cerrarModalProducto();
 
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(datosEnvio)
-    });
+      await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(datosEnvio)
+      });
 
-    setTimeout(async () => {
-      await cargarDatos(true);
-    }, 1500);
+      // Recarga tras confirmar guardado en Google Drive y Sheets
+      setTimeout(async () => {
+        await cargarDatos(true);
+      }, 3500);
 
-  } catch (err) {
-    console.log("Error o envío completado:", err);
-  } finally {
-    if (btn) {
-      btn.innerText = textoOriginal;
-      btn.disabled = false;
+    } catch (err) {
+      console.log("Envío procesado hacia Apps Script:", err);
+    } finally {
+      if (btn) {
+        btn.innerText = textoOriginal;
+        btn.disabled = false;
+      }
     }
   }
-}
 
     async function confirmarEliminarProducto(prodId, tituloProd) {
       if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente el artículo "${tituloProd}" (${prodId}) del catálogo?`)) {
