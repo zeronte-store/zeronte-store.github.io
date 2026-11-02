@@ -109,6 +109,15 @@
             <span class="sidebar-text truncate">Catálogo</span>
           </button>
 
+          <!-- NUEVA SECCIÓN OFERTAS ESTILO ETSY -->
+          <button onclick="cambiarSeccion('ofertas', this)" title="Ofertas" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-tags text-sm text-rose-500"></i>
+            </div>
+            <span class="sidebar-text truncate flex-grow text-left">Ofertas</span>
+            <span id="badgeOfertasActivas" class="sidebar-text text-[10px] bg-rose-100 text-rose-700 font-extrabold px-1.5 py-0.2 rounded-full hidden">0</span>
+          </button>
+
           <button onclick="cambiarSeccion('clientes', this)" title="Clientes" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-users text-sm"></i>
@@ -683,6 +692,186 @@
                 <div id="botonesAccionProdModal" class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
                   <button type="button" onclick="cerrarModalProducto()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
                   <button type="submit" id="btnGuardarProd" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Publicar en la tienda</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <!-- ================= SECCIÓN: OFERTAS & PROMOCIONES (ESTILO ETSY) ================= -->
+        <div id="vistaSeccionOfertas" class="hidden space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                  <i class="fa-solid fa-tags text-rose-500"></i> Ofertas y Promociones
+                </h1>
+                <span id="badgeEstadoOfertasGeneral" class="text-xs bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded-full font-bold">0 en curso</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">Lanza descuentos masivos, programa campañas automáticas (Black Friday, Navidad) o gestiona rebajas de tu tienda Zeronte.</p>
+            </div>
+
+            <button type="button" onclick="abrirModalCrearOferta()" class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs">
+              <i class="fa-solid fa-plus text-xs"></i> Crear nueva oferta
+            </button>
+          </div>
+
+          <!-- RESUMEN EN TARJETAS ESTILO ETSY -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Campañas Creadas</span>
+              <span id="statOfertasTotales" class="text-xl font-bold text-slate-900 mt-1 block">0</span>
+            </div>
+            <div class="bg-white border border-rose-200 border-l-4 border-l-rose-500 p-4 rounded-2xl shadow-xs">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-rose-600 block">Ofertas En Curso</span>
+              <span id="statOfertasActivas" class="text-xl font-bold text-rose-600 mt-1 block">0</span>
+            </div>
+            <div class="bg-white border border-slate-200 border-l-4 border-l-amber-500 p-4 rounded-2xl shadow-xs">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 block">Programadas</span>
+              <span id="statOfertasProgramadas" class="text-xl font-bold text-amber-600 mt-1 block">0</span>
+            </div>
+            <div class="bg-white border border-slate-200 border-l-4 border-l-emerald-500 p-4 rounded-2xl shadow-xs">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">Artículos Rebajados</span>
+              <span id="statProdsRebajados" class="text-xl font-bold text-emerald-600 mt-1 block">0</span>
+            </div>
+          </div>
+
+          <!-- LISTA DE OFERTAS ACTIVAS Y PROGRAMADAS -->
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Historial y Programación de Ofertas</h2>
+              <span class="text-xs text-slate-400">Control automático en tiempo real</span>
+            </div>
+
+            <div id="contenedorListaOfertas" class="space-y-3">
+              <!-- Render dinámico -->
+            </div>
+
+            <div id="sinOfertasMensaje" class="hidden text-center py-12 text-slate-400">
+              <i class="fa-solid fa-tag text-3xl text-slate-300 mb-2 block"></i>
+              <p class="text-xs font-semibold">No tienes ninguna campaña u oferta creada todavía.</p>
+              <button onclick="abrirModalCrearOferta()" class="mt-3 text-xs text-rose-600 hover:underline font-bold">+ Crear tu primera oferta</button>
+            </div>
+          </section>
+
+          <!-- MODAL ETSY: CREAR / LANZAR OFERTA -->
+          <div id="modalOfertaEtsy" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-white border border-slate-200 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden my-6">
+              
+              <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-rose-50/50">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-tags"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-slate-900">Configurar Campaña u Oferta</h3>
+                    <p class="text-[10px] text-slate-500">Aplica descuentos programados por porcentaje o precio fijo.</p>
+                  </div>
+                </div>
+                <button type="button" onclick="cerrarModalCrearOferta()" class="text-slate-400 hover:text-slate-700 p-2 rounded-xl transition">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <form onsubmit="guardarYEjecutarOferta(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs text-slate-700">
+                
+                <!-- Nombre y plantilla rápida de Campaña -->
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-[10px] uppercase font-bold text-slate-400">Nombre de la oferta / campaña *</label>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="text-[9px] text-slate-400 font-semibold">Plantillas:</span>
+                      <button type="button" onclick="aplicarPlantillaCampana('Black Friday', 50)" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px]">Black Friday (-50%)</button>
+                      <button type="button" onclick="aplicarPlantillaCampana('Navidad Especial', 25)" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px]">Navidad (-25%)</button>
+                      <button type="button" onclick="aplicarPlantillaCampana('Rebajas Flash 48h', 30)" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px]">Flash 48h (-30%)</button>
+                    </div>
+                  </div>
+                  <input type="text" id="ofertaNombre" required placeholder="Ej. Black Friday Zeronte" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                </div>
+
+                <!-- Tipo de descuento y Valor -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Tipo de descuento *</label>
+                    <select id="ofertaTipoDescuento" onchange="actualizarPlaceholderDescuento(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-slate-400">
+                      <option value="porcentaje">Porcentaje de descuento (%)</option>
+                      <option value="fijo">Precio final fijo directo (€)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label id="lblValorDescuento" class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Porcentaje de rebaja (%) *</label>
+                    <div class="relative">
+                      <input type="number" step="0.01" min="1" id="ofertaValorDescuento" required placeholder="Ej. 20" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3 pr-8 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white font-bold transition">
+                      <span id="simboloTipoDesc" class="absolute right-3 top-2 text-slate-400 font-bold">%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Programación de Fechas: Inicio y Fin -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase font-bold text-slate-700 flex items-center gap-1.5">
+                      <i class="fa-regular fa-calendar-check text-rose-500"></i> Duración y Programación Automática
+                    </span>
+                    <label class="flex items-center gap-1.5 cursor-pointer select-none text-[10px] text-slate-500 font-semibold">
+                      <input type="checkbox" id="checkOfertaSinFin" onchange="toggleSinFechaFin(this.checked)" class="rounded border-slate-300">
+                      <span>Sin fecha de fin (Indefinida)</span>
+                    </label>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-[10px] text-slate-400 uppercase font-semibold mb-1">Fecha & Hora de Inicio *</label>
+                      <input type="datetime-local" id="ofertaFechaInicio" required class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-slate-400 font-medium">
+                    </div>
+                    <div id="boxFechaFin">
+                      <label class="block text-[10px] text-slate-400 uppercase font-semibold mb-1">Fecha & Hora de Fin *</label>
+                      <input type="datetime-local" id="ofertaFechaFin" required class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-slate-400 font-medium">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ALCANCE DE LA OFERTA -->
+                <div class="space-y-2">
+                  <label class="block text-[10px] uppercase font-bold text-slate-700">Artículos incluidos en la promoción *</label>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button type="button" onclick="setAlcanceOferta('todos', this)" data-alcance="todos" class="btn-alcance-oferta p-2.5 rounded-xl border border-rose-300 bg-rose-50 text-rose-900 font-bold text-center active:scale-95 transition">
+                      <i class="fa-solid fa-shop text-xs mb-1 block"></i>
+                      <span>Toda la tienda</span>
+                    </button>
+                    <button type="button" onclick="setAlcanceOferta('categoria', this)" data-alcance="categoria" class="btn-alcance-oferta p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-center active:scale-95 transition">
+                      <i class="fa-solid fa-layer-group text-xs mb-1 block text-slate-400"></i>
+                      <span>Por Categoría</span>
+                    </button>
+                    <button type="button" onclick="setAlcanceOferta('top_ventas', this)" data-alcance="top_ventas" class="btn-alcance-oferta p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-center active:scale-95 transition">
+                      <i class="fa-solid fa-fire text-xs mb-1 block text-amber-500"></i>
+                      <span>Más Vendidos</span>
+                    </button>
+                    <button type="button" onclick="setAlcanceOferta('individual', this)" data-alcance="individual" class="btn-alcance-oferta p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-center active:scale-95 transition">
+                      <i class="fa-solid fa-list-check text-xs mb-1 block text-slate-400"></i>
+                      <span>Seleccionar</span>
+                    </button>
+                  </div>
+
+                  <!-- Desplegable categoría -->
+                  <div id="subAlcanceCategoria" class="hidden pt-1">
+                    <select id="selectCategoriaOferta" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
+                      <!-- Dinámico -->
+                    </select>
+                  </div>
+
+                  <!-- Lista interactiva de productos con checkbox -->
+                  <div id="subAlcanceIndividual" class="hidden max-h-48 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50">
+                    <!-- Dinámico -->
+                  </div>
+                </div>
+
+                <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+                  <button type="button" onclick="cerrarModalCrearOferta()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
+                  <button type="submit" id="btnGuardarCampanaOferta" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 shadow-xs">
+                    Lanzar / Programar Oferta
+                  </button>
                 </div>
               </form>
             </div>
@@ -3560,6 +3749,8 @@
     function cambiarSeccion(seccion, btn) {
       document.getElementById('vistaSeccionDashboard').classList.add('hidden');
       document.getElementById('vistaSeccionCatalogo').classList.add('hidden');
+      const vOfertas = document.getElementById('vistaSeccionOfertas');
+      if (vOfertas) vOfertas.classList.add('hidden');
       document.getElementById('vistaSeccionClientes').classList.add('hidden');
       document.getElementById('vistaSeccionEstadisticas').classList.add('hidden');
       document.getElementById('vistaSeccionFinanzas').classList.add('hidden');
@@ -3574,6 +3765,9 @@
         document.getElementById('vistaSeccionDashboard').classList.remove('hidden');
       } else if (seccion === 'catalogo') {
         document.getElementById('vistaSeccionCatalogo').classList.remove('hidden');
+      } else if (seccion === 'ofertas') {
+        if (vOfertas) vOfertas.classList.remove('hidden');
+        renderizarModuloOfertas();
       } else if (seccion === 'clientes') {
         document.getElementById('vistaSeccionClientes').classList.remove('hidden');
         renderizarClientes();
@@ -4266,6 +4460,344 @@
 
     // Iniciar de forma automática
     iniciarRelojDigital();
+
+    // =========================================================================
+    // MOTOR DE OFERTAS & CAMPAÑAS MASIVAS AUTOMATIZADAS (ESTILO ETSY)
+    // =========================================================================
+    let alcanceOfertaActual = 'todos';
+
+    function obtenerCampanasOfertas() {
+      try {
+        return JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]');
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function guardarCampanasOfertas(lista) {
+      localStorage.setItem('zeronte_campanas_ofertas', JSON.stringify(lista));
+    }
+
+    function abrirModalCrearOferta() {
+      const modal = document.getElementById('modalOfertaEtsy');
+      if (!modal) return;
+
+      const ahora = new Date();
+      const formatoLocal = (d) => {
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+
+      const inInicio = document.getElementById('ofertaFechaInicio');
+      const inFin = document.getElementById('ofertaFechaFin');
+      if (inInicio) inInicio.value = formatoLocal(ahora);
+      if (inFin) {
+        const fin48h = new Date(ahora.getTime() + (48 * 60 * 60 * 1000));
+        inFin.value = formatoLocal(fin48h);
+      }
+
+      // Población de categorías en el select del modal
+      const selectCat = document.getElementById('selectCategoriaOferta');
+      if (selectCat) {
+        const categorias = new Set();
+        listaProductosGlobal.forEach(p => { if (p.categoria) categorias.add(p.categoria.trim()); });
+        selectCat.innerHTML = Array.from(categorias).map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('');
+      }
+
+      // Población de productos para selección individual
+      const boxInd = document.getElementById('subAlcanceIndividual');
+      if (boxInd) {
+        boxInd.innerHTML = listaProductosGlobal.map(p => `
+          <label class="flex items-center gap-2 p-1.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" name="prods_oferta_check" value="${p.id}" class="rounded border-slate-300">
+            <span class="font-mono text-[9px] font-bold bg-slate-900 text-white px-1 rounded">${p.id}</span>
+            <span class="text-xs text-slate-800 truncate">${p.titulo}</span>
+            <span class="text-xs text-slate-400 ml-auto">${(parseFloat(p.precio) || 0).toFixed(2)} €</span>
+          </label>
+        `).join('');
+      }
+
+      const btnTodos = document.querySelector('.btn-alcance-oferta[data-alcance="todos"]');
+      if (btnTodos) setAlcanceOferta('todos', btnTodos);
+
+      modal.classList.remove('hidden');
+    }
+
+    function cerrarModalCrearOferta() {
+      const modal = document.getElementById('modalOfertaEtsy');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function toggleSinFechaFin(sinFin) {
+      const box = document.getElementById('boxFechaFin');
+      const input = document.getElementById('ofertaFechaFin');
+      if (box) box.style.opacity = sinFin ? '0.4' : '1';
+      if (input) input.required = !sinFin;
+    }
+
+    function actualizarPlaceholderDescuento(tipo) {
+      const lbl = document.getElementById('lblValorDescuento');
+      const simb = document.getElementById('simboloTipoDesc');
+      const input = document.getElementById('ofertaValorDescuento');
+      if (tipo === 'porcentaje') {
+        if (lbl) lbl.innerText = 'Porcentaje de rebaja (%) *';
+        if (simb) simb.innerText = '%';
+        if (input) { input.placeholder = 'Ej. 20'; input.max = 90; }
+      } else {
+        if (lbl) lbl.innerText = 'Precio final de oferta (€) *';
+        if (simb) simb.innerText = '€';
+        if (input) { input.placeholder = 'Ej. 1.99'; input.removeAttribute('max'); }
+      }
+    }
+
+    function aplicarPlantillaCampana(nombre, valorPorc) {
+      const inNom = document.getElementById('ofertaNombre');
+      const selTipo = document.getElementById('ofertaTipoDescuento');
+      const inVal = document.getElementById('ofertaValorDescuento');
+      if (inNom) inNom.value = nombre;
+      if (selTipo) { selTipo.value = 'porcentaje'; actualizarPlaceholderDescuento('porcentaje'); }
+      if (inVal) inVal.value = valorPorc;
+    }
+
+    function setAlcanceOferta(alcance, btn) {
+      alcanceOfertaActual = alcance;
+      document.querySelectorAll('.btn-alcance-oferta').forEach(b => {
+        b.className = 'btn-alcance-oferta p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-center active:scale-95 transition';
+      });
+      if (btn) {
+        btn.className = 'btn-alcance-oferta p-2.5 rounded-xl border border-rose-300 bg-rose-50 text-rose-900 font-bold text-center active:scale-95 transition';
+      }
+
+      const boxCat = document.getElementById('subAlcanceCategoria');
+      const boxInd = document.getElementById('subAlcanceIndividual');
+      if (boxCat) boxCat.classList.toggle('hidden', alcance !== 'categoria');
+      if (boxInd) boxInd.classList.toggle('hidden', alcance !== 'individual');
+    }
+
+    async function guardarYEjecutarOferta(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('ofertaNombre').value.trim();
+      const tipo = document.getElementById('ofertaTipoDescuento').value;
+      const valor = parseFloat(document.getElementById('ofertaValorDescuento').value) || 0;
+      const fInicio = new Date(document.getElementById('ofertaFechaInicio').value).getTime();
+      const sinFin = document.getElementById('checkOfertaSinFin')?.checked;
+      const fFin = sinFin ? null : new Date(document.getElementById('ofertaFechaFin').value).getTime();
+
+      let idsObjetivo = [];
+      if (alcanceOfertaActual === 'todos') {
+        idsObjetivo = listaProductosGlobal.map(p => p.id);
+      } else if (alcanceOfertaActual === 'categoria') {
+        const catSel = document.getElementById('selectCategoriaOferta').value;
+        idsObjetivo = listaProductosGlobal.filter(p => (p.categoria || '').trim().toLowerCase() === catSel.trim().toLowerCase()).map(p => p.id);
+      } else if (alcanceOfertaActual === 'top_ventas') {
+        // Tomar el top 4 más vendidos
+        const ranking = [...listaProductosGlobal].sort((a,b) => (b.totalVentas || 0) - (a.totalVentas || 0));
+        idsObjetivo = ranking.slice(0, 4).map(p => p.id);
+      } else if (alcanceOfertaActual === 'individual') {
+        document.querySelectorAll('input[name="prods_oferta_check"]:checked').forEach(chk => {
+          idsObjetivo.push(chk.value);
+        });
+      }
+
+      if (idsObjetivo.length === 0) {
+        alert("Debes seleccionar al menos un artículo para aplicar la promoción.");
+        return;
+      }
+
+      const nuevaCampana = {
+        id: "OFERTA-" + Date.now(),
+        nombre: nombre,
+        tipo: tipo,
+        valor: valor,
+        fechaInicio: fInicio,
+        fechaFin: fFin,
+        sinFin: sinFin,
+        alcance: alcanceOfertaActual,
+        idsObjetivo: idsObjetivo,
+        activa: true
+      };
+
+      const campanas = obtenerCampanasOfertas();
+      campanas.unshift(nuevaCampana);
+      guardarCampanasOfertas(campanas);
+
+      cerrarModalCrearOferta();
+      await sincronizarOfertasConCatalogo();
+      renderizarModuloOfertas();
+    }
+
+    async function eliminarCampanaOferta(campanaId) {
+      if (!confirm("¿Deseas finalizar y eliminar esta oferta? Los artículos volverán a su precio normal si no tienen otra oferta activa.")) return;
+      let campanas = obtenerCampanasOfertas();
+      campanas = campanas.filter(c => c.id !== campanaId);
+      guardarCampanasOfertas(campanas);
+
+      await sincronizarOfertasConCatalogo();
+      renderizarModuloOfertas();
+    }
+
+    // Comprueba las fechas programadas y aplica/retira los precios de oferta automáticamente
+    async function sincronizarOfertasConCatalogo() {
+      const ahora = Date.now();
+      const campanas = obtenerCampanasOfertas();
+
+      const mapaDescuentosActivos = {};
+
+      campanas.forEach(camp => {
+        if (!camp.activa) return;
+        const inicioAlcanzado = ahora >= camp.fechaInicio;
+        const noExpirada = camp.sinFin || (camp.fechaFin && ahora <= camp.fechaFin);
+
+        if (inicioAlcanzado && noExpirada) {
+          camp.idsObjetivo.forEach(idProd => {
+            mapaDescuentosActivos[idProd] = {
+              tipo: camp.tipo,
+              valor: camp.valor,
+              campana: camp.nombre
+            };
+          });
+        }
+      });
+
+      // Modificar en memoria y sincronizar con la base de datos
+      let huboCambios = false;
+      for (const prod of listaProductosGlobal) {
+        const desc = mapaDescuentosActivos[prod.id];
+        const precioBase = parseFloat(prod.precio) || 0;
+        let nuevoPrecioOferta = "";
+
+        if (desc && precioBase > 0) {
+          if (desc.tipo === 'porcentaje') {
+            const rebajado = precioBase * (1 - (desc.valor / 100));
+            nuevoPrecioOferta = rebajado.toFixed(2);
+          } else {
+            nuevoPrecioOferta = desc.valor.toFixed(2);
+          }
+        }
+
+        const ofertaPrevia = (prod.precioOferta || '').toString().trim();
+        if (ofertaPrevia !== nuevoPrecioOferta) {
+          prod.precioOferta = nuevoPrecioOferta;
+          huboCambios = true;
+          // Actualización silenciosa a Google Sheets
+          if (prod.fila) {
+            try {
+              fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({
+                  accion: "editarProducto",
+                  clave: tokenClave || "zeronte2026",
+                  id: prod.id,
+                  fila: prod.fila,
+                  titulo: prod.titulo,
+                  precio: prod.precio,
+                  precioOferta: nuevoPrecioOferta,
+                  categoria: prod.categoria,
+                  imagenes: Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen],
+                  video: prod.video || '',
+                  descripcion: prod.descripcion || ''
+                })
+              });
+            } catch(e) {}
+          }
+        }
+      }
+
+      if (huboCambios) {
+        renderizarProductos();
+      }
+    }
+
+    function renderizarModuloOfertas() {
+      sincronizarOfertasConCatalogo();
+      const campanas = obtenerCampanasOfertas();
+      const ahora = Date.now();
+
+      const cont = document.getElementById('contenedorListaOfertas');
+      const sinOf = document.getElementById('sinOfertasMensaje');
+      if (!cont) return;
+
+      let activasCount = 0;
+      let programadasCount = 0;
+
+      campanas.forEach(c => {
+        if (ahora < c.fechaInicio) programadasCount++;
+        else if (c.sinFin || (c.fechaFin && ahora <= c.fechaFin)) activasCount++;
+      });
+
+      const prodsRebajados = listaProductosGlobal.filter(p => p.precioOferta && parseFloat(p.precioOferta) > 0).length;
+
+      document.getElementById('statOfertasTotales').innerText = campanas.length;
+      document.getElementById('statOfertasActivas').innerText = activasCount;
+      document.getElementById('statOfertasProgramadas').innerText = programadasCount;
+      document.getElementById('statProdsRebajados').innerText = prodsRebajados;
+
+      const badgeHeader = document.getElementById('badgeEstadoOfertasGeneral');
+      if (badgeHeader) badgeHeader.innerText = `${activasCount} en curso`;
+
+      const badgeMenu = document.getElementById('badgeOfertasActivas');
+      if (badgeMenu) {
+        badgeMenu.innerText = activasCount;
+        badgeMenu.classList.toggle('hidden', activasCount === 0);
+      }
+
+      if (campanas.length === 0) {
+        cont.innerHTML = "";
+        sinOf.classList.remove('hidden');
+        return;
+      }
+      sinOf.classList.add('hidden');
+
+      cont.innerHTML = campanas.map(c => {
+        const esProgramada = ahora < c.fechaInicio;
+        const esExpirada = !c.sinFin && c.fechaFin && ahora > c.fechaFin;
+        const esEnCurso = !esProgramada && !esExpirada;
+
+        let estadoBadge = '';
+        if (esEnCurso) {
+          estadoBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> En curso</span>`;
+        } else if (esProgramada) {
+          estadoBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-regular fa-clock text-[10px]"></i> Programada</span>`;
+        } else {
+          estadoBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">Finalizada</span>`;
+        }
+
+        const fIniTexto = new Date(c.fechaInicio).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const fFinTexto = c.sinFin ? 'Indefinida' : new Date(c.fechaFin).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+        return `
+          <div class="p-4 rounded-2xl border ${esEnCurso ? 'border-rose-300 bg-rose-50/20 shadow-xs' : 'border-slate-200 bg-white'} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-bold text-slate-900 text-sm">${c.nombre}</span>
+                <span class="font-extrabold text-xs px-2 py-0.5 rounded-md ${c.tipo === 'porcentaje' ? 'bg-rose-100 text-rose-800' : 'bg-blue-100 text-blue-800'}">
+                  ${c.tipo === 'porcentaje' ? `-${c.valor}%` : `Precio: ${c.valor.toFixed(2)} €`}
+                </span>
+                ${estadoBadge}
+              </div>
+              <div class="text-[11px] text-slate-500 flex items-center gap-3 flex-wrap">
+                <span><i class="fa-regular fa-calendar text-[10px]"></i> ${fIniTexto} h ➔ ${fFinTexto} h</span>
+                <span>•</span>
+                <span><i class="fa-solid fa-box text-[10px]"></i> ${c.idsObjetivo.length} artículos rebajados</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              <button type="button" onclick="eliminarCampanaOferta('${c.id}')" title="Finalizar y eliminar campaña" class="px-3 py-1.5 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-600 hover:text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5">
+                <i class="fa-solid fa-trash text-[11px]"></i> Eliminar
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Comprobador en tiempo real cada 30 segundos para iniciar/terminar campañas automáticamente
+    setInterval(() => {
+      sincronizarOfertasConCatalogo();
+    }, 30000);
   </script>
 </body>
 </html>
