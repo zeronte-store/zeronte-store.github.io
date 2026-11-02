@@ -1678,19 +1678,27 @@
         mapaPedidosCliente[idCliente].push(p);
       });
 
-      // 2. Localizar foto del catálogo
+      // 2. Localizar portada del producto soportando formatos simples y galerías múltiples
       const obtenerFotoProducto = (nombreProducto) => {
         if (!nombreProducto) return "";
-        const prod = (typeof buscarProductoEnCatalogo === 'function') 
-          ? buscarProductoEnCatalogo(nombreProducto) 
-          : listaProductosGlobal.find(pr => (pr.titulo || "").toLowerCase().trim() === nombreProducto.toLowerCase().trim());
-        
+        const prod = buscarProductoEnCatalogo(nombreProducto);
         if (!prod || !prod.imagen) return "";
-        const fotos = (typeof extraerFotosProducto === 'function') 
-          ? extraerFotosProducto(prod.imagen) 
-          : (Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen]);
-        
-        return fotos[0] || "";
+
+        // Si es un array directo de imágenes
+        if (Array.isArray(prod.imagen) && prod.imagen.length > 0) {
+          return prod.imagen[0];
+        }
+
+        // Si es un JSON serializado
+        if (typeof prod.imagen === 'string' && prod.imagen.startsWith('[')) {
+          try {
+            const parsed = JSON.parse(prod.imagen);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+          } catch (e) {}
+        }
+
+        // Si es una URL directa en texto
+        return prod.imagen;
       };
 
       // 3. Forzar siempre formato con dos decimales y símbolo €
@@ -1711,6 +1719,71 @@
         if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) return "bg-emerald-50/70 border-emerald-200/80 hover:bg-emerald-100/60";
         if (est.includes("cancelado")) return "bg-slate-100/70 border-slate-200/80 hover:bg-slate-200/50";
         return "bg-white border-slate-200 hover:bg-slate-50";
+      };
+
+      // Helper para renderizar logo de método de pago (Bizum / PayPal / Genérico)
+      const renderizarMetodoPago = (metodoRaw) => {
+        const m = (metodoRaw || "Web").toString().trim();
+        const mLower = m.toLowerCase();
+        if (mLower.includes("bizum")) {
+          return `
+            <span class="inline-flex items-center gap-1.5 font-bold text-slate-800">
+              <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#00A9A2] text-white font-extrabold text-[9px] leading-none">b</span>
+              <span>Bizum</span>
+            </span>
+          `;
+        } else if (mLower.includes("paypal")) {
+          return `
+            <span class="inline-flex items-center gap-1.5 font-bold text-[#003087]">
+              <i class="fa-brands fa-paypal text-sm text-[#0079C1]"></i>
+              <span>PayPal</span>
+            </span>
+          `;
+        }
+        return `<strong class="text-slate-700">${m}</strong>`;
+      };
+
+      // Helper para limpiar ID eliminando (1/2), (2/2), etc.
+      const limpiarIdPedido = (idRaw) => {
+        return (idRaw || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim();
+      };
+
+      // Helper para formatear personalización limpia en líneas numeradas con título en negrita
+      const renderizarPersonalizacionLimpia = (textoRaw) => {
+        if (!textoRaw || textoRaw.trim() === "") return '<span class="italic text-slate-400">Sin dedicatoria</span>';
+
+        let limpio = textoRaw.replace(/["“”«»]/g, '')
+                             .replace(/\[\s*UNIDAD\s*\d+\/\d+\s*\]\s*\|?/gi, '')
+                             .trim();
+
+        if (limpio.includes('|')) {
+          const partes = limpio.split('|').map(p => p.trim()).filter(Boolean);
+          return partes.map(parte => {
+            const indexColon = parte.indexOf(':');
+            if (indexColon !== -1) {
+              const etiqueta = parte.substring(0, indexColon).trim();
+              const contenido = parte.substring(indexColon + 1).trim();
+              return `<div class="leading-relaxed"><strong class="font-bold text-slate-900">${etiqueta}:</strong> ${contenido}</div>`;
+            }
+            return `<div class="leading-relaxed">${parte}</div>`;
+          }).join('');
+        }
+
+        const regexCampos = /(\d+\.\s*[^:]+:)/g;
+        if (regexCampos.test(limpio)) {
+          const trozos = limpio.split(/(\d+\.\s*[^:]+:)/).filter(Boolean);
+          let html = '';
+          for (let i = 0; i < trozos.length; i += 2) {
+            const label = trozos[i] ? trozos[i].trim() : '';
+            const val = trozos[i + 1] ? trozos[i + 1].trim() : '';
+            if (label) {
+              html += `<div class="leading-relaxed"><strong class="font-bold text-slate-900">${label}</strong> ${val}</div>`;
+            }
+          }
+          if (html) return html;
+        }
+
+        return `<div class="leading-relaxed font-medium">${limpio}</div>`;
       };
 
       // Escritorio (PC)
@@ -1737,7 +1810,8 @@
 
         const fotoProd = obtenerFotoProducto(p.producto);
         const idProd = obtenerIdProducto(p.producto);
-        const textoPersonalizacion = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+        const idLimpio = limpiarIdPedido(p.id);
+        const personalizacionHtml = renderizarPersonalizacionLimpia(p.personalizacion);
         const notaActual = obtenerNotaPedido(p.id);
 
         const fondoPastel = obtenerFondoPastel(p.estado);
@@ -1758,7 +1832,7 @@
 
             <td class="py-2.5 px-3 align-middle whitespace-nowrap">
               <div class="flex items-center gap-1.5 leading-tight">
-                <span class="font-mono font-bold text-slate-900 text-xs">${p.id}</span>
+                <span class="font-mono font-bold text-slate-900 text-xs">${idLimpio}</span>
                 <span class="text-[10px] font-bold px-1.5 py-0.2 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white/80 text-slate-500 border border-slate-200'}">
                   ${badgeCliente}
                 </span>
@@ -1772,12 +1846,11 @@
 
             <td class="py-2.5 px-3 align-middle">
               <div class="flex items-center gap-2.5 max-w-[340px]">
-                <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
+                <div class="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
                   ${fotoProd ? `
-                    <img src="${fotoProd}" alt="${p.producto}" class="w-full h-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-                    <span class="hidden text-white font-bold text-[10px] brand-font">Z</span>
+                    <img src="${fotoProd}" alt="${p.producto}" class="w-full h-full object-cover">
                   ` : `
-                    <span class="text-white font-bold text-[10px] brand-font">Z</span>
+                    <span class="text-white font-bold text-[10px] bg-slate-900 w-full h-full flex items-center justify-center brand-font">Z</span>
                   `}
                 </div>
                 <div class="flex items-center gap-1.5 min-w-0">
@@ -1820,7 +1893,7 @@
                     </div>
                   </div>
                   <div class="flex items-center justify-between gap-2 flex-wrap">
-                    <span class="text-[10px] uppercase font-bold text-slate-400">Método de Pago: <strong class="text-slate-700">${p.metodoPago || 'Web'}</strong></span>
+                    <span class="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">Método de Pago: ${renderizarMetodoPago(p.metodoPago)}</span>
                     ${calcularDiasTranscurridosPedido(p.fecha, p.estado)}
                   </div>
                   <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
@@ -1853,8 +1926,8 @@
                 <!-- Personalización y Notas -->
                 <div class="space-y-2 bg-white border border-slate-200/90 p-3 rounded-xl shadow-2xs">
                   <span class="block text-[10px] uppercase font-bold text-slate-400">Personalización & Notas</span>
-                  <div class="bg-blue-50/70 border border-blue-200/70 px-2.5 py-1.5 rounded-lg text-xs text-[#002b49] font-medium leading-snug">
-                    ${textoPersonalizacion}
+                  <div class="bg-blue-50/70 border border-blue-200/70 px-2.5 py-1.5 rounded-lg text-xs text-[#002b49] space-y-1">
+                    ${personalizacionHtml}
                   </div>
                   <div>
                     ${notaActual ? `
@@ -1911,7 +1984,8 @@
 
         const fotoProd = obtenerFotoProducto(p.producto);
         const idProd = obtenerIdProducto(p.producto);
-        const textoPersonalizacion = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+        const idLimpio = limpiarIdPedido(p.id);
+        const personalizacionHtml = renderizarPersonalizacionLimpia(p.personalizacion);
         const notaActual = obtenerNotaPedido(p.id);
 
         const fondoPastel = obtenerFondoPastel(p.estado);
@@ -1927,7 +2001,7 @@
                   </span>
                   <div>
                     <div class="flex items-center gap-1.5 leading-none">
-                      <span class="font-mono font-bold text-slate-900 text-xs">${p.id}</span>
+                      <span class="font-mono font-bold text-slate-900 text-xs">${idLimpio}</span>
                       <span class="text-[9px] font-bold px-1.5 py-0.2 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white/80 text-slate-500 border border-slate-200'}">
                         ${badgeCliente}
                       </span>
@@ -1947,11 +2021,11 @@
               </div>
 
               <div class="flex items-center gap-2 mt-1.5">
-                <div class="w-6 h-6 rounded bg-slate-900 shrink-0 overflow-hidden flex items-center justify-center">
+                <div class="w-6 h-6 rounded bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
                   ${fotoProd ? `
                     <img src="${fotoProd}" alt="${p.producto}" class="w-full h-full object-cover">
                   ` : `
-                    <span class="text-white font-bold text-[9px] brand-font">Z</span>
+                    <span class="text-white font-bold text-[9px] bg-slate-900 w-full h-full flex items-center justify-center brand-font">Z</span>
                   `}
                 </div>
                 <span class="bg-slate-900 text-white font-mono text-[8px] font-bold px-1 rounded">${idProd}</span>
@@ -1962,7 +2036,7 @@
             <!-- DESPLEGABLE MÓVIL AL PULSAR -->
             <div id="${detalleId}" class="hidden p-3 bg-white/80 border-t border-slate-200/80 space-y-3" onclick="event.stopPropagation()">
               <div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-                <span class="text-[10px] uppercase font-bold text-slate-400">Método: <strong class="text-slate-700">${p.metodoPago || 'Web'}</strong></span>
+                <span class="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">Método: ${renderizarMetodoPago(p.metodoPago)}</span>
                 ${calcularDiasTranscurridosPedido(p.fecha, p.estado)}
               </div>
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
@@ -1981,8 +2055,8 @@
               </div>
 
               <!-- Personalización -->
-              <div class="bg-blue-50/70 border border-blue-200/70 p-2.5 rounded-xl text-xs text-[#002b49] font-medium leading-relaxed">
-                ${textoPersonalizacion}
+              <div class="bg-blue-50/70 border border-blue-200/70 p-2.5 rounded-xl text-xs text-[#002b49] space-y-1">
+                ${personalizacionHtml}
               </div>
 
               <!-- Post-it Móvil -->
