@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="referrer" content="no-referrer">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Zeronte | Personalización Musical & Partituras</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -2156,7 +2156,10 @@
       }
     }
 
+    let catalogoFiltradoActual = [];
+
     function renderizarCatalogo(lista) {
+      catalogoFiltradoActual = lista;
       const contenedor = document.getElementById("gridProductos");
       const contadorLabel = document.getElementById("contadorResultados");
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
@@ -2169,7 +2172,7 @@
         return;
       }
 
-      contenedor.innerHTML = lista.map((p) => {
+      contenedor.innerHTML = lista.map((p, idxLista) => {
         let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
         try {
           if (Array.isArray(p.imagen)) {
@@ -2190,12 +2193,8 @@
         const porcentajeDescuento = tieneOferta ? Math.round(((precioBase - precioOferta) / precioBase) * 100) : 0;
         const tituloTraducido = traducirTituloProducto(p.titulo, idiomaActual);
 
-        // Localizar el índice real e inmutable dentro de catalogoCompleto para evitar discrepancias al ordenar/filtrar
-        const indexRealGlobal = catalogoCompleto.findIndex(item => (item.id && p.id && item.id === p.id) || item.titulo === p.titulo);
-        const indexParaAbrir = indexRealGlobal !== -1 ? indexRealGlobal : 0;
-
         return `
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(${indexParaAbrir})">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(catalogoFiltradoActual[${idxLista}])">
             <div>
               <div class="aspect-square bg-gray-100 relative overflow-hidden">
                 <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
@@ -2606,15 +2605,71 @@
       indiceMediaFicha = idx;
       const item = galeriaFichaActual[idx];
       const img = document.getElementById('imgPrincipalFicha');
-      const vid = document.getElementById('videoPrincipalFicha');
+      let vid = document.getElementById('videoPrincipalFicha');
+      let iframeVid = document.getElementById('iframePrincipalFicha');
+
+      // Limpiar iframe previo si existiera
+      if (iframeVid) {
+        iframeVid.remove();
+        iframeVid = null;
+      }
 
       if (item.tipo === 'video') {
         if (img) img.classList.add('hidden');
-        if (vid) {
-          vid.classList.remove('hidden');
-          vid.src = item.url;
+
+        const url = (item.url || '').trim();
+        const esYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+        const esVimeo = url.includes('vimeo.com');
+
+        if (esYouTube) {
+          if (vid) {
+            vid.pause();
+            vid.classList.add('hidden');
+          }
+
+          let idYt = '';
+          if (url.includes('youtu.be/')) {
+            idYt = url.split('youtu.be/')[1]?.split('?')[0];
+          } else if (url.includes('watch?v=')) {
+            idYt = url.split('watch?v=')[1]?.split('&')[0];
+          }
+
+          iframeVid = document.createElement('iframe');
+          iframeVid.id = 'iframePrincipalFicha';
+          iframeVid.className = 'w-full h-full aspect-square border-0';
+          iframeVid.src = `https://www.youtube.com/embed/${idYt}?autoplay=1&rel=0`;
+          iframeVid.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          iframeVid.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+          iframeVid.allowFullscreen = true;
+          
+          vid.parentNode.insertBefore(iframeVid, vid);
+
+        } else if (esVimeo) {
+          if (vid) {
+            vid.pause();
+            vid.classList.add('hidden');
+          }
+
+          const idVimeo = url.split('/').filter(Boolean).pop();
+          iframeVid = document.createElement('iframe');
+          iframeVid.id = 'iframePrincipalFicha';
+          iframeVid.className = 'w-full h-full aspect-square border-0';
+          iframeVid.src = `https://player.vimeo.com/video/${idVimeo}?autoplay=1`;
+          iframeVid.allow = 'autoplay; fullscreen; picture-in-picture';
+          iframeVid.allowFullscreen = true;
+          
+          vid.parentNode.insertBefore(iframeVid, vid);
+
+        } else {
+          // Archivo MP4 directo
+          if (vid) {
+            vid.classList.remove('hidden');
+            vid.src = item.url;
+            vid.play().catch(() => {});
+          }
         }
       } else {
+        // Modo Foto
         if (vid) {
           vid.pause();
           vid.classList.add('hidden');
@@ -2730,6 +2785,8 @@
     function cerrarFichaArticulo() {
       const vid = document.getElementById('videoPrincipalFicha');
       if (vid) vid.pause();
+      const iframeVid = document.getElementById('iframePrincipalFicha');
+      if (iframeVid) iframeVid.remove();
       articuloFichaActual = null;
       document.body.style.overflow = '';
       const mFicha = document.getElementById('modalFichaArticulo');
