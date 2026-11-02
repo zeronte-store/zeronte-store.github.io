@@ -679,6 +679,9 @@
         <!-- COLUMNA DERECHA: Personalización primero, Cantidad/Total después y Botón Comprar (Lg: 5 cols) -->
         <div class="lg:col-span-5 space-y-5">
           
+          <!-- CONTENEDOR RECEPTOR TÍTULO/PRECIO EN WEB PARA PRODUCTOS SIN PERSONALIZACIÓN -->
+          <div id="contenedorHeaderWebSinPers" class="hidden"></div>
+
           <!-- BOX DE PERSONALIZACIÓN DINÁMICA (ARRIBA) -->
           <div id="seccionBloquePersonalizacion" class="border border-gray-300 rounded-2xl p-4 sm:p-5 bg-[#fafafa] space-y-3.5">
             <div class="flex items-center justify-between">
@@ -2508,11 +2511,24 @@
       }
 
       const boxPers = document.getElementById('seccionBloquePersonalizacion');
-      if (boxPers) {
-        if (esProdPersonalizable) {
-          boxPers.classList.remove('hidden');
-        } else {
-          boxPers.classList.add('hidden');
+      const bloquePreciosOriginal = document.getElementById('tituloFichaArticulo')?.parentElement;
+      const slotWebDerecha = document.getElementById('contenedorHeaderWebSinPers');
+
+      if (esProdPersonalizable) {
+        if (boxPers) boxPers.classList.remove('hidden');
+        if (slotWebDerecha) {
+          slotWebDerecha.classList.add('hidden');
+          slotWebDerecha.innerHTML = '';
+        }
+        if (bloquePreciosOriginal) {
+          bloquePreciosOriginal.classList.remove('lg:hidden');
+        }
+      } else {
+        if (boxPers) boxPers.classList.add('hidden');
+        if (slotWebDerecha && bloquePreciosOriginal) {
+          slotWebDerecha.innerHTML = bloquePreciosOriginal.innerHTML;
+          slotWebDerecha.className = 'hidden lg:block space-y-3 pb-2 border-b border-gray-200';
+          bloquePreciosOriginal.classList.add('lg:hidden');
         }
       }
 
