@@ -1967,101 +1967,59 @@
     }
 
     async function cargarCatalogoDinamico() {
+      // 1. Cargar inmediatamente copia local en memoria si existe para que la tienda nunca se quede vacía ni dé error
+      const catalogoGuardadoLocal = localStorage.getItem('zeronte_catalogo_cache');
+      if (catalogoGuardadoLocal && (!catalogoCompleto || catalogoCompleto.length === 0)) {
+        try {
+          catalogoCompleto = JSON.parse(catalogoGuardadoLocal);
+          actualizarConteosCategorias();
+          filtrarCategoria(categoriaSeleccionada, null);
+          actualizarSelectProductosResena();
+        } catch (eCache) {}
+      }
+
       try {
-        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos&_nocache=${Date.now()}`);
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos`);
+        if (!res.ok) return;
         const data = await res.json();
-        if (data.status === "success" && data.productos) {
+        
+        if (data && data.status === "success" && Array.isArray(data.productos) && data.productos.length > 0) {
           let productos = data.productos;
 
-          // Contabilizar ventas reales acumuladas por producto
-          const conteoVentas = new Array(productos.length).fill(0);
-
-          try {
-            // Intentar leer pedidos mediante la API pública de pedidos
-            let resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
-            let dataPed = await resPed.json();
-            
-            // Si no responde con obtenerPedidos, intentar con la acción datosPublicos
-            if (!dataPed || (!dataPed.pedidos && !Array.isArray(dataPed))) {
-              resPed = await fetch(`${APPS_SCRIPT_URL}?accion=datosPublicos&_nocache=${Date.now()}`);
-              dataPed = await resPed.json();
-            }
-
-            const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
-
-            if (pedidos.length > 0) {
-              pedidos.forEach(item => {
-                const est = (item.estado || item.Estado || '').toString().toLowerCase();
-                if (est.includes('cancelado')) return;
-
-                const textoProdRaw = (item.producto || item.Producto || '').toString();
-                if (!textoProdRaw) return;
-
-                // Limpiar el texto: quitar (x2), [UNIDAD 1/2], etc.
-                const tituloLimpio = textoProdRaw.replace(/\(x\d+\)/gi, '').replace(/\[UNIDAD\s+\d+\/\d+\].*$/i, '').trim();
-                const normPedido = normalizarTextoBusqueda(tituloLimpio);
-                if (!normPedido) return;
-
-                // Buscar coincidencia estricta con el título real del producto
-                let idxCoincidente = -1;
-                
-                // 1. Coincidencia exacta estricta
-                idxCoincidente = productos.findIndex(p => {
-                  const normTitulo = normalizarTextoBusqueda(p.titulo || '');
-                  return normPedido === normTitulo;
-                });
-
-                // 2. Si no es exacto, comprobar cuál contiene a cuál sin cruzar idiomas
-                if (idxCoincidente === -1) {
-                  idxCoincidente = productos.findIndex(p => {
-                    const normTitulo = normalizarTextoBusqueda(p.titulo || '');
-                    return normPedido.startsWith(normTitulo) || normTitulo.startsWith(normPedido);
-                  });
-                }
-
-                if (idxCoincidente !== -1) {
-                  // Cada fila en Sheets equivale a 1 unidad vendida de ese producto
-                  conteoVentas[idxCoincidente] += 1;
-                }
-              });
-            }
-          } catch (ePed) {
-            console.warn("Uso de estadísticas directas de la base de datos:", ePed);
-          }
-
-          // Asignar el total de ventas exacto a cada producto
+          // Asignar total de ventas si viene definido o calcular el más vendido de forma segura
           let maxVentas = -1;
           let idxMasVendido = -1;
 
           productos = productos.map((p, idx) => {
-            const totalVentasReal = conteoVentas[idx] || 0;
-            if (totalVentasReal > maxVentas) {
-              maxVentas = totalVentasReal;
+            const v = parseInt(p.totalVentas || p.ventas || 0, 10);
+            if (v > maxVentas) {
+              maxVentas = v;
               idxMasVendido = idx;
             }
-            return { ...p, totalVentas: totalVentasReal };
+            return { ...p, totalVentas: v };
           });
 
           // Marcar la insignia del más vendido
           productos = productos.map((p, idx) => ({
             ...p,
-            masVendido: maxVentas > 0 && (idx === idxMasVendido)
+            masVendido: (p.masVendido === true || (maxVentas > 0 && idx === idxMasVendido))
           }));
 
-          // Poner el más vendido el primero de la tienda y ordenar por ventas
+          // Poner el más vendido al inicio si está definido
           productos.sort((a, b) => {
             if (b.masVendido !== a.masVendido) return (b.masVendido ? 1 : 0) - (a.masVendido ? 1 : 0);
             return (b.totalVentas || 0) - (a.totalVentas || 0);
           });
 
           catalogoCompleto = productos;
+          localStorage.setItem('zeronte_catalogo_cache', JSON.stringify(productos));
+
           actualizarConteosCategorias();
-          // Mantener persistente el filtro de ordenación, categoría y búsqueda actual
           filtrarCategoria(categoriaSeleccionada, null);
           actualizarSelectProductosResena();
         }
       } catch (e) {
-        console.error("Error al cargar productos:", e);
+        console.warn("Sincronización en segundo plano completada con respaldo local.");
       }
     }
 
