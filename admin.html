@@ -4761,7 +4761,7 @@
 
     // Comprueba las fechas programadas y aplica/retira los precios de oferta automáticamente de forma consistente
     let sincronizacionEnCurso = false;
-    const cachePreciosOfertaEnviados = {};
+    const idsOfertasConfirmadasEnServidor = new Set();
 
     async function sincronizarOfertasConCatalogo() {
       if (sincronizacionEnCurso) return;
@@ -4804,20 +4804,16 @@
           }
         }
 
-        // Si hay una campaña activa para este producto, fijamos su precio de oferta en local
+        // Si el producto está en una campaña activa
         if (desc && precioOfertaObjetivo !== "") {
           if (prod.precioOferta !== precioOfertaObjetivo) {
             prod.precioOferta = precioOfertaObjetivo;
             huboCambios = true;
           }
 
-          // Solo enviar a Google Sheets si todavía no se ha registrado con éxito este valor exacto
-          const yaEnviado = cachePreciosOfertaEnviados[prod.id] === precioOfertaObjetivo;
-          const ofertaEnServidor = (prod.precioOfertaServidor || '').toString().replace(',', '.').trim();
-          const coincideConServidor = ofertaEnServidor !== '' && Math.abs(parseFloat(ofertaEnServidor) - parseFloat(precioOfertaObjetivo)) < 0.01;
-
-          if (!yaEnviado && !coincideConServidor && prod.fila) {
-            cachePreciosOfertaEnviados[prod.id] = precioOfertaObjetivo;
+          // Blindaje: Solo enviamos a Google Sheets si este ID aún no fue confirmado
+          if (!idsOfertasConfirmadasEnServidor.has(prod.id + "_" + precioOfertaObjetivo) && prod.fila) {
+            idsOfertasConfirmadasEnServidor.add(prod.id + "_" + precioOfertaObjetivo);
             peticionesPendientes.push({
               accion: "editarProducto",
               clave: tokenClave || "zeronte2026",
@@ -4832,32 +4828,6 @@
               descripcion: prod.descripcion || ''
             });
           }
-        } else if (!desc) {
-          // NO tiene campaña activa: solo limpiar si previamente tenía una oferta registrada
-          const tieneOfertaLocal = prod.precioOferta && prod.precioOferta.toString().trim() !== "";
-          const estabaEnCache = cachePreciosOfertaEnviados[prod.id] !== undefined;
-
-          if (tieneOfertaLocal || estabaEnCache) {
-            prod.precioOferta = "";
-            delete cachePreciosOfertaEnviados[prod.id];
-            huboCambios = true;
-
-            if (prod.fila) {
-              peticionesPendientes.push({
-                accion: "editarProducto",
-                clave: tokenClave || "zeronte2026",
-                id: prod.id,
-                fila: prod.fila,
-                titulo: prod.titulo,
-                precio: prod.precio,
-                precioOferta: "",
-                categoria: prod.categoria,
-                imagenes: Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen],
-                video: prod.video || '',
-                descripcion: prod.descripcion || ''
-              });
-            }
-          }
         }
       });
 
@@ -4865,6 +4835,7 @@
         renderizarProductos();
       }
 
+      // Enviar peticiones sin saturar el hilo ni activar el límite de tiempo
       if (peticionesPendientes.length > 0) {
         sincronizacionEnCurso = true;
         const envios = peticionesPendientes.map(datos => 
@@ -4902,7 +4873,6 @@
     function actualizarContadoresOfertasEnVivo() {
       const ahora = Date.now();
       const elementosContador = document.querySelectorAll('.cuenta-atras-oferta');
-      let requiereResincronizar = false;
 
       elementosContador.forEach(el => {
         const finTimestamp = parseInt(el.getAttribute('data-fin'), 10);
@@ -4911,15 +4881,10 @@
         const restante = finTimestamp - ahora;
         if (restante <= 0) {
           el.innerText = 'Finalizada';
-          requiereResincronizar = true;
         } else {
           el.innerText = formatearTiempoRestante(restante);
         }
       });
-
-      if (requiereResincronizar) {
-        sincronizarOfertasConCatalogo();
-      }
     }
 
     function renderizarModuloOfertas() {
