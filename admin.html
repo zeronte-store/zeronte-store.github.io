@@ -540,8 +540,8 @@
                     <span id="contadorFotosEtsy" class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">0 / 10 fotos</span>
                   </div>
 
-                  <!-- Rejilla interactiva de 10 casillas Etsy -->
-                  <div class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-10 gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <!-- Rejilla interactiva de 10 casillas Etsy con Drag & Drop Masivo -->
+                  <div id="zonaDropFotosEtsy" ondragover="handleDragOverFotos(event)" ondragleave="handleDragLeaveFotos(event)" ondrop="handleDropFotos(event)" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-10 gap-2 p-2.5 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl transition-colors duration-200">
                     <!-- Casilla 0 (Principal) -->
                     <div id="slotFoto-0" class="slot-foto-etsy group relative aspect-square bg-white border-2 border-dashed border-slate-300 rounded-xl overflow-hidden flex flex-col items-center justify-center p-1 text-center cursor-pointer hover:border-slate-500 transition" onclick="clickSlotFoto(0)">
                       <i class="fa-solid fa-camera text-slate-400 text-xs mb-0.5"></i>
@@ -2399,24 +2399,52 @@
       reader.readAsDataURL(file);
     }
 
+    function handleDragOverFotos(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zona = document.getElementById('zonaDropFotosEtsy');
+      if (zona) zona.classList.add('border-slate-800', 'bg-slate-100');
+    }
+
+    function handleDragLeaveFotos(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zona = document.getElementById('zonaDropFotosEtsy');
+      if (zona) zona.classList.remove('border-slate-800', 'bg-slate-100');
+    }
+
+    function handleDropFotos(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zona = document.getElementById('zonaDropFotosEtsy');
+      if (zona) zona.classList.remove('border-slate-800', 'bg-slate-100');
+
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        procesarArchivosFotosMasivas(Array.from(e.dataTransfer.files));
+      }
+    }
+
     function procesarFotosEtsyMultiples(input) {
       const files = Array.from(input.files || []);
       if (!files.length) return;
+      procesarArchivosFotosMasivas(files);
+      input.value = "";
+    }
 
-      files.forEach((file, fIdx) => {
-        let destino = (files.length === 1) ? slotFotoActivo : -1;
+    function procesarArchivosFotosMasivas(files) {
+      // Filtrar solo imágenes válidas y ordenar alfabéticamente para respetar el orden de los archivos
+      const archivosImagen = files.filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|tif|tiff)$/i.test(f.name));
+      if (!archivosImagen.length) return;
 
-        if (destino === -1) {
-          destino = arrayFotosEtsy.findIndex(f => !f);
-          if (destino === -1 && fIdx === 0) destino = slotFotoActivo;
-        }
+      archivosImagen.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
-        if (destino >= 0 && destino < 10) {
-          const targetSlot = destino;
+      // Si se arrastran o seleccionan múltiples fotos de golpe, rellenar de la 0 en adelante
+      if (archivosImagen.length > 1) {
+        archivosImagen.slice(0, 10).forEach((file, index) => {
           comprimirImagenWeb(file, function(base64Optimizada) {
-            arrayFotosEtsy[targetSlot] = base64Optimizada;
-            const img = document.getElementById(`imgSlot-${targetSlot}`);
-            const slot = document.getElementById(`slotFoto-${targetSlot}`);
+            arrayFotosEtsy[index] = base64Optimizada;
+            const img = document.getElementById(`imgSlot-${index}`);
+            const slot = document.getElementById(`slotFoto-${index}`);
             if (img) {
               img.src = base64Optimizada;
               img.classList.remove('hidden');
@@ -2427,10 +2455,29 @@
             }
             actualizarContadorFotosEtsy();
           });
-        }
-      });
+        });
+      } else {
+        // Si solo se arrastra 1 imagen individual, va a la casilla activa o a la primera libre
+        const file = archivosImagen[0];
+        let destino = slotFotoActivo;
+        if (destino < 0 || destino >= 10) destino = arrayFotosEtsy.findIndex(f => !f);
+        if (destino === -1) destino = 0;
 
-      input.value = "";
+        comprimirImagenWeb(file, function(base64Optimizada) {
+          arrayFotosEtsy[destino] = base64Optimizada;
+          const img = document.getElementById(`imgSlot-${destino}`);
+          const slot = document.getElementById(`slotFoto-${destino}`);
+          if (img) {
+            img.src = base64Optimizada;
+            img.classList.remove('hidden');
+          }
+          if (slot) {
+            const btnDel = slot.querySelector('.btn-del-slot');
+            if (btnDel) btnDel.classList.remove('hidden');
+          }
+          actualizarContadorFotosEtsy();
+        });
+      }
     }
 
     function previsualizarVideoEtsy(url) {
