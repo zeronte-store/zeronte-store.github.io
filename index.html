@@ -2310,6 +2310,22 @@
         datosPersonalizaciones = datosPersonalizaciones.slice(0, cant);
       }
 
+      // Obtener qué campos están activos para este producto desde la base de datos
+      let camposActivos = ['titulo', 'nombre', 'dedicatoria', 'compositor'];
+      if (articuloFichaActual && articuloFichaActual.camposPersonalizacion) {
+        const cp = articuloFichaActual.camposPersonalizacion;
+        if (typeof cp === 'string' && cp.trim() !== '' && cp !== 'NO') {
+          try {
+            const parsed = JSON.parse(cp);
+            camposActivos = Array.isArray(parsed) ? parsed : cp.split(',').map(s=>s.trim().toLowerCase());
+          } catch(e) {
+            camposActivos = cp.split(',').map(s=>s.trim().toLowerCase());
+          }
+        } else if (Array.isArray(cp)) {
+          camposActivos = cp.map(s=>String(s).trim().toLowerCase());
+        }
+      }
+
       contenedor.innerHTML = datosPersonalizaciones.map((item, idx) => {
         const esSecundarioReplicado = replicarComunes && idx > 0;
         return `
@@ -2321,34 +2337,38 @@
               ${esSecundarioReplicado ? '<span class="text-xs text-amber-800 font-bold bg-amber-100 px-2 py-0.5 rounded">Datos compartidos de #1</span>' : ''}
             </div>
 
+            ${camposActivos.includes('titulo') ? `
             <div>
               <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">1. Cambiar Título (Opcional):</label>
               <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].titulo || '') : (item.titulo || '')}" 
                 placeholder="Ej. Eres mi armonía" 
                 ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'titulo', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
-            </div>
+            </div>` : ''}
 
+            ${camposActivos.includes('nombre') ? `
             <div>
               <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">2. Nombre * :</label>
               <input type="text" value="${item.nombre || ''}" 
                 placeholder="Ej. María / Carlos" 
                 oninput="actualizarDatoPers(${idx}, 'nombre', this.value)" 
                 class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-semibold focus:outline-none focus:border-black transition">
-            </div>
+            </div>` : ''}
 
+            ${camposActivos.includes('dedicatoria') ? `
             <div>
               <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">3. Dedicatoria (máx. 90 car.):</label>
               <input type="text" maxlength="90" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].dedicatoria || '') : (item.dedicatoria || '')}" 
                 placeholder="Ej. Gracias por llenar mi vida de armonía. 24/09/2024" 
                 ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'dedicatoria', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
-            </div>
+            </div>` : ''}
 
+            ${camposActivos.includes('compositor') ? `
             <div>
               <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">4. Compositor (Opcional):</label>
               <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].compositor || '') : (item.compositor || '')}" 
                 placeholder="Ej. W. A. Mozart" 
                 ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'compositor', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
-            </div>
+            </div>` : ''}
           </div>
         `;
       }).join('');
