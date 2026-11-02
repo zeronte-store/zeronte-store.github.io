@@ -419,6 +419,7 @@
           </div>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
+          <span id="contadorTotalPedidosLabel" class="text-xs font-bold text-gray-700 bg-gray-100 px-2.5 py-1.5 rounded-xl border border-gray-200">Número de pedidos: 1</span>
           <span class="text-xs text-gray-500 font-medium">Pedido:</span>
           <!-- Menú desplegable si existen múltiples partes del pedido -->
           <select id="selectDesplegablePedidos" onchange="cambiarPedidoSeleccionado(this.value)" class="font-mono font-bold text-xs bg-gray-50 text-gray-800 px-3 py-1.5 rounded-xl border border-gray-300 focus:outline-none focus:border-black cursor-pointer transition shadow-2xs">
@@ -477,54 +478,62 @@
         </p>
       </div>
 
-      <!-- ================= DETALLES COMPLETOS DEL ARTÍCULO Y ENCARGO ================= -->
-      <div class="pt-6 border-t border-gray-100 space-y-4">
-        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">Detalles de la compra</h4>
+      <!-- ================= DATOS DEL CLIENTE Y DETALLES DE LA COMPRA ================= -->
+      <div class="pt-6 border-t border-gray-100 space-y-6">
         
-        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div class="flex items-center gap-4 min-w-0">
-            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-white border border-gray-200 overflow-hidden shrink-0 shadow-2xs">
-              <img id="imgSeguimientoProducto" src="https://zeronte-store.github.io/img/logo-zeronte.png" alt="Portada" class="w-full h-full object-cover">
+        <!-- Datos del Cliente de Entrega (Arriba) -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">Datos de contacto y entrega</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 text-xs">
+              <span class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Nombre</span>
+              <span id="nombreSeguimientoCliente" class="font-semibold text-gray-800">---</span>
             </div>
-            <div class="min-w-0">
-              <h5 id="tituloSeguimientoProducto" class="font-bold text-sm sm:text-base text-gray-900 leading-snug truncate">My Name in Music</h5>
-              <div class="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                <span id="precioSeguimientoProducto" class="font-bold text-gray-800">7.99 €</span>
-                <span>•</span>
-                <span id="metodoSeguimientoProducto">Bizum</span>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 text-xs">
+              <span class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Email</span>
+              <span id="emailSeguimientoCliente" class="font-semibold text-gray-800 truncate block">---</span>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 text-xs">
+              <span class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Teléfono</span>
+              <span id="telSeguimientoCliente" class="font-semibold text-gray-800">---</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalles de la compra y portada (Abajo) -->
+        <div class="space-y-4">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">Detalles de la compra</h4>
+          
+          <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4 min-w-0">
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-white border border-gray-200 overflow-hidden shrink-0 shadow-2xs flex items-center justify-center">
+                <img id="imgSeguimientoProducto" src="https://zeronte-store.github.io/img/logo-zeronte.png" alt="Portada" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/logo-zeronte.png';">
+              </div>
+              <div class="min-w-0">
+                <h5 id="tituloSeguimientoProducto" class="font-bold text-sm sm:text-base text-gray-900 leading-snug truncate">My Name in Music</h5>
+                <div class="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                  <span id="precioSeguimientoProducto" class="font-bold text-gray-800">7.99 €</span>
+                  <span>•</span>
+                  <span id="metodoSeguimientoProducto">Bizum</span>
+                </div>
               </div>
             </div>
+
+            <div class="text-left sm:text-right shrink-0">
+              <span class="text-[10px] uppercase font-bold text-gray-400 block">Fecha del pedido</span>
+              <span id="fechaSeguimientoProducto" class="text-xs font-semibold text-gray-700 block mt-0.5">---</span>
+            </div>
           </div>
 
-          <div class="text-left sm:text-right shrink-0">
-            <span class="text-[10px] uppercase font-bold text-gray-400 block">Fecha del pedido</span>
-            <span id="fechaSeguimientoProducto" class="text-xs font-semibold text-gray-700 block mt-0.5">---</span>
+          <!-- Caja de Personalización Registrada -->
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Datos y Dedicatoria Registrada</label>
+            <div id="cajaPersonalizacionSeguimiento" class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-3.5 sm:p-4 text-xs text-[#002b49] font-medium leading-relaxed whitespace-pre-wrap">
+              Sin personalización especificada.
+            </div>
           </div>
         </div>
 
-        <!-- Caja de Personalización Registrada -->
-        <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Datos y Dedicatoria Registrada</label>
-          <div id="cajaPersonalizacionSeguimiento" class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-3.5 sm:p-4 text-xs text-[#002b49] font-medium leading-relaxed whitespace-pre-wrap">
-            Sin personalización especificada.
-          </div>
-        </div>
-
-        <!-- Datos del Cliente de Entrega -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 text-xs">
-            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Nombre</span>
-            <span id="nombreSeguimientoCliente" class="font-semibold text-gray-800">---</span>
-          </div>
-          <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 text-xs">
-            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Email</span>
-            <span id="emailSeguimientoCliente" class="font-semibold text-gray-800 truncate block">---</span>
-          </div>
-          <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 text-xs">
-            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Teléfono</span>
-            <span id="telSeguimientoCliente" class="font-semibold text-gray-800">---</span>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -3084,7 +3093,11 @@
       document.getElementById('boxFormConsultaPedido').classList.add('hidden');
       document.getElementById('resultadoSeguimientoPedido').classList.remove('hidden');
 
-      // Poblar el menú desplegable superior si hay múltiples partes
+      const labelTotal = document.getElementById('contadorTotalPedidosLabel');
+      if (labelTotal) {
+        labelTotal.innerText = `Número de pedidos: ${listaCoincidentesClienteGlobal.length}`;
+      }
+
       const selectDesplegable = document.getElementById('selectDesplegablePedidos');
       if (selectDesplegable) {
         selectDesplegable.innerHTML = listaCoincidentesClienteGlobal.map(item => {
@@ -3096,7 +3109,9 @@
 
       const estado = (p.estado || p.Estado || "Pendiente de pago").toString().toLowerCase();
 
-      document.getElementById('tituloSeguimientoProducto').innerText = p.producto || "Partitura personalizada";
+      const nombreProductoLimpio = (p.producto || "Partitura personalizada").replace(/\s*\(x\d+\)/gi, '').trim();
+      document.getElementById('tituloSeguimientoProducto').innerText = nombreProductoLimpio;
+      
       document.getElementById('precioSeguimientoProducto').innerText = (p.precio || "0.00 €").toString().includes('€') ? p.precio : `${p.precio} €`;
       document.getElementById('metodoSeguimientoProducto').innerText = p.metodoPago || "Bizum";
       document.getElementById('cajaPersonalizacionSeguimiento').innerText = (p.personalizacion || "Sin personalización").replace(/["“”«»]/g, '').trim();
@@ -3116,8 +3131,29 @@
       }
       document.getElementById('fechaSeguimientoProducto').innerText = fechaTexto;
 
-      // Obtener imagen de portada con la función dedicada
-      const urlImg = (typeof obtenerImagenArticulo === 'function') ? obtenerImagenArticulo(p.producto) : 'https://zeronte-store.github.io/img/logo-zeronte.png';
+      // Obtener imagen de portada vinculada exactamente al catálogo global cargado
+      let urlImg = 'https://zeronte-store.github.io/img/logo-zeronte.png';
+      if (Array.isArray(catalogoCompleto) && catalogoCompleto.length > 0) {
+        const prodEncontrado = catalogoCompleto.find(prod => {
+          const t1 = (prod.titulo || "").toLowerCase().trim();
+          const t2 = nombreProductoLimpio.toLowerCase().trim();
+          return t1 === t2 || t2.includes(t1) || t1.includes(t2);
+        });
+        if (prodEncontrado && prodEncontrado.imagen) {
+          try {
+            if (Array.isArray(prodEncontrado.imagen)) {
+              urlImg = prodEncontrado.imagen[0] || urlImg;
+            } else if (typeof prodEncontrado.imagen === 'string' && prodEncontrado.imagen.trim().startsWith('[')) {
+              const arrImg = JSON.parse(prodEncontrado.imagen);
+              urlImg = arrImg[0] || urlImg;
+            } else {
+              urlImg = prodEncontrado.imagen;
+            }
+          } catch(eImg) {
+            urlImg = prodEncontrado.imagen;
+          }
+        }
+      }
       const imgEl = document.getElementById('imgSeguimientoProducto');
       if (imgEl) imgEl.src = urlImg;
 
