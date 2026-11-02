@@ -373,9 +373,7 @@
                 <div>
                   <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Categoría *</label>
                   <select id="nuevaCategoria" onchange="alternarNuevaCategoria(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
-                    <option value="partitura">Partitura Personalizada</option>
-                    <option value="natalicio">Natalicio</option>
-                    <option value="posters">Pósters Educativos</option>
+                    <!-- Se carga dinámicamente desde la base de datos -->
                     <option value="__otra__">+ Añadir nueva categoría...</option>
                   </select>
                   <input type="text" id="inputNuevaCategoriaTexto" placeholder="Escribe la nueva categoría" class="hidden mt-2 w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
@@ -2377,6 +2375,47 @@
       pintarTarjetasEtsy(productosCatalogoFiltrados);
     }
 
+    function poblarCategoriasModalFormulario(categoriaSeleccionar = '') {
+      const select = document.getElementById('nuevaCategoria');
+      if (!select) return;
+
+      const categorias = new Set();
+      listaProductosGlobal.forEach(p => {
+        if (p.categoria && p.categoria.trim()) {
+          categorias.add(p.categoria.trim());
+        }
+      });
+
+      let html = '';
+      categorias.forEach(cat => {
+        const nombreVisible = cat.charAt(0).toUpperCase() + cat.slice(1);
+        html += `<option value="${cat}">${nombreVisible}</option>`;
+      });
+      html += `<option value="__otra__">+ Añadir nueva categoría...</option>`;
+      select.innerHTML = html;
+
+      if (categoriaSeleccionar) {
+        const existe = Array.from(select.options).some(o => o.value.toLowerCase() === categoriaSeleccionar.toLowerCase());
+        if (existe) {
+          select.value = categoriaSeleccionar;
+          alternarNuevaCategoria(categoriaSeleccionar);
+        } else {
+          select.value = '__otra__';
+          alternarNuevaCategoria('__otra__');
+          const inputOtra = document.getElementById('inputNuevaCategoriaTexto');
+          if (inputOtra) inputOtra.value = categoriaSeleccionar;
+        }
+      } else {
+        if (categorias.size > 0) {
+          select.selectedIndex = 0;
+          alternarNuevaCategoria(select.value);
+        } else {
+          select.value = '__otra__';
+          alternarNuevaCategoria('__otra__');
+        }
+      }
+    }
+
     function abrirModalProducto(prodId = null) {
       const modal = document.getElementById('modalProductoEtsy');
       const form = document.getElementById('formNuevoProducto');
@@ -2409,18 +2448,8 @@
           const inputPreOferta = document.getElementById('nuevoPrecioOferta');
           if (inputPreOferta) inputPreOferta.value = (prod.precioOferta || prod.oferta || '').toString().replace('€', '').trim();
 
-          const catSelect = document.getElementById('nuevaCategoria');
-          if (catSelect) {
-            const existeOpcion = Array.from(catSelect.options).some(o => o.value === prod.categoria);
-            if (existeOpcion) {
-              catSelect.value = prod.categoria;
-            } else {
-              catSelect.value = '__otra__';
-              alternarNuevaCategoria('__otra__');
-              const inputOtra = document.getElementById('inputNuevaCategoriaTexto');
-              if (inputOtra) inputOtra.value = prod.categoria || '';
-            }
-          }
+          // Sincronizar categorías del modal con la base de datos
+          poblarCategoriasModalFormulario(prod.categoria || '');
 
           const fotosCargadas = extraerFotosProducto(prod.imagen);
           fotosCargadas.slice(0, 10).forEach((foto, idx) => {
@@ -2468,6 +2497,9 @@
         const inputPreOferta = document.getElementById('nuevoPrecioOferta');
         if (inputPreOferta) inputPreOferta.value = '';
 
+        // Sincronizar categorías del modal con la base de datos
+        poblarCategoriasModalFormulario('');
+
         // Valores por defecto al crear: Descarga y PDF activados
         const chkDescarga = document.getElementById('checkBadgeDescarga');
         const chkPdf = document.getElementById('checkBadgePdf');
@@ -2502,6 +2534,9 @@
       });
       select.innerHTML = html;
       select.value = valorSeleccionado;
+
+      // Mantener sincronizado también el modal de creación
+      poblarCategoriasModalFormulario();
     }
 
     function filtrarCatalogoEtsy() {
