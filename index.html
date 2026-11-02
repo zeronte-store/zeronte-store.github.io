@@ -1970,19 +1970,9 @@
     }
 
     async function cargarCatalogoDinamico() {
-      // 1. Cargar inmediatamente copia local en memoria si existe para que la tienda nunca se quede vacía ni dé error
-      const catalogoGuardadoLocal = localStorage.getItem('zeronte_catalogo_cache');
-      if (catalogoGuardadoLocal && (!catalogoCompleto || catalogoCompleto.length === 0)) {
-        try {
-          catalogoCompleto = JSON.parse(catalogoGuardadoLocal);
-          actualizarConteosCategorias();
-          filtrarCategoria(categoriaSeleccionada, null);
-          actualizarSelectProductosResena();
-        } catch (eCache) {}
-      }
-
       try {
-        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos`);
+        // Petición con parámetro de tiempo para que GitHub Pages nunca sirva datos obsoletos
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos&t=${Date.now()}`);
         if (!res.ok) return;
         const data = await res.json();
         
@@ -2501,9 +2491,22 @@
         contSellos.innerHTML = htmlSellos;
       }
 
-      // Comprobar si el producto es personalizable
+      // Detección universal e infalible (Base de datos + Título / Categoría + Local)
+      const titNorm = (p.titulo || '').toLowerCase();
+      const catNorm = (p.categoria || '').toLowerCase();
+
       let esProdPersonalizable = true;
-      if (p.esPersonalizable !== undefined && p.esPersonalizable !== null) {
+
+      // Si el título o la categoría indican que es material en blanco / cuaderno / descarga directa
+      if (
+        titNorm.includes('blanco') || 
+        titNorm.includes('blank') || 
+        titNorm.includes('cuaderno') || 
+        titNorm.includes('fichas musicales') || 
+        catNorm.includes('fichas')
+      ) {
+        esProdPersonalizable = false;
+      } else if (p.esPersonalizable !== undefined && p.esPersonalizable !== null && p.esPersonalizable !== '') {
         esProdPersonalizable = (p.esPersonalizable === true || p.esPersonalizable === 'true' || p.esPersonalizable === 1 || p.esPersonalizable === '1');
       } else if (p.id) {
         const valLocal = localStorage.getItem(`es_personalizable_prod_${p.id}`);
@@ -2526,6 +2529,7 @@
       } else {
         if (boxPers) boxPers.classList.add('hidden');
         if (slotWebDerecha && bloquePreciosOriginal) {
+          // Inyectamos el bloque en la columna derecha
           slotWebDerecha.innerHTML = bloquePreciosOriginal.innerHTML;
           slotWebDerecha.className = 'hidden lg:block space-y-3 pb-2 border-b border-gray-200';
           bloquePreciosOriginal.classList.add('lg:hidden');
@@ -2745,8 +2749,19 @@
       const chkMisma = document.getElementById('checkMismaPersonalizacion');
       const replicar = chkMisma ? chkMisma.checked : false;
 
+      const titFicha = (articuloFichaActual.titulo || '').toLowerCase();
+      const catFicha = (articuloFichaActual.categoria || '').toLowerCase();
       let esProdPersonalizable = true;
-      if (articuloFichaActual.esPersonalizable !== undefined && articuloFichaActual.esPersonalizable !== null) {
+
+      if (
+        titFicha.includes('blanco') || 
+        titFicha.includes('blank') || 
+        titFicha.includes('cuaderno') || 
+        titFicha.includes('fichas musicales') || 
+        catFicha.includes('fichas')
+      ) {
+        esProdPersonalizable = false;
+      } else if (articuloFichaActual.esPersonalizable !== undefined && articuloFichaActual.esPersonalizable !== null && articuloFichaActual.esPersonalizable !== '') {
         esProdPersonalizable = (articuloFichaActual.esPersonalizable === true || articuloFichaActual.esPersonalizable === 'true' || articuloFichaActual.esPersonalizable === 1 || articuloFichaActual.esPersonalizable === '1');
       } else if (articuloFichaActual.id) {
         const valLocal = localStorage.getItem(`es_personalizable_prod_${articuloFichaActual.id}`);
