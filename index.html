@@ -2169,7 +2169,7 @@
         return;
       }
 
-      contenedor.innerHTML = lista.map((p, index) => {
+      contenedor.innerHTML = lista.map((p) => {
         let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
         try {
           if (Array.isArray(p.imagen)) {
@@ -2190,8 +2190,12 @@
         const porcentajeDescuento = tieneOferta ? Math.round(((precioBase - precioOferta) / precioBase) * 100) : 0;
         const tituloTraducido = traducirTituloProducto(p.titulo, idiomaActual);
 
+        // Localizar el índice real e inmutable dentro de catalogoCompleto para evitar discrepancias al ordenar/filtrar
+        const indexRealGlobal = catalogoCompleto.findIndex(item => (item.id && p.id && item.id === p.id) || item.titulo === p.titulo);
+        const indexParaAbrir = indexRealGlobal !== -1 ? indexRealGlobal : 0;
+
         return `
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(${index})">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(${indexParaAbrir})">
             <div>
               <div class="aspect-square bg-gray-100 relative overflow-hidden">
                 <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
