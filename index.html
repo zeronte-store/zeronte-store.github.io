@@ -2326,6 +2326,16 @@
         }
       }
 
+      // Generar mapeo con numeración dinámica secuencial (1, 2, 3...) según los campos activos
+      const ordenBase = ['titulo', 'nombre', 'dedicatoria', 'compositor'];
+      const numMap = {};
+      let contadorOrden = 1;
+      ordenBase.forEach(c => {
+        if (camposActivos.includes(c)) {
+          numMap[c] = contadorOrden++;
+        }
+      });
+
       contenedor.innerHTML = datosPersonalizaciones.map((item, idx) => {
         const esSecundarioReplicado = replicarComunes && idx > 0;
         return `
@@ -2334,12 +2344,12 @@
               <span class="font-bold text-[#111111] text-xs sm:text-sm uppercase tracking-wide">
                 ${cant > 1 ? `Personalización unidad ${idx + 1} de ${cant}` : 'Detalles de la obra'}
               </span>
-              ${esSecundarioReplicado ? '<span class="text-xs text-amber-800 font-bold bg-amber-100 px-2 py-0.5 rounded">Datos compartidos de #1</span>' : ''}
+              ${esSecundarioReplicado ? `<span class="text-xs text-amber-800 font-bold bg-amber-100 px-2 py-0.5 rounded">Datos compartidos de #1</span>` : ''}
             </div>
 
             ${camposActivos.includes('titulo') ? `
             <div>
-              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">1. Cambiar Título (Opcional):</label>
+              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['titulo']}. Cambiar Título (Opcional):</label>
               <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].titulo || '') : (item.titulo || '')}" 
                 placeholder="Ej. Eres mi armonía" 
                 ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'titulo', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
@@ -2347,7 +2357,7 @@
 
             ${camposActivos.includes('nombre') ? `
             <div>
-              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">2. Nombre * :</label>
+              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['nombre']}. Nombre * :</label>
               <input type="text" value="${item.nombre || ''}" 
                 placeholder="Ej. María / Carlos" 
                 oninput="actualizarDatoPers(${idx}, 'nombre', this.value)" 
@@ -2356,7 +2366,7 @@
 
             ${camposActivos.includes('dedicatoria') ? `
             <div>
-              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">3. Dedicatoria (máx. 90 car.):</label>
+              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['dedicatoria']}. Dedicatoria (máx. 90 car.):</label>
               <input type="text" maxlength="90" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].dedicatoria || '') : (item.dedicatoria || '')}" 
                 placeholder="Ej. Gracias por llenar mi vida de armonía. 24/09/2024" 
                 ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'dedicatoria', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
@@ -2364,7 +2374,7 @@
 
             ${camposActivos.includes('compositor') ? `
             <div>
-              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">4. Compositor (Opcional):</label>
+              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['compositor']}. Compositor (Opcional):</label>
               <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].compositor || '') : (item.compositor || '')}" 
                 placeholder="Ej. W. A. Mozart" 
                 ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'compositor', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
@@ -2854,6 +2864,31 @@
 
       let personalizacionFinal = '';
       if (esProdPersonalizable) {
+        // Detectar campos activos para numerar correlativamente el pedido
+        let camposActivosPed = ['titulo', 'nombre', 'dedicatoria', 'compositor'];
+        if (articuloFichaActual && articuloFichaActual.camposPersonalizacion) {
+          const cp = articuloFichaActual.camposPersonalizacion;
+          if (typeof cp === 'string' && cp.trim() !== '' && cp !== 'NO') {
+            try {
+              const parsed = JSON.parse(cp);
+              camposActivosPed = Array.isArray(parsed) ? parsed : cp.split(',').map(s=>s.trim().toLowerCase());
+            } catch(e) {
+              camposActivosPed = cp.split(',').map(s=>s.trim().toLowerCase());
+            }
+          } else if (Array.isArray(cp)) {
+            camposActivosPed = cp.map(s=>String(s).trim().toLowerCase());
+          }
+        }
+
+        const ordenBasePed = ['titulo', 'nombre', 'dedicatoria', 'compositor'];
+        const numMapPed = {};
+        let cOrdenPed = 1;
+        ordenBasePed.forEach(c => {
+          if (camposActivosPed.includes(c)) {
+            numMapPed[c] = cOrdenPed++;
+          }
+        });
+
         const bloquesFormateados = [];
         for (let i = 0; i < cant; i++) {
           const datosItem = datosPersonalizaciones[i] || { titulo: '', nombre: '', dedicatoria: '', compositor: '' };
@@ -2863,10 +2898,10 @@
           const compositorU = (replicar && i > 0) ? (datosPersonalizaciones[0].compositor || '') : (datosItem.compositor || '');
 
           let txtUnidad = `[UNIDAD ${i + 1}/${cant}]`;
-          if (tituloU) txtUnidad += ` | 1. Título: ${tituloU}`;
-          txtUnidad += ` | 2. Nombre: ${nombreU || 'Sin especificar'}`;
-          if (dedicatoriaU) txtUnidad += ` | 3. Dedicatoria: ${dedicatoriaU}`;
-          if (compositorU) txtUnidad += ` | 4. Compositor: ${compositorU}`;
+          if (camposActivosPed.includes('titulo') && tituloU) txtUnidad += ` | ${numMapPed['titulo']}. Título: ${tituloU}`;
+          if (camposActivosPed.includes('nombre')) txtUnidad += ` | ${numMapPed['nombre']}. Nombre: ${nombreU || 'Sin especificar'}`;
+          if (camposActivosPed.includes('dedicatoria') && dedicatoriaU) txtUnidad += ` | ${numMapPed['dedicatoria']}. Dedicatoria: ${dedicatoriaU}`;
+          if (camposActivosPed.includes('compositor') && compositorU) txtUnidad += ` | ${numMapPed['compositor']}. Compositor: ${compositorU}`;
 
           bloquesFormateados.push(txtUnidad);
         }
