@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="referrer" content="no-referrer">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Zeronte | Panel de Control Shop Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -2739,7 +2739,7 @@
         } else if (urlLimpia.includes('watch?v=')) {
           idYt = urlLimpia.split('watch?v=')[1]?.split('&')[0];
         }
-        cont.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${idYt}" frameborder="0" allowfullscreen></iframe>`;
+        cont.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${idYt}" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
       } else if (urlLimpia.includes('vimeo.com')) {
         const idVimeo = urlLimpia.split('/').filter(Boolean).pop();
         cont.innerHTML = `<iframe class="w-full h-full" src="https://player.vimeo.com/video/${idVimeo}" frameborder="0" allowfullscreen></iframe>`;
