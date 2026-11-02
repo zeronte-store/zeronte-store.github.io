@@ -3201,6 +3201,14 @@
     function volverAConsultarPedido() {
       document.getElementById('resultadoSeguimientoPedido').classList.add('hidden');
       document.getElementById('boxFormConsultaPedido').classList.remove('hidden');
+      
+      // Limpiar los campos del formulario para permitir nuevas consultas
+      const inputEmail = document.getElementById('inputEmailSeguimiento');
+      const inputId = document.getElementById('inputIdSeguimiento');
+      if (inputEmail) inputEmail.value = '';
+      if (inputId) inputId.value = '';
+      
+      listaCoincidentesClienteGlobal = [];
     }
 
     // ================= RESEÑAS TOTALES Y TRADUCIDAS =================
