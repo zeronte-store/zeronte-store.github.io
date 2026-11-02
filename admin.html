@@ -1004,7 +1004,16 @@
 
         const pedidosServidor = data.pedidos || [];
         listaPedidosGlobal = pedidosServidor.filter(p => !idsEliminadosLocalmente.has(p.id));
-        listaProductosGlobal = data.productos || [];
+        const productosServidor = data.productos || [];
+        listaProductosGlobal = productosServidor.map(p => {
+          if (p.id) {
+            const valLocal = localStorage.getItem(`es_personalizable_prod_${p.id}`);
+            if (valLocal !== null) {
+              return { ...p, esPersonalizable: (valLocal === 'true') };
+            }
+          }
+          return p;
+        });
 
         const mensajesServidor = data.mensajes || [];
         mensajesClientes = mensajesServidor.map(m => {
@@ -2494,7 +2503,14 @@
           // Cargar estado de personalización
           const chkPersonalizado = document.getElementById('checkArticuloPersonalizado');
           if (chkPersonalizado) {
-            chkPersonalizado.checked = prod.esPersonalizable !== undefined ? (prod.esPersonalizable === true || prod.esPersonalizable === 'true' || prod.esPersonalizable === 1 || prod.esPersonalizable === '1') : true;
+            let estadoPers = true;
+            const valLocal = localStorage.getItem(`es_personalizable_prod_${prod.id}`);
+            if (valLocal !== null) {
+              estadoPers = (valLocal === 'true');
+            } else if (prod.esPersonalizable !== undefined && prod.esPersonalizable !== null && prod.esPersonalizable !== '') {
+              estadoPers = (prod.esPersonalizable === true || prod.esPersonalizable === 'true' || prod.esPersonalizable === 1 || prod.esPersonalizable === '1');
+            }
+            chkPersonalizado.checked = estadoPers;
           }
 
           // Cargar badges/sellos guardados
