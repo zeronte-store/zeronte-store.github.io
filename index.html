@@ -680,7 +680,7 @@
         <div class="lg:col-span-5 space-y-5">
           
           <!-- BOX DE PERSONALIZACIÓN DINÁMICA (ARRIBA) -->
-          <div class="border border-gray-300 rounded-2xl p-4 sm:p-5 bg-[#fafafa] space-y-3.5">
+          <div id="seccionBloquePersonalizacion" class="border border-gray-300 rounded-2xl p-4 sm:p-5 bg-[#fafafa] space-y-3.5">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 text-sm sm:text-base font-bold text-[#111111]">
                 <i class="fa-solid fa-pen-nib text-[#111111]"></i>
@@ -2540,6 +2540,24 @@
         contSellos.innerHTML = htmlSellos;
       }
 
+      // Comprobar si el producto es personalizable
+      let esProdPersonalizable = true;
+      if (p.esPersonalizable !== undefined && p.esPersonalizable !== null) {
+        esProdPersonalizable = (p.esPersonalizable === true || p.esPersonalizable === 'true' || p.esPersonalizable === 1 || p.esPersonalizable === '1');
+      } else if (p.id) {
+        const valLocal = localStorage.getItem(`es_personalizable_prod_${p.id}`);
+        if (valLocal !== null) esProdPersonalizable = (valLocal === 'true');
+      }
+
+      const boxPers = document.getElementById('seccionBloquePersonalizacion');
+      if (boxPers) {
+        if (esProdPersonalizable) {
+          boxPers.classList.remove('hidden');
+        } else {
+          boxPers.classList.add('hidden');
+        }
+      }
+
       // Resetear box de personalización y cantidad
       const txtBox = document.getElementById('textoBoxPersonalizacion');
       if (txtBox) txtBox.value = '';
@@ -2753,24 +2771,37 @@
       const chkMisma = document.getElementById('checkMismaPersonalizacion');
       const replicar = chkMisma ? chkMisma.checked : false;
 
-      const bloquesFormateados = [];
-      for (let i = 0; i < cant; i++) {
-        const datosItem = datosPersonalizaciones[i] || { titulo: '', nombre: '', dedicatoria: '', compositor: '' };
-        const tituloU = (replicar && i > 0) ? (datosPersonalizaciones[0].titulo || '') : (datosItem.titulo || '');
-        const nombreU = datosItem.nombre || '';
-        const dedicatoriaU = (replicar && i > 0) ? (datosPersonalizaciones[0].dedicatoria || '') : (datosItem.dedicatoria || '');
-        const compositorU = (replicar && i > 0) ? (datosPersonalizaciones[0].compositor || '') : (datosItem.compositor || '');
-
-        let txtUnidad = `[UNIDAD ${i + 1}/${cant}]`;
-        if (tituloU) txtUnidad += ` | 1. Título: ${tituloU}`;
-        txtUnidad += ` | 2. Nombre: ${nombreU || 'Sin especificar'}`;
-        if (dedicatoriaU) txtUnidad += ` | 3. Dedicatoria: ${dedicatoriaU}`;
-        if (compositorU) txtUnidad += ` | 4. Compositor: ${compositorU}`;
-
-        bloquesFormateados.push(txtUnidad);
+      let esProdPersonalizable = true;
+      if (articuloFichaActual.esPersonalizable !== undefined && articuloFichaActual.esPersonalizable !== null) {
+        esProdPersonalizable = (articuloFichaActual.esPersonalizable === true || articuloFichaActual.esPersonalizable === 'true' || articuloFichaActual.esPersonalizable === 1 || articuloFichaActual.esPersonalizable === '1');
+      } else if (articuloFichaActual.id) {
+        const valLocal = localStorage.getItem(`es_personalizable_prod_${articuloFichaActual.id}`);
+        if (valLocal !== null) esProdPersonalizable = (valLocal === 'true');
       }
 
-      const personalizacionFinal = bloquesFormateados.join('\n');
+      let personalizacionFinal = '';
+      if (esProdPersonalizable) {
+        const bloquesFormateados = [];
+        for (let i = 0; i < cant; i++) {
+          const datosItem = datosPersonalizaciones[i] || { titulo: '', nombre: '', dedicatoria: '', compositor: '' };
+          const tituloU = (replicar && i > 0) ? (datosPersonalizaciones[0].titulo || '') : (datosItem.titulo || '');
+          const nombreU = datosItem.nombre || '';
+          const dedicatoriaU = (replicar && i > 0) ? (datosPersonalizaciones[0].dedicatoria || '') : (datosItem.dedicatoria || '');
+          const compositorU = (replicar && i > 0) ? (datosPersonalizaciones[0].compositor || '') : (datosItem.compositor || '');
+
+          let txtUnidad = `[UNIDAD ${i + 1}/${cant}]`;
+          if (tituloU) txtUnidad += ` | 1. Título: ${tituloU}`;
+          txtUnidad += ` | 2. Nombre: ${nombreU || 'Sin especificar'}`;
+          if (dedicatoriaU) txtUnidad += ` | 3. Dedicatoria: ${dedicatoriaU}`;
+          if (compositorU) txtUnidad += ` | 4. Compositor: ${compositorU}`;
+
+          bloquesFormateados.push(txtUnidad);
+        }
+        personalizacionFinal = bloquesFormateados.join('\n');
+      } else {
+        personalizacionFinal = 'Producto directo sin personalización';
+      }
+
       const titulo = traducirTituloProducto(articuloFichaActual.titulo, idiomaActual);
 
       abrirModal(titulo, total, cant);
