@@ -370,13 +370,27 @@
                   </div>
                 </div>
 
-                <div>
-                  <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Categoría *</label>
-                  <select id="nuevaCategoria" onchange="alternarNuevaCategoria(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
-                    <!-- Se carga dinámicamente desde la base de datos -->
-                    <option value="__otra__">+ Añadir nueva categoría...</option>
-                  </select>
-                  <input type="text" id="inputNuevaCategoriaTexto" placeholder="Escribe la nueva categoría" class="hidden mt-2 w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                  <div class="md:col-span-8">
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Categoría *</label>
+                    <select id="nuevaCategoria" onchange="alternarNuevaCategoria(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400">
+                      <!-- Se carga dinámicamente desde la base de datos -->
+                      <option value="__otra__">+ Añadir nueva categoría...</option>
+                    </select>
+                    <input type="text" id="inputNuevaCategoriaTexto" placeholder="Escribe la nueva categoría" class="hidden mt-2 w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
+                  </div>
+                  <div class="md:col-span-4">
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition h-[38px]">
+                      <div class="flex items-center gap-1.5 min-w-0 pr-1">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-xs shrink-0"></i>
+                        <span class="text-xs font-semibold text-slate-800 truncate">Personalizable</span>
+                      </div>
+                      <input type="checkbox" id="checkArticuloPersonalizado" checked class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+                  </div>
                 </div>
 
                 <!-- ================= FORMATOS Y DISTINTIVOS DEL PRODUCTO (TIPO IPHONE) ================= -->
@@ -2477,6 +2491,12 @@
 
           if (editorDesc) editorDesc.innerHTML = prod.descripcion || '';
 
+          // Cargar estado de personalización
+          const chkPersonalizado = document.getElementById('checkArticuloPersonalizado');
+          if (chkPersonalizado) {
+            chkPersonalizado.checked = prod.esPersonalizable !== undefined ? (prod.esPersonalizable === true || prod.esPersonalizable === 'true' || prod.esPersonalizable === 1 || prod.esPersonalizable === '1') : true;
+          }
+
           // Cargar badges/sellos guardados
           const sellosArray = Array.isArray(prod.badges) ? prod.badges : (prod.badges ? String(prod.badges).split(',').map(s=>s.trim()) : ['descarga', 'pdf']);
           const chkDescarga = document.getElementById('checkBadgeDescarga');
@@ -2499,6 +2519,10 @@
 
         // Sincronizar categorías del modal con la base de datos
         poblarCategoriasModalFormulario('');
+
+        // Por defecto: Artículo Personalizado activado
+        const chkPersonalizado = document.getElementById('checkArticuloPersonalizado');
+        if (chkPersonalizado) chkPersonalizado.checked = true;
 
         // Valores por defecto al crear: Descarga y PDF activados
         const chkDescarga = document.getElementById('checkBadgeDescarga');
@@ -2816,6 +2840,8 @@
       if (document.getElementById('checkBadgeAudio')?.checked) sellosSeleccionados.push('audio');
       if (document.getElementById('checkBadgeFisico')?.checked) sellosSeleccionados.push('fisico');
 
+      const esPersonalizableVal = document.getElementById('checkArticuloPersonalizado') ? document.getElementById('checkArticuloPersonalizado').checked : true;
+
       let filaReal = "";
       if (idEditando) {
         const pEncontrado = listaProductosGlobal.find(p => (p.id || '').toLowerCase() === idEditando.toLowerCase());
@@ -2843,7 +2869,8 @@
         imagenes: fotosValidas,
         video: videoVal,
         descripcion: descVal,
-        badges: sellosSeleccionados
+        badges: sellosSeleccionados,
+        esPersonalizable: esPersonalizableVal
       };
 
       // Animación de avance progresivo simulado
@@ -2883,8 +2910,10 @@
             prodMemoria.video = videoVal;
             prodMemoria.descripcion = descVal;
             prodMemoria.badges = sellosSeleccionados;
+            prodMemoria.esPersonalizable = esPersonalizableVal;
           }
           localStorage.setItem(`badges_prod_${idEditando}`, JSON.stringify(sellosSeleccionados));
+          localStorage.setItem(`es_personalizable_prod_${idEditando}`, esPersonalizableVal ? 'true' : 'false');
         }
 
         // Dejar ver el 100% brevemente y luego cerrar automáticamente
