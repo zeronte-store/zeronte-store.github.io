@@ -139,6 +139,10 @@
       <button onclick="cambiarPestana('resenas')" id="tab-resenas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
         <span id="tabResenasTexto">Reseñas</span> <span id="conteoPestanaResenas" class="text-xs bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-full font-bold ml-0.5">192</span>
       </button>
+      <button onclick="cambiarPestana('mis-pedidos')" id="tab-mis-pedidos" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap flex items-center gap-1.5">
+        <i class="fa-solid fa-truck-fast text-xs text-gray-400"></i>
+        <span id="tabMisPedidosTexto">Mis Pedidos</span>
+      </button>
       <button onclick="cambiarPestana('informacion')" id="tab-informacion" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
         Información básica
       </button>
@@ -360,6 +364,161 @@
         <span id="infoPaginaResenas">Página 1 de 20</span>
         <button onclick="cambiarPaginaResenas(1)" id="btnResenaSig" class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-30">Siguiente</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== SECCIÓN MIS PEDIDOS (SEGUIMIENTO ESTILO AMAZON) ==================== -->
+  <div id="vistaMisPedidos" class="pestana-contenido hidden max-w-4xl mx-auto px-4 py-6">
+    <!-- Formulario de Consulta -->
+    <div id="boxFormConsultaPedido" class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center text-sm shadow-sm">
+          <i class="fa-solid fa-truck-fast"></i>
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-serif font-bold text-gray-900">Seguimiento de tu Pedido</h2>
+          <p class="text-xs text-gray-500">Introduce el email con el que hiciste la compra y el número de pedido.</p>
+        </div>
+      </div>
+
+      <form onsubmit="consultarEstadoPedidoCliente(event)" class="space-y-4 mt-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1">Email de compra *</label>
+            <input type="email" id="inputEmailSeguimiento" required placeholder="tucorreo@ejemplo.com" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-xs text-gray-900 focus:outline-none focus:border-black focus:bg-white transition">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1">Nº de Pedido *</label>
+            <input type="text" id="inputIdSeguimiento" required placeholder="Ej. PED-4481 o 4481" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-xs text-gray-900 font-mono focus:outline-none focus:border-black focus:bg-white transition">
+          </div>
+        </div>
+
+        <button type="submit" id="btnConsultarSeguimiento" class="w-full sm:w-auto px-7 py-3 bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-sm flex items-center justify-center gap-2">
+          <i class="fa-solid fa-magnifying-glass text-xs"></i>
+          <span>Consultar estado</span>
+        </button>
+      </form>
+
+      <div id="errorConsultaPedido" class="hidden mt-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation text-sm shrink-0"></i>
+        <span id="txtErrorConsulta">No se ha encontrado ningún pedido con esos datos. Revisa el correo y el número de pedido.</span>
+      </div>
+    </div>
+
+    <!-- Panel de Resultados con Línea de Seguimiento estilo Amazon -->
+    <div id="resultadoSeguimientoPedido" class="hidden mt-6 bg-white border border-gray-200 rounded-3xl p-5 sm:p-8 shadow-sm space-y-8">
+      
+      <!-- Cabecera de Estado Actual -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 gap-2">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Estado de tu pedido</span>
+          <h3 id="tituloEstadoPedidoAmazon" class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5">Pendiente de pago</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500 font-medium">Pedido:</span>
+          <span id="badgeIdSeguimiento" class="font-mono font-bold text-xs bg-gray-100 text-gray-800 px-2.5 py-1 rounded-lg border border-gray-200">PED-0000</span>
+          <button onclick="volverAConsultarPedido()" title="Buscar otro pedido" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-xs transition">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= LÍNEA DE SEGUIMIENTO ESTILO AMAZON ================= -->
+      <div class="py-4 px-2">
+        <div class="relative flex items-center justify-between w-full max-w-2xl mx-auto">
+          <!-- Línea gris de fondo continuo -->
+          <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1.5 bg-gray-200 rounded-full z-0"></div>
+          <!-- Barra de progreso dinámica que se rellena con color según el estado -->
+          <div id="barraProgresoSeguimientoAmazon" class="absolute left-0 top-1/2 -translate-y-1/2 h-1.5 bg-emerald-500 rounded-full z-0 transition-all duration-700" style="width: 33%;"></div>
+
+          <!-- PASO 1: Recibido (Verde, siempre activo) -->
+          <div class="relative z-10 flex flex-col items-center">
+            <div id="nodoPasoRecibido" class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-md transition ring-4 ring-white">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <span class="mt-2 text-[11px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">Recibido</span>
+          </div>
+
+          <!-- PASO 2: Pendiente (Rojo, siempre activo al crearse el pedido) -->
+          <div class="relative z-10 flex flex-col items-center">
+            <div id="nodoPasoPendiente" class="w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs font-bold shadow-md transition ring-4 ring-white">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <span class="mt-2 text-[11px] sm:text-xs font-bold text-rose-700 whitespace-nowrap">Pendiente</span>
+          </div>
+
+          <!-- PASO 3: En Proceso (Naranja) -->
+          <div class="relative z-10 flex flex-col items-center">
+            <div id="nodoPasoProceso" class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-xs font-bold transition ring-4 ring-white">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <span id="labelPasoProceso" class="mt-2 text-[11px] sm:text-xs font-semibold text-gray-400 whitespace-nowrap">En proceso</span>
+          </div>
+
+          <!-- PASO 4: Enviado (Azul) -->
+          <div class="relative z-10 flex flex-col items-center">
+            <div id="nodoPasoEnviado" class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-xs font-bold transition ring-4 ring-white">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <span id="labelPasoEnviado" class="mt-2 text-[11px] sm:text-xs font-semibold text-gray-400 whitespace-nowrap">Enviado</span>
+          </div>
+        </div>
+
+        <p id="subtextoExplicativoEstado" class="text-center text-xs text-gray-500 mt-6 max-w-md mx-auto">
+          Hemos recibido tu encargo y está en cola para preparación.
+        </p>
+      </div>
+
+      <!-- ================= DETALLES COMPLETOS DEL ARTÍCULO Y ENCARGO ================= -->
+      <div class="pt-6 border-t border-gray-100 space-y-4">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">Detalles de la compra</h4>
+        
+        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-white border border-gray-200 overflow-hidden shrink-0 shadow-2xs">
+              <img id="imgSeguimientoProducto" src="https://zeronte-store.github.io/img/logo-zeronte.png" alt="Portada" class="w-full h-full object-cover">
+            </div>
+            <div class="min-w-0">
+              <h5 id="tituloSeguimientoProducto" class="font-bold text-sm sm:text-base text-gray-900 leading-snug truncate">My Name in Music</h5>
+              <div class="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                <span id="precioSeguimientoProducto" class="font-bold text-gray-800">7.99 €</span>
+                <span>•</span>
+                <span id="metodoSeguimientoProducto">Bizum</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-left sm:text-right shrink-0">
+            <span class="text-[10px] uppercase font-bold text-gray-400 block">Fecha del pedido</span>
+            <span id="fechaSeguimientoProducto" class="text-xs font-semibold text-gray-700 block mt-0.5">---</span>
+          </div>
+        </div>
+
+        <!-- Caja de Personalización Registrada -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Datos y Dedicatoria Registrada</label>
+          <div id="cajaPersonalizacionSeguimiento" class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-3.5 sm:p-4 text-xs text-[#002b49] font-medium leading-relaxed whitespace-pre-wrap">
+            Sin personalización especificada.
+          </div>
+        </div>
+
+        <!-- Datos del Cliente de Entrega -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 text-xs">
+            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Nombre</span>
+            <span id="nombreSeguimientoCliente" class="font-semibold text-gray-800">---</span>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 text-xs">
+            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Email</span>
+            <span id="emailSeguimientoCliente" class="font-semibold text-gray-800 truncate block">---</span>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 text-xs">
+            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Teléfono</span>
+            <span id="telSeguimientoCliente" class="font-semibold text-gray-800">---</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2831,6 +2990,7 @@
       const vistaMap = {
         'articulos': 'vistaArticulos',
         'resenas': 'vistaResenas',
+        'mis-pedidos': 'vistaMisPedidos',
         'informacion': 'vistaInformacion',
         'politicas': 'vistaPoliticas'
       };
@@ -2850,6 +3010,151 @@
       }
 
       window.scrollTo({ top: 380, behavior: 'smooth' });
+    }
+
+    // ================= LÓGICA DE SEGUIMIENTO MIS PEDIDOS (ESTILO AMAZON) =================
+    async function consultarEstadoPedidoCliente(e) {
+      e.preventDefault();
+      const emailInput = document.getElementById('inputEmailSeguimiento').value.trim().toLowerCase();
+      let idInput = document.getElementById('inputIdSeguimiento').value.trim().toUpperCase();
+      if (!idInput.startsWith('PED-') && /^\d+$/.test(idInput)) {
+        idInput = 'PED-' + idInput;
+      }
+
+      const btn = document.getElementById('btnConsultarSeguimiento');
+      const errBox = document.getElementById('errorConsultaPedido');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Consultando...</span>`;
+      errBox.classList.add('hidden');
+
+      let pedidoEncontrado = null;
+
+      try {
+        // Consultar directamente a la API de Apps Script
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=verificarPedido&pedidoId=${encodeURIComponent(idInput)}&_nocache=${Date.now()}`);
+        const data = await res.json();
+        
+        if (data && data.status === "success" && data.pedido) {
+          const emailServidor = (data.pedido.email || "").trim().toLowerCase();
+          if (emailServidor === emailInput) {
+            pedidoEncontrado = data.pedido;
+          }
+        }
+      } catch (err) {
+        console.warn("Fallo al verificar por endpoint individual:", err);
+      }
+
+      // Fallback: Si no respondió el endpoint individual, buscar en la lista general de pedidos
+      if (!pedidoEncontrado) {
+        try {
+          const resGen = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
+          const dataGen = await resGen.json();
+          const lista = (dataGen && dataGen.pedidos) ? dataGen.pedidos : (Array.isArray(dataGen) ? dataGen : []);
+          
+          pedidoEncontrado = lista.find(p => {
+            const pId = (p.id || p.ID || "").toString().trim().toUpperCase();
+            const pEmail = (p.email || p.Email || "").toString().trim().toLowerCase();
+            return (pId === idInput || pId.startsWith(idInput)) && pEmail === emailInput;
+          });
+        } catch(eGen) {}
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-magnifying-glass text-xs"></i> <span>Consultar estado</span>`;
+
+      if (!pedidoEncontrado) {
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      renderizarSeguimientoAmazon(pedidoEncontrado, idInput);
+    }
+
+    function renderizarSeguimientoAmazon(p, idBuscado) {
+      document.getElementById('boxFormConsultaPedido').classList.add('hidden');
+      document.getElementById('resultadoSeguimientoPedido').classList.remove('hidden');
+
+      const estado = (p.estado || p.Estado || "Pendiente de pago").toString().toLowerCase();
+
+      document.getElementById('badgeIdSeguimiento').innerText = p.id || idBuscado;
+      document.getElementById('tituloSeguimientoProducto').innerText = p.producto || "Partitura personalizada";
+      document.getElementById('precioSeguimientoProducto').innerText = (p.precio || "0.00 €").toString().includes('€') ? p.precio : `${p.precio} €`;
+      document.getElementById('metodoSeguimientoProducto').innerText = p.metodoPago || "Bizum";
+      document.getElementById('cajaPersonalizacionSeguimiento').innerText = (p.personalizacion || "Sin personalización").replace(/["“”«»]/g, '').trim();
+      document.getElementById('nombreSeguimientoCliente').innerText = p.nombre || "Cliente";
+      document.getElementById('emailSeguimientoCliente').innerText = p.email || "";
+      document.getElementById('telSeguimientoCliente').innerText = (p.telefono || "").replace(/'/g, '');
+
+      // Formatear fecha
+      const fechaRaw = p.fecha || p.Fecha;
+      let fechaTexto = "Reciente";
+      if (fechaRaw) {
+        const d = new Date(fechaRaw);
+        if (!isNaN(d.getTime())) {
+          const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+          const hora = d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+          fechaTexto = `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()} - ${hora}h`;
+        }
+      }
+      document.getElementById('fechaSeguimientoProducto').innerText = fechaTexto;
+
+      // Obtener imagen de la portada
+      const urlImg = (typeof obtenerImagenArticulo === 'function') ? obtenerImagenArticulo(p.producto) : 'https://zeronte-store.github.io/img/logo-zeronte.png';
+      const imgEl = document.getElementById('imgSeguimientoProducto');
+      if (imgEl) imgEl.src = urlImg;
+
+      // Elementos visuales de la barra horizontal estilo Amazon
+      const barra = document.getElementById('barraProgresoSeguimientoAmazon');
+      const nodoRecibido = document.getElementById('nodoPasoRecibido');
+      const nodoPendiente = document.getElementById('nodoPasoPendiente');
+      const nodoProceso = document.getElementById('nodoPasoProceso');
+      const labelProceso = document.getElementById('labelPasoProceso');
+      const nodoEnviado = document.getElementById('nodoPasoEnviado');
+      const labelEnviado = document.getElementById('labelPasoEnviado');
+      const titEstado = document.getElementById('tituloEstadoPedidoAmazon');
+      const subtexto = document.getElementById('subtextoExplicativoEstado');
+
+      // Por defecto: Recibido (Verde) y Pendiente (Rojo) siempre activos
+      nodoRecibido.className = "w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-md ring-4 ring-white";
+      nodoPendiente.className = "w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs font-bold shadow-md ring-4 ring-white";
+      nodoProceso.className = "w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-xs font-bold ring-4 ring-white";
+      labelProceso.className = "mt-2 text-[11px] sm:text-xs font-semibold text-gray-400 whitespace-nowrap";
+      nodoEnviado.className = "w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-xs font-bold ring-4 ring-white";
+      labelEnviado.className = "mt-2 text-[11px] sm:text-xs font-semibold text-gray-400 whitespace-nowrap";
+
+      if (estado.includes("enviado") || estado.includes("completado") || estado.includes("pagado")) {
+        // Estado: Enviado / Pagado (Barra al 100%)
+        barra.style.width = "100%";
+        barra.className = "absolute left-0 top-1/2 -translate-y-1/2 h-1.5 bg-blue-600 rounded-full z-0 transition-all duration-700";
+        nodoProceso.className = "w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold shadow-md ring-4 ring-white";
+        labelProceso.className = "mt-2 text-[11px] sm:text-xs font-bold text-amber-600 whitespace-nowrap";
+        nodoEnviado.className = "w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-md ring-4 ring-white";
+        labelEnviado.className = "mt-2 text-[11px] sm:text-xs font-bold text-blue-600 whitespace-nowrap";
+        titEstado.innerText = "Enviado / Listo para descargar";
+        titEstado.className = "text-xl sm:text-2xl font-bold text-blue-600 mt-0.5";
+        subtexto.innerText = "¡Tu pedido ha sido completado y enviado! Revisa tu bandeja de entrada o WhatsApp con el material final.";
+      } else if (estado.includes("proceso")) {
+        // Estado: En proceso (Barra al 66%)
+        barra.style.width = "66%";
+        barra.className = "absolute left-0 top-1/2 -translate-y-1/2 h-1.5 bg-amber-500 rounded-full z-0 transition-all duration-700";
+        nodoProceso.className = "w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold shadow-md ring-4 ring-white";
+        labelProceso.className = "mt-2 text-[11px] sm:text-xs font-bold text-amber-600 whitespace-nowrap";
+        titEstado.innerText = "En proceso de creación";
+        titEstado.className = "text-xl sm:text-2xl font-bold text-amber-600 mt-0.5";
+        subtexto.innerText = "Nuestro compositor está armonizando y maquetando tu obra en estos momentos.";
+      } else {
+        // Estado inicial por defecto: Recibido y Pendiente (Barra al 33%)
+        barra.style.width = "33%";
+        barra.className = "absolute left-0 top-1/2 -translate-y-1/2 h-1.5 bg-rose-500 rounded-full z-0 transition-all duration-700";
+        titEstado.innerText = "Recibido · Pendiente de pago";
+        titEstado.className = "text-xl sm:text-2xl font-bold text-rose-600 mt-0.5";
+        subtexto.innerText = "Hemos recibido tu encargo correctamente. En cuanto verifiquemos el justificante o abono comenzaremos con la composición musical.";
+      }
+    }
+
+    function volverAConsultarPedido() {
+      document.getElementById('resultadoSeguimientoPedido').classList.add('hidden');
+      document.getElementById('boxFormConsultaPedido').classList.remove('hidden');
     }
 
     // ================= RESEÑAS TOTALES Y TRADUCIDAS =================
