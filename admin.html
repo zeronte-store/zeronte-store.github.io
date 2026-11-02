@@ -4761,6 +4761,7 @@
 
     // Comprueba las fechas programadas y aplica/retira los precios de oferta automáticamente de forma consistente
     let sincronizacionEnCurso = false;
+    const cachePreciosOfertaEnviados = {};
 
     async function sincronizarOfertasConCatalogo() {
       if (sincronizacionEnCurso) return;
@@ -4791,30 +4792,32 @@
       listaProductosGlobal.forEach(prod => {
         const desc = mapaDescuentosActivos[prod.id];
         const precioBase = parseFloat((prod.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
-        let nuevoPrecioOferta = "";
+        
+        let precioOfertaObjetivo = "";
 
         if (desc && precioBase > 0) {
           if (desc.tipo === 'porcentaje') {
             const rebajado = precioBase * (1 - (desc.valor / 100));
-            nuevoPrecioOferta = rebajado.toFixed(2);
+            precioOfertaObjetivo = rebajado.toFixed(2);
           } else {
-            nuevoPrecioOferta = Number(desc.valor).toFixed(2);
+            precioOfertaObjetivo = Number(desc.valor).toFixed(2);
           }
         }
 
-        const ofertaPreviaRaw = (prod.precioOferta !== undefined && prod.precioOferta !== null) ? prod.precioOferta.toString().trim() : '';
-        const numPrevia = parseFloat(ofertaPreviaRaw.replace(',', '.'));
-        const numNueva = parseFloat(nuevoPrecioOferta.replace(',', '.'));
+        // Si hay una campaña activa para este producto, fijamos su precio de oferta en local
+        if (desc && precioOfertaObjetivo !== "") {
+          if (prod.precioOferta !== precioOfertaObjetivo) {
+            prod.precioOferta = precioOfertaObjetivo;
+            huboCambios = true;
+          }
 
-        const ambosVacios = (ofertaPreviaRaw === '' || isNaN(numPrevia)) && (nuevoPrecioOferta === '' || isNaN(numNueva));
-        const valoresNumericosIguales = !isNaN(numPrevia) && !isNaN(numNueva) && Math.abs(numPrevia - numNueva) < 0.001;
+          // Solo enviar a Google Sheets si todavía no se ha registrado con éxito este valor exacto
+          const yaEnviado = cachePreciosOfertaEnviados[prod.id] === precioOfertaObjetivo;
+          const ofertaEnServidor = (prod.precioOfertaServidor || '').toString().replace(',', '.').trim();
+          const coincideConServidor = ofertaEnServidor !== '' && Math.abs(parseFloat(ofertaEnServidor) - parseFloat(precioOfertaObjetivo)) < 0.01;
 
-        // Si son iguales numéricamente (ej: 0.49 vs 0,49 o 2 vs 2.00), no sobreescribir ni volver a enviar
-        if (!ambosVacios && !valoresNumericosIguales) {
-          prod.precioOferta = nuevoPrecioOferta;
-          huboCambios = true;
-
-          if (prod.fila) {
+          if (!yaEnviado && !coincideConServidor && prod.fila) {
+            cachePreciosOfertaEnviados[prod.id] = precioOfertaObjetivo;
             peticionesPendientes.push({
               accion: "editarProducto",
               clave: tokenClave || "zeronte2026",
@@ -4822,31 +4825,38 @@
               fila: prod.fila,
               titulo: prod.titulo,
               precio: prod.precio,
-              precioOferta: nuevoPrecioOferta,
+              precioOferta: precioOfertaObjetivo,
               categoria: prod.categoria,
               imagenes: Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen],
               video: prod.video || '',
               descripcion: prod.descripcion || ''
             });
           }
-        } else if (ambosVacios && ofertaPreviaRaw !== '') {
-          // Si expiró la oferta y tenía valor previo, limpiarlo una sola vez
-          prod.precioOferta = '';
-          huboCambios = true;
-          if (prod.fila) {
-            peticionesPendientes.push({
-              accion: "editarProducto",
-              clave: tokenClave || "zeronte2026",
-              id: prod.id,
-              fila: prod.fila,
-              titulo: prod.titulo,
-              precio: prod.precio,
-              precioOferta: '',
-              categoria: prod.categoria,
-              imagenes: Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen],
-              video: prod.video || '',
-              descripcion: prod.descripcion || ''
-            });
+        } else if (!desc) {
+          // NO tiene campaña activa: solo limpiar si previamente tenía una oferta registrada
+          const tieneOfertaLocal = prod.precioOferta && prod.precioOferta.toString().trim() !== "";
+          const estabaEnCache = cachePreciosOfertaEnviados[prod.id] !== undefined;
+
+          if (tieneOfertaLocal || estabaEnCache) {
+            prod.precioOferta = "";
+            delete cachePreciosOfertaEnviados[prod.id];
+            huboCambios = true;
+
+            if (prod.fila) {
+              peticionesPendientes.push({
+                accion: "editarProducto",
+                clave: tokenClave || "zeronte2026",
+                id: prod.id,
+                fila: prod.fila,
+                titulo: prod.titulo,
+                precio: prod.precio,
+                precioOferta: "",
+                categoria: prod.categoria,
+                imagenes: Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen],
+                video: prod.video || '',
+                descripcion: prod.descripcion || ''
+              });
+            }
           }
         }
       });
