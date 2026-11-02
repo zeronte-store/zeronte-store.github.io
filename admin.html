@@ -385,7 +385,55 @@
                         <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-xs shrink-0"></i>
                         <span class="text-xs font-semibold text-slate-800 truncate">Personalizable</span>
                       </div>
-                      <input type="checkbox" id="checkArticuloPersonalizado" checked class="switch-ios-input">
+                      <input type="checkbox" id="checkArticuloPersonalizado" checked onchange="alternarSubOpcionesPersonalizacion(this.checked)" class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- SUB-BLOQUE: CAMPOS CONFIGURABLES DE PERSONALIZACIÓN -->
+                <div id="bloqueCamposPersonalizacion" class="w-full bg-amber-50/50 border border-amber-200/80 rounded-2xl p-3.5 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <span class="text-[10px] uppercase font-bold text-amber-900 block leading-tight">Campos personalizables activos</span>
+                      <p class="text-[10px] text-amber-700/80">Selecciona qué opciones verá el cliente al personalizar este artículo.</p>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                    <!-- 1. Título -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">1. Título</span>
+                      <input type="checkbox" id="checkPersCampoTitulo" checked class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+
+                    <!-- 2. Nombre -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">2. Nombre</span>
+                      <input type="checkbox" id="checkPersCampoNombre" checked class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+
+                    <!-- 3. Dedicatoria -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">3. Dedicatoria</span>
+                      <input type="checkbox" id="checkPersCampoDedicatoria" checked class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+
+                    <!-- 4. Compositor -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">4. Compositor</span>
+                      <input type="checkbox" id="checkPersCampoCompositor" checked class="switch-ios-input">
                       <div class="switch-ios-track">
                         <div class="switch-ios-thumb"></div>
                       </div>
@@ -394,7 +442,7 @@
                 </div>
 
                 <!-- ================= FORMATOS Y DISTINTIVOS DEL PRODUCTO (TIPO IPHONE) ================= -->
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2.5">
+                <div class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2.5">
                   <style>
                     .switch-ios-input { display: none !important; }
                     .switch-ios-track {
@@ -483,7 +531,7 @@
                 </div>
 
                 <!-- ================= SECCIÓN FOTOS ESTILO ETSY (HASTA 10) ================= -->
-                <div class="space-y-2">
+                <div class="w-full space-y-2">
                   <div class="flex items-center justify-between">
                     <div>
                       <label class="block text-[10px] uppercase font-bold text-slate-700">Fotos Mockups *</label>
@@ -581,7 +629,7 @@
                 </div>
 
                 <!-- ================= SECCIÓN VÍDEO ESTILO ETSY ================= -->
-                <div>
+                <div class="w-full">
                   <label class="block text-[10px] uppercase font-bold text-slate-700 mb-0.5">Vídeo Mockup</label>
                   <p class="text-[10px] text-slate-400 mb-1.5">Enlace directo a MP4, YouTube o Vimeo para mostrar el producto en movimiento.</p>
                   <div class="relative">
@@ -592,7 +640,7 @@
                 </div>
 
                 <!-- Editor enriquecido -->
-                <div>
+                <div class="w-full">
                   <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Descripción *</label>
                   <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs focus-within:border-slate-400 transition">
                     <div class="bg-slate-100/90 border-b border-slate-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs">
@@ -606,6 +654,7 @@
                       <button type="button" onmousedown="event.preventDefault()" onclick="aplicarFormato('justifyFull')" title="Justificar texto" class="w-7 h-7 flex items-center justify-center rounded-lg bg-white shadow-2xs text-slate-900 border border-slate-200 transition"><i class="fa-solid fa-align-justify text-xs"></i></button>
                     </div>
                     <div id="editorDescripcion" contenteditable="true" class="p-3 min-h-[120px] max-h-[220px] overflow-y-auto text-xs text-slate-800 leading-relaxed text-justify [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 focus:outline-none"></div>
+                  </div>
                   <input type="hidden" id="nuevaDesc">
                 </div>
 
@@ -2203,6 +2252,16 @@
       }
     }
 
+    function alternarSubOpcionesPersonalizacion(activo) {
+      const bloque = document.getElementById('bloqueCamposPersonalizacion');
+      if (!bloque) return;
+      if (activo) {
+        bloque.classList.remove('hidden');
+      } else {
+        bloque.classList.add('hidden');
+      }
+    }
+
     function alternarNuevaCategoria(val) {
       const inputOtra = document.getElementById('inputNuevaCategoriaTexto');
       if (!inputOtra) return;
@@ -2530,7 +2589,7 @@
 
           if (editorDesc) editorDesc.innerHTML = prod.descripcion || '';
 
-          // Cargar estado de personalización
+          // Cargar estado de personalización y sus campos individuales
           const chkPersonalizado = document.getElementById('checkArticuloPersonalizado');
           if (chkPersonalizado) {
             let estadoPers = true;
@@ -2541,6 +2600,23 @@
               estadoPers = (prod.esPersonalizable === true || prod.esPersonalizable === 'true' || prod.esPersonalizable === 1 || prod.esPersonalizable === '1');
             }
             chkPersonalizado.checked = estadoPers;
+            alternarSubOpcionesPersonalizacion(estadoPers);
+
+            // Cargar campos específicos seleccionados
+            let camposPers = prod.camposPersonalizacion;
+            if (!camposPers) {
+              try {
+                const guardados = localStorage.getItem(`campos_pers_prod_${prod.id}`);
+                if (guardados) camposPers = JSON.parse(guardados);
+              } catch(e) {}
+            }
+            if (!Array.isArray(camposPers)) {
+              camposPers = typeof camposPers === 'string' ? camposPers.split(',').map(s=>s.trim().toLowerCase()) : ['titulo', 'nombre', 'dedicatoria', 'compositor'];
+            }
+            if (document.getElementById('checkPersCampoTitulo')) document.getElementById('checkPersCampoTitulo').checked = camposPers.includes('titulo');
+            if (document.getElementById('checkPersCampoNombre')) document.getElementById('checkPersCampoNombre').checked = camposPers.includes('nombre');
+            if (document.getElementById('checkPersCampoDedicatoria')) document.getElementById('checkPersCampoDedicatoria').checked = camposPers.includes('dedicatoria');
+            if (document.getElementById('checkPersCampoCompositor')) document.getElementById('checkPersCampoCompositor').checked = camposPers.includes('compositor');
           }
 
           // Cargar badges/sellos guardados
@@ -2566,9 +2642,14 @@
         // Sincronizar categorías del modal con la base de datos
         poblarCategoriasModalFormulario('');
 
-        // Por defecto: Artículo Personalizado activado
+        // Por defecto: Artículo Personalizado activado con todos los campos
         const chkPersonalizado = document.getElementById('checkArticuloPersonalizado');
         if (chkPersonalizado) chkPersonalizado.checked = true;
+        alternarSubOpcionesPersonalizacion(true);
+        if (document.getElementById('checkPersCampoTitulo')) document.getElementById('checkPersCampoTitulo').checked = true;
+        if (document.getElementById('checkPersCampoNombre')) document.getElementById('checkPersCampoNombre').checked = true;
+        if (document.getElementById('checkPersCampoDedicatoria')) document.getElementById('checkPersCampoDedicatoria').checked = true;
+        if (document.getElementById('checkPersCampoCompositor')) document.getElementById('checkPersCampoCompositor').checked = true;
 
         // Valores por defecto al crear: Descarga y PDF activados
         const chkDescarga = document.getElementById('checkBadgeDescarga');
@@ -2899,6 +2980,14 @@
       if (document.getElementById('checkBadgeFisico')?.checked) sellosSeleccionados.push('fisico');
 
       const esPersonalizableVal = document.getElementById('checkArticuloPersonalizado') ? document.getElementById('checkArticuloPersonalizado').checked : true;
+      
+      const camposPersonalizacionSeleccionados = [];
+      if (esPersonalizableVal) {
+        if (document.getElementById('checkPersCampoTitulo')?.checked) camposPersonalizacionSeleccionados.push('titulo');
+        if (document.getElementById('checkPersCampoNombre')?.checked) camposPersonalizacionSeleccionados.push('nombre');
+        if (document.getElementById('checkPersCampoDedicatoria')?.checked) camposPersonalizacionSeleccionados.push('dedicatoria');
+        if (document.getElementById('checkPersCampoCompositor')?.checked) camposPersonalizacionSeleccionados.push('compositor');
+      }
 
       let filaReal = "";
       if (idEditando) {
@@ -2928,7 +3017,8 @@
         video: videoVal,
         descripcion: descVal,
         badges: sellosSeleccionados,
-        esPersonalizable: esPersonalizableVal
+        esPersonalizable: esPersonalizableVal,
+        camposPersonalizacion: camposPersonalizacionSeleccionados
       };
 
       // Animación de avance progresivo simulado
@@ -2972,6 +3062,7 @@
           }
           localStorage.setItem(`badges_prod_${idEditando}`, JSON.stringify(sellosSeleccionados));
           localStorage.setItem(`es_personalizable_prod_${idEditando}`, esPersonalizableVal ? 'true' : 'false');
+          localStorage.setItem(`campos_pers_prod_${idEditando}`, JSON.stringify(camposPersonalizacionSeleccionados));
         }
 
         // Dejar ver el 100% brevemente y luego cerrar automáticamente
