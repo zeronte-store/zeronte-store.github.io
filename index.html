@@ -131,26 +131,29 @@
       </div>
     </div>
 
-    <!-- FILA INFERIOR INDEPENDIENTE: Pestañas de Navegación Estilo Etsy -->
-    <div class="flex items-center gap-6 sm:gap-8 border-b border-gray-200 mt-1 text-xs sm:text-sm font-medium overflow-x-auto no-scrollbar">
-      <button onclick="cambiarPestana('articulos')" id="tab-articulos" class="pestana-btn py-3 border-b-2 border-black font-bold text-black transition whitespace-nowrap">
-        Artículos
+    <!-- FILA INFERIOR INDEPENDIENTE: Pestañas de Navegación Estilo Etsy con Iconos Centradas en Móvil -->
+    <div class="flex items-center justify-center sm:justify-start gap-6 sm:gap-8 border-b border-gray-200 mt-1 text-xs sm:text-sm font-medium overflow-x-auto no-scrollbar">
+      <button onclick="cambiarPestana('articulos')" id="tab-articulos" class="pestana-btn py-3 border-b-2 border-black font-bold text-black transition whitespace-nowrap flex items-center gap-1.5">
+        <i class="fa-solid fa-store text-xs text-gray-400"></i>
+        <span id="tabArticulosTexto">Artículos</span>
       </button>
-      <button onclick="cambiarPestana('resenas')" id="tab-resenas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
-        <span id="tabResenasTexto">Reseñas</span> <span id="conteoPestanaResenas" class="text-xs bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-full font-bold ml-0.5">192</span>
+      <button onclick="cambiarPestana('resenas')" id="tab-resenas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap flex items-center gap-1.5">
+        <i class="fa-solid fa-star text-xs text-gray-400"></i>
+        <span><span id="tabResenasTexto">Reseñas</span> <span id="conteoPestanaResenas" class="text-xs bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-full font-bold ml-0.5">192</span></span>
       </button>
       <button onclick="cambiarPestana('mis-pedidos')" id="tab-mis-pedidos" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap flex items-center gap-1.5">
         <i class="fa-solid fa-truck-fast text-xs text-gray-400"></i>
         <span id="tabMisPedidosTexto">Mis Pedidos</span>
       </button>
-      <button onclick="cambiarPestana('informacion')" id="tab-informacion" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap">
-        Información básica
+      <button onclick="cambiarPestana('informacion')" id="tab-informacion" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap hidden sm:inline-flex items-center gap-1.5">
+        <i class="fa-solid fa-circle-info text-xs text-gray-400"></i>
+        <span id="tabInformacionTexto">Información básica</span>
       </button>
-      <button onclick="cambiarPestana('politicas')" id="tab-politicas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap hidden sm:inline-block">
-        Políticas de la tienda
+      <button onclick="cambiarPestana('politicas')" id="tab-politicas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap hidden sm:inline-flex items-center gap-1.5">
+        <i class="fa-solid fa-shield-halved text-xs text-gray-400"></i>
+        <span id="tabPoliticasTexto">Políticas de la tienda</span>
       </button>
     </div>
-  </section>
 
   <!-- ==================== SECCIÓN 1: ARTÍCULOS (SIDEBAR + CATÁLOGO) ==================== -->
   <div id="vistaArticulos" class="pestana-contenido max-w-6xl mx-auto px-4 py-4 sm:py-6">
@@ -273,10 +276,14 @@
           <!-- Renderizado dinámico vía JavaScript -->
         </div>
 
-        <!-- Enlace / Botón a Políticas de la tienda al final de los artículos en móvil -->
-        <div class="sm:hidden mt-8 pt-6 border-t border-gray-200 text-center">
+        <!-- Enlaces a Información básica y Políticas de la tienda al final de los artículos en móvil -->
+        <div class="sm:hidden mt-8 pt-6 border-t border-gray-200 space-y-2.5">
+          <button onclick="cambiarPestana('informacion')" class="w-full py-3 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-800 shadow-sm flex items-center justify-between px-4 hover:border-black transition">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-circle-info text-gray-400 text-xs"></i> <span>Información básica</span></span>
+            <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+          </button>
           <button onclick="cambiarPestana('politicas')" class="w-full py-3 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-800 shadow-sm flex items-center justify-between px-4 hover:border-black transition">
-            <span id="txtBtnPoliticasAbajo">Políticas de la tienda</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-gray-400 text-xs"></i> <span id="txtBtnPoliticasAbajo">Políticas de la tienda</span></span>
             <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
           </button>
         </div>
@@ -377,7 +384,7 @@
         </div>
         <div>
           <h2 class="text-lg sm:text-xl font-serif font-bold text-gray-900">Seguimiento de tu Pedido</h2>
-          <p class="text-xs text-gray-500">Introduce el email con el que hiciste la compra y el número de pedido.</p>
+          <p class="text-xs text-gray-500">Introduce el email y el número de pedido con el que hiciste la compra.</p>
         </div>
       </div>
 
@@ -1799,14 +1806,16 @@
       const btnC = document.getElementById("btnContactoTxt");
       if (btnC) btnC.innerText = t.btnContacto;
 
-      // Pestañas
-      const tabArt = document.getElementById("tab-articulos");
+      // Pestañas con protección de iconos
+      const tabArt = document.getElementById("tabArticulosTexto");
       if (tabArt) tabArt.innerText = t.tabArticulos;
       const tabRes = document.getElementById("tabResenasTexto");
       if (tabRes) tabRes.innerText = t.tabResenas;
-      const tabInfo = document.getElementById("tab-informacion");
+      const tabPed = document.getElementById("tabMisPedidosTexto");
+      if (tabPed) tabPed.innerText = t.tabMisPedidos || "Mis Pedidos";
+      const tabInfo = document.getElementById("tabInformacionTexto");
       if (tabInfo) tabInfo.innerText = t.tabInformacion;
-      const tabPol = document.getElementById("tab-politicas");
+      const tabPol = document.getElementById("tabPoliticasTexto");
       if (tabPol) tabPol.innerText = t.tabPoliticas;
 
       // Sidebar Categorías
