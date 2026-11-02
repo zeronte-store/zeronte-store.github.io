@@ -1254,44 +1254,52 @@
 
         const productosServidor = data.productos || [];
         
-        // Obtener ofertas vigentes para blindar los precios de oferta ante refrescos del servidor
+        // Obtener ofertas vigentes locales
         const campanasVigentes = (typeof obtenerCampanasOfertas === 'function') ? obtenerCampanasOfertas() : [];
         const ahoraMomento = Date.now();
         const mapaOfertasVigentes = {};
+        
         campanasVigentes.forEach(c => {
           if (!c.activa) return;
           const inicioAlcanzado = ahoraMomento >= c.fechaInicio;
           const noExpirada = c.sinFin || (c.fechaFin && ahoraMomento <= c.fechaFin);
           if (inicioAlcanzado && noExpirada && Array.isArray(c.idsObjetivo)) {
             c.idsObjetivo.forEach(idProd => {
-              mapaOfertasVigentes[idProd] = { tipo: c.tipo, valor: c.valor };
+              mapaOfertasVigentes[idProd.toLowerCase()] = { tipo: c.tipo, valor: c.valor };
             });
           }
         });
 
         listaProductosGlobal = productosServidor.map(p => {
           let prodActualizado = { ...p };
-          // Normalizar precio de oferta que venga del servidor con coma (ej. 0,49 -> 0.49)
-          if (prodActualizado.precioOferta !== undefined && prodActualizado.precioOferta !== null) {
-            prodActualizado.precioOferta = prodActualizado.precioOferta.toString().replace(',', '.').trim();
+          const pIdLower = (p.id || '').toLowerCase();
+
+          // Normalizar precio base numérico
+          const pBase = parseFloat((p.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
+
+          // Normalizar precio de oferta existente en la base de datos
+          let poNum = null;
+          if (prodActualizado.precioOferta !== undefined && prodActualizado.precioOferta !== null && prodActualizado.precioOferta !== "") {
+            poNum = parseFloat(prodActualizado.precioOferta.toString().replace('€', '').trim().replace(',', '.'));
+            prodActualizado.precioOferta = isNaN(poNum) ? "" : poNum.toFixed(2);
+          } else {
+            prodActualizado.precioOferta = "";
+          }
+
+          // Si el producto tiene una campaña local en curso, PRIORIZAR LA OFERTA VIGENTE LOCAL
+          if (mapaOfertasVigentes[pIdLower] && pBase > 0) {
+            const infoDesc = mapaOfertasVigentes[pIdLower];
+            let precioOfertaCalculado = (infoDesc.tipo === 'porcentaje')
+              ? (pBase * (1 - (infoDesc.valor / 100))).toFixed(2)
+              : Number(infoDesc.valor).toFixed(2);
+
+            prodActualizado.precioOferta = precioOfertaCalculado;
           }
 
           if (p.id) {
             const valLocal = localStorage.getItem(`es_personalizable_prod_${p.id}`);
             if (valLocal !== null) {
               prodActualizado.esPersonalizable = (valLocal === 'true');
-            }
-            // Si tiene una campaña activa, el precio de oferta se blinda y no se deja pisar por el servidor
-            if (mapaOfertasVigentes[p.id]) {
-              const infoDesc = mapaOfertasVigentes[p.id];
-              const pBase = parseFloat((p.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
-              if (pBase > 0) {
-                if (infoDesc.tipo === 'porcentaje') {
-                  prodActualizado.precioOferta = (pBase * (1 - (infoDesc.valor / 100))).toFixed(2);
-                } else {
-                  prodActualizado.precioOferta = Number(infoDesc.valor).toFixed(2);
-                }
-              }
             }
           }
           return prodActualizado;
@@ -4761,7 +4769,6 @@
 
     // Comprueba las fechas programadas y aplica/retira los precios de oferta automáticamente de forma consistente
     let sincronizacionEnCurso = false;
-    const idsOfertasConfirmadasEnServidor = new Set();
 
     async function sincronizarOfertasConCatalogo() {
       if (sincronizacionEnCurso) return;
@@ -4777,7 +4784,7 @@
 
         if (inicioAlcanzado && noExpirada && Array.isArray(camp.idsObjetivo)) {
           camp.idsObjetivo.forEach(idProd => {
-            mapaDescuentosActivos[idProd] = {
+            mapaDescuentosActivos[idProd.toLowerCase()] = {
               tipo: camp.tipo,
               valor: camp.valor,
               campana: camp.nombre
@@ -4786,11 +4793,12 @@
         }
       });
 
-      let huboCambios = false;
-      const peticionesPendientes = [];
+      let huboCambiosVisuales = false;
+      const cambiosParaServidor = {};
 
       listaProductosGlobal.forEach(prod => {
-        const desc = mapaDescuentosActivos[prod.id];
+        const pIdLower = (prod.id || '').toLowerCase();
+        const desc = mapaDescuentosActivos[pIdLower];
         const precioBase = parseFloat((prod.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
         
         let precioOfertaObjetivo = "";
@@ -4804,52 +4812,43 @@
           }
         }
 
-        // Si el producto está en una campaña activa
-        if (desc && precioOfertaObjetivo !== "") {
-          if (prod.precioOferta !== precioOfertaObjetivo) {
-            prod.precioOferta = precioOfertaObjetivo;
-            huboCambios = true;
-          }
+        // Comparación numérica segura para evitar discrepancias por strings tipo "7.99" vs 7.99
+        const poActualNum = parseFloat(prod.precioOferta);
+        const poObjNum = parseFloat(precioOfertaObjetivo);
 
-          // Blindaje: Solo enviamos a Google Sheets si este ID aún no fue confirmado
-          if (!idsOfertasConfirmadasEnServidor.has(prod.id + "_" + precioOfertaObjetivo) && prod.fila) {
-            idsOfertasConfirmadasEnServidor.add(prod.id + "_" + precioOfertaObjetivo);
-            peticionesPendientes.push({
-              accion: "editarProducto",
-              clave: tokenClave || "zeronte2026",
-              id: prod.id,
-              fila: prod.fila,
-              titulo: prod.titulo,
-              precio: prod.precio,
-              precioOferta: precioOfertaObjetivo,
-              categoria: prod.categoria,
-              imagenes: Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen],
-              video: prod.video || '',
-              descripcion: prod.descripcion || ''
-            });
-          }
+        const sonIguales = (isNaN(poActualNum) && isNaN(poObjNum)) || 
+                           (!isNaN(poActualNum) && !isNaN(poObjNum) && Math.abs(poActualNum - poObjNum) < 0.005);
+
+        if (!sonIguales) {
+          prod.precioOferta = precioOfertaObjetivo;
+          huboCambiosVisuales = true;
+          cambiosParaServidor[pIdLower] = precioOfertaObjetivo;
         }
       });
 
-      if (huboCambios) {
+      if (huboCambiosVisuales) {
         renderizarProductos();
+        renderizarModuloOfertas();
       }
 
-      // Enviar peticiones sin saturar el hilo ni activar el límite de tiempo
-      if (peticionesPendientes.length > 0) {
+      // Si hay diferencias entre el estado local y Sheets, enviar TODO en una única petición atómica
+      if (Object.keys(cambiosParaServidor).length > 0) {
         sincronizacionEnCurso = true;
-        const envios = peticionesPendientes.map(datos => 
-          fetch(APPS_SCRIPT_URL, {
+        try {
+          await fetch(APPS_SCRIPT_URL, {
             method: "POST",
-            mode: "no-cors",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(datos)
-          }).catch(() => {})
-        );
-
-        Promise.all(envios).finally(() => {
+            body: JSON.stringify({
+              accion: "actualizarOfertasLote",
+              clave: tokenClave || "zeronte2026",
+              cambios: cambiosParaServidor
+            })
+          });
+        } catch (errSync) {
+          console.warn("Sincronización por lote pospuesta:", errSync);
+        } finally {
           sincronizacionEnCurso = false;
-        });
+        }
       }
     }
 
