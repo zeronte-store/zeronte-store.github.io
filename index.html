@@ -213,30 +213,7 @@
       <aside class="w-full lg:w-56 flex-shrink-0 hidden lg:block">
         <h3 id="txtSeccionesSidebar" class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-3">Secciones</h3>
         <ul id="listaCategorias" class="flex flex-col gap-1 text-sm font-medium">
-          <li>
-            <button onclick="filtrarCategoria('todos', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg bg-gray-200/80 text-black font-semibold transition text-left whitespace-nowrap">
-              <span id="catTxtTodos">Todos los artículos</span>
-              <span id="conteo-todos" class="text-xs text-gray-500 ml-2">0</span>
-            </button>
-          </li>
-          <li>
-            <button onclick="filtrarCategoria('partitura', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap">
-              <span id="catTxtPartituras">Partituras personalizadas</span>
-              <span id="conteo-partitura" class="text-xs text-gray-500 ml-2">0</span>
-            </button>
-          </li>
-          <li>
-            <button onclick="filtrarCategoria('natalicio', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap">
-              <span id="catTxtNatalicios">Natalicios</span>
-              <span id="conteo-natalicio" class="text-xs text-gray-500 ml-2">0</span>
-            </button>
-          </li>
-          <li>
-            <button onclick="filtrarCategoria('posters', this)" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap">
-              <span id="catTxtPosters">Pósters y Láminas</span>
-              <span id="conteo-posters" class="text-xs text-gray-500 ml-2">0</span>
-            </button>
-          </li>
+          <!-- Generado dinámicamente según la base de datos -->
         </ul>
       </aside>
 
@@ -2916,25 +2893,26 @@
 
       // Sincronizar botones de escritorio
       document.querySelectorAll('.cat-btn').forEach(b => {
-        b.classList.remove('bg-gray-200/80', 'text-black', 'font-semibold');
-        b.classList.add('text-gray-700');
+        const catBtnAttr = b.getAttribute('data-cat');
+        if (catBtnAttr === cat) {
+          b.className = 'cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg bg-gray-200/80 text-black font-semibold transition text-left whitespace-nowrap';
+        } else {
+          b.className = 'cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-200/50 text-gray-700 transition text-left whitespace-nowrap';
+        }
       });
-      if (btn) {
-        btn.classList.add('bg-gray-200/80', 'text-black', 'font-semibold');
-      }
 
-      const tituloMap = {
-        'todos': t.catTodos,
-        'partitura': t.catPartituras,
-        'natalicio': t.catNatalicios,
-        'posters': t.catPosters
-      };
       const tituloEl = document.getElementById('tituloSeccionActual');
-      if (tituloEl) tituloEl.innerText = tituloMap[cat] || t.catTodos;
+      if (tituloEl) {
+        if (cat === 'todos') {
+          tituloEl.innerText = t.catTodos;
+        } else {
+          tituloEl.innerText = cat.charAt(0).toUpperCase() + cat.slice(1);
+        }
+      }
 
       let filtrados = catalogoCompleto;
       if (cat !== 'todos') {
-        filtrados = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes(cat.toLowerCase()));
+        filtrados = catalogoCompleto.filter(p => (p.categoria || '').trim().toLowerCase() === cat.trim().toLowerCase());
       }
 
       const inputMovil = document.getElementById('buscadorTiendaMovil');
@@ -2962,7 +2940,7 @@
 
       let base = catalogoCompleto;
       if (categoriaSeleccionada !== 'todos') {
-        base = base.filter(p => (p.categoria || '').toLowerCase().includes(categoriaSeleccionada.toLowerCase()));
+        base = base.filter(p => (p.categoria || '').trim().toLowerCase() === categoriaSeleccionada.trim().toLowerCase());
       }
       const resultados = base.filter(p => 
         (p.titulo || '').toLowerCase().includes(q) || 
@@ -2972,36 +2950,66 @@
     }
 
     function actualizarConteosCategorias() {
-      const elTodos = document.getElementById('conteo-todos');
-      const elPartitura = document.getElementById('conteo-partitura');
-      const elNatalicio = document.getElementById('conteo-natalicio');
-      const elPosters = document.getElementById('conteo-posters');
-
+      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       const cTodos = catalogoCompleto.length;
-      const cPart = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('partitura')).length;
-      const cNat = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('natalicio')).length;
-      const cPost = catalogoCompleto.filter(p => (p.categoria || '').toLowerCase().includes('poster')).length;
 
-      if (elTodos) elTodos.innerText = cTodos;
-      if (elPartitura) elPartitura.innerText = cPart;
-      if (elNatalicio) elNatalicio.innerText = cNat;
-      if (elPosters) elPosters.innerText = cPost;
+      // Obtener dinámicamente las categorías reales de la base de datos y sus conteos
+      const mapaCategorias = {};
+      catalogoCompleto.forEach(p => {
+        const cat = (p.categoria || '').trim();
+        if (cat) {
+          const catKey = cat.toLowerCase();
+          if (!mapaCategorias[catKey]) {
+            mapaCategorias[catKey] = { nombre: cat, total: 0 };
+          }
+          mapaCategorias[catKey].total += 1;
+        }
+      });
 
-      // Actualizar opciones del select móvil con sus conteos
-      const selectMovil = document.getElementById('selectCategoriasMovil');
-      if (selectMovil) {
-        const valActual = selectMovil.value;
-        const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
-        selectMovil.innerHTML = `
-          <option value="todos">${t.catTodos} (${cTodos})</option>
-          <option value="partitura">${t.catPartituras} (${cPart})</option>
-          <option value="natalicio">${t.catNatalicios} (${cNat})</option>
-          <option value="posters">${t.catPosters} (${cPost})</option>
+      // Renderizar Sidebar Dinámico de Escritorio
+      const listaUl = document.getElementById('listaCategorias');
+      if (listaUl) {
+        let htmlCats = `
+          <li>
+            <button onclick="filtrarCategoria('todos', this)" data-cat="todos" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg ${categoriaSeleccionada === 'todos' ? 'bg-gray-200/80 text-black font-semibold' : 'hover:bg-gray-200/50 text-gray-700'} transition text-left whitespace-nowrap">
+              <span>${t.catTodos}</span>
+              <span class="text-xs text-gray-500 ml-2">${cTodos}</span>
+            </button>
+          </li>
         `;
-        selectMovil.value = valActual || 'todos';
+
+        Object.keys(mapaCategorias).forEach(key => {
+          const item = mapaCategorias[key];
+          const nombreVisible = item.nombre.charAt(0).toUpperCase() + item.nombre.slice(1);
+          const esActivo = categoriaSeleccionada.toLowerCase() === key;
+
+          htmlCats += `
+            <li>
+              <button onclick="filtrarCategoria('${item.nombre.replace(/'/g, "\\'")}', this)" data-cat="${item.nombre.replace(/"/g, '&quot;')}" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg ${esActivo ? 'bg-gray-200/80 text-black font-semibold' : 'hover:bg-gray-200/50 text-gray-700'} transition text-left whitespace-nowrap">
+                <span>${nombreVisible}</span>
+                <span class="text-xs text-gray-500 ml-2">${item.total}</span>
+              </button>
+            </li>
+          `;
+        });
+
+        listaUl.innerHTML = htmlCats;
       }
 
-      // Actualizar placeholder del buscador móvil estilo Etsy: "Buscar entre los X artículos"
+      // Actualizar Select de categorías de la versión Móvil dinámicamente
+      const selectMovil = document.getElementById('selectCategoriasMovil');
+      if (selectMovil) {
+        let opcionesMovil = `<option value="todos">${t.catTodos} (${cTodos})</option>`;
+        Object.keys(mapaCategorias).forEach(key => {
+          const item = mapaCategorias[key];
+          const nombreVisible = item.nombre.charAt(0).toUpperCase() + item.nombre.slice(1);
+          opcionesMovil += `<option value="${item.nombre.replace(/"/g, '&quot;')}">${nombreVisible} (${item.total})</option>`;
+        });
+        selectMovil.innerHTML = opcionesMovil;
+        selectMovil.value = categoriaSeleccionada || 'todos';
+      }
+
+      // Actualizar placeholder del buscador móvil
       const buscadorMovil = document.getElementById('buscadorTiendaMovil');
       if (buscadorMovil) {
         buscadorMovil.placeholder = `Buscar entre los ${cTodos} artículos`;
