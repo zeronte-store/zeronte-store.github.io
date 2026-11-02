@@ -755,17 +755,17 @@
             </div>
           </section>
 
-          <!-- MODAL ETSY: CREAR / LANZAR OFERTA -->
+          <!-- MODAL ETSY: CREAR / LANZAR / EDITAR OFERTA -->
           <div id="modalOfertaEtsy" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-white border border-slate-200 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden my-6">
               
               <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-rose-50/50">
                 <div class="flex items-center gap-2.5">
                   <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-tags"></i>
+                    <i id="iconoModalOferta" class="fa-solid fa-tags"></i>
                   </div>
                   <div>
-                    <h3 class="text-sm font-bold text-slate-900">Configurar Campaña u Oferta</h3>
+                    <h3 id="tituloModalOferta" class="text-sm font-bold text-slate-900">Configurar Campaña u Oferta</h3>
                     <p class="text-[10px] text-slate-500">Aplica descuentos programados por porcentaje o precio fijo.</p>
                   </div>
                 </div>
@@ -775,6 +775,8 @@
               </div>
 
               <form onsubmit="guardarYEjecutarOferta(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs text-slate-700">
+                <!-- Campo oculto para identificar si se está editando una oferta existente -->
+                <input type="hidden" id="ofertaEditandoId" value="">
                 
                 <!-- Nombre y plantilla rápida de Campaña -->
                 <div>
@@ -1250,17 +1252,49 @@
         const datosCambiaron = JSON.stringify(listaPedidosGlobal) !== JSON.stringify(data.pedidos || []) ||
                                JSON.stringify(listaProductosGlobal) !== JSON.stringify(data.productos || []);
 
-        const pedidosServidor = data.pedidos || [];
-        listaPedidosGlobal = pedidosServidor.filter(p => !idsEliminadosLocalmente.has(p.id));
         const productosServidor = data.productos || [];
+        
+        // Obtener ofertas vigentes para blindar los precios de oferta ante refrescos del servidor
+        const campanasVigentes = (typeof obtenerCampanasOfertas === 'function') ? obtenerCampanasOfertas() : [];
+        const ahoraMomento = Date.now();
+        const mapaOfertasVigentes = {};
+        campanasVigentes.forEach(c => {
+          if (!c.activa) return;
+          const inicioAlcanzado = ahoraMomento >= c.fechaInicio;
+          const noExpirada = c.sinFin || (c.fechaFin && ahoraMomento <= c.fechaFin);
+          if (inicioAlcanzado && noExpirada && Array.isArray(c.idsObjetivo)) {
+            c.idsObjetivo.forEach(idProd => {
+              mapaOfertasVigentes[idProd] = { tipo: c.tipo, valor: c.valor };
+            });
+          }
+        });
+
         listaProductosGlobal = productosServidor.map(p => {
+          let prodActualizado = { ...p };
+          // Normalizar precio de oferta que venga del servidor con coma (ej. 0,49 -> 0.49)
+          if (prodActualizado.precioOferta !== undefined && prodActualizado.precioOferta !== null) {
+            prodActualizado.precioOferta = prodActualizado.precioOferta.toString().replace(',', '.').trim();
+          }
+
           if (p.id) {
             const valLocal = localStorage.getItem(`es_personalizable_prod_${p.id}`);
             if (valLocal !== null) {
-              return { ...p, esPersonalizable: (valLocal === 'true') };
+              prodActualizado.esPersonalizable = (valLocal === 'true');
+            }
+            // Si tiene una campaña activa, el precio de oferta se blinda y no se deja pisar por el servidor
+            if (mapaOfertasVigentes[p.id]) {
+              const infoDesc = mapaOfertasVigentes[p.id];
+              const pBase = parseFloat((p.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
+              if (pBase > 0) {
+                if (infoDesc.tipo === 'porcentaje') {
+                  prodActualizado.precioOferta = (pBase * (1 - (infoDesc.valor / 100))).toFixed(2);
+                } else {
+                  prodActualizado.precioOferta = Number(infoDesc.valor).toFixed(2);
+                }
+              }
             }
           }
-          return p;
+          return prodActualizado;
         });
 
         const mensajesServidor = data.mensajes || [];
@@ -4465,6 +4499,7 @@
     // MOTOR DE OFERTAS & CAMPAÑAS MASIVAS AUTOMATIZADAS (ESTILO ETSY)
     // =========================================================================
     let alcanceOfertaActual = 'todos';
+    let intervaloCuentaAtrasOfertas = null;
 
     function obtenerCampanasOfertas() {
       try {
@@ -4478,23 +4513,14 @@
       localStorage.setItem('zeronte_campanas_ofertas', JSON.stringify(lista));
     }
 
-    function abrirModalCrearOferta() {
+    function abrirModalCrearOferta(campanaId = null) {
       const modal = document.getElementById('modalOfertaEtsy');
       if (!modal) return;
 
-      const ahora = new Date();
       const formatoLocal = (d) => {
         const pad = (n) => String(n).padStart(2, '0');
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
       };
-
-      const inInicio = document.getElementById('ofertaFechaInicio');
-      const inFin = document.getElementById('ofertaFechaFin');
-      if (inInicio) inInicio.value = formatoLocal(ahora);
-      if (inFin) {
-        const fin48h = new Date(ahora.getTime() + (48 * 60 * 60 * 1000));
-        inFin.value = formatoLocal(fin48h);
-      }
 
       // Población de categorías en el select del modal
       const selectCat = document.getElementById('selectCategoriaOferta');
@@ -4517,8 +4543,83 @@
         `).join('');
       }
 
-      const btnTodos = document.querySelector('.btn-alcance-oferta[data-alcance="todos"]');
-      if (btnTodos) setAlcanceOferta('todos', btnTodos);
+      const inputEditando = document.getElementById('ofertaEditandoId');
+      const tituloModal = document.getElementById('tituloModalOferta');
+      const iconoModal = document.getElementById('iconoModalOferta');
+      const btnSubmit = document.getElementById('btnGuardarCampanaOferta');
+
+      if (campanaId) {
+        // MODO EDICIÓN
+        const campanas = obtenerCampanasOfertas();
+        const camp = campanas.find(c => c.id === campanaId);
+        if (camp) {
+          if (inputEditando) inputEditando.value = camp.id;
+          if (tituloModal) tituloModal.innerText = 'Editar Campaña u Oferta';
+          if (iconoModal) iconoModal.className = 'fa-solid fa-pen';
+          if (btnSubmit) btnSubmit.innerText = 'Guardar Cambios';
+
+          const inNom = document.getElementById('ofertaNombre');
+          const selTipo = document.getElementById('ofertaTipoDescuento');
+          const inVal = document.getElementById('ofertaValorDescuento');
+          const inInicio = document.getElementById('ofertaFechaInicio');
+          const inFin = document.getElementById('ofertaFechaFin');
+          const chkSinFin = document.getElementById('checkOfertaSinFin');
+
+          if (inNom) inNom.value = camp.nombre || '';
+          if (selTipo) {
+            selTipo.value = camp.tipo || 'porcentaje';
+            actualizarPlaceholderDescuento(camp.tipo || 'porcentaje');
+          }
+          if (inVal) inVal.value = camp.valor || '';
+          if (inInicio && camp.fechaInicio) inInicio.value = formatoLocal(new Date(camp.fechaInicio));
+          if (chkSinFin) {
+            chkSinFin.checked = !!camp.sinFin;
+            toggleSinFechaFin(chkSinFin.checked);
+          }
+          if (inFin && camp.fechaFin) {
+            inFin.value = formatoLocal(new Date(camp.fechaFin));
+          }
+
+          const btnAlcance = document.querySelector(`.btn-alcance-oferta[data-alcance="${camp.alcance || 'todos'}"]`);
+          setAlcanceOferta(camp.alcance || 'todos', btnAlcance);
+
+          if (camp.alcance === 'categoria' && selectCat && camp.categoriaSeleccionada) {
+            selectCat.value = camp.categoriaSeleccionada;
+          } else if (camp.alcance === 'individual' && Array.isArray(camp.idsObjetivo)) {
+            document.querySelectorAll('input[name="prods_oferta_check"]').forEach(chk => {
+              chk.checked = camp.idsObjetivo.includes(chk.value);
+            });
+          }
+        }
+      } else {
+        // MODO CREACIÓN
+        if (inputEditando) inputEditando.value = '';
+        if (tituloModal) tituloModal.innerText = 'Configurar Campaña u Oferta';
+        if (iconoModal) iconoModal.className = 'fa-solid fa-tags';
+        if (btnSubmit) btnSubmit.innerText = 'Lanzar / Programar Oferta';
+
+        const ahora = new Date();
+        const inInicio = document.getElementById('ofertaFechaInicio');
+        const inFin = document.getElementById('ofertaFechaFin');
+        const inNom = document.getElementById('ofertaNombre');
+        const inVal = document.getElementById('ofertaValorDescuento');
+        const chkSinFin = document.getElementById('checkOfertaSinFin');
+
+        if (inNom) inNom.value = '';
+        if (inVal) inVal.value = '';
+        if (inInicio) inInicio.value = formatoLocal(ahora);
+        if (inFin) {
+          const fin48h = new Date(ahora.getTime() + (48 * 60 * 60 * 1000));
+          inFin.value = formatoLocal(fin48h);
+        }
+        if (chkSinFin) {
+          chkSinFin.checked = false;
+          toggleSinFechaFin(false);
+        }
+
+        const btnTodos = document.querySelector('.btn-alcance-oferta[data-alcance="todos"]');
+        if (btnTodos) setAlcanceOferta('todos', btnTodos);
+      }
 
       modal.classList.remove('hidden');
     }
@@ -4576,6 +4677,7 @@
 
     async function guardarYEjecutarOferta(e) {
       e.preventDefault();
+      const idEditando = (document.getElementById('ofertaEditandoId')?.value || '').trim();
       const nombre = document.getElementById('ofertaNombre').value.trim();
       const tipo = document.getElementById('ofertaTipoDescuento').value;
       const valor = parseFloat(document.getElementById('ofertaValorDescuento').value) || 0;
@@ -4584,13 +4686,13 @@
       const fFin = sinFin ? null : new Date(document.getElementById('ofertaFechaFin').value).getTime();
 
       let idsObjetivo = [];
+      let catSel = '';
       if (alcanceOfertaActual === 'todos') {
         idsObjetivo = listaProductosGlobal.map(p => p.id);
       } else if (alcanceOfertaActual === 'categoria') {
-        const catSel = document.getElementById('selectCategoriaOferta').value;
+        catSel = document.getElementById('selectCategoriaOferta').value;
         idsObjetivo = listaProductosGlobal.filter(p => (p.categoria || '').trim().toLowerCase() === catSel.trim().toLowerCase()).map(p => p.id);
       } else if (alcanceOfertaActual === 'top_ventas') {
-        // Tomar el top 4 más vendidos
         const ranking = [...listaProductosGlobal].sort((a,b) => (b.totalVentas || 0) - (a.totalVentas || 0));
         idsObjetivo = ranking.slice(0, 4).map(p => p.id);
       } else if (alcanceOfertaActual === 'individual') {
@@ -4604,23 +4706,44 @@
         return;
       }
 
-      const nuevaCampana = {
-        id: "OFERTA-" + Date.now(),
-        nombre: nombre,
-        tipo: tipo,
-        valor: valor,
-        fechaInicio: fInicio,
-        fechaFin: fFin,
-        sinFin: sinFin,
-        alcance: alcanceOfertaActual,
-        idsObjetivo: idsObjetivo,
-        activa: true
-      };
-
       const campanas = obtenerCampanasOfertas();
-      campanas.unshift(nuevaCampana);
-      guardarCampanasOfertas(campanas);
 
+      if (idEditando) {
+        // ACTUALIZAR OFERTA EXISTENTE
+        const index = campanas.findIndex(c => c.id === idEditando);
+        if (index !== -1) {
+          campanas[index] = {
+            ...campanas[index],
+            nombre: nombre,
+            tipo: tipo,
+            valor: valor,
+            fechaInicio: fInicio,
+            fechaFin: fFin,
+            sinFin: sinFin,
+            alcance: alcanceOfertaActual,
+            categoriaSeleccionada: catSel,
+            idsObjetivo: idsObjetivo
+          };
+        }
+      } else {
+        // CREAR NUEVA OFERTA
+        const nuevaCampana = {
+          id: "OFERTA-" + Date.now(),
+          nombre: nombre,
+          tipo: tipo,
+          valor: valor,
+          fechaInicio: fInicio,
+          fechaFin: fFin,
+          sinFin: sinFin,
+          alcance: alcanceOfertaActual,
+          categoriaSeleccionada: catSel,
+          idsObjetivo: idsObjetivo,
+          activa: true
+        };
+        campanas.unshift(nuevaCampana);
+      }
+
+      guardarCampanasOfertas(campanas);
       cerrarModalCrearOferta();
       await sincronizarOfertasConCatalogo();
       renderizarModuloOfertas();
@@ -4636,8 +4759,11 @@
       renderizarModuloOfertas();
     }
 
-    // Comprueba las fechas programadas y aplica/retira los precios de oferta automáticamente
+    // Comprueba las fechas programadas y aplica/retira los precios de oferta automáticamente de forma consistente
+    let sincronizacionEnCurso = false;
+
     async function sincronizarOfertasConCatalogo() {
+      if (sincronizacionEnCurso) return;
       const ahora = Date.now();
       const campanas = obtenerCampanasOfertas();
 
@@ -4648,7 +4774,7 @@
         const inicioAlcanzado = ahora >= camp.fechaInicio;
         const noExpirada = camp.sinFin || (camp.fechaFin && ahora <= camp.fechaFin);
 
-        if (inicioAlcanzado && noExpirada) {
+        if (inicioAlcanzado && noExpirada && Array.isArray(camp.idsObjetivo)) {
           camp.idsObjetivo.forEach(idProd => {
             mapaDescuentosActivos[idProd] = {
               tipo: camp.tipo,
@@ -4659,11 +4785,12 @@
         }
       });
 
-      // Modificar en memoria y sincronizar con la base de datos
       let huboCambios = false;
-      for (const prod of listaProductosGlobal) {
+      const peticionesPendientes = [];
+
+      listaProductosGlobal.forEach(prod => {
         const desc = mapaDescuentosActivos[prod.id];
-        const precioBase = parseFloat(prod.precio) || 0;
+        const precioBase = parseFloat((prod.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
         let nuevoPrecioOferta = "";
 
         if (desc && precioBase > 0) {
@@ -4671,47 +4798,121 @@
             const rebajado = precioBase * (1 - (desc.valor / 100));
             nuevoPrecioOferta = rebajado.toFixed(2);
           } else {
-            nuevoPrecioOferta = desc.valor.toFixed(2);
+            nuevoPrecioOferta = Number(desc.valor).toFixed(2);
           }
         }
 
-        const ofertaPrevia = (prod.precioOferta || '').toString().trim();
-        if (ofertaPrevia !== nuevoPrecioOferta) {
+        const ofertaPreviaRaw = (prod.precioOferta !== undefined && prod.precioOferta !== null) ? prod.precioOferta.toString().trim() : '';
+        const numPrevia = parseFloat(ofertaPreviaRaw.replace(',', '.'));
+        const numNueva = parseFloat(nuevoPrecioOferta.replace(',', '.'));
+
+        const ambosVacios = (ofertaPreviaRaw === '' || isNaN(numPrevia)) && (nuevoPrecioOferta === '' || isNaN(numNueva));
+        const valoresNumericosIguales = !isNaN(numPrevia) && !isNaN(numNueva) && Math.abs(numPrevia - numNueva) < 0.001;
+
+        // Si son iguales numéricamente (ej: 0.49 vs 0,49 o 2 vs 2.00), no sobreescribir ni volver a enviar
+        if (!ambosVacios && !valoresNumericosIguales) {
           prod.precioOferta = nuevoPrecioOferta;
           huboCambios = true;
-          // Actualización silenciosa a Google Sheets
+
           if (prod.fila) {
-            try {
-              fetch(APPS_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify({
-                  accion: "editarProducto",
-                  clave: tokenClave || "zeronte2026",
-                  id: prod.id,
-                  fila: prod.fila,
-                  titulo: prod.titulo,
-                  precio: prod.precio,
-                  precioOferta: nuevoPrecioOferta,
-                  categoria: prod.categoria,
-                  imagenes: Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen],
-                  video: prod.video || '',
-                  descripcion: prod.descripcion || ''
-                })
-              });
-            } catch(e) {}
+            peticionesPendientes.push({
+              accion: "editarProducto",
+              clave: tokenClave || "zeronte2026",
+              id: prod.id,
+              fila: prod.fila,
+              titulo: prod.titulo,
+              precio: prod.precio,
+              precioOferta: nuevoPrecioOferta,
+              categoria: prod.categoria,
+              imagenes: Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen],
+              video: prod.video || '',
+              descripcion: prod.descripcion || ''
+            });
+          }
+        } else if (ambosVacios && ofertaPreviaRaw !== '') {
+          // Si expiró la oferta y tenía valor previo, limpiarlo una sola vez
+          prod.precioOferta = '';
+          huboCambios = true;
+          if (prod.fila) {
+            peticionesPendientes.push({
+              accion: "editarProducto",
+              clave: tokenClave || "zeronte2026",
+              id: prod.id,
+              fila: prod.fila,
+              titulo: prod.titulo,
+              precio: prod.precio,
+              precioOferta: '',
+              categoria: prod.categoria,
+              imagenes: Array.isArray(prod.imagen) ? prod.imagen : [prod.imagen],
+              video: prod.video || '',
+              descripcion: prod.descripcion || ''
+            });
           }
         }
-      }
+      });
 
       if (huboCambios) {
         renderizarProductos();
       }
+
+      if (peticionesPendientes.length > 0) {
+        sincronizacionEnCurso = true;
+        const envios = peticionesPendientes.map(datos => 
+          fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(datos)
+          }).catch(() => {})
+        );
+
+        Promise.all(envios).finally(() => {
+          sincronizacionEnCurso = false;
+        });
+      }
+    }
+
+    // Calcula el texto y formato de cuenta atrás regresiva
+    function formatearTiempoRestante(milisegundos) {
+      if (milisegundos <= 0) return "Expirada";
+      const totalSegundos = Math.floor(milisegundos / 1000);
+      const dias = Math.floor(totalSegundos / (3600 * 24));
+      const horas = Math.floor((totalSegundos % (3600 * 24)) / 3600);
+      const minutos = Math.floor((totalSegundos % 3600) / 60);
+      const segundos = totalSegundos % 60;
+
+      const pad = (n) => String(n).padStart(2, '0');
+
+      if (dias > 0) {
+        return `${dias}d ${pad(horas)}h ${pad(minutos)}m ${pad(segundos)}s`;
+      }
+      return `${pad(horas)}h ${pad(minutos)}m ${pad(segundos)}s`;
+    }
+
+    function actualizarContadoresOfertasEnVivo() {
+      const ahora = Date.now();
+      const elementosContador = document.querySelectorAll('.cuenta-atras-oferta');
+      let requiereResincronizar = false;
+
+      elementosContador.forEach(el => {
+        const finTimestamp = parseInt(el.getAttribute('data-fin'), 10);
+        if (!finTimestamp || isNaN(finTimestamp)) return;
+
+        const restante = finTimestamp - ahora;
+        if (restante <= 0) {
+          el.innerText = 'Finalizada';
+          requiereResincronizar = true;
+        } else {
+          el.innerText = formatearTiempoRestante(restante);
+        }
+      });
+
+      if (requiereResincronizar) {
+        sincronizarOfertasConCatalogo();
+      }
     }
 
     function renderizarModuloOfertas() {
-      sincronizarOfertasConCatalogo();
       const campanas = obtenerCampanasOfertas();
       const ahora = Date.now();
 
@@ -4746,6 +4947,10 @@
       if (campanas.length === 0) {
         cont.innerHTML = "";
         sinOf.classList.remove('hidden');
+        if (intervaloCuentaAtrasOfertas) {
+          clearInterval(intervaloCuentaAtrasOfertas);
+          intervaloCuentaAtrasOfertas = null;
+        }
         return;
       }
       sinOf.classList.add('hidden');
@@ -4756,10 +4961,33 @@
         const esEnCurso = !esProgramada && !esExpirada;
 
         let estadoBadge = '';
+        let contadorHtml = '';
+
         if (esEnCurso) {
           estadoBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> En curso</span>`;
+          if (!c.sinFin && c.fechaFin) {
+            const restante = c.fechaFin - ahora;
+            contadorHtml = `
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                <i class="fa-solid fa-hourglass-half text-[11px] animate-spin text-rose-500"></i>
+                <span class="cuenta-atras-oferta" data-fin="${c.fechaFin}">${formatearTiempoRestante(restante)}</span>
+              </span>
+            `;
+          } else {
+            contadorHtml = `
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                <i class="fa-solid fa-infinity text-[11px]"></i> Sin límite de tiempo
+              </span>
+            `;
+          }
         } else if (esProgramada) {
           estadoBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-regular fa-clock text-[10px]"></i> Programada</span>`;
+          const tiempoParaIniciar = c.fechaInicio - ahora;
+          contadorHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+              <i class="fa-regular fa-clock text-[10px]"></i> Empieza en: ${formatearTiempoRestante(tiempoParaIniciar)}
+            </span>
+          `;
         } else {
           estadoBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">Finalizada</span>`;
         }
@@ -4769,13 +4997,14 @@
 
         return `
           <div class="p-4 rounded-2xl border ${esEnCurso ? 'border-rose-300 bg-rose-50/20 shadow-xs' : 'border-slate-200 bg-white'} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="space-y-1">
+            <div class="space-y-1.5">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-bold text-slate-900 text-sm">${c.nombre}</span>
                 <span class="font-extrabold text-xs px-2 py-0.5 rounded-md ${c.tipo === 'porcentaje' ? 'bg-rose-100 text-rose-800' : 'bg-blue-100 text-blue-800'}">
                   ${c.tipo === 'porcentaje' ? `-${c.valor}%` : `Precio: ${c.valor.toFixed(2)} €`}
                 </span>
                 ${estadoBadge}
+                ${contadorHtml}
               </div>
               <div class="text-[11px] text-slate-500 flex items-center gap-3 flex-wrap">
                 <span><i class="fa-regular fa-calendar text-[10px]"></i> ${fIniTexto} h ➔ ${fFinTexto} h</span>
@@ -4785,13 +5014,21 @@
             </div>
 
             <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
-              <button type="button" onclick="eliminarCampanaOferta('${c.id}')" title="Finalizar y eliminar campaña" class="px-3 py-1.5 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-600 hover:text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5">
+              <button type="button" onclick="abrirModalCrearOferta('${c.id}')" title="Editar parámetros de la campaña" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-pen text-[11px] text-slate-400"></i> Editar
+              </button>
+              <button type="button" onclick="eliminarCampanaOferta('${c.id}')" title="Finalizar y eliminar campaña" class="px-3 py-1.5 rounded-xl border border-rose-200 bg-white text-rose-700 hover:bg-rose-600 hover:text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-2xs">
                 <i class="fa-solid fa-trash text-[11px]"></i> Eliminar
               </button>
             </div>
           </div>
         `;
       }).join('');
+
+      // Iniciar el temporizador de cuenta atrás en vivo de segundo a segundo
+      if (!intervaloCuentaAtrasOfertas) {
+        intervaloCuentaAtrasOfertas = setInterval(actualizarContadoresOfertasEnVivo, 1000);
+      }
     }
 
     // Comprobador en tiempo real cada 30 segundos para iniciar/terminar campañas automáticamente
