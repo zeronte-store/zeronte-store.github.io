@@ -112,7 +112,7 @@
           <!-- NUEVA SECCIÓN OFERTAS ESTILO ETSY -->
           <button onclick="cambiarSeccion('ofertas', this)" title="Ofertas" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
-              <i class="fa-solid fa-tags text-sm text-rose-500"></i>
+              <i id="iconoMenuOfertas" class="fa-solid fa-tags text-sm text-slate-600"></i>
             </div>
             <span class="sidebar-text truncate flex-grow text-left">Ofertas</span>
             <span id="badgeOfertasActivas" class="sidebar-text text-[10px] bg-rose-100 text-rose-700 font-extrabold px-1.5 py-0.2 rounded-full hidden">0</span>
@@ -143,7 +143,7 @@
 
           <button onclick="cambiarSeccion('mensajes', this)" title="Mensajes" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="relative w-6 h-6 flex items-center justify-center shrink-0">
-              <i class="fa-solid fa-envelope text-sm"></i>
+              <i id="iconoMenuMensajes" class="fa-solid fa-envelope text-sm text-slate-600"></i>
               <span id="badgeMensajes" class="sidebar-badge min-w-[18px] h-[18px] px-1 text-[9px] font-extrabold flex items-center justify-center rounded-full bg-slate-200 text-slate-700">0</span>
             </div>
             <span class="sidebar-text truncate flex-grow text-left">Mensajes</span>
@@ -4327,6 +4327,7 @@
     function renderizarMensajesAdmin(lista) {
       const contenedor = document.getElementById("contenedorMensajes");
       const badgeMenu = document.getElementById("badgeMensajes");
+      const iconoMenu = document.getElementById("iconoMenuMensajes");
       
       const noLeidos = (lista || []).filter(m => (m.estado || "").toLowerCase() !== "leído").length;
       
@@ -4335,9 +4336,17 @@
         if (noLeidos > 0) {
           badgeMenu.classList.remove('bg-slate-200', 'text-slate-700');
           badgeMenu.classList.add('bg-amber-500', 'text-slate-950', 'animate-pulse');
+          if (iconoMenu) {
+            iconoMenu.classList.remove('text-slate-600');
+            iconoMenu.classList.add('text-amber-500');
+          }
         } else {
           badgeMenu.classList.remove('bg-amber-500', 'text-slate-950', 'animate-pulse');
           badgeMenu.classList.add('bg-slate-200', 'text-slate-700');
+          if (iconoMenu) {
+            iconoMenu.classList.remove('text-amber-500');
+            iconoMenu.classList.add('text-slate-600');
+          }
         }
       }
 
@@ -4891,6 +4900,7 @@
 
       const cont = document.getElementById('contenedorListaOfertas');
       const sinOf = document.getElementById('sinOfertasMensaje');
+      const iconoMenu = document.getElementById('iconoMenuOfertas');
       if (!cont) return;
 
       let activasCount = 0;
@@ -4915,6 +4925,16 @@
       if (badgeMenu) {
         badgeMenu.innerText = activasCount;
         badgeMenu.classList.toggle('hidden', activasCount === 0);
+      }
+
+      if (iconoMenu) {
+        if (activasCount > 0) {
+          iconoMenu.classList.remove('text-slate-600');
+          iconoMenu.classList.add('text-rose-500');
+        } else {
+          iconoMenu.classList.remove('text-rose-500');
+          iconoMenu.classList.add('text-slate-600');
+        }
       }
 
       if (campanas.length === 0) {
