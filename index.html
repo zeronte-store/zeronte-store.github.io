@@ -2402,7 +2402,10 @@
       if (elTit) elTit.innerText = tituloTrad;
 
       const elDesc = document.getElementById('descripcionFichaArticulo');
-      if (elDesc) elDesc.innerText = p.descripcion || "Partitura personalizada y armonizada a medida con sistema de cifrado musical exclusivo, entregada en formato PDF de alta resolución listo para imprimir y archivo MP3 para piano.";
+      if (elDesc) {
+        const textoDescRaw = p.descripcion || "Partitura personalizada y armonizada a medida con sistema de cifrado musical exclusivo, entregada en formato PDF de alta resolución listo para imprimir y archivo MP3 para piano.";
+        elDesc.innerHTML = textoDescRaw;
+      }
 
       const precioBase = parseFloat(p.precio) || 0;
       const precioOferta = p.precioOferta ? parseFloat(String(p.precioOferta).replace(',', '.')) : null;
