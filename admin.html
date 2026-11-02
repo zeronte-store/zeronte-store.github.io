@@ -2875,30 +2875,27 @@
 
           if (editorDesc) editorDesc.innerHTML = prod.descripcion || '';
 
-          // Cargar estado de personalización y sus campos individuales
+          // Cargar estado de personalización y sus campos individuales persistentes
           const chkPersonalizado = document.getElementById('checkArticuloPersonalizado');
           if (chkPersonalizado) {
-            let estadoPers = true;
-            const valLocal = localStorage.getItem(`es_personalizable_prod_${prod.id}`);
-            if (valLocal !== null) {
-              estadoPers = (valLocal === 'true');
-            } else if (prod.esPersonalizable !== undefined && prod.esPersonalizable !== null && prod.esPersonalizable !== '') {
-              estadoPers = (prod.esPersonalizable === true || prod.esPersonalizable === 'true' || prod.esPersonalizable === 1 || prod.esPersonalizable === '1');
-            }
+            let estadoPers = (prod.esPersonalizable !== false && prod.camposPersonalizacion !== "NO");
             chkPersonalizado.checked = estadoPers;
             alternarSubOpcionesPersonalizacion(estadoPers);
 
-            // Cargar campos específicos seleccionados
-            let camposPers = prod.camposPersonalizacion;
-            if (!camposPers) {
+            let camposPers = [];
+            if (typeof prod.camposPersonalizacion === 'string' && prod.camposPersonalizacion.trim() !== '' && prod.camposPersonalizacion !== 'NO') {
               try {
-                const guardados = localStorage.getItem(`campos_pers_prod_${prod.id}`);
-                if (guardados) camposPers = JSON.parse(guardados);
-              } catch(e) {}
+                const parsed = JSON.parse(prod.camposPersonalizacion);
+                camposPers = Array.isArray(parsed) ? parsed : prod.camposPersonalizacion.split(',').map(s=>s.trim().toLowerCase());
+              } catch(e) {
+                camposPers = prod.camposPersonalizacion.split(',').map(s=>s.trim().toLowerCase());
+              }
+            } else if (Array.isArray(prod.camposPersonalizacion)) {
+              camposPers = prod.camposPersonalizacion.map(s=>String(s).trim().toLowerCase());
+            } else {
+              camposPers = ['titulo', 'nombre', 'dedicatoria', 'compositor'];
             }
-            if (!Array.isArray(camposPers)) {
-              camposPers = typeof camposPers === 'string' ? camposPers.split(',').map(s=>s.trim().toLowerCase()) : ['titulo', 'nombre', 'dedicatoria', 'compositor'];
-            }
+
             if (document.getElementById('checkPersCampoTitulo')) document.getElementById('checkPersCampoTitulo').checked = camposPers.includes('titulo');
             if (document.getElementById('checkPersCampoNombre')) document.getElementById('checkPersCampoNombre').checked = camposPers.includes('nombre');
             if (document.getElementById('checkPersCampoDedicatoria')) document.getElementById('checkPersCampoDedicatoria').checked = camposPers.includes('dedicatoria');
