@@ -344,7 +344,7 @@
                   </div>
                   <div>
                     <h3 id="tituloModalProd" class="text-sm font-bold text-slate-900">Añadir nuevo artículo</h3>
-                    <p class="text-[10px] text-slate-400">Datos y fotografía que se mostrarán en la tienda.</p>
+                    <p class="text-[10px] text-slate-400">Rellena el siguiente formulario para publicar el artículo en la tienda.</p>
                   </div>
                 </div>
                 <button type="button" onclick="cerrarModalProducto()" class="text-slate-400 hover:text-slate-700 p-2 rounded-xl transition">
@@ -357,16 +357,16 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div class="sm:col-span-2">
-                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Título del artículo *</label>
-                    <input type="text" id="nuevoTitulo" required placeholder="Ej: Lámina Partitura San Valentín" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Título *</label>
+                    <input type="text" id="nuevoTitulo" required placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
                   </div>
                   <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Precio Habitual (€) *</label>
-                    <input type="number" step="0.01" id="nuevoPrecio" required placeholder="18.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Precio (€) *</label>
+                    <input type="number" step="0.01" id="nuevoPrecio" required placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
                   </div>
                   <div>
                     <label class="block text-[10px] uppercase font-bold text-emerald-600 mb-1">Precio Oferta (€) <span class="text-slate-400 font-normal lowercase"></span></label>
-                    <input type="number" step="0.01" id="nuevoPrecioOferta" placeholder="Ej: 12.99" class="w-full bg-emerald-50/50 border border-emerald-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition">
+                    <input type="number" step="0.01" id="nuevoPrecioOferta" placeholder="" class="w-full bg-emerald-50/50 border border-emerald-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition">
                   </div>
                 </div>
 
@@ -427,7 +427,7 @@
                   </style>
 
                   <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-700">Formatos y Entrega del Producto</label>
+                    <label class="block text-[10px] uppercase font-bold text-slate-700">Formatos y Entrega del artículo</label>
                     <p class="text-[10px] text-slate-400">Activa los sellos informativos que verá el cliente junto al precio en la ficha.</p>
                   </div>
 
@@ -486,7 +486,7 @@
                 <div class="space-y-2">
                   <div class="flex items-center justify-between">
                     <div>
-                      <label class="block text-[10px] uppercase font-bold text-slate-700">Fotos del artículo *</label>
+                      <label class="block text-[10px] uppercase font-bold text-slate-700">Fotos Mockups *</label>
                       <p class="text-[10px] text-slate-400">Añade hasta 10 fotos para mostrar todos los detalles y ángulos.</p>
                     </div>
                     <span id="contadorFotosEtsy" class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">0 / 10 fotos</span>
@@ -582,7 +582,7 @@
 
                 <!-- ================= SECCIÓN VÍDEO ESTILO ETSY ================= -->
                 <div>
-                  <label class="block text-[10px] uppercase font-bold text-slate-700 mb-0.5">Vídeo del producto (Opcional)</label>
+                  <label class="block text-[10px] uppercase font-bold text-slate-700 mb-0.5">Vídeo Mockup</label>
                   <p class="text-[10px] text-slate-400 mb-1.5">Enlace directo a MP4, YouTube o Vimeo para mostrar el producto en movimiento.</p>
                   <div class="relative">
                     <i class="fa-solid fa-video absolute left-3 top-2.5 text-xs text-slate-400"></i>
@@ -593,7 +593,7 @@
 
                 <!-- Editor enriquecido -->
                 <div>
-                  <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Descripción detallada *</label>
+                  <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Descripción *</label>
                   <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs focus-within:border-slate-400 transition">
                     <div class="bg-slate-100/90 border-b border-slate-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs">
                       <button type="button" onclick="aplicarFormato('bold')" title="Negrita" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition font-bold"><i class="fa-solid fa-bold text-xs"></i></button>
