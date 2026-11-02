@@ -596,15 +596,16 @@
                   <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Descripción *</label>
                   <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs focus-within:border-slate-400 transition">
                     <div class="bg-slate-100/90 border-b border-slate-200 px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-xs">
-                      <button type="button" onclick="aplicarFormato('bold')" title="Negrita" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition font-bold"><i class="fa-solid fa-bold text-xs"></i></button>
-                      <button type="button" onclick="aplicarFormato('italic')" title="Cursiva" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition italic"><i class="fa-solid fa-italic text-xs"></i></button>
-                      <button type="button" onclick="aplicarFormato('underline')" title="Subrayado" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition underline"><i class="fa-solid fa-underline text-xs"></i></button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="aplicarFormato('bold')" title="Negrita" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition font-bold"><i class="fa-solid fa-bold text-xs"></i></button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="aplicarFormato('italic')" title="Cursiva" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition italic"><i class="fa-solid fa-italic text-xs"></i></button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="aplicarFormato('underline')" title="Subrayado" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition underline"><i class="fa-solid fa-underline text-xs"></i></button>
                       <span class="w-[1px] h-4 bg-slate-300 mx-1"></span>
-                      <button type="button" onclick="aplicarFormato('insertUnorderedList')" title="Viñetas" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition"><i class="fa-solid fa-list-ul text-xs"></i></button>
-                      <button type="button" onclick="aplicarFormato('insertOrderedList')" title="Numeración" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition"><i class="fa-solid fa-list-ol text-xs"></i></button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="aplicarFormato('insertUnorderedList')" title="Viñetas" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition"><i class="fa-solid fa-list-ul text-xs"></i></button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="aplicarFormato('insertOrderedList')" title="Numeración" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-700 transition"><i class="fa-solid fa-list-ol text-xs"></i></button>
+                      <span class="w-[1px] h-4 bg-slate-300 mx-1"></span>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="aplicarFormato('justifyFull')" title="Justificar texto" class="w-7 h-7 flex items-center justify-center rounded-lg bg-white shadow-2xs text-slate-900 border border-slate-200 transition"><i class="fa-solid fa-align-justify text-xs"></i></button>
                     </div>
-                    <div id="editorDescripcion" contenteditable="true" class="p-3 min-h-[120px] max-h-[220px] overflow-y-auto text-xs text-slate-800 leading-relaxed focus:outline-none"></div>
-                  </div>
+                    <div id="editorDescripcion" contenteditable="true" class="p-3 min-h-[120px] max-h-[220px] overflow-y-auto text-xs text-slate-800 leading-relaxed text-justify [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 focus:outline-none"></div>
                   <input type="hidden" id="nuevaDesc">
                 </div>
 
@@ -2217,9 +2218,9 @@
     }
 
     function aplicarFormato(comando, valor = null) {
-      document.execCommand(comando, false, valor);
       const editor = document.getElementById('editorDescripcion');
       if (editor) editor.focus();
+      document.execCommand(comando, false, valor);
     }
 
     // ==================== GESTOR CATÁLOGO (ESTILO ETSY COMPLETO) ====================
