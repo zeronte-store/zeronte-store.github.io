@@ -2834,11 +2834,23 @@
         ? document.getElementById('inputNuevaCategoriaTexto').value.trim() 
         : document.getElementById('nuevaCategoria').value;
 
-      const descVal = document.getElementById('editorDescripcion').innerHTML.trim();
+      let descVal = document.getElementById('editorDescripcion').innerHTML.trim();
       if (!descVal || descVal === '<br>') {
         alert("Por favor, ingresa una descripción para el producto.");
         return;
       }
+
+      // Limpieza de etiquetas y estilos externos pegados de Google Docs / ChatGPT
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = descVal;
+      tempDiv.querySelectorAll('*').forEach(el => {
+        el.removeAttribute('style');
+        el.removeAttribute('class');
+        Array.from(el.attributes).forEach(attr => {
+          if (attr.name.startsWith('data-')) el.removeAttribute(attr.name);
+        });
+      });
+      descVal = tempDiv.innerHTML.trim();
 
       const rawPrecio = document.getElementById('nuevoPrecio')?.value || '';
       const rawOferta = document.getElementById('nuevoPrecioOferta')?.value || '';
