@@ -2048,12 +2048,16 @@
             masVendido: maxVentas > 0 && (idx === idxMasVendido)
           }));
 
-          // Poner el más vendido el primero de la tienda (destacado)
-          productos.sort((a, b) => (b.masVendido ? 1 : 0) - (a.masVendido ? 1 : 0));
+          // Poner el más vendido el primero de la tienda y ordenar por ventas
+          productos.sort((a, b) => {
+            if (b.masVendido !== a.masVendido) return (b.masVendido ? 1 : 0) - (a.masVendido ? 1 : 0);
+            return (b.totalVentas || 0) - (a.totalVentas || 0);
+          });
 
           catalogoCompleto = productos;
           actualizarConteosCategorias();
-          renderizarCatalogo(catalogoCompleto);
+          // Mantener persistente el filtro de ordenación, categoría y búsqueda actual
+          filtrarCategoria(categoriaSeleccionada, null);
           actualizarSelectProductosResena();
         }
       } catch (e) {
