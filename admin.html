@@ -2223,6 +2223,35 @@
       document.execCommand(comando, false, valor);
     }
 
+    function manejarPegadoGemini(e) {
+      e.preventDefault();
+      // Obtenemos el texto plano con sus saltos de línea exactos de Gemini
+      let texto = (e.clipboardData || window.clipboardData).getData('text/plain');
+      if (!texto) return;
+
+      // Eliminar los chips de archivos adjuntos de Gemini tipo "0.jpg + 1" o "archivo.pdf + 1"
+      texto = texto.replace(/[\w\-.]+\.(jpg|jpeg|png|pdf|mp3|mp4)\s*\+\s*\d+/gi, '');
+
+      // Convertir líneas en párrafos HTML conservando saltos de línea exactos
+      const lineas = texto.split(/\r?\n/);
+      let htmlResultado = '';
+      
+      lineas.forEach(linea => {
+        const lineaTrim = linea.trim();
+        if (lineaTrim === '') {
+          htmlResultado += '<p><br></p>';
+        } else {
+          // Detectar negritas en formato markdown **texto** de Gemini si las hubiera
+          let lineaProcesada = linea
+            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+            .replace(/__(.*?)__/g, '<b>$1</b>');
+          htmlResultado += `<p>${lineaProcesada}</p>`;
+        }
+      });
+
+      document.execCommand('insertHTML', false, htmlResultado);
+    }
+
     // ==================== GESTOR CATÁLOGO (ESTILO ETSY COMPLETO) ====================
     let productosCatalogoFiltrados = [];
     let modoVistaCatalogo = 'grid'; // 'grid' o 'list'
