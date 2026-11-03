@@ -516,6 +516,21 @@
               Sin personalización especificada.
             </div>
           </div>
+
+          <!-- BLOQUE DE DESCARGA DIRECTA ESTILO ETSY (SE ACTIVA AUTOMÁTICAMENTE AL ENVIARSE) -->
+          <div id="cajaDescargaArchivosCliente" class="hidden bg-emerald-50/80 border border-emerald-300 rounded-2xl p-4 sm:p-5 text-center space-y-3 shadow-xs">
+            <div class="flex items-center justify-center gap-2 text-emerald-800 font-bold text-sm">
+              <i class="fa-solid fa-cloud-arrow-down text-base"></i>
+              <span>¡Tus archivos digitales están listos!</span>
+            </div>
+            <p class="text-xs text-emerald-700 max-w-md mx-auto leading-relaxed">
+              Tu obra personalizada ha sido completada. Haz clic a continuación para descargar tus partituras y audios directamente a tu dispositivo:
+            </p>
+            <a id="btnDescargaArchivosEntrega" href="#" target="_blank" class="inline-flex items-center gap-2 bg-black hover:bg-zinc-800 text-white font-bold py-3.5 px-6 rounded-full text-xs uppercase tracking-wider shadow-md transition active:scale-95">
+              <i class="fa-solid fa-download"></i>
+              <span>Descargar Archivos del Pedido</span>
+            </a>
+          </div>
         </div>
 
       </div>
@@ -3375,6 +3390,20 @@
         }
       }
       document.getElementById('fechaSeguimientoProducto').innerText = fechaTexto;
+
+      // Mostrar u ocultar el botón de descarga del archivo entregado desde Google Drive
+      const cajaDescarga = document.getElementById('cajaDescargaArchivosCliente');
+      const btnDescarga = document.getElementById('btnDescargaArchivosEntrega');
+      const urlEntrega = p.archivoEntregaUrl || "";
+
+      if (cajaDescarga && btnDescarga) {
+        if (urlEntrega && (estado.includes("enviado") || estado.includes("completado") || estado.includes("pagado"))) {
+          btnDescarga.href = urlEntrega;
+          cajaDescarga.classList.remove('hidden');
+        } else {
+          cajaDescarga.classList.add('hidden');
+        }
+      }
 
       // Obtener imagen de portada vinculada exactamente al catálogo global cargado
       let urlImg = 'https://zeronte-store.github.io/img/logo-zeronte.png';
