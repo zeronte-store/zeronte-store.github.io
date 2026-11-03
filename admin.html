@@ -101,6 +101,15 @@
             </div>
             <span class="sidebar-text truncate">Pedidos Recibidos</span>
           </button>
+
+          <!-- NUEVA SECCIÓN ESTILO ETSY: PROCESAR PEDIDOS -->
+          <button onclick="cambiarSeccion('procesar', this)" title="Procesar pedidos" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="relative w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-truck-ramp-box text-sm text-slate-600"></i>
+              <span id="badgePedidosPorProcesar" class="sidebar-badge min-w-[18px] h-[18px] px-1 text-[9px] font-extrabold flex items-center justify-center rounded-full bg-amber-100 text-amber-700 hidden">0</span>
+            </div>
+            <span class="sidebar-text truncate flex-grow text-left">Procesar pedidos</span>
+          </button>
           
           <button onclick="cambiarSeccion('catalogo', this)" title="Catálogo" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
@@ -284,6 +293,115 @@
             </div>
           </section>
 
+        </div>
+
+        <!-- ================= SECCIÓN: PROCESAR Y ENVIAR PEDIDOS (ESTILO ETSY) ================= -->
+        <div id="vistaSeccionProcesar" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                  <i class="fa-solid fa-truck-ramp-box text-blue-600"></i> Procesar y Completar Pedidos
+                </h1>
+                <span id="badgeConteoProcesar" class="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full font-bold">0 pendientes</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">Sube los archivos finales del encargo (PDF, MP3, ZIP), márcalos como enviados y notifica al comprador.</p>
+            </div>
+          </div>
+
+          <!-- Buscador de pedidos por procesar -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 shadow-xs">
+            <div class="relative w-full">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+              <input type="text" id="buscadorProcesarPedidos" oninput="filtrarPedidosPorProcesar()" placeholder="Buscar por cliente, ID de pedido, producto..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+            </div>
+          </div>
+
+          <!-- Listado de pedidos listos para adjuntar material y enviar -->
+          <div id="contenedorListaProcesar" class="space-y-4">
+            <!-- Render dinámico -->
+          </div>
+
+          <div id="sinPedidosPorProcesar" class="hidden text-center py-16 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <i class="fa-solid fa-circle-check text-emerald-500 text-3xl mb-2 block"></i>
+            <p class="text-sm font-bold text-slate-800">¡Todo al día!</p>
+            <p class="text-xs text-slate-400 mt-0.5">No hay pedidos pendientes o en proceso que requieran entrega de archivos.</p>
+          </div>
+
+          <!-- MODAL FLOTANTE: SUBIR ARCHIVO Y ENVIAR AL CLIENTE -->
+          <div id="modalSubirEntregaEtsy" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-white border border-slate-200 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden my-6 transform transition-all">
+              <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-blue-50/60">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-slate-900">Completar y Enviar Pedido</h3>
+                    <p class="text-[10px] text-slate-400" id="subtituloModalEntrega">Adjunta el archivo que recibirá el cliente</p>
+                  </div>
+                </div>
+                <button type="button" onclick="cerrarModalEntrega()" class="text-slate-400 hover:text-slate-700 p-2 rounded-xl transition">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <form onsubmit="ejecutarEntregaPedido(event)" class="p-5 space-y-4 text-xs text-slate-700">
+                <input type="hidden" id="entregaFilaPedido">
+                <input type="hidden" id="entregaIdPedido">
+                <input type="hidden" id="entregaEmailCliente">
+                <input type="hidden" id="entregaNombreCliente">
+                <input type="hidden" id="entregaProductoNombre">
+
+                <!-- Tarjeta Resumen del Pedido -->
+                <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl flex items-center justify-between">
+                  <div>
+                    <span id="entregaPedidoIdLabel" class="font-mono font-bold text-xs bg-slate-900 text-white px-1.5 py-0.5 rounded">PED-0000</span>
+                    <h4 id="entregaClienteLabel" class="font-bold text-slate-900 mt-1">Nombre Cliente</h4>
+                    <span id="entregaProductoLabel" class="text-[11px] text-slate-500 block truncate max-w-[280px]">Producto</span>
+                  </div>
+                  <div class="text-right">
+                    <span id="entregaPrecioLabel" class="font-bold text-xs text-slate-800">0.00 €</span>
+                  </div>
+                </div>
+
+                <!-- Zona de subida de archivo (PDF, MP3, ZIP, etc.) -->
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Archivo de entrega (PDF, MP3, ZIP, etc.) *</label>
+                  <div id="dropZoneEntrega" onclick="document.getElementById('inputArchivoEntrega').click()" class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-5 text-center cursor-pointer bg-white transition hover:bg-blue-50/20">
+                    <i class="fa-solid fa-file-arrow-up text-2xl text-blue-500 mb-1.5 block"></i>
+                    <span class="text-xs font-bold text-slate-800 block" id="txtNombreArchivoElegido">Haz clic para seleccionar el archivo</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Se subirá de forma segura a tu carpeta de Google Drive</span>
+                  </div>
+                  <input type="file" id="inputArchivoEntrega" onchange="seleccionarArchivoEntrega(this)" class="hidden" accept=".pdf,.mp3,.wav,.zip,.rar,.png,.jpg,.jpeg">
+                </div>
+
+                <!-- Opcional: Mensaje o nota para el correo al cliente -->
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Mensaje para el cliente (Opcional)</label>
+                  <textarea id="entregaMensajeAdmin" rows="2" placeholder="Ej. ¡Aquí tienes tu partitura armonizada y el audio en alta fidelidad! Esperamos que lo disfrutes..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-white transition"></textarea>
+                </div>
+
+                <!-- Barra de Progreso de Subida a Drive -->
+                <div id="progresoSubidaEntregaBox" class="hidden space-y-2 pt-2 border-t border-slate-100">
+                  <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                    <span id="txtProgresoEntrega" class="flex items-center gap-1.5"><i class="fa-solid fa-circle-notch fa-spin text-blue-600"></i> Subiendo a Google Drive y enviando correo...</span>
+                    <span id="porcProgresoEntrega" class="font-mono text-blue-600">0%</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
+                    <div id="barraProgresoEntrega" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                  </div>
+                </div>
+
+                <div id="botonesModalEntrega" class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                  <button type="button" onclick="cerrarModalEntrega()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
+                  <button type="submit" id="btnConfirmarEntrega" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 shadow-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-paper-plane text-xs"></i> Enviar y Completar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
 
         <!-- ================= SECCIÓN 2: CATÁLOGO DE PARTITURAS (ESTILO ETSY) ================= -->
@@ -3789,6 +3907,8 @@
     // Control del Menú Lateral y Pestañas
     function cambiarSeccion(seccion, btn) {
       document.getElementById('vistaSeccionDashboard').classList.add('hidden');
+      const vProcesar = document.getElementById('vistaSeccionProcesar');
+      if (vProcesar) vProcesar.classList.add('hidden');
       document.getElementById('vistaSeccionCatalogo').classList.add('hidden');
       const vOfertas = document.getElementById('vistaSeccionOfertas');
       if (vOfertas) vOfertas.classList.add('hidden');
@@ -3796,6 +3916,11 @@
       document.getElementById('vistaSeccionEstadisticas').classList.add('hidden');
       document.getElementById('vistaSeccionFinanzas').classList.add('hidden');
       document.getElementById('vistaSeccionMensajes').classList.add('hidden');
+
+      if (seccion === 'procesar') {
+        if (vProcesar) vProcesar.classList.remove('hidden');
+        renderizarModuloProcesarPedidos();
+      }
 
       document.querySelectorAll('.nav-item-btn').forEach(b => {
         b.classList.remove('bg-slate-900', 'text-white', 'shadow-sm');
@@ -5039,6 +5164,218 @@
     setInterval(() => {
       sincronizarOfertasConCatalogo();
     }, 30000);
+
+    // =========================================================================
+    // LÓGICA DE PROCESADO Y SUBIDA DE ENTREGAS (ESTILO ETSY)
+    // =========================================================================
+    let archivoEntregaSeleccionadoBase64 = null;
+    let nombreArchivoEntregaSeleccionado = "";
+    let mimeTypeArchivoEntrega = "";
+
+    function renderizarModuloProcesarPedidos() {
+      const cont = document.getElementById('contenedorListaProcesar');
+      const sinPed = document.getElementById('sinPedidosPorProcesar');
+      const badgeNav = document.getElementById('badgePedidosPorProcesar');
+      const badgeHeader = document.getElementById('badgeConteoProcesar');
+      if (!cont) return;
+
+      const pedidosPendientesOProceso = listaPedidosGlobal.filter(p => {
+        const est = (p.estado || "").toLowerCase().trim();
+        return est.includes("pendiente") || est.includes("proceso");
+      });
+
+      if (badgeNav) {
+        badgeNav.innerText = pedidosPendientesOProceso.length;
+        badgeNav.classList.toggle('hidden', pedidosPendientesOProceso.length === 0);
+      }
+      if (badgeHeader) {
+        badgeHeader.innerText = `${pedidosPendientesOProceso.length} pendientes`;
+      }
+
+      filtrarPedidosPorProcesar();
+    }
+
+    function filtrarPedidosPorProcesar() {
+      const cont = document.getElementById('contenedorListaProcesar');
+      const sinPed = document.getElementById('sinPedidosPorProcesar');
+      const busqueda = (document.getElementById('buscadorProcesarPedidos')?.value || "").toLowerCase().trim();
+
+      const lista = listaPedidosGlobal.filter(p => {
+        const est = (p.estado || "").toLowerCase().trim();
+        const esCandidato = est.includes("pendiente") || est.includes("proceso");
+        if (!esCandidato) return false;
+
+        if (!busqueda) return true;
+        const textoComp = `${p.id || ''} ${p.nombre || ''} ${p.producto || ''} ${p.email || ''}`.toLowerCase();
+        return textoComp.includes(busqueda);
+      });
+
+      if (lista.length === 0) {
+        cont.innerHTML = "";
+        sinPed.classList.remove('hidden');
+        return;
+      }
+      sinPed.classList.add('hidden');
+
+      cont.innerHTML = lista.map(p => {
+        const fechaForm = formatearFechaEspanol(p.fecha);
+        const persLimpia = (p.personalizacion || "Sin dedicatoria").replace(/["“”«»]/g, '').trim();
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs hover:border-slate-300 transition flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1.5 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-mono font-bold text-xs bg-slate-900 text-white px-2 py-0.5 rounded">${p.id}</span>
+                <h3 class="font-bold text-slate-900 text-sm">${p.nombre}</h3>
+                ${getEstadoBadge(p.estado)}
+                <span class="text-[11px] text-slate-400">${fechaForm}</span>
+              </div>
+              <div class="text-xs text-slate-700">
+                <strong class="text-slate-900 font-semibold">${p.producto}</strong> • <span class="font-bold">${p.precio}</span>
+              </div>
+              <div class="bg-blue-50/60 border border-blue-200/60 rounded-xl p-2.5 text-[11px] text-[#002b49] leading-relaxed max-w-2xl">
+                ${persLimpia}
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0 self-end md:self-center">
+              <button type="button" onclick="abrirModalEntrega(${p.fila})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 shadow-xs flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Adjuntar y Enviar</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function abrirModalEntrega(fila) {
+      const p = listaPedidosGlobal.find(item => item.fila === fila);
+      if (!p) return;
+
+      document.getElementById('entregaFilaPedido').value = p.fila;
+      document.getElementById('entregaIdPedido').value = p.id;
+      document.getElementById('entregaEmailCliente').value = p.email || "";
+      document.getElementById('entregaNombreCliente').value = p.nombre || "Cliente";
+      document.getElementById('entregaProductoNombre').value = p.producto || "";
+
+      document.getElementById('entregaPedidoIdLabel').innerText = p.id;
+      document.getElementById('entregaClienteLabel').innerText = `${p.nombre} (${p.email || 'Sin email'})`;
+      document.getElementById('entregaProductoLabel').innerText = p.producto;
+      document.getElementById('entregaPrecioLabel').innerText = p.precio;
+
+      archivoEntregaSeleccionadoBase64 = null;
+      nombreArchivoEntregaSeleccionado = "";
+      mimeTypeArchivoEntrega = "";
+
+      document.getElementById('inputArchivoEntrega').value = "";
+      document.getElementById('txtNombreArchivoElegido').innerText = "Haz clic para seleccionar el archivo";
+      document.getElementById('entregaMensajeAdmin').value = "";
+
+      document.getElementById('progresoSubidaEntregaBox').classList.add('hidden');
+      document.getElementById('botonesModalEntrega').classList.remove('hidden');
+
+      document.getElementById('modalSubirEntregaEtsy').classList.remove('hidden');
+    }
+
+    function cerrarModalEntrega() {
+      document.getElementById('modalSubirEntregaEtsy').classList.add('hidden');
+    }
+
+    function seleccionarArchivoEntrega(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      nombreArchivoEntregaSeleccionado = file.name;
+      mimeTypeArchivoEntrega = file.type;
+
+      document.getElementById('txtNombreArchivoElegido').innerText = `📄 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        archivoEntregaSeleccionadoBase64 = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function ejecutarEntregaPedido(e) {
+      e.preventDefault();
+      if (!archivoEntregaSeleccionadoBase64) {
+        alert("Por favor, selecciona un archivo (PDF, MP3, ZIP) para completar la entrega.");
+        return;
+      }
+
+      const fila = document.getElementById('entregaFilaPedido').value;
+      const orderId = document.getElementById('entregaIdPedido').value;
+      const email = document.getElementById('entregaEmailCliente').value;
+      const nombre = document.getElementById('entregaNombreCliente').value;
+      const producto = document.getElementById('entregaProductoNombre').value;
+      const mensajeAdmin = document.getElementById('entregaMensajeAdmin').value.trim();
+
+      const boxProgreso = document.getElementById('progresoSubidaEntregaBox');
+      const barra = document.getElementById('barraProgresoEntrega');
+      const porc = document.getElementById('porcProgresoEntrega');
+      const txt = document.getElementById('txtProgresoEntrega');
+      const boxBotones = document.getElementById('botonesModalEntrega');
+
+      boxProgreso.classList.remove('hidden');
+      boxBotones.classList.add('hidden');
+      barra.style.width = '20%';
+      porc.innerText = '20%';
+
+      let progreso = 20;
+      const intervalo = setInterval(() => {
+        if (progreso < 85) {
+          progreso += 8;
+          barra.style.width = progreso + '%';
+          porc.innerText = progreso + '%';
+        }
+      }, 300);
+
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "completarYEnviarPedido",
+            clave: tokenClave || "zeronte2026",
+            fila: fila,
+            orderId: orderId,
+            email: email,
+            nombre: nombre,
+            producto: producto,
+            mensajeAdmin: mensajeAdmin,
+            nombreArchivo: nombreArchivoEntregaSeleccionado,
+            mimeType: mimeTypeArchivoEntrega,
+            archivoBase64: archivoEntregaSeleccionadoBase64
+          })
+        });
+
+        clearInterval(intervalo);
+        barra.style.width = '100%';
+        porc.innerText = '100%';
+        txt.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> ¡Pedido enviado y completado con éxito!`;
+
+        // Actualizar en la lista local en memoria
+        const itemP = listaPedidosGlobal.find(p => p.fila === Number(fila));
+        if (itemP) {
+          itemP.estado = "Enviado / Completado";
+        }
+        actualizarMetricas();
+        filtrarPedidos();
+
+        setTimeout(() => {
+          cerrarModalEntrega();
+          renderizarModuloProcesarPedidos();
+        }, 1200);
+
+      } catch(err) {
+        clearInterval(intervalo);
+        boxProgreso.classList.add('hidden');
+        boxBotones.classList.remove('hidden');
+        alert("Ocurrió un error al subir el archivo o enviar el correo: " + err);
+      }
+    }
   </script>
 </body>
 </html>
