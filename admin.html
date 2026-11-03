@@ -4792,11 +4792,13 @@
 
         if (inicioAlcanzado && noExpirada && Array.isArray(camp.idsObjetivo)) {
           camp.idsObjetivo.forEach(idProd => {
-            mapaDescuentosActivos[idProd.toLowerCase()] = {
-              tipo: camp.tipo,
-              valor: camp.valor,
-              campana: camp.nombre
-            };
+            if (idProd) {
+              mapaDescuentosActivos[idProd.toString().trim().toLowerCase()] = {
+                tipo: camp.tipo,
+                valor: camp.valor,
+                campana: camp.nombre
+              };
+            }
           });
         }
       });
@@ -4805,7 +4807,9 @@
       const cambiosParaServidor = {};
 
       listaProductosGlobal.forEach(prod => {
-        const pIdLower = (prod.id || '').toLowerCase();
+        const pIdLower = (prod.id || '').toString().trim().toLowerCase();
+        if (!pIdLower) return;
+
         const desc = mapaDescuentosActivos[pIdLower];
         const precioBase = parseFloat((prod.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
         
@@ -4813,24 +4817,31 @@
 
         if (desc && precioBase > 0) {
           if (desc.tipo === 'porcentaje') {
-            const rebajado = precioBase * (1 - (desc.valor / 100));
+            const rebajado = Math.round((precioBase * (1 - (desc.valor / 100))) * 100) / 100;
             precioOfertaObjetivo = rebajado.toFixed(2);
           } else {
             precioOfertaObjetivo = Number(desc.valor).toFixed(2);
           }
         }
 
-        // Comparación numérica segura para evitar discrepancias por strings tipo "7.99" vs 7.99
-        const poActualNum = parseFloat(prod.precioOferta);
-        const poObjNum = parseFloat(precioOfertaObjetivo);
+        const poActualNum = (prod.precioOferta !== undefined && prod.precioOferta !== null && prod.precioOferta !== "") 
+          ? parseFloat(prod.precioOferta.toString().replace('€', '').trim().replace(',', '.')) 
+          : NaN;
+        const poObjNum = (precioOfertaObjetivo !== "") 
+          ? parseFloat(precioOfertaObjetivo) 
+          : NaN;
 
-        const sonIguales = (isNaN(poActualNum) && isNaN(poObjNum)) || 
-                           (!isNaN(poActualNum) && !isNaN(poObjNum) && Math.abs(poActualNum - poObjNum) < 0.005);
+        const ambosVacios = isNaN(poActualNum) && isNaN(poObjNum);
+        const ambosNumericosIguales = !isNaN(poActualNum) && !isNaN(poObjNum) && Math.abs(poActualNum - poObjNum) < 0.01;
 
-        if (!sonIguales) {
+        if (!ambosVacios && !ambosNumericosIguales) {
           prod.precioOferta = precioOfertaObjetivo;
           huboCambiosVisuales = true;
-          cambiosParaServidor[pIdLower] = precioOfertaObjetivo;
+
+          // Solo mandar a Google Sheets si el producto tiene oferta activa o si realmente tenía antes una oferta que ha expirado
+          if (precioOfertaObjetivo !== "" || (!isNaN(poActualNum) && poActualNum > 0)) {
+            cambiosParaServidor[pIdLower] = precioOfertaObjetivo;
+          }
         }
       });
 
@@ -4839,7 +4850,7 @@
         renderizarModuloOfertas();
       }
 
-      // Si hay diferencias entre el estado local y Sheets, enviar TODO en una única petición atómica
+      // Si hay diferencias reales confirmadas, sincronizar con Google Sheets sin pisar celdas innecesariamente
       if (Object.keys(cambiosParaServidor).length > 0) {
         sincronizacionEnCurso = true;
         try {
