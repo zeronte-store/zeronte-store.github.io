@@ -2158,6 +2158,39 @@
 
     let catalogoFiltradoActual = [];
 
+    let temporizadorCuentaAtrasEtsy = null;
+
+    function formatearTiempoEtsy(ms) {
+      if (ms <= 0) return "0:00:00";
+      const totalSeg = Math.floor(ms / 1000);
+      const dias = Math.floor(totalSeg / 86400);
+      const horas = Math.floor((totalSeg % 86400) / 3600);
+      const min = Math.floor((totalSeg % 3600) / 60);
+      const seg = totalSeg % 60;
+      const pad = n => String(n).padStart(2, '0');
+
+      if (dias > 0) {
+        return `${dias}d ${pad(horas)}:${pad(min)}:${pad(seg)}`;
+      }
+      return `${pad(horas)}:${pad(min)}:${pad(seg)}`;
+    }
+
+    function actualizarContadoresEtsyEnVivo() {
+      const ahora = Date.now();
+      document.querySelectorAll('.countdown-etsy-timer').forEach(el => {
+        const finMs = parseInt(el.getAttribute('data-fin'), 10);
+        if (finMs && !isNaN(finMs)) {
+          const restante = finMs - ahora;
+          if (restante <= 0) {
+            const contenedorPadre = el.closest('.banner-oferta-etsy');
+            if (contenedorPadre) contenedorPadre.style.display = 'none';
+          } else {
+            el.innerText = formatearTiempoEtsy(restante);
+          }
+        }
+      });
+    }
+
     function renderizarCatalogo(lista) {
       catalogoFiltradoActual = lista;
       const contenedor = document.getElementById("gridProductos");
@@ -2171,6 +2204,14 @@
         contenedor.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500 text-sm">${t.noArticulos}</div>`;
         return;
       }
+
+      // Obtener campañas activas locales
+      let campanasLocales = [];
+      try {
+        campanasLocales = JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]');
+      } catch(e){}
+
+      const ahora = Date.now();
 
       contenedor.innerHTML = lista.map((p, idxLista) => {
         let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
@@ -2186,12 +2227,28 @@
         } catch(e) {
           if (p.imagen) imgUrl = p.imagen;
         }
+
         const precioBase = parseFloat(p.precio) || 0;
         const precioOferta = p.precioOferta ? parseFloat(String(p.precioOferta).replace(',', '.')) : null;
         const tieneOferta = precioOferta && precioOferta > 0 && precioOferta < precioBase;
         const precioFinal = tieneOferta ? precioOferta : precioBase;
         const porcentajeDescuento = tieneOferta ? Math.round(((precioBase - precioOferta) / precioBase) * 100) : 0;
         const tituloTraducido = traducirTituloProducto(p.titulo, idiomaActual);
+
+        // Buscar fecha fin de oferta si existe
+        let fechaFinOferta = null;
+        if (tieneOferta && p.id) {
+          const camp = campanasLocales.find(c => 
+            c.activa && 
+            ahora >= c.fechaInicio && 
+            (!c.fechaFin || ahora <= c.fechaFin) &&
+            Array.isArray(c.idsObjetivo) && 
+            c.idsObjetivo.map(x=>x.toLowerCase()).includes(p.id.toLowerCase())
+          );
+          if (camp && camp.fechaFin && !camp.sinFin) {
+            fechaFinOferta = camp.fechaFin;
+          }
+        }
 
         return `
           <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(catalogoFiltradoActual[${idxLista}])">
@@ -2232,9 +2289,21 @@
                 <span class="text-sm sm:text-base font-bold text-[#222222]">${precioFinal.toFixed(2)} €</span>
                 ${tieneOferta ? `
                   <span class="text-xs text-gray-400 line-through">${precioBase.toFixed(2)} €</span>
-                  <span class="text-[11px] text-emerald-600 font-semibold hidden sm:inline">-${porcentajeDescuento}%</span>
                 ` : ''}
               </div>
+
+              <!-- BANNER DE OFERTA ETSY CON CUENTA ATRÁS -->
+              ${tieneOferta ? `
+                <div class="banner-oferta-etsy flex items-center gap-1 text-[11px] font-semibold text-[#0f766e] mt-0.5 leading-tight flex-wrap">
+                  <span>-${porcentajeDescuento}%</span>
+                  <span>•</span>
+                  <span>La oferta termina en</span>
+                  <span class="countdown-etsy-timer font-bold" data-fin="${fechaFinOferta || (ahora + 33687000)}">
+                    ${formatearTiempoEtsy((fechaFinOferta || (ahora + 33687000)) - ahora)}
+                  </span>
+                </div>
+              ` : ''}
+
               <span class="text-xs font-medium text-blue-600 flex items-center gap-1.5 mt-1">
                 <i class="fa-solid fa-cloud-arrow-down text-sm text-blue-600"></i>
                 <span>${t.descargaDigital}</span>
@@ -2243,6 +2312,11 @@
           </div>
         `;
       }).join('');
+
+      // Iniciar intervalo en vivo de segundo a segundo para la cuenta atrás
+      if (!temporizadorCuentaAtrasEtsy) {
+        temporizadorCuentaAtrasEtsy = setInterval(actualizarContadoresEtsyEnVivo, 1000);
+      }
     }
 
     // ================= LÓGICA DE LA FICHA DETALLADA ESTILO ETSY =================
@@ -2459,7 +2533,15 @@
           elTachado.classList.remove('hidden');
         }
         if (elBadgeDto) {
-          elBadgeDto.innerText = `-${dto}%`;
+          let finMs = null;
+          try {
+            const campanasLoc = JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]');
+            const cAct = campanasLoc.find(c => c.activa && c.idsObjetivo && c.idsObjetivo.map(x=>x.toLowerCase()).includes((p.id||'').toLowerCase()));
+            if (cAct && cAct.fechaFin && !cAct.sinFin) finMs = cAct.fechaFin;
+          } catch(e){}
+          const finFinal = finMs || (Date.now() + 33687000);
+          elBadgeDto.innerHTML = `-${dto}% • La oferta termina en <span class="countdown-etsy-timer font-bold" data-fin="${finFinal}">${formatearTiempoEtsy(finFinal - Date.now())}</span>`;
+          elBadgeDto.className = "text-xs font-bold text-[#0f766e] bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-md inline-flex items-center gap-1";
           elBadgeDto.classList.remove('hidden');
         }
         if (elAvisoOferta) elAvisoOferta.classList.remove('hidden');
