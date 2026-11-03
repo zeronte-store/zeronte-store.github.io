@@ -104,11 +104,11 @@
 
           <!-- NUEVA SECCIÓN ESTILO ETSY: PROCESAR PEDIDOS -->
           <button onclick="cambiarSeccion('procesar', this)" title="Procesar pedidos" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-            <div class="relative w-6 h-6 flex items-center justify-center shrink-0">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-truck-ramp-box text-sm text-slate-600"></i>
-              <span id="badgePedidosPorProcesar" class="sidebar-badge min-w-[18px] h-[18px] px-1 text-[9px] font-extrabold flex items-center justify-center rounded-full bg-amber-100 text-amber-700 hidden">0</span>
             </div>
             <span class="sidebar-text truncate flex-grow text-left">Procesar pedidos</span>
+            <span id="badgePedidosPorProcesar" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-amber-100 text-amber-800 font-extrabold hidden">0</span>
           </button>
           
           <button onclick="cambiarSeccion('catalogo', this)" title="Catálogo" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
@@ -124,7 +124,7 @@
               <i id="iconoMenuOfertas" class="fa-solid fa-tags text-sm text-slate-600"></i>
             </div>
             <span class="sidebar-text truncate flex-grow text-left">Ofertas</span>
-            <span id="badgeOfertasActivas" class="sidebar-text text-[10px] bg-rose-100 text-rose-700 font-extrabold px-1.5 py-0.2 rounded-full hidden">0</span>
+            <span id="badgeOfertasActivas" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-rose-100 text-rose-700 font-extrabold rounded-full hidden">0</span>
           </button>
 
           <button onclick="cambiarSeccion('clientes', this)" title="Clientes" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
@@ -151,11 +151,11 @@
           </button>
 
           <button onclick="cambiarSeccion('mensajes', this)" title="Mensajes" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-            <div class="relative w-6 h-6 flex items-center justify-center shrink-0">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i id="iconoMenuMensajes" class="fa-solid fa-envelope text-sm text-slate-600"></i>
-              <span id="badgeMensajes" class="sidebar-badge min-w-[18px] h-[18px] px-1 text-[9px] font-extrabold flex items-center justify-center rounded-full bg-slate-200 text-slate-700">0</span>
             </div>
             <span class="sidebar-text truncate flex-grow text-left">Mensajes</span>
+            <span id="badgeMensajes" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-slate-200 text-slate-700 font-extrabold">0</span>
           </button>
 
           <!-- ENLACE DIRECTO A LA TIENDA WEB -->
@@ -3981,7 +3981,6 @@
       const cabecera = document.getElementById('cabeceraSidebar');
       const brandBox = sidebar ? sidebar.querySelector('.sidebar-brand-box') : null;
       const icono = document.getElementById('iconoColapsoSidebar');
-      const badge = document.getElementById('badgeMensajes');
       if (!sidebar) return;
 
       const estaCompacto = sidebar.classList.contains('md:w-[72px]');
@@ -3996,22 +3995,13 @@
         }
         if (brandBox) brandBox.classList.remove('hidden');
         sidebar.querySelectorAll('.sidebar-text').forEach(el => el.classList.remove('hidden'));
-        if (badge) {
-          badge.classList.remove('absolute', '-top-2', '-right-2.5', 'shadow-xs');
-          badge.classList.add('ml-auto');
-          const contenedorBadge = badge.parentElement;
-          const btnMensajes = sidebar.querySelector('button[title="Mensajes"]');
-          if (contenedorBadge && btnMensajes && contenedorBadge !== btnMensajes) {
-            btnMensajes.appendChild(badge);
-          }
-        }
         sidebar.querySelectorAll('.nav-item-btn').forEach(btn => {
           btn.classList.remove('justify-center', 'px-0');
           btn.classList.add('px-3');
         });
         if (icono) icono.className = 'fa-solid fa-angles-left text-xs';
       } else {
-        // MODO COMPACTO (72px): El icono queda milimétricamente centrado y el número queda superpuesto en la esquina
+        // MODO COMPACTO (72px)
         sidebar.classList.remove('md:w-64');
         sidebar.classList.add('md:w-[72px]');
         if (cabecera) {
@@ -4020,14 +4010,6 @@
         }
         if (brandBox) brandBox.classList.add('hidden');
         sidebar.querySelectorAll('.sidebar-text').forEach(el => el.classList.add('hidden'));
-        if (badge) {
-          badge.classList.remove('ml-auto');
-          badge.classList.add('absolute', '-top-2', '-right-2.5', 'shadow-xs');
-          const iconoCaja = sidebar.querySelector('button[title="Mensajes"] .w-6.h-6');
-          if (iconoCaja && badge.parentElement !== iconoCaja) {
-            iconoCaja.appendChild(badge);
-          }
-        }
         sidebar.querySelectorAll('.nav-item-btn').forEach(btn => {
           btn.classList.remove('px-3');
           btn.classList.add('justify-center', 'px-0');
