@@ -1913,14 +1913,24 @@
       }
     }
 
+    // Conjunto en memoria para recordar los pedidos desplegados aunque se refresquen los datos
+    const pedidosDesplegadosSet = new Set();
+
     // Función para alternar el despliegue al pulsar la fila o tarjeta
     function toggleDetallePedido(id) {
       const el = document.getElementById(id);
       const icon = document.getElementById('icon-' + id);
       if (!el) return;
-      el.classList.toggle('hidden');
-      if (icon) {
-        icon.classList.toggle('rotate-180');
+      
+      const estaOculto = el.classList.contains('hidden');
+      if (estaOculto) {
+        el.classList.remove('hidden');
+        pedidosDesplegadosSet.add(id);
+        if (icon) icon.classList.add('rotate-180');
+      } else {
+        el.classList.add('hidden');
+        pedidosDesplegadosSet.delete(id);
+        if (icon) icon.classList.remove('rotate-180');
       }
     }
 
@@ -2246,7 +2256,8 @@
         const notaActual = obtenerNotaPedido(p.id);
 
         const fondoPastel = obtenerFondoPastel(p.estado);
-        const detalleId = `detalle-pc-${idx}`;
+        const detalleId = `detalle-pc-${(p.id || idx).toString().replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+        const estaAbierto = pedidosDesplegadosSet.has(detalleId);
 
         return `
           <!-- FILA PRINCIPAL COMPACTA -->
@@ -2297,13 +2308,13 @@
 
             <td class="py-2.5 px-3 align-middle text-right pr-3 whitespace-nowrap">
               <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/70 text-slate-500 hover:text-slate-900 shadow-2xs transition">
-                <i id="icon-${detalleId}" class="fa-solid fa-chevron-down text-[11px] transition-transform duration-200"></i>
+                <i id="icon-${detalleId}" class="fa-solid fa-chevron-down text-[11px] transition-transform duration-200 ${estaAbierto ? 'rotate-180' : ''}"></i>
               </span>
             </td>
           </tr>
 
           <!-- FILA DESPLEGABLE CON EL RESTO DE INFORMACIÓN -->
-          <tr id="${detalleId}" class="hidden ${fondoPastel} border-b-2 border-slate-300">
+          <tr id="${detalleId}" class="${estaAbierto ? '' : 'hidden'} ${fondoPastel} border-b-2 border-slate-300">
             <td colspan="7" class="p-4 bg-white/70">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4" onclick="event.stopPropagation()">
                 <!-- Estado & Acciones -->
@@ -2420,7 +2431,8 @@
         const notaActual = obtenerNotaPedido(p.id);
 
         const fondoPastel = obtenerFondoPastel(p.estado);
-        const detalleId = `detalle-movil-${idx}`;
+        const detalleId = `detalle-movil-${(p.id || idx).toString().replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+        const estaAbierto = pedidosDesplegadosSet.has(detalleId);
 
         return `
           <div class="border rounded-2xl shadow-xs overflow-hidden transition ${fondoPastel}">
@@ -2442,7 +2454,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   ${getEstadoBadge(p.estado)}
-                  <i id="icon-${detalleId}" class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200"></i>
+                  <i id="icon-${detalleId}" class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200 ${estaAbierto ? 'rotate-180' : ''}"></i>
                 </div>
               </div>
 
@@ -2465,7 +2477,7 @@
             </div>
 
             <!-- DESPLEGABLE MÓVIL AL PULSAR -->
-            <div id="${detalleId}" class="hidden p-3 bg-white/80 border-t border-slate-200/80 space-y-3" onclick="event.stopPropagation()">
+            <div id="${detalleId}" class="${estaAbierto ? '' : 'hidden'} p-3 bg-white/80 border-t border-slate-200/80 space-y-3" onclick="event.stopPropagation()">
               <div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
                 <span class="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">Método: ${renderizarMetodoPago(p.metodoPago)}</span>
                 ${calcularDiasTranscurridosPedido(p.fecha, p.estado)}
