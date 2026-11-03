@@ -2197,6 +2197,33 @@
       return `${pad(horas)}:${pad(min)}:${pad(seg)}`;
     }
 
+    function obtenerFechaFinOfertaSincronizada(p, ahora) {
+      try {
+        const campanasLocales = JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]');
+        if (Array.isArray(campanasLocales) && campanasLocales.length > 0) {
+          const camp = campanasLocales.find(c => 
+            c.activa && 
+            ahora >= c.fechaInicio && 
+            (!c.fechaFin || ahora <= c.fechaFin) &&
+            Array.isArray(c.idsObjetivo) && 
+            c.idsObjetivo.map(x=>x.toLowerCase()).includes((p.id||'').toLowerCase())
+          );
+          if (camp && camp.fechaFin && !camp.sinFin) {
+            return camp.fechaFin;
+          }
+          const campGenerica = campanasLocales.find(c => c.activa && c.fechaFin && !c.sinFin && ahora <= c.fechaFin);
+          if (campGenerica) {
+            return campGenerica.fechaFin;
+          }
+        }
+      } catch(e){}
+
+      // Si se abre en un móvil que no tiene acceso al localStorage del panel admin,
+      // sincronizar con el fin del ciclo de oferta de 48 horas exactas
+      const ciclo48h = 48 * 60 * 60 * 1000;
+      return (Math.floor(ahora / ciclo48h) + 1) * ciclo48h;
+    }
+
     function actualizarContadoresEtsyEnVivo() {
       const ahora = Date.now();
       document.querySelectorAll('.countdown-etsy-timer').forEach(el => {
@@ -2227,12 +2254,6 @@
         return;
       }
 
-      // Obtener campañas activas locales
-      let campanasLocales = [];
-      try {
-        campanasLocales = JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]');
-      } catch(e){}
-
       const ahora = Date.now();
 
       contenedor.innerHTML = lista.map((p, idxLista) => {
@@ -2257,20 +2278,8 @@
         const porcentajeDescuento = tieneOferta ? Math.round(((precioBase - precioOferta) / precioBase) * 100) : 0;
         const tituloTraducido = traducirTituloProducto(p.titulo, idiomaActual);
 
-        // Buscar fecha fin de oferta si existe
-        let fechaFinOferta = null;
-        if (tieneOferta && p.id) {
-          const camp = campanasLocales.find(c => 
-            c.activa && 
-            ahora >= c.fechaInicio && 
-            (!c.fechaFin || ahora <= c.fechaFin) &&
-            Array.isArray(c.idsObjetivo) && 
-            c.idsObjetivo.map(x=>x.toLowerCase()).includes(p.id.toLowerCase())
-          );
-          if (camp && camp.fechaFin && !camp.sinFin) {
-            fechaFinOferta = camp.fechaFin;
-          }
-        }
+        // Fecha unificada y sincronizada para web y móvil
+        let fechaFinOferta = tieneOferta ? obtenerFechaFinOfertaSincronizada(p, ahora) : null;
 
         return `
           <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(catalogoFiltradoActual[${idxLista}])">
