@@ -1251,6 +1251,9 @@
         const datosCambiaron = JSON.stringify(listaPedidosGlobal) !== JSON.stringify(data.pedidos || []) ||
                                JSON.stringify(listaProductosGlobal) !== JSON.stringify(data.productos || []);
 
+        const pedidosServidor = data.pedidos || [];
+        listaPedidosGlobal = pedidosServidor.filter(p => !idsEliminadosLocalmente.has(p.id));
+
         const productosServidor = data.productos || [];
         
         // Obtener ofertas vigentes locales
