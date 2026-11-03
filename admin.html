@@ -220,7 +220,7 @@
               <!-- Buscador -->
               <div class="relative w-full">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-                <input type="text" id="inputBuscador" oninput="filtrarPedidos()" placeholder="Buscar por cliente, ID, móvil..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                <input type="text" id="inputBuscador" oninput="filtrarPedidos()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
               </div>
 
               <!-- Pestañas de Estado con Flechas de Navegación Lateral -->
@@ -310,7 +310,7 @@
             <!-- Buscador estilo Etsy -->
             <div class="relative flex-grow max-w-md">
               <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-              <input type="text" id="inputBuscadorCatalogo" oninput="filtrarCatalogoEtsy()" placeholder="Busca por título, categoría o ID..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+              <input type="text" id="inputBuscadorCatalogo" oninput="filtrarCatalogoEtsy()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
             </div>
 
             <!-- CONTROLES DERECHA: BOTONES DE VISTA + FILTROS -->
@@ -897,7 +897,7 @@
             <!-- Buscador de Clientes -->
             <div class="relative w-full mb-5">
               <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-              <input type="text" id="inputBuscadorClientes" oninput="filtrarListaClientes()" placeholder="Buscar por cliente, email, teléfono o Nº de pedido (ej: PED-3956)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+              <input type="text" id="inputBuscadorClientes" oninput="filtrarListaClientes()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
             </div>
 
             <!-- Listado / Tarjetas de Clientes -->
@@ -2061,7 +2061,7 @@
         return (idRaw || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim();
       };
 
-      // Helper para formatear personalización limpia en líneas numeradas con título en negrita
+      // Helper para formatear personalización limpia con opciones en negro sin negrita y texto del cliente en negrita
       const renderizarPersonalizacionLimpia = (textoRaw) => {
         if (!textoRaw || textoRaw.trim() === "") return '<span class="italic text-slate-400">Sin dedicatoria</span>';
 
@@ -2076,7 +2076,7 @@
             if (indexColon !== -1) {
               const etiqueta = parte.substring(0, indexColon).trim();
               const contenido = parte.substring(indexColon + 1).trim();
-              return `<div class="leading-relaxed"><strong class="font-bold text-slate-900">${etiqueta}:</strong> ${contenido}</div>`;
+              return `<div class="leading-relaxed"><span class="font-normal text-black">${etiqueta}:</span> <strong class="font-bold text-slate-900">${contenido}</strong></div>`;
             }
             return `<div class="leading-relaxed">${parte}</div>`;
           }).join('');
@@ -2090,13 +2090,13 @@
             const label = trozos[i] ? trozos[i].trim() : '';
             const val = trozos[i + 1] ? trozos[i + 1].trim() : '';
             if (label) {
-              html += `<div class="leading-relaxed"><strong class="font-bold text-slate-900">${label}</strong> ${val}</div>`;
+              html += `<div class="leading-relaxed"><span class="font-normal text-black">${label}</span> <strong class="font-bold text-slate-900">${val}</strong></div>`;
             }
           }
           if (html) return html;
         }
 
-        return `<div class="leading-relaxed font-medium">${limpio}</div>`;
+        return `<div class="leading-relaxed font-bold text-slate-900">${limpio}</div>`;
       };
 
       // Escritorio (PC)
@@ -2229,7 +2229,7 @@
                     </button>
                   </div>
                   <div class="flex items-center justify-between text-xs bg-slate-50 border border-slate-200/60 p-2 rounded-lg">
-                    <span class="text-slate-500 truncate mr-2">${p.email}</span>
+                    <span class="text-slate-700 font-medium truncate mr-2">${p.email}</span>
                     <button onclick="copiarDato('${p.email}', this)" title="Copiar email" class="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200 transition active:scale-90">
                       <i class="fa-regular fa-copy text-xs"></i>
                     </button>
@@ -2354,13 +2354,13 @@
               </div>
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                 <div class="flex items-center gap-1.5">
-                  <span class="text-slate-600 font-medium">${telInfo.visible}</span>
+                  <span class="text-slate-700 font-medium">${telInfo.visible}</span>
                   <button onclick="copiarDato('${telInfo.visible}', this)" title="Copiar teléfono" class="text-slate-400 hover:text-slate-700 p-1 rounded active:scale-90">
                     <i class="fa-regular fa-copy text-xs"></i>
                   </button>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <span class="text-slate-400 truncate max-w-[150px]">${p.email}</span>
+                  <span class="text-slate-700 font-medium truncate max-w-[150px]">${p.email}</span>
                   <button onclick="copiarDato('${p.email}', this)" title="Copiar email" class="text-slate-400 hover:text-slate-700 p-1 rounded active:scale-90">
                     <i class="fa-regular fa-copy text-xs"></i>
                   </button>
