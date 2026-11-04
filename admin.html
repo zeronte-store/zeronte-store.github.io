@@ -143,7 +143,7 @@
               <i id="iconoMenuMensajes" class="fa-solid fa-envelope text-sm text-slate-600"></i>
             </div>
             <span class="sidebar-text truncate flex-grow text-left">Mensajes</span>
-            <span id="badgeMensajes" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-slate-200 text-slate-700 font-extrabold">0</span>
+            <span id="badgeMensajes" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-amber-100 text-amber-800 font-extrabold hidden">0</span>
           </button>
 
           <!-- ENLACE DIRECTO A LA TIENDA WEB -->
@@ -4385,29 +4385,7 @@
     // ================= RENDERIZAR MENSAJES EN EL PANEL ADMIN =================
     function renderizarMensajesAdmin(lista) {
       const contenedor = document.getElementById("contenedorMensajes");
-      const badgeMenu = document.getElementById("badgeMensajes");
-      const iconoMenu = document.getElementById("iconoMenuMensajes");
-      
-      const noLeidos = (lista || []).filter(m => (m.estado || "").toLowerCase() !== "leído").length;
-      
-      if (badgeMenu) {
-        badgeMenu.innerText = noLeidos;
-        if (noLeidos > 0) {
-          badgeMenu.classList.remove('bg-slate-200', 'text-slate-700');
-          badgeMenu.classList.add('bg-amber-500', 'text-slate-950', 'animate-pulse');
-          if (iconoMenu) {
-            iconoMenu.classList.remove('text-slate-600');
-            iconoMenu.classList.add('text-amber-500');
-          }
-        } else {
-          badgeMenu.classList.remove('bg-amber-500', 'text-slate-950', 'animate-pulse');
-          badgeMenu.classList.add('bg-slate-200', 'text-slate-700');
-          if (iconoMenu) {
-            iconoMenu.classList.remove('text-amber-500');
-            iconoMenu.classList.add('text-slate-600');
-          }
-        }
-      }
+      actualizarBadgesMenuLateral();
 
       if (!contenedor) return;
 
@@ -5152,13 +5130,7 @@
       const iconoMensajes = document.getElementById('iconoMenuMensajes');
       if (badgeMensajes) {
         badgeMensajes.innerText = noLeidos;
-        if (noLeidos > 0) {
-          badgeMensajes.classList.remove('bg-slate-200', 'text-slate-700');
-          badgeMensajes.classList.add('bg-amber-500', 'text-slate-950', 'animate-pulse');
-        } else {
-          badgeMensajes.classList.remove('bg-amber-500', 'text-slate-950', 'animate-pulse');
-          badgeMensajes.classList.add('bg-slate-200', 'text-slate-700');
-        }
+        badgeMensajes.classList.toggle('hidden', noLeidos === 0);
       }
       if (iconoMensajes) {
         const btnMensajes = iconoMensajes.closest('.nav-item-btn');
@@ -5167,7 +5139,7 @@
           iconoMensajes.classList.remove('text-slate-600', 'text-white');
           iconoMensajes.classList.add('text-amber-500');
         } else {
-          iconoMensajes.classList.remove('text-amber-500');
+          iconoMensajes.classList.remove('text-amber-500', 'text-white');
           iconoMensajes.classList.add(estaSeleccionado ? 'text-white' : 'text-slate-600');
         }
       }
