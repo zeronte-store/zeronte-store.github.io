@@ -97,7 +97,7 @@
             <span class="sidebar-text truncate">Pedidos Recibidos</span>
           </button>
 
-          <!-- NUEVA SECCIÓN ESTILO ETSY: PROCESAR PEDIDOS -->
+          <!-- SECCIÓN: PROCESAR PEDIDOS -->
           <button onclick="cambiarSeccion('procesar', this)" title="Procesar pedidos" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i id="iconoMenuProcesar" class="fa-solid fa-truck-ramp-box text-sm text-slate-600"></i>
@@ -106,7 +106,15 @@
             <span id="badgePedidosPorProcesar" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-amber-100 text-amber-800 font-extrabold hidden">0</span>
           </button>
 
-          <!-- NUEVA SECCIÓN OFERTAS ESTILO ETSY -->
+          <!-- SECCIÓN: CATÁLOGO DE PRODUCTOS -->
+          <button onclick="cambiarSeccion('catalogo', this)" title="Catálogo" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-music text-sm"></i>
+            </div>
+            <span class="sidebar-text truncate">Catálogo</span>
+          </button>
+
+          <!-- SECCIÓN: OFERTAS -->
           <button onclick="cambiarSeccion('ofertas', this)" title="Ofertas" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i id="iconoMenuOfertas" class="fa-solid fa-tags text-sm text-slate-600"></i>
@@ -115,6 +123,7 @@
             <span id="badgeOfertasActivas" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-rose-100 text-rose-700 font-extrabold rounded-full hidden">0</span>
           </button>
 
+          <!-- SECCIÓN: CLIENTES -->
           <button onclick="cambiarSeccion('clientes', this)" title="Clientes" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-users text-sm"></i>
@@ -122,7 +131,7 @@
             <span class="sidebar-text truncate">Clientes</span>
           </button>
 
-         <!-- NUEVA SECCIÓN: VENTAS DE ETSY -->
+          <!-- NUEVA SECCIÓN: VENTAS DE ETSY -->
           <button onclick="cambiarSeccion('ventasEtsy', this)" title="Ventas de ETSY" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i class="fa-brands fa-etsy text-sm text-[#F1641E]"></i>
