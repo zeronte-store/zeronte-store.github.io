@@ -1670,7 +1670,7 @@
         });
         renderizarMensajesAdmin(mensajesClientes);
 
-        // Recepción y procesamiento automático de ventas de Etsy desde Google Sheets
+       // Recepción y procesamiento automático de ventas de Etsy desde Google Sheets (Página Persistente)
         if (data.ventasEtsy && Array.isArray(data.ventasEtsy)) {
           listaVentasEtsyGlobal = data.ventasEtsy.map(v => {
             let anio = "2024";
@@ -1685,7 +1685,8 @@
           }
           const vEtsy = document.getElementById('vistaSeccionVentasEtsy');
           if (vEtsy && !vEtsy.classList.contains('hidden')) {
-            filtrarVentasEtsy();
+            // Pasamos 'false' para preservar la página actual donde estés navegando
+            filtrarVentasEtsy(false);
           }
         }
 
@@ -5648,10 +5649,6 @@
     function cambiarPaginaEtsy(nuevaPagina) {
       paginaActualEtsy = nuevaPagina;
       filtrarVentasEtsy(false);
-      const seccionEtsy = document.getElementById('vistaSeccionVentasEtsy');
-      if (seccionEtsy) {
-        seccionEtsy.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
     }
 
     function renderizarControlesPaginacionEtsy(totalItems) {
@@ -5749,10 +5746,11 @@
     }
 
     function renderizarModuloVentasEtsy() {
-      filtrarVentasEtsy(true);
+      // Se mantiene en la página actual si ya existía navegación previa
+      filtrarVentasEtsy(false);
     }
 
-    function filtrarVentasEtsy(reiniciarPagina = true) {
+    function filtrarVentasEtsy(reiniciarPagina = false) {
       if (reiniciarPagina) {
         paginaActualEtsy = 1;
       }
@@ -5859,6 +5857,9 @@
       if (paginaActualEtsy > totalPaginas) {
         paginaActualEtsy = totalPaginas || 1;
       }
+      if (paginaActualEtsy < 1) {
+        paginaActualEtsy = 1;
+      }
 
       const indiceInicio = (paginaActualEtsy - 1) * ventasEtsyPorPagina;
       const indiceFin = indiceInicio + ventasEtsyPorPagina;
@@ -5866,7 +5867,7 @@
 
       renderizarControlesPaginacionEtsy(filtrados.length);
 
-      // 3. Render Listado de Clientes con Función Acordeón y Desglose Completo (20 por página)
+      // Conteo de compras acumuladas por cliente
       const mapaTotalPedidosPorCliente = {};
       listaVentasEtsyGlobal.forEach(item => {
         const keyCl = (item.email || item.nombre || "").toString().trim().toLowerCase();
@@ -5876,13 +5877,17 @@
       });
 
       cont.innerHTML = ventasPaginadas.map((v, idx) => {
-        const detalleId = `detalle-etsy-${idx}`;
+        // ID único persistente basado en su identificador de venta
+        const idSeguro = (v.id || ('idx-' + (indiceInicio + idx))).toString().replace(/[^a-zA-Z0-9_-]/g, '_');
+        const detalleId = `detalle-etsy-${idSeguro}`;
         const estaAbierto = registrosEtsyDesplegadosSet.has(detalleId);
         const tieneEmail = v.email && v.email.includes('@');
         const precioVisible = v.precio > 0 ? `${v.precio.toFixed(2)} €` : 'No especificado';
 
         const claveCl = (v.email || v.nombre || "").toString().trim().toLowerCase();
         const totalPedidosCliente = mapaTotalPedidosPorCliente[claveCl] || 1;
+
+        const numPedidoVisible = v.id || `ETSY-${indiceInicio + idx + 1}`;
 
         const asuntoPromo = encodeURIComponent(`Hola ${v.nombre}! Novedades y catálogo oficial de Zeronte`);
         const cuerpoPromo = encodeURIComponent(`Hola ${v.nombre},\n\nTe contacto porque en su día adquiriste "${v.producto}" conmigo a través de Etsy.\n\nHe inaugurado mi nueva tienda oficial independiente Zeronte (https://zeronte-store.github.io/index.html) donde dispondrás de mejores ofertas exclusivas y atención directa.\n\n¡Un cordial saludo!\nAdrián Díaz | Zeronte`);
@@ -5891,7 +5896,7 @@
         return `
           <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs hover:border-slate-300 transition">
             
-            <!-- FILA PRINCIPAL COMPACTA (CLICABLE) -->
+            <!-- FILA PRINCIPAL COMPACTA (CLICABLE) CON Nº DE PEDIDO VISIBLE -->
             <div onclick="toggleDetalleVentaEtsy('${detalleId}')" class="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/70 transition">
               <div class="flex items-center gap-3 min-w-0 flex-grow">
                 <span class="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
@@ -5899,6 +5904,7 @@
                 </span>
                 <div class="min-w-0">
                   <div class="flex items-center gap-2 flex-wrap leading-tight">
+                    <span class="font-mono text-xs font-black bg-slate-900 text-white px-2 py-0.5 rounded shadow-2xs tracking-wider">${numPedidoVisible}</span>
                     <span class="font-bold text-slate-900 text-xs sm:text-sm">${v.nombre}</span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${totalPedidosCliente > 1 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-600 border border-slate-200'}">
                       <i class="fa-solid fa-bag-shopping text-[9px] mr-1"></i>${totalPedidosCliente} ${totalPedidosCliente === 1 ? 'pedido' : 'pedidos'}
@@ -5918,13 +5924,13 @@
               </div>
             </div>
 
-            <!-- CONTENIDO DESPLEGABLE CON TODOS LOS DATOS DETALLADOS -->
+            <!-- CONTENIDO DESPLEGABLE CON INFORMACIÓN DETALLADA -->
             <div id="${detalleId}" class="${estaAbierto ? '' : 'hidden'} p-4 bg-slate-50 border-t border-slate-200 space-y-3" onclick="event.stopPropagation()">
               <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 text-xs">
                 
                 <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Identificador</span>
-                  <span class="font-mono font-bold text-slate-900">${v.id || 'N/A'}</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Nº de Pedido</span>
+                  <span class="font-mono font-bold text-slate-900 text-xs">${numPedidoVisible}</span>
                 </div>
 
                 <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
