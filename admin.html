@@ -4926,136 +4926,53 @@
       }
 
       const campanas = obtenerCampanasOfertas();
+      const nuevaCampana = {
+        id: idEditando || ("OFERTA-" + Date.now()),
+        nombre: nombre,
+        tipo: tipo,
+        valor: valor,
+        fechaInicio: fInicio,
+        fechaFin: fFin,
+        sinFin: sinFin,
+        alcance: alcanceOfertaActual,
+        categoriaSeleccionada: catSel,
+        idsObjetivo: idsObjetivo,
+        activa: true
+      };
 
       if (idEditando) {
-        // ACTUALIZAR OFERTA EXISTENTE
-        const index = campanas.findIndex(c => c.id === idEditando);
-        if (index !== -1) {
-          campanas[index] = {
-            ...campanas[index],
-            nombre: nombre,
-            tipo: tipo,
-            valor: valor,
-            fechaInicio: fInicio,
-            fechaFin: fFin,
-            sinFin: sinFin,
-            alcance: alcanceOfertaActual,
-            categoriaSeleccionada: catSel,
-            idsObjetivo: idsObjetivo
-          };
-        }
+        const idx = campanas.findIndex(c => c.id === idEditando);
+        if (idx !== -1) campanas[idx] = nuevaCampana;
       } else {
-        // CREAR NUEVA OFERTA
-        const nuevaCampana = {
-          id: "OFERTA-" + Date.now(),
-          nombre: nombre,
-          tipo: tipo,
-          valor: valor,
-          fechaInicio: fInicio,
-          fechaFin: fFin,
-          sinFin: sinFin,
-          alcance: alcanceOfertaActual,
-          categoriaSeleccionada: catSel,
-          idsObjetivo: idsObjetivo,
-          activa: true
-        };
         campanas.unshift(nuevaCampana);
       }
 
       guardarCampanasOfertas(campanas);
       cerrarModalCrearOferta();
-      await sincronizarOfertasConCatalogo();
-      renderizarModuloOfertas();
-    }
 
-    async function eliminarCampanaOferta(campanaId) {
-      if (!confirm("¿Deseas finalizar y eliminar esta oferta? Los artículos volverán a su precio normal si no tienen otra oferta activa.")) return;
-      let campanas = obtenerCampanasOfertas();
-      campanas = campanas.filter(c => c.id !== campanaId);
-      guardarCampanasOfertas(campanas);
-
-      await sincronizarOfertasConCatalogo();
-      renderizarModuloOfertas();
-    }
-
-    // Comprueba las fechas programadas y aplica/retira los precios de oferta automáticamente de forma consistente
-    let sincronizacionEnCurso = false;
-
-    async function sincronizarOfertasConCatalogo() {
-      if (sincronizacionEnCurso) return;
-      const ahora = Date.now();
-      const campanas = obtenerCampanasOfertas();
-
-      const mapaDescuentosActivos = {};
-
-      campanas.forEach(camp => {
-        if (!camp.activa) return;
-        const inicioAlcanzado = ahora >= camp.fechaInicio;
-        const noExpirada = camp.sinFin || (camp.fechaFin && ahora <= camp.fechaFin);
-
-        if (inicioAlcanzado && noExpirada && Array.isArray(camp.idsObjetivo)) {
-          camp.idsObjetivo.forEach(idProd => {
-            if (idProd) {
-              mapaDescuentosActivos[idProd.toString().trim().toLowerCase()] = {
-                tipo: camp.tipo,
-                valor: camp.valor,
-                campana: camp.nombre
-              };
-            }
-          });
-        }
-      });
-
-      let huboCambiosVisuales = false;
+      // Aplicar ofertas a los productos seleccionados y enviar DIRECTAMENTE a Sheets
       const cambiosParaServidor = {};
-
       listaProductosGlobal.forEach(prod => {
         const pIdLower = (prod.id || '').toString().trim().toLowerCase();
-        if (!pIdLower) return;
+        const coincide = idsObjetivo.some(targetId => targetId.toString().trim().toLowerCase() === pIdLower);
 
-        const desc = mapaDescuentosActivos[pIdLower];
-        const precioBase = parseFloat((prod.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
-        
-        let precioOfertaObjetivo = "";
+        if (coincide) {
+          const precioBase = parseFloat((prod.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
+          if (precioBase > 0) {
+            let pOferta = (tipo === 'porcentaje') 
+              ? (Math.round((precioBase * (1 - (valor / 100))) * 100) / 100).toFixed(2)
+              : Number(valor).toFixed(2);
 
-        if (desc && precioBase > 0) {
-          if (desc.tipo === 'porcentaje') {
-            const rebajado = Math.round((precioBase * (1 - (desc.valor / 100))) * 100) / 100;
-            precioOfertaObjetivo = rebajado.toFixed(2);
-          } else {
-            precioOfertaObjetivo = Number(desc.valor).toFixed(2);
-          }
-        }
-
-        const poActualNum = (prod.precioOferta !== undefined && prod.precioOferta !== null && prod.precioOferta !== "") 
-          ? parseFloat(prod.precioOferta.toString().replace('€', '').trim().replace(',', '.')) 
-          : NaN;
-        const poObjNum = (precioOfertaObjetivo !== "") 
-          ? parseFloat(precioOfertaObjetivo) 
-          : NaN;
-
-        const ambosVacios = isNaN(poActualNum) && isNaN(poObjNum);
-        const ambosNumericosIguales = !isNaN(poActualNum) && !isNaN(poObjNum) && Math.abs(poActualNum - poObjNum) < 0.01;
-
-        if (!ambosVacios && !ambosNumericosIguales) {
-          prod.precioOferta = precioOfertaObjetivo;
-          huboCambiosVisuales = true;
-
-          // Solo mandar a Google Sheets si el producto tiene oferta activa o si realmente tenía antes una oferta que ha expirado
-          if (precioOfertaObjetivo !== "" || (!isNaN(poActualNum) && poActualNum > 0)) {
-            cambiosParaServidor[pIdLower] = precioOfertaObjetivo;
+            prod.precioOferta = pOferta;
+            cambiosParaServidor[pIdLower] = pOferta;
           }
         }
       });
 
-      if (huboCambiosVisuales) {
-        renderizarProductos();
-        renderizarModuloOfertas();
-      }
+      renderizarProductos();
+      renderizarModuloOfertas();
 
-      // Si hay diferencias reales confirmadas, sincronizar con Google Sheets sin pisar celdas innecesariamente
       if (Object.keys(cambiosParaServidor).length > 0) {
-        sincronizacionEnCurso = true;
         try {
           await fetch(APPS_SCRIPT_URL, {
             method: "POST",
@@ -5066,10 +4983,45 @@
               cambios: cambiosParaServidor
             })
           });
-        } catch (errSync) {
-          console.warn("Sincronización por lote pospuesta:", errSync);
-        } finally {
-          sincronizacionEnCurso = false;
+        } catch (err) {
+          console.error("Error al guardar ofertas en Google Sheets:", err);
+        }
+      }
+    }
+
+    async function eliminarCampanaOferta(campanaId) {
+      if (!confirm("¿Deseas finalizar y eliminar esta oferta? Los artículos volverán a su precio normal.")) return;
+      let campanas = obtenerCampanasOfertas();
+      const campanaEliminar = campanas.find(c => c.id === campanaId);
+      campanas = campanas.filter(c => c.id !== campanaId);
+      guardarCampanasOfertas(campanas);
+
+      const cambiosParaServidor = {};
+      if (campanaEliminar && Array.isArray(campanaEliminar.idsObjetivo)) {
+        campanaEliminar.idsObjetivo.forEach(idProd => {
+          const pIdLower = idProd.toString().trim().toLowerCase();
+          cambiosParaServidor[pIdLower] = "";
+          const prod = listaProductosGlobal.find(p => (p.id || '').toString().trim().toLowerCase() === pIdLower);
+          if (prod) prod.precioOferta = "";
+        });
+      }
+
+      renderizarProductos();
+      renderizarModuloOfertas();
+
+      if (Object.keys(cambiosParaServidor).length > 0) {
+        try {
+          await fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              accion: "actualizarOfertasLote",
+              clave: tokenClave || "zeronte2026",
+              cambios: cambiosParaServidor
+            })
+          });
+        } catch (err) {
+          console.error("Error al limpiar ofertas:", err);
         }
       }
     }
@@ -5224,10 +5176,7 @@
       }
     }
 
-    // Comprobador en tiempo real cada 30 segundos para iniciar/terminar campañas automáticamente
-    setInterval(() => {
-      sincronizarOfertasConCatalogo();
-    }, 30000);
+    // Sincronizador automático desactivado para evitar borrado accidental en Google Sheets
 
     // =========================================================================
     // LÓGICA DE PROCESADO Y SUBIDA DE ENTREGAS (ESTILO ETSY)
