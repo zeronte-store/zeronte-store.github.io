@@ -1036,7 +1036,7 @@
         <!-- ================= SECCIÓN: VENTAS HISTÓRICAS ETSY (2023 - 2026) ================= -->
         <div id="vistaSeccionVentasEtsy" class="hidden space-y-6">
           
-          <!-- Encabezado con Indicador de Sincronización en Vivo -->
+          <!-- Encabezado Limpio sin caja de sincronización -->
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div>
               <div class="flex items-center gap-2">
@@ -1046,15 +1046,7 @@
                 <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Histórico de Ventas Etsy</h1>
                 <span class="text-xs bg-orange-50 border border-orange-200 text-orange-700 px-2.5 py-0.5 rounded-full font-bold">2023 - 2026</span>
               </div>
-              <p class="text-xs text-slate-400 mt-0.5">Base histórica consolidada y sincronizada directamente desde tu hoja de cálculo de Google Sheets.</p>
-            </div>
-
-            <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs text-emerald-800 font-semibold shadow-2xs">
-              <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span>Sincronizado con Google Sheets</span>
+              <p class="text-xs text-slate-400 mt-0.5">Base histórica consolidada directamente desde tu hoja de cálculo de Google Sheets.</p>
             </div>
           </div>
 
@@ -1114,14 +1106,22 @@
               </div>
             </div>
 
-            <!-- Listado de filas interactivo (desplegable) -->
-            <div id="contenedorListaPedidosEtsy" class="space-y-2 max-h-[650px] overflow-y-auto pr-1">
+            <!-- Listado de filas interactivo (desplegable de 20 en 20 sin scroll infinito) -->
+            <div id="contenedorListaPedidosEtsy" class="space-y-2">
               <!-- Render dinámico -->
             </div>
 
             <div id="sinVentasEtsy" class="hidden text-center py-12 text-slate-400">
               <i class="fa-brands fa-etsy text-3xl text-orange-400 mb-2 block"></i>
               <p class="text-xs font-semibold">No se encontraron ventas para ese criterio en la base de datos.</p>
+            </div>
+
+            <!-- Controles de Paginación Etsy (20 por página) -->
+            <div id="barraPaginacionEtsy" class="hidden flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 text-xs text-slate-600">
+              <span id="infoPaginacionEtsy" class="text-[11px] text-slate-400 font-medium">Mostrando 1-20 de 0 pedidos</span>
+              <div id="botonesPaginacionEtsy" class="flex items-center gap-1 overflow-x-auto max-w-full py-1">
+                <!-- Se genera dinámicamente con « ‹ 1, 2, 3... › » -->
+              </div>
             </div>
           </div>
 
@@ -5629,17 +5629,106 @@
     // =========================================================================
     let listaVentasEtsyGlobal = [];
     let filtroAnoEtsyActual = 'todos';
+    let paginaActualEtsy = 1;
+    const ventasEtsyPorPagina = 20;
     const registrosEtsyDesplegadosSet = new Set();
 
     function setFiltroAnoEtsy(ano, btn) {
       filtroAnoEtsyActual = ano;
+      paginaActualEtsy = 1;
       document.querySelectorAll('.btn-filtro-etsy-ano').forEach(b => {
         b.className = 'btn-filtro-etsy-ano px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:text-slate-900 transition active:scale-95';
       });
       if (btn) {
         btn.className = 'btn-filtro-etsy-ano px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition active:scale-95';
       }
-      filtrarVentasEtsy();
+      filtrarVentasEtsy(true);
+    }
+
+    function cambiarPaginaEtsy(nuevaPagina) {
+      paginaActualEtsy = nuevaPagina;
+      filtrarVentasEtsy(false);
+      const seccionEtsy = document.getElementById('vistaSeccionVentasEtsy');
+      if (seccionEtsy) {
+        seccionEtsy.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function renderizarControlesPaginacionEtsy(totalItems) {
+      const barra = document.getElementById('barraPaginacionEtsy');
+      const contenedorBotones = document.getElementById('botonesPaginacionEtsy');
+      const infoTexto = document.getElementById('infoPaginacionEtsy');
+      if (!barra || !contenedorBotones || !infoTexto) return;
+
+      const totalPaginas = Math.ceil(totalItems / ventasEtsyPorPagina);
+
+      if (totalPaginas <= 1) {
+        barra.classList.add('hidden');
+        return;
+      }
+      barra.classList.remove('hidden');
+
+      const inicio = ((paginaActualEtsy - 1) * ventasEtsyPorPagina) + 1;
+      const fin = Math.min(paginaActualEtsy * ventasEtsyPorPagina, totalItems);
+      infoTexto.innerText = `Mostrando ${inicio}-${fin} de ${totalItems} pedidos`;
+
+      let html = '';
+
+      // Botón « (Primera)
+      html += `
+        <button type="button" onclick="cambiarPaginaEtsy(1)" ${paginaActualEtsy === 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Primera página" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition">
+          <i class="fa-solid fa-angles-left text-[10px]"></i>
+        </button>
+      `;
+
+      // Botón ‹ (Anterior)
+      html += `
+        <button type="button" onclick="cambiarPaginaEtsy(${paginaActualEtsy - 1})" ${paginaActualEtsy === 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Página anterior" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition mr-1">
+          <i class="fa-solid fa-chevron-left text-[10px]"></i>
+        </button>
+      `;
+
+      let paginas = [];
+      if (totalPaginas <= 7) {
+        for (let i = 1; i <= totalPaginas; i++) paginas.push(i);
+      } else {
+        if (paginaActualEtsy <= 4) {
+          paginas = [1, 2, 3, 4, 5, '...', totalPaginas];
+        } else if (paginaActualEtsy >= totalPaginas - 3) {
+          paginas = [1, '...', totalPaginas - 4, totalPaginas - 3, totalPaginas - 2, totalPaginas - 1, totalPaginas];
+        } else {
+          paginas = [1, '...', paginaActualEtsy - 1, paginaActualEtsy, paginaActualEtsy + 1, '...', totalPaginas];
+        }
+      }
+
+      paginas.forEach(p => {
+        if (p === '...') {
+          html += `<span class="w-8 h-8 flex items-center justify-center text-slate-400 font-bold">...</span>`;
+        } else {
+          const esActiva = p === paginaActualEtsy;
+          html += `
+            <button type="button" onclick="cambiarPaginaEtsy(${p})" class="w-8 h-8 rounded-lg text-xs font-bold transition active:scale-95 ${esActiva ? 'bg-slate-900 text-white shadow-xs' : 'border border-slate-200 hover:bg-slate-100 text-slate-700'}">
+              ${p}
+            </button>
+          `;
+        }
+      });
+
+      // Botón › (Siguiente)
+      html += `
+        <button type="button" onclick="cambiarPaginaEtsy(${paginaActualEtsy + 1})" ${paginaActualEtsy === totalPaginas ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Página siguiente" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition ml-1">
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+      `;
+
+      // Botón » (Última)
+      html += `
+        <button type="button" onclick="cambiarPaginaEtsy(${totalPaginas})" ${paginaActualEtsy === totalPaginas ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Última página" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition">
+          <i class="fa-solid fa-angles-right text-[10px]"></i>
+        </button>
+      `;
+
+      contenedorBotones.innerHTML = html;
     }
 
     function toggleDetalleVentaEtsy(idDetalle) {
@@ -5660,13 +5749,18 @@
     }
 
     function renderizarModuloVentasEtsy() {
-      filtrarVentasEtsy();
+      filtrarVentasEtsy(true);
     }
 
-    function filtrarVentasEtsy() {
+    function filtrarVentasEtsy(reiniciarPagina = true) {
+      if (reiniciarPagina) {
+        paginaActualEtsy = 1;
+      }
+
       const busqueda = (document.getElementById('buscadorEtsyInput')?.value || '').toLowerCase().trim();
       const cont = document.getElementById('contenedorListaPedidosEtsy');
       const sinVentas = document.getElementById('sinVentasEtsy');
+      const barraPaginacion = document.getElementById('barraPaginacionEtsy');
       if (!cont) return;
 
       const filtrados = listaVentasEtsyGlobal.filter(v => {
@@ -5755,16 +5849,40 @@
       if (filtrados.length === 0) {
         cont.innerHTML = '';
         sinVentas.classList.remove('hidden');
+        if (barraPaginacion) barraPaginacion.classList.add('hidden');
         return;
       }
       sinVentas.classList.add('hidden');
 
-      // 3. Render Listado de Clientes con Función Acordeón y Desglose Completo
-      cont.innerHTML = filtrados.map((v, idx) => {
+      // Validar límite de páginas y paginar exactamente 20 elementos
+      const totalPaginas = Math.ceil(filtrados.length / ventasEtsyPorPagina);
+      if (paginaActualEtsy > totalPaginas) {
+        paginaActualEtsy = totalPaginas || 1;
+      }
+
+      const indiceInicio = (paginaActualEtsy - 1) * ventasEtsyPorPagina;
+      const indiceFin = indiceInicio + ventasEtsyPorPagina;
+      const ventasPaginadas = filtrados.slice(indiceInicio, indiceFin);
+
+      renderizarControlesPaginacionEtsy(filtrados.length);
+
+      // 3. Render Listado de Clientes con Función Acordeón y Desglose Completo (20 por página)
+      const mapaTotalPedidosPorCliente = {};
+      listaVentasEtsyGlobal.forEach(item => {
+        const keyCl = (item.email || item.nombre || "").toString().trim().toLowerCase();
+        if (keyCl) {
+          mapaTotalPedidosPorCliente[keyCl] = (mapaTotalPedidosPorCliente[keyCl] || 0) + 1;
+        }
+      });
+
+      cont.innerHTML = ventasPaginadas.map((v, idx) => {
         const detalleId = `detalle-etsy-${idx}`;
         const estaAbierto = registrosEtsyDesplegadosSet.has(detalleId);
         const tieneEmail = v.email && v.email.includes('@');
         const precioVisible = v.precio > 0 ? `${v.precio.toFixed(2)} €` : 'No especificado';
+
+        const claveCl = (v.email || v.nombre || "").toString().trim().toLowerCase();
+        const totalPedidosCliente = mapaTotalPedidosPorCliente[claveCl] || 1;
 
         const asuntoPromo = encodeURIComponent(`Hola ${v.nombre}! Novedades y catálogo oficial de Zeronte`);
         const cuerpoPromo = encodeURIComponent(`Hola ${v.nombre},\n\nTe contacto porque en su día adquiriste "${v.producto}" conmigo a través de Etsy.\n\nHe inaugurado mi nueva tienda oficial independiente Zeronte (https://zeronte-store.github.io/index.html) donde dispondrás de mejores ofertas exclusivas y atención directa.\n\n¡Un cordial saludo!\nAdrián Díaz | Zeronte`);
@@ -5782,6 +5900,9 @@
                 <div class="min-w-0">
                   <div class="flex items-center gap-2 flex-wrap leading-tight">
                     <span class="font-bold text-slate-900 text-xs sm:text-sm">${v.nombre}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${totalPedidosCliente > 1 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-600 border border-slate-200'}">
+                      <i class="fa-solid fa-bag-shopping text-[9px] mr-1"></i>${totalPedidosCliente} ${totalPedidosCliente === 1 ? 'pedido' : 'pedidos'}
+                    </span>
                     <span class="text-[10px] bg-slate-100 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md font-semibold">${v.pais}</span>
                     <span class="text-[10px] text-slate-400 font-medium">${v.fecha}</span>
                   </div>
@@ -5799,20 +5920,27 @@
 
             <!-- CONTENIDO DESPLEGABLE CON TODOS LOS DATOS DETALLADOS -->
             <div id="${detalleId}" class="${estaAbierto ? '' : 'hidden'} p-4 bg-slate-50 border-t border-slate-200 space-y-3" onclick="event.stopPropagation()">
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 text-xs">
                 
                 <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Identificador de Venta</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Identificador</span>
                   <span class="font-mono font-bold text-slate-900">${v.id || 'N/A'}</span>
                 </div>
 
                 <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Fecha y Registro</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Fecha de Registro</span>
                   <span class="font-semibold text-slate-800">${v.fecha || 'Sin fecha'}</span>
                 </div>
 
                 <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">País de Envío / Destino</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Pedidos del Cliente</span>
+                  <span class="font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md inline-block">
+                    ${totalPedidosCliente} ${totalPedidosCliente === 1 ? 'pedido en Etsy' : 'pedidos en Etsy'}
+                  </span>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">País de Envío</span>
                   <span class="font-semibold text-slate-800 flex items-center gap-1.5">
                     <i class="fa-solid fa-location-dot text-rose-500 text-[10px]"></i> ${v.pais || 'No registrado'}
                   </span>
