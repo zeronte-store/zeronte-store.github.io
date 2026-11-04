@@ -5877,26 +5877,26 @@
       });
 
       cont.innerHTML = ventasPaginadas.map((v, idx) => {
-        // ID único persistente basado en su identificador de venta
-        const idSeguro = (v.id || ('idx-' + (indiceInicio + idx))).toString().replace(/[^a-zA-Z0-9_-]/g, '_');
+        // ID único persistente basado en el Número de Pedido real de la columna J
+        const numPedidoRealEtsy = (v.id || ('ETSY-' + (indiceInicio + idx + 1))).toString().trim();
+        const idSeguro = numPedidoRealEtsy.replace(/[^a-zA-Z0-9_-]/g, '_');
         const detalleId = `detalle-etsy-${idSeguro}`;
         const estaAbierto = registrosEtsyDesplegadosSet.has(detalleId);
         const tieneEmail = v.email && v.email.includes('@');
         const precioVisible = v.precio > 0 ? `${v.precio.toFixed(2)} €` : 'No especificado';
+        const cantidadUnidades = v.cantidad || 1;
 
         const claveCl = (v.email || v.nombre || "").toString().trim().toLowerCase();
         const totalPedidosCliente = mapaTotalPedidosPorCliente[claveCl] || 1;
 
-        const numPedidoVisible = v.id || `ETSY-${indiceInicio + idx + 1}`;
-
         const asuntoPromo = encodeURIComponent(`Hola ${v.nombre}! Novedades y catálogo oficial de Zeronte`);
-        const cuerpoPromo = encodeURIComponent(`Hola ${v.nombre},\n\nTe contacto porque en su día adquiriste "${v.producto}" conmigo a través de Etsy.\n\nHe inaugurado mi nueva tienda oficial independiente Zeronte (https://zeronte-store.github.io/index.html) donde dispondrás de mejores ofertas exclusivas y atención directa.\n\n¡Un cordial saludo!\nAdrián Díaz | Zeronte`);
+        const cuerpoPromo = encodeURIComponent(`Hola ${v.nombre},\n\nTe contacto porque en su día adquiriste "${v.producto}" conmigo a través de Etsy (Pedido Nº ${numPedidoRealEtsy}).\n\nHe inaugurado mi nueva tienda oficial independiente Zeronte (https://zeronte-store.github.io/index.html) donde dispondrás de mejores ofertas exclusivas y atención directa.\n\n¡Un cordial saludo!\nAdrián Díaz | Zeronte`);
         const mailtoUrl = tieneEmail ? `mailto:${v.email}?subject=${asuntoPromo}&body=${cuerpoPromo}` : '#';
 
         return `
           <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs hover:border-slate-300 transition">
             
-            <!-- FILA PRINCIPAL COMPACTA (CLICABLE) CON Nº DE PEDIDO VISIBLE -->
+            <!-- FILA PRINCIPAL COMPACTA CON EL NÚMERO DE PEDIDO REAL (COLUMNA J) -->
             <div onclick="toggleDetalleVentaEtsy('${detalleId}')" class="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/70 transition">
               <div class="flex items-center gap-3 min-w-0 flex-grow">
                 <span class="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
@@ -5904,7 +5904,7 @@
                 </span>
                 <div class="min-w-0">
                   <div class="flex items-center gap-2 flex-wrap leading-tight">
-                    <span class="font-mono text-xs font-black bg-slate-900 text-white px-2 py-0.5 rounded shadow-2xs tracking-wider">${numPedidoVisible}</span>
+                    <span class="font-mono text-xs font-black bg-slate-900 text-white px-2 py-0.5 rounded shadow-2xs tracking-wider" title="Número de Pedido Etsy (Columna J)">${numPedidoRealEtsy}</span>
                     <span class="font-bold text-slate-900 text-xs sm:text-sm">${v.nombre}</span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${totalPedidosCliente > 1 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-600 border border-slate-200'}">
                       <i class="fa-solid fa-bag-shopping text-[9px] mr-1"></i>${totalPedidosCliente} ${totalPedidosCliente === 1 ? 'pedido' : 'pedidos'}
@@ -5924,37 +5924,42 @@
               </div>
             </div>
 
-            <!-- CONTENIDO DESPLEGABLE CON INFORMACIÓN DETALLADA -->
+            <!-- CONTENIDO DESPLEGABLE CON TODOS LOS DATOS EXACTOS (Nº PEDIDO, CANTIDAD, IMPORTE) -->
             <div id="${detalleId}" class="${estaAbierto ? '' : 'hidden'} p-4 bg-slate-50 border-t border-slate-200 space-y-3" onclick="event.stopPropagation()">
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 text-xs">
                 
                 <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
                   <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Nº de Pedido</span>
-                  <span class="font-mono font-bold text-slate-900 text-xs">${numPedidoVisible}</span>
+                  <span class="font-mono font-bold text-slate-900 text-xs">${numPedidoRealEtsy}</span>
                 </div>
 
                 <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Fecha de Registro</span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Fecha</span>
                   <span class="font-semibold text-slate-800">${v.fecha || 'Sin fecha'}</span>
                 </div>
 
                 <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Pedidos del Cliente</span>
-                  <span class="font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md inline-block">
-                    ${totalPedidosCliente} ${totalPedidosCliente === 1 ? 'pedido en Etsy' : 'pedidos en Etsy'}
-                  </span>
-                </div>
-
-                <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">País de Envío</span>
-                  <span class="font-semibold text-slate-800 flex items-center gap-1.5">
-                    <i class="fa-solid fa-location-dot text-rose-500 text-[10px]"></i> ${v.pais || 'No registrado'}
-                  </span>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Unidades</span>
+                  <span class="font-bold text-slate-900">${cantidadUnidades} ${cantidadUnidades === 1 ? 'ud.' : 'uds.'}</span>
                 </div>
 
                 <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
                   <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Importe Total</span>
                   <span class="font-bold text-emerald-600 text-sm">${precioVisible}</span>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">País de Envío</span>
+                  <span class="font-semibold text-slate-800 flex items-center gap-1">
+                    <i class="fa-solid fa-location-dot text-rose-500 text-[10px]"></i> ${v.pais || 'No registrado'}
+                  </span>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-2.5 rounded-xl">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Historial Cliente</span>
+                  <span class="font-bold text-amber-900 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md inline-block">
+                    ${totalPedidosCliente} ${totalPedidosCliente === 1 ? 'pedido' : 'pedidos'}
+                  </span>
                 </div>
 
               </div>
