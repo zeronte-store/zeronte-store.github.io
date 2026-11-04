@@ -54,12 +54,7 @@
 
         <button type="submit" id="btnEntrar" class="w-full bg-white hover:bg-gold text-black font-bold py-3.5 rounded-xl uppercase text-xs tracking-wider transition active:scale-98">Acceder</button>
         
-        <!-- Botón Face ID / Biometría (se activa automáticamente en iPhone) -->
-        <button type="button" id="btnFaceID" onclick="accederConFaceID()" class="hidden w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold py-3 rounded-xl text-xs tracking-wide transition active:scale-98 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-expand text-sm text-gold"></i>
-          <span>Entrar con Face ID</span>
-        </button>
-      </form>
+        </form>
     </div>
   </div>
 
@@ -105,17 +100,10 @@
           <!-- NUEVA SECCIÓN ESTILO ETSY: PROCESAR PEDIDOS -->
           <button onclick="cambiarSeccion('procesar', this)" title="Procesar pedidos" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
-              <i class="fa-solid fa-truck-ramp-box text-sm text-slate-600"></i>
+              <i id="iconoMenuProcesar" class="fa-solid fa-truck-ramp-box text-sm text-slate-600"></i>
             </div>
             <span class="sidebar-text truncate flex-grow text-left">Procesar pedidos</span>
             <span id="badgePedidosPorProcesar" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-amber-100 text-amber-800 font-extrabold hidden">0</span>
-          </button>
-          
-          <button onclick="cambiarSeccion('catalogo', this)" title="Catálogo" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-            <div class="w-6 h-6 flex items-center justify-center shrink-0">
-              <i class="fa-solid fa-music text-sm"></i>
-            </div>
-            <span class="sidebar-text truncate">Catálogo</span>
           </button>
 
           <!-- NUEVA SECCIÓN OFERTAS ESTILO ETSY -->
@@ -1276,67 +1264,15 @@
       }
     }
 
-    // Autenticación nativa con Face ID / Touch ID (WebAuthn)
-    async function accederConFaceID() {
-      const tokenGuardado = localStorage.getItem('zeronte_admin_token');
-      if (!tokenGuardado) {
-        alert("Primero debes acceder una vez introduciendo tu contraseña y marcando 'Recordar clave'.");
-        return;
-      }
-
-      if (window.PublicKeyCredential) {
-        try {
-          const desafio = new Uint8Array(32);
-          window.crypto.getRandomValues(desafio);
-
-          // Petición de verificación biométrica nativa de iOS / Safari
-          await navigator.credentials.get({
-            publicKey: {
-              challenge: desafio,
-              timeout: 60000,
-              userVerification: "required"
-            }
-          });
-
-          // Si el sensor Face ID valida al usuario:
-          tokenClave = tokenGuardado;
-          document.getElementById('inputClave').value = tokenGuardado;
-          cargarDatos();
-          return;
-        } catch (err) {
-          // Si es la primera vez que se vincula o se cancela el lector
-          console.log("Validación biométrica alternativa:", err);
-        }
-      }
-
-      // Desbloqueo directo con la clave recordada si Face ID ya fue confirmado previamente
-      tokenClave = tokenGuardado;
-      document.getElementById('inputClave').value = tokenGuardado;
-      cargarDatos();
-    }
-
-    // Inicializar comprobación de clave recordada y compatibilidad con Face ID al cargar la página
-    document.addEventListener("DOMContentLoaded", async () => {
+    // Inicializar comprobación de clave recordada al cargar la página
+    document.addEventListener("DOMContentLoaded", () => {
       const claveGuardada = localStorage.getItem('zeronte_admin_token');
       const inputClave = document.getElementById('inputClave');
       const checkRecordar = document.getElementById('checkRecordarClave');
-      const btnFace = document.getElementById('btnFaceID');
 
       if (claveGuardada) {
         if (inputClave) inputClave.value = claveGuardada;
         if (checkRecordar) checkRecordar.checked = true;
-      }
-
-      // Detectar si el dispositivo (iPhone / Mac / iPad) admite Face ID / Touch ID
-      if (window.PublicKeyCredential && btnFace) {
-        try {
-          const disponible = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-          if (disponible) {
-            btnFace.classList.remove('hidden');
-          }
-        } catch (e) {
-          if (claveGuardada && btnFace) btnFace.classList.remove('hidden');
-        }
       }
     });
 
@@ -1445,6 +1381,9 @@
             renderizarClientes();
           }
         }
+
+        // Actualizar badges y colores de iconos del menú lateral de inmediato
+        actualizarBadgesMenuLateral();
 
         // Iniciar el auto-refresco continuo cada 15 segundos si no estaba iniciado
         if (!temporizadorAutoRefresco) {
@@ -3963,6 +3902,9 @@
       btn.classList.add('bg-slate-900', 'text-white', 'shadow-sm');
       btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
 
+      // Restaurar y sincronizar colores e iconos según sus contadores
+      actualizarBadgesMenuLateral();
+
       if (window.innerWidth < 768) {
         toggleSidebarMovil();
       }
@@ -4062,12 +4004,10 @@
       }
 
       const obtenerFoto = (nombre) => {
-        const prod = listaProductosGlobal.find(pr => 
-          (pr.titulo && pr.titulo.toLowerCase().trim() === nombre.toLowerCase().trim()) ||
-          nombre.toLowerCase().includes((pr.titulo || "").toLowerCase()) ||
-          (pr.titulo || "").toLowerCase().includes(nombre.toLowerCase())
-        );
-        return (prod && prod.imagen) ? prod.imagen : "";
+        const prod = buscarProductoEnCatalogo(nombre);
+        if (!prod || !prod.imagen) return "";
+        const fotos = extraerFotosProducto(prod.imagen);
+        return (fotos && fotos.length > 0) ? fotos[0] : "";
       };
 
       const obtenerId = (nombre) => {
@@ -4087,11 +4027,11 @@
                 <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-center shrink-0 shadow-2xs">
                   ${medalla}
                 </span>
-                <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
                   ${foto ? `
-                    <img src="${foto}" alt="${item.titulo}" class="w-full h-full object-cover">
+                    <img src="${foto}" alt="${item.titulo}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/logo-zeronte.png';">
                   ` : `
-                    <span class="text-white font-bold text-xs brand-font">Z</span>
+                    <span class="text-white font-bold text-xs bg-slate-900 w-full h-full flex items-center justify-center brand-font">Z</span>
                   `}
                 </div>
                 <div class="min-w-0">
@@ -5051,21 +4991,7 @@
       const badgeHeader = document.getElementById('badgeEstadoOfertasGeneral');
       if (badgeHeader) badgeHeader.innerText = `${activasCount} en curso`;
 
-      const badgeMenu = document.getElementById('badgeOfertasActivas');
-      if (badgeMenu) {
-        badgeMenu.innerText = activasCount;
-        badgeMenu.classList.toggle('hidden', activasCount === 0);
-      }
-
-      if (iconoMenu) {
-        if (activasCount > 0) {
-          iconoMenu.classList.remove('text-slate-600');
-          iconoMenu.classList.add('text-rose-500');
-        } else {
-          iconoMenu.classList.remove('text-rose-500');
-          iconoMenu.classList.add('text-slate-600');
-        }
-      }
+      actualizarBadgesMenuLateral();
 
       if (campanas.length === 0) {
         cont.innerHTML = "";
@@ -5166,10 +5092,90 @@
     let nombreArchivoEntregaSeleccionado = "";
     let mimeTypeArchivoEntrega = "";
 
+    // Función centralizada para mantener badges numéricos y colores de iconos en el menú lateral
+    function actualizarBadgesMenuLateral() {
+      // 1. OFERTAS
+      const campanas = (typeof obtenerCampanasOfertas === 'function') ? obtenerCampanasOfertas() : [];
+      const ahora = Date.now();
+      let activasOfertas = 0;
+      campanas.forEach(c => {
+        if (!c.activa) return;
+        const inicioAlcanzado = ahora >= c.fechaInicio;
+        const noExpirada = c.sinFin || (c.fechaFin && ahora <= c.fechaFin);
+        if (inicioAlcanzado && noExpirada) activasOfertas++;
+      });
+
+      const badgeOfertas = document.getElementById('badgeOfertasActivas');
+      const iconoOfertas = document.getElementById('iconoMenuOfertas');
+      if (badgeOfertas) {
+        badgeOfertas.innerText = activasOfertas;
+        badgeOfertas.classList.toggle('hidden', activasOfertas === 0);
+      }
+      if (iconoOfertas) {
+        const btnOfertas = iconoOfertas.closest('.nav-item-btn');
+        const estaSeleccionado = btnOfertas && btnOfertas.classList.contains('bg-slate-900');
+        if (activasOfertas > 0) {
+          iconoOfertas.classList.remove('text-slate-600', 'text-white');
+          iconoOfertas.classList.add('text-rose-500');
+        } else {
+          iconoOfertas.classList.remove('text-rose-500');
+          iconoOfertas.classList.add(estaSeleccionado ? 'text-white' : 'text-slate-600');
+        }
+      }
+
+      // 2. PROCESAR PEDIDOS
+      const pedidosPendientesOProceso = listaPedidosGlobal.filter(p => {
+        const est = (p.estado || "").toLowerCase().trim();
+        return est.includes("pendiente") || est.includes("proceso");
+      });
+      const badgeProcesar = document.getElementById('badgePedidosPorProcesar');
+      const iconoProcesar = document.getElementById('iconoMenuProcesar');
+      if (badgeProcesar) {
+        badgeProcesar.innerText = pedidosPendientesOProceso.length;
+        badgeProcesar.classList.toggle('hidden', pedidosPendientesOProceso.length === 0);
+      }
+      if (iconoProcesar) {
+        const btnProcesar = iconoProcesar.closest('.nav-item-btn');
+        const estaSeleccionado = btnProcesar && btnProcesar.classList.contains('bg-slate-900');
+        if (pedidosPendientesOProceso.length > 0) {
+          iconoProcesar.classList.remove('text-slate-600', 'text-white');
+          iconoProcesar.classList.add('text-amber-500');
+        } else {
+          iconoProcesar.classList.remove('text-amber-500');
+          iconoProcesar.classList.add(estaSeleccionado ? 'text-white' : 'text-slate-600');
+        }
+      }
+
+      // 3. MENSAJES
+      const noLeidos = (mensajesClientes || []).filter(m => (m.estado || "").toLowerCase() !== "leído").length;
+      const badgeMensajes = document.getElementById('badgeMensajes');
+      const iconoMensajes = document.getElementById('iconoMenuMensajes');
+      if (badgeMensajes) {
+        badgeMensajes.innerText = noLeidos;
+        if (noLeidos > 0) {
+          badgeMensajes.classList.remove('bg-slate-200', 'text-slate-700');
+          badgeMensajes.classList.add('bg-amber-500', 'text-slate-950', 'animate-pulse');
+        } else {
+          badgeMensajes.classList.remove('bg-amber-500', 'text-slate-950', 'animate-pulse');
+          badgeMensajes.classList.add('bg-slate-200', 'text-slate-700');
+        }
+      }
+      if (iconoMensajes) {
+        const btnMensajes = iconoMensajes.closest('.nav-item-btn');
+        const estaSeleccionado = btnMensajes && btnMensajes.classList.contains('bg-slate-900');
+        if (noLeidos > 0) {
+          iconoMensajes.classList.remove('text-slate-600', 'text-white');
+          iconoMensajes.classList.add('text-amber-500');
+        } else {
+          iconoMensajes.classList.remove('text-amber-500');
+          iconoMensajes.classList.add(estaSeleccionado ? 'text-white' : 'text-slate-600');
+        }
+      }
+    }
+
     function renderizarModuloProcesarPedidos() {
       const cont = document.getElementById('contenedorListaProcesar');
       const sinPed = document.getElementById('sinPedidosPorProcesar');
-      const badgeNav = document.getElementById('badgePedidosPorProcesar');
       const badgeHeader = document.getElementById('badgeConteoProcesar');
       if (!cont) return;
 
@@ -5178,14 +5184,11 @@
         return est.includes("pendiente") || est.includes("proceso");
       });
 
-      if (badgeNav) {
-        badgeNav.innerText = pedidosPendientesOProceso.length;
-        badgeNav.classList.toggle('hidden', pedidosPendientesOProceso.length === 0);
-      }
       if (badgeHeader) {
         badgeHeader.innerText = `${pedidosPendientesOProceso.length} pendientes`;
       }
 
+      actualizarBadgesMenuLateral();
       filtrarPedidosPorProcesar();
     }
 
