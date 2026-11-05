@@ -2149,7 +2149,7 @@
         }
       }
     }
- 
+  
     function actualizarSelectProductosResena() {
       const select = document.getElementById("articuloResena");
       if (!select || !catalogoCompleto || catalogoCompleto.length === 0) return;
@@ -3610,10 +3610,30 @@
       // Mostrar u ocultar el botón de descarga del archivo entregado desde Google Drive
       const cajaDescarga = document.getElementById('cajaDescargaArchivosCliente');
       const btnDescarga = document.getElementById('btnDescargaArchivosEntrega');
-      const urlEntrega = p.archivoEntregaUrl || "";
+      let urlEntrega = (p.archivoEntregaUrl || "").trim();
 
       if (cajaDescarga && btnDescarga) {
         if (urlEntrega && (estado.includes("enviado") || estado.includes("completado") || estado.includes("pagado"))) {
+          // Solución antirrestricción de iOS (iPhone/iPad): transformar enlace directo en visor seguro compatible
+          const esDispositivoApple = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+          
+          let idDrive = "";
+          const matchId = urlEntrega.match(/[-\w]{25,}/);
+          if (matchId && (urlEntrega.includes('drive.google.com') || urlEntrega.includes('drive.usercontent.google.com'))) {
+            idDrive = matchId[0];
+          }
+
+          if (idDrive && esDispositivoApple) {
+            // En iOS se abre en modo visualización directa para que Safari no se congele en drive.usercontent
+            urlEntrega = `https://drive.google.com/file/d/${idDrive}/view?usp=sharing`;
+            btnDescarga.removeAttribute('target');
+          } else if (idDrive) {
+            urlEntrega = `https://drive.google.com/uc?export=download&id=${idDrive}`;
+            btnDescarga.setAttribute('target', '_blank');
+          } else {
+            btnDescarga.setAttribute('target', '_blank');
+          }
+
           btnDescarga.href = urlEntrega;
           cajaDescarga.classList.remove('hidden');
         } else {
