@@ -3178,12 +3178,27 @@
       const select = document.getElementById('nuevaCategoria');
       if (!select) return;
 
+      // Si no se pasa categoría explícita y se está editando, rescatar la del producto en edición
+      if (!categoriaSeleccionar) {
+        const idEditando = (document.getElementById('prodEditandoId')?.value || '').trim();
+        if (idEditando) {
+          const prodActual = listaProductosGlobal.find(p => (p.id || '').toLowerCase() === idEditando.toLowerCase());
+          if (prodActual && prodActual.categoria) {
+            categoriaSeleccionar = prodActual.categoria.trim();
+          }
+        }
+      }
+
       const categorias = new Set();
       listaProductosGlobal.forEach(p => {
         if (p.categoria && p.categoria.trim()) {
           categorias.add(p.categoria.trim());
         }
       });
+
+      if (categoriaSeleccionar && categoriaSeleccionar !== '__otra__') {
+        categorias.add(categoriaSeleccionar);
+      }
 
       let html = '';
       categorias.forEach(cat => {
@@ -3194,10 +3209,11 @@
       select.innerHTML = html;
 
       if (categoriaSeleccionar) {
-        const existe = Array.from(select.options).some(o => o.value.toLowerCase() === categoriaSeleccionar.toLowerCase());
-        if (existe) {
-          select.value = categoriaSeleccionar;
-          alternarNuevaCategoria(categoriaSeleccionar);
+        const catNorm = categoriaSeleccionar.trim().toLowerCase();
+        const opcionExacta = Array.from(select.options).find(o => o.value.trim().toLowerCase() === catNorm);
+        if (opcionExacta) {
+          select.value = opcionExacta.value;
+          alternarNuevaCategoria(opcionExacta.value);
         } else {
           select.value = '__otra__';
           alternarNuevaCategoria('__otra__');
@@ -3484,6 +3500,7 @@
           const bloquePrecioHtml = obtenerBloquePrecio(item);
           const fotosArray = extraerFotosProducto(item.imagen);
           const fotoPortada = fotosArray[0] || 'https://zeronte-store.github.io/img/logo-zeronte.png';
+          const enlaceFichaWeb = `https://zeronte-store.github.io/index.html?prod=${encodeURIComponent(idProd)}`;
 
           return `
             <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-slate-300 transition group flex flex-col justify-between">
@@ -3496,6 +3513,9 @@
                 <div class="p-3">
                   <div class="flex items-center justify-between gap-1 mb-1">
                     <span class="text-[9px] uppercase font-bold tracking-wider text-slate-400 truncate">${item.categoria || 'Sin categoría'}</span>
+                    <a href="${enlaceFichaWeb}" target="_blank" rel="noopener noreferrer" title="Ver producto en la tienda web" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition active:scale-90">
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+                    </a>
                   </div>
 
                   <h3 class="text-xs font-bold text-slate-900 line-clamp-2 leading-tight group-hover:text-blue-600 transition" title="${item.titulo}">
@@ -3543,6 +3563,7 @@
           const bloquePrecioHtml = obtenerBloquePrecio(item);
           const fotosArray = extraerFotosProducto(item.imagen);
           const fotoPortada = fotosArray[0] || 'https://zeronte-store.github.io/img/logo-zeronte.png';
+          const enlaceFichaWeb = `https://zeronte-store.github.io/index.html?prod=${encodeURIComponent(idProd)}`;
 
           return `
             <div class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 shadow-xs hover:shadow-md hover:border-slate-300 transition flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3.5 group">
@@ -3559,6 +3580,9 @@
                     <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 truncate">
                       ${item.categoria || 'Sin categoría'}
                     </span>
+                    <a href="${enlaceFichaWeb}" target="_blank" rel="noopener noreferrer" title="Ver producto en la tienda web" class="shrink-0 text-slate-400 hover:text-slate-800 transition active:scale-90 ml-0.5">
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
                   </div>
                   <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate" title="${item.titulo}">
                     ${item.titulo}
@@ -3570,7 +3594,7 @@
               <div class="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                 <div class="text-left sm:text-right">
                   <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Histórico</span>
-                  <div class="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 mt-0.5">
+                  <div class="flex sm:flex-col items-end gap-2 sm:gap-0 mt-0.5">
                     <span class="text-xs font-semibold text-slate-700 flex items-center gap-1">
                       <i class="fa-solid fa-bag-shopping text-[10px] text-slate-400"></i> ${item.unidadesVendidas} ${item.unidadesVendidas === 1 ? 'venta' : 'ventas'}
                     </span>
