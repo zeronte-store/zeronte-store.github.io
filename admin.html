@@ -3362,12 +3362,16 @@
         if (chkFisico) chkFisico.checked = false;
       }
 
+      // Bloquear scroll del fondo
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     }
 
     function cerrarModalProducto() {
       const modal = document.getElementById('modalProductoEtsy');
       if (modal) modal.classList.add('hidden');
+      // Restaurar scroll del fondo
+      document.body.style.overflow = '';
     }
 
     function poblarCategoriasCatalogo() {
