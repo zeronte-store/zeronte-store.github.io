@@ -240,6 +240,18 @@
 
       <!-- Rejilla de Productos con Descuentos -->
       <main class="flex-1 w-full" id="catalogo">
+        <!-- BLOQUE ESTILO ETSY: ARTÍCULOS DESTACADOS (MÁXIMO 6) -->
+        <section id="seccionDestacadosEtsy" class="hidden mb-8 pb-8 border-b border-gray-200">
+          <div class="flex items-center justify-between mb-4">
+            <h2 id="tituloArticulosDestacados" class="text-base sm:text-lg font-bold text-[#222222] flex items-center gap-2">
+              <span>Artículos destacados</span>
+            </h2>
+          </div>
+          <div id="gridProductosDestacados" class="grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-4">
+            <!-- Render dinámico de hasta 6 productos destacados -->
+          </div>
+        </section>
+
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base sm:text-lg font-bold text-[#222222]" id="tituloSeccionActual">Todos los artículos</h2>
           <div class="flex items-center gap-3">
@@ -1871,6 +1883,20 @@
       const tSec = document.getElementById('tituloSeccionActual');
       if (tSec) tSec.innerText = tituloMap[categoriaSeleccionada] || t.catTodos;
 
+      const tDest = document.getElementById('tituloArticulosDestacados');
+      if (tDest) {
+        const titulosDestMap = {
+          es: "Artículos destacados",
+          en: "Featured items",
+          fr: "Articles vedettes",
+          de: "Hervorgehobene Artikel",
+          it: "Articoli in evidenza",
+          pt: "Artigos em destaque",
+          zh: "特色推荐宝贝"
+        };
+        tDest.innerText = titulosDestMap[lang] || "Artículos destacados";
+      }
+
       // Sección Reseñas
       const resTit = document.getElementById("txtResenasTitulo");
       if (resTit) resTit.innerText = t.resenasTitulo;
@@ -2366,12 +2392,97 @@
       if (contadorLabel) contadorLabel.innerText = `${lista.length} ${t.articulosSufijo}`;
       if (!contenedor) return;
 
+      const ahora = Date.now();
+
+      // Renderizar bloque de Artículos Destacados (máximo 6 y visible solo en la pestaña "Todos")
+      const seccionDest = document.getElementById("seccionDestacadosEtsy");
+      const gridDest = document.getElementById("gridProductosDestacados");
+      const destacados = catalogoCompleto.filter(p => p.destacado === true || p.destacado === "SI").slice(0, 6);
+
+      if (seccionDest && gridDest) {
+        if (destacados.length > 0 && categoriaSeleccionada === 'todos') {
+          seccionDest.classList.remove('hidden');
+          gridDest.innerHTML = destacados.map((p) => {
+            let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
+            try {
+              if (Array.isArray(p.imagen)) imgUrl = p.imagen[0] || imgUrl;
+              else if (typeof p.imagen === 'string' && (p.imagen.trim().startsWith('[') || p.imagen.trim().startsWith('{'))) {
+                const arr = JSON.parse(p.imagen);
+                imgUrl = Array.isArray(arr) && arr.length > 0 ? arr[0] : imgUrl;
+              } else if (p.imagen) imgUrl = p.imagen;
+            } catch(e) { if (p.imagen) imgUrl = p.imagen; }
+
+            const precioBase = parseFloat(p.precio) || 0;
+            const precioOferta = p.precioOferta ? parseFloat(String(p.precioOferta).replace(',', '.')) : null;
+            const tieneOferta = precioOferta && precioOferta > 0 && precioOferta < precioBase;
+            const precioFinal = tieneOferta ? precioOferta : precioBase;
+            const porcentajeDescuento = tieneOferta ? Math.round(((precioBase - precioOferta) / precioBase) * 100) : 0;
+            const tituloTraducido = traducirTituloProducto(p.titulo, idiomaActual);
+            let fechaFinOferta = tieneOferta ? obtenerFechaFinOfertaSincronizada(p, ahora) : null;
+
+            return `
+              <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick='abrirFichaArticulo(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+                <div>
+                  <div class="aspect-square bg-gray-100 relative overflow-hidden">
+                    <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <div class="absolute top-2 left-2 flex flex-col gap-1 items-start z-10 pointer-events-none">
+                      <span class="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                        <i class="fa-solid fa-star text-[9px]"></i>
+                        <span>Destacado</span>
+                      </span>
+                      ${tieneOferta ? `<span class="bg-[#d23f57] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">-${porcentajeDescuento}%</span>` : ''}
+                    </div>
+                  </div>
+
+                  <div class="p-3">
+                    <h3 data-titulo-orig="${encodeURIComponent(p.titulo)}" class="text-sm sm:text-base font-semibold uppercase tracking-wide text-[#111111] line-clamp-2 leading-snug group-hover:underline">
+                      ${tituloTraducido}
+                    </h3>
+                    <div class="flex items-center gap-1.5 mt-1.5 text-xs text-amber-500">
+                      <div class="flex items-center gap-1">
+                        <i class="fa-solid fa-star"></i>
+                        <span class="text-gray-700 font-bold text-xs">5.0</span>
+                      </div>
+                      <span class="text-gray-300">|</span>
+                      <span class="text-gray-600 font-semibold text-xs">
+                        ${(p.totalVentas || 0).toLocaleString('es-ES')} ${(p.totalVentas === 1) ? 'venta' : 'ventas'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-3 pt-0">
+                  <div class="flex items-baseline gap-1.5 flex-wrap">
+                    <span class="text-sm sm:text-base font-bold text-[#222222]">${precioFinal.toFixed(2)} €</span>
+                    ${tieneOferta ? `<span class="text-xs text-gray-400 line-through">${precioBase.toFixed(2)} €</span>` : ''}
+                  </div>
+                  ${tieneOferta ? `
+                    <div class="banner-oferta-etsy flex items-center gap-1 text-[11px] font-semibold text-[#0f766e] mt-0.5 leading-tight flex-wrap">
+                      <span>-${porcentajeDescuento}%</span>
+                      <span>•</span>
+                      <span>La oferta termina en</span>
+                      <span class="countdown-etsy-timer font-bold" data-fin="${fechaFinOferta || (ahora + 33687000)}">
+                        ${formatearTiempoEtsy((fechaFinOferta || (ahora + 33687000)) - ahora)}
+                      </span>
+                    </div>
+                  ` : ''}
+                  <span class="text-xs font-medium text-blue-600 flex items-center gap-1.5 mt-1">
+                    <i class="fa-solid fa-cloud-arrow-down text-sm text-blue-600"></i>
+                    <span>${t.descargaDigital}</span>
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          seccionDest.classList.add('hidden');
+        }
+      }
+
       if (lista.length === 0) {
         contenedor.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500 text-sm">${t.noArticulos}</div>`;
         return;
       }
-
-      const ahora = Date.now();
 
       contenedor.innerHTML = lista.map((p, idxLista) => {
         let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
