@@ -34,6 +34,27 @@
 </head>
 <body class="bg-[#f5f5f1] text-[#222222] antialiased min-h-screen selection:bg-[#222222] selection:text-white">
 
+  <!-- ==================== PANTALLA DE SINCRONIZACIÓN INICIAL CON BARRA DE PROGRESO ==================== -->
+  <div id="pantallaCargaInicial" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#f5f5f1]/85 backdrop-blur-md transition-opacity duration-500 ease-out p-6 text-center select-none">
+    <!-- Logo oficial subido en GitHub -->
+    <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-black p-1.5 mb-5 transition-transform duration-300 hover:scale-105">
+      <img src="img/logo-zeronte.png" alt="Zeronte" class="w-full h-full object-cover rounded-xl" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/logo-zeronte.png';">
+    </div>
+
+    <!-- Textos de bienvenida -->
+    <h2 class="font-serif text-xl sm:text-2xl font-bold text-[#222222] mb-1.5 tracking-wide">Bienvenidos a Zeronte</h2>
+    <p class="text-xs sm:text-sm text-gray-600 max-w-xs sm:max-w-sm font-medium leading-relaxed mb-6">
+      Estamos sincronizando nuestro catálogo de productos musicales...
+    </p>
+
+    <!-- Barra de progreso dinámica -->
+    <div class="w-56 sm:w-64 h-2 bg-gray-200/90 rounded-full overflow-hidden border border-gray-300/70 p-0.5 shadow-inner">
+      <div id="barraProgresoCargaInicial" class="h-full bg-[#222222] rounded-full transition-all duration-300 ease-out" style="width: 15%;"></div>
+    </div>
+    <!-- Porcentaje dinámico en tiempo real -->
+    <span id="textoPorcentajeCarga" class="text-xs font-mono font-bold text-gray-700 mt-2 tracking-wider">15%</span>
+  </div>
+ 
   <!-- ==================== BANNER Y CABECERA DE TIENDA ETSY ==================== -->
   <section class="max-w-6xl mx-auto px-4 pt-4 sm:pt-6">
     <!-- Portada / Banner -->
@@ -2012,9 +2033,16 @@
     }
 
     async function cargarCatalogoDinamico() {
+      const barra = document.getElementById('barraProgresoCargaInicial');
+      const txtPorcentaje = document.getElementById('textoPorcentajeCarga');
+      if (barra) barra.style.width = '35%';
+      if (txtPorcentaje) txtPorcentaje.innerText = '35%';
+
       try {
         // Petición con parámetro de tiempo para que GitHub Pages nunca sirva datos obsoletos
         const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos&t=${Date.now()}`);
+        if (barra) barra.style.width = '65%';
+        if (txtPorcentaje) txtPorcentaje.innerText = '65%';
         if (!res.ok) return;
         const data = await res.json();
         
@@ -2094,7 +2122,6 @@
           });
 
           catalogoCompleto = productos;
-          localStorage.setItem('zeronte_catalogo_cache', JSON.stringify(productos));
 
           actualizarConteosCategorias();
           filtrarCategoria(categoriaSeleccionada, null);
@@ -2105,9 +2132,24 @@
         }
       } catch (e) {
         console.warn("Sincronización en segundo plano completada con respaldo local.");
+      } finally {
+        const barra = document.getElementById('barraProgresoCargaInicial');
+        const txtPorcentaje = document.getElementById('textoPorcentajeCarga');
+        if (barra) barra.style.width = '100%';
+        if (txtPorcentaje) txtPorcentaje.innerText = '100%';
+
+        const overlayCarga = document.getElementById('pantallaCargaInicial');
+        if (overlayCarga) {
+          setTimeout(() => {
+            overlayCarga.style.opacity = '0';
+            setTimeout(() => {
+              overlayCarga.style.display = 'none';
+            }, 500);
+          }, 250);
+        }
       }
     }
-
+ 
     function actualizarSelectProductosResena() {
       const select = document.getElementById("articuloResena");
       if (!select || !catalogoCompleto || catalogoCompleto.length === 0) return;
