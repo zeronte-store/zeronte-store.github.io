@@ -529,13 +529,23 @@
                     </select>
                     <input type="text" id="inputNuevaCategoriaTexto" placeholder="Escribe la nueva categoría" class="hidden mt-2 w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
                   </div>
-                  <div class="md:col-span-4">
-                    <label class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition h-[38px]">
+                  <div class="md:col-span-4 flex gap-2">
+                    <label class="flex-1 flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition h-[38px]">
                       <div class="flex items-center gap-1.5 min-w-0 pr-1">
                         <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-xs shrink-0"></i>
                         <span class="text-xs font-semibold text-slate-800 truncate">Personalizable</span>
                       </div>
                       <input type="checkbox" id="checkArticuloPersonalizado" checked onchange="alternarSubOpcionesPersonalizacion(this.checked)" class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+                    <label title="Destacar en el escaparate de inicio (máx 6)" class="flex-1 flex items-center justify-between p-2 rounded-xl bg-amber-50/60 border border-amber-200 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition h-[38px]">
+                      <div class="flex items-center gap-1.5 min-w-0 pr-1">
+                        <i class="fa-solid fa-star text-amber-500 text-xs shrink-0"></i>
+                        <span class="text-xs font-bold text-amber-900 truncate">Destacado</span>
+                      </div>
+                      <input type="checkbox" id="checkArticuloDestacado" class="switch-ios-input">
                       <div class="switch-ios-track">
                         <div class="switch-ios-thumb"></div>
                       </div>
@@ -3330,6 +3340,9 @@
           if (chkPdf) chkPdf.checked = sellosArray.includes('pdf');
           if (chkAudio) chkAudio.checked = sellosArray.includes('audio');
           if (chkFisico) chkFisico.checked = sellosArray.includes('fisico');
+
+          const chkDestacado = document.getElementById('checkArticuloDestacado');
+          if (chkDestacado) chkDestacado.checked = (prod.destacado === true || prod.destacado === "SI");
         }
       } else {
         if (inputEditando) inputEditando.value = '';
@@ -3361,6 +3374,9 @@
         if (chkPdf) chkPdf.checked = true;
         if (chkAudio) chkAudio.checked = false;
         if (chkFisico) chkFisico.checked = false;
+
+        const chkDestacado = document.getElementById('checkArticuloDestacado');
+        if (chkDestacado) chkDestacado.checked = false;
       }
 
       // Bloquear scroll del fondo
@@ -3693,6 +3709,7 @@
       if (document.getElementById('checkBadgeFisico')?.checked) sellosSeleccionados.push('fisico');
 
       const esPersonalizableVal = document.getElementById('checkArticuloPersonalizado') ? document.getElementById('checkArticuloPersonalizado').checked : true;
+      const esDestacadoVal = document.getElementById('checkArticuloDestacado') ? document.getElementById('checkArticuloDestacado').checked : false;
       
       const camposPersonalizacionSeleccionados = [];
       if (esPersonalizableVal) {
@@ -3731,7 +3748,8 @@
         descripcion: descVal,
         badges: sellosSeleccionados,
         esPersonalizable: esPersonalizableVal,
-        camposPersonalizacion: camposPersonalizacionSeleccionados
+        camposPersonalizacion: camposPersonalizacionSeleccionados,
+        destacado: esDestacadoVal
       };
 
       // Animación de avance progresivo simulado
@@ -3772,6 +3790,7 @@
             prodMemoria.descripcion = descVal;
             prodMemoria.badges = sellosSeleccionados;
             prodMemoria.esPersonalizable = esPersonalizableVal;
+            prodMemoria.destacado = esDestacadoVal;
           }
           localStorage.setItem(`badges_prod_${idEditando}`, JSON.stringify(sellosSeleccionados));
           localStorage.setItem(`es_personalizable_prod_${idEditando}`, esPersonalizableVal ? 'true' : 'false');
