@@ -2021,12 +2021,59 @@
         if (data && data.status === "success" && Array.isArray(data.productos) && data.productos.length > 0) {
           let productos = data.productos;
 
-          // Asignar total de ventas si viene definido o calcular el más vendido de forma segura
+          // Obtener los pedidos reales registrados para computar las ventas sin duplicar fracciones (1/2, 2/2)
+          let ventasPorProdMap = {};
+          try {
+            const resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
+            const dataPed = await resPed.json();
+            const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
+            const normalizar = s => (s || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+            const pedidosProcesadosId = new Set();
+
+            pedidos.forEach(ped => {
+              const est = (ped.estado || ped.Estado || '').toString().toLowerCase();
+              if (est.includes('cancelado')) return;
+
+              // Obtener identificador base del pedido sin fracción (ej. "PED-9009" de "PED-9009 (1/2)")
+              const idRaw = (ped.id || ped.ID || '').toString().trim();
+              const idBase = idRaw.replace(/\s*\(\d+\/\d+\).*/, '').trim().toUpperCase();
+
+              // Si el pedido ya fue contabilizado en otra fila de fracción, se omite para evitar duplicarlo
+              if (idBase && pedidosProcesadosId.has(idBase)) return;
+              if (idBase) pedidosProcesadosId.add(idBase);
+
+              const titPed = normalizar((ped.producto || ped.Producto || '').replace(/\s*\(x\d+\)/gi, ''));
+              let cant = parseInt(ped.cantidad || ped.Cantidad, 10);
+              if (isNaN(cant) || cant < 1) {
+                const mCant = (ped.producto || ped.Producto || '').match(/\(x(\d+)\)/);
+                cant = mCant ? parseInt(mCant[1], 10) : 1;
+              }
+              if (titPed) {
+                ventasPorProdMap[titPed] = (ventasPorProdMap[titPed] || 0) + cant;
+              }
+            });
+          } catch (ePed) {
+            console.warn("No se pudieron contabilizar pedidos remotos:", ePed);
+          }
+
+          // Asignar el total de ventas sumando los pedidos reales coincidentes con cada producto
           let maxVentas = -1;
           let idxMasVendido = -1;
+          const normalizar = s => (s || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
           productos = productos.map((p, idx) => {
-            const v = parseInt(p.totalVentas || p.ventas || 0, 10);
+            const titNorm = normalizar(p.titulo);
+            let ventasPedidos = 0;
+            for (const [clavePed, cant] of Object.entries(ventasPorProdMap)) {
+              if (clavePed === titNorm || titNorm.includes(clavePed) || clavePed.includes(titNorm)) {
+                ventasPedidos += cant;
+              }
+            }
+
+            const ventasDirectas = parseInt(p.totalVentas || p.ventas || p.Ventas || p.sales || 0, 10) || 0;
+            const v = Math.max(ventasDirectas, ventasPedidos);
+
             if (v > maxVentas) {
               maxVentas = v;
               idxMasVendido = idx;
