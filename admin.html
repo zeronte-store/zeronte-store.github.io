@@ -94,7 +94,8 @@
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-box text-sm"></i>
             </div>
-            <span class="sidebar-text truncate">Pedidos Recibidos</span>
+            <span class="sidebar-text truncate flex-grow text-left">Pedidos Recibidos</span>
+            <span id="badgePedidosPendientes" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-rose-500 text-white font-extrabold hidden">0</span>
           </button>
 
           <!-- SECCIÓN: PROCESAR PEDIDOS -->
@@ -5388,6 +5389,17 @@
 
     // Función centralizada para mantener badges numéricos y colores de iconos en el menú lateral
     function actualizarBadgesMenuLateral() {
+      // BADGE: PEDIDOS PENDIENTES (EXCLUSIVAMENTE PENDIENTES)
+      const pedidosSoloPendientes = listaPedidosGlobal.filter(p => {
+        const est = (p.estado || "").toLowerCase().trim();
+        return est.includes("pendiente");
+      });
+      const badgePendientes = document.getElementById('badgePedidosPendientes');
+      if (badgePendientes) {
+        badgePendientes.innerText = pedidosSoloPendientes.length;
+        badgePendientes.classList.toggle('hidden', pedidosSoloPendientes.length === 0);
+      }
+
       // 1. OFERTAS
       const campanas = (typeof obtenerCampanasOfertas === 'function') ? obtenerCampanasOfertas() : [];
       const ahora = Date.now();
