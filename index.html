@@ -1991,6 +1991,26 @@
       }
     }
 
+    let productoUrlYaAbierto = false;
+
+    function verificarAperturaProductoPorUrl() {
+      if (productoUrlYaAbierto || !catalogoCompleto || catalogoCompleto.length === 0) return;
+      const params = new URLSearchParams(window.location.search);
+      const prodParam = (params.get('prod') || '').trim().toLowerCase();
+      if (!prodParam) return;
+
+      const prodEncontrado = catalogoCompleto.find(p => {
+        const idActual = (p.id || '').toString().trim().toLowerCase();
+        const titActual = (p.titulo || '').toString().trim().toLowerCase();
+        return idActual === prodParam || titActual === prodParam;
+      });
+
+      if (prodEncontrado) {
+        productoUrlYaAbierto = true;
+        abrirFichaArticulo(prodEncontrado);
+      }
+    }
+
     async function cargarCatalogoDinamico() {
       try {
         // Petición con parámetro de tiempo para que GitHub Pages nunca sirva datos obsoletos
@@ -2032,6 +2052,9 @@
           actualizarConteosCategorias();
           filtrarCategoria(categoriaSeleccionada, null);
           actualizarSelectProductosResena();
+
+          // Abrir automáticamente la ficha si la URL contiene el parámetro ?prod=...
+          verificarAperturaProductoPorUrl();
         }
       } catch (e) {
         console.warn("Sincronización en segundo plano completada con respaldo local.");
