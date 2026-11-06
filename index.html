@@ -791,22 +791,132 @@
 
   <!-- ==================== SECCIÓN 4: POLÍTICAS DE LA TIENDA ==================== -->
   <div id="vistaPoliticas" class="pestana-contenido hidden max-w-6xl mx-auto px-4 py-6">
-    <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm text-xs sm:text-sm text-gray-600 leading-relaxed">
+    <div class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-10 space-y-8 shadow-sm text-xs sm:text-sm text-gray-700 leading-relaxed">
       <div>
-        <h2 id="txtPoliticasTitulo" class="text-xl font-serif font-bold text-gray-900 mb-3">Políticas de la tienda</h2>
+        <h2 id="txtPoliticasTitulo" class="text-2xl sm:text-3xl font-serif font-bold text-gray-900 mb-2">Políticas de la Tienda Zeronte</h2>
+        <p class="text-gray-500 font-medium">Condiciones generales sobre envíos digitales, formas de pago, revisiones y cancelaciones.</p>
       </div>
-      <div class="border-t border-gray-100 pt-4">
-        <h3 id="txtEnviosTitulo" class="font-bold text-gray-900 mb-1">Descargas y envíos digitales</h3>
-        <p id="txtEnviosCuerpo">Todos nuestros productos de partituras personalizadas se entregan en formato digital de alta resolución (PDF listo para enmarcar a 300 DPI) y archivo de audio original (MP3). Los plazos de creación y entrega habituales se sitúan entre 24 y 48 horas.</p>
+
+      <!-- 1. Naturaleza del Producto y Formato de Entrega -->
+      <div class="border-t border-gray-100 pt-6 space-y-3">
+        <h3 class="text-base sm:text-lg font-serif font-bold text-gray-900 flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-down text-blue-600 text-sm"></i>
+          <span>1. Naturaleza del Producto y Formato de Entrega</span>
+        </h3>
+        <ul class="list-disc pl-5 space-y-2">
+          <li><strong>Productos 100% Digitales:</strong> Todas nuestras obras de partituras personalizadas se entregan exclusivamente en formato digital. No se realizan envíos físicos en papel ni soportes físicos.</li>
+          <li><strong>Uso Personal:</strong> La compra de una partitura personalizada te permite imprimirla las veces que desees para enmarcar, regalar o guardar.</li>
+          <li><strong>Archivos Incluidos:</strong> Recibirás la partitura personalizada en formato PDF de alta resolución (preparado y optimizado a 300 DPI listo para imprimir o enmarcar) y si hay partituras que incluyan música, el archivo de audio será en formato MP3 con la máxima calidad.</li>
+          <li><strong>Plazos de Creación y Entrega:</strong> El tiempo habitual de elaboración y envío se sitúa entre 1 y 4 días tras la confirmación del pago y la recepción completa de los datos necesarios (nombres, fechas o dedicatorias). En momentos de alta demanda, te notificaremos si existe algún cambio en la estimación de entrega.</li>
+        </ul>
       </div>
-      <div class="border-t border-gray-100 pt-4">
-        <h3 id="txtCambiosTitulo" class="font-bold text-gray-900 mb-1">Cambios y cancelaciones</h3>
-        <p id="txtCambiosCuerpo">Al tratarse de obras personalizadas a medida que se inician tras recibir los datos, no se admiten devoluciones una vez entregado el archivo final. Sin embargo, realizamos cualquier revisión o ajuste necesario sobre el texto o la dedicatoria sin coste adicional para que quedes 100% satisfecho.</p>
+
+      <!-- 2. Métodos de Pago y Proceso de Compra -->
+      <div class="border-t border-gray-100 pt-6 space-y-4">
+        <h3 class="text-base sm:text-lg font-serif font-bold text-gray-900 flex items-center gap-2">
+          <i class="fa-solid fa-credit-card text-emerald-600 text-sm"></i>
+          <span>2. Métodos de Pago y Proceso de Compra</span>
+        </h3>
+        
+        <p>Para garantizar la máxima agilidad y seguridad en la entrega de tu obra personalizada, los pagos se efectúan por adelantado. Únicamente aceptamos los siguientes métodos de pago:</p>
+
+        <!-- Bloque estilo Etsy: Opciones seguras con logos exclusivos de Bizum y PayPal -->
+        <div class="bg-gray-50/80 border border-gray-200 rounded-2xl p-4 sm:p-5 space-y-3">
+          <div class="flex items-center gap-2 text-sm font-bold text-gray-900">
+            <i class="fa-solid fa-lock text-gray-800 text-sm"></i>
+            <span>Opciones seguras</span>
+          </div>
+
+          <!-- Logos exclusivos Bizum y PayPal -->
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <!-- Insignia Bizum -->
+            <div class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 flex items-center justify-center shadow-xs h-10">
+              <svg class="h-6 w-auto" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.5 7.5C12.5 6.1 13.6 5 15 5H21C22.4 5 23.5 6.1 23.5 7.5V11H12.5V7.5Z" fill="#00AAAC"/>
+                <path d="M12.5 14H23.5V26C23.5 27.4 22.4 28.5 21 28.5H15C13.6 28.5 12.5 27.4 12.5 26V14Z" fill="#00AAAC"/>
+                <circle cx="29" cy="8" r="3.5" fill="#00AAAC"/>
+                <text x="38" y="24" fill="#00AAAC" font-family="Arial, sans-serif" font-weight="bold" font-size="20" letter-spacing="-0.5">bizum</text>
+              </svg>
+            </div>
+
+            <!-- Insignia PayPal -->
+            <div class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 flex items-center justify-center shadow-xs h-10">
+              <svg class="h-6 w-auto" viewBox="0 0 100 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4H21C25 4 28 6.5 27 11.5C26 16.5 22.5 19 18.5 19H14.5L12 30H7L12 4Z" fill="#003087"/>
+                <path d="M16 9H23C26.5 9 29.5 11 28.5 15.5C27.5 20.5 24 23 20 23H17L15.5 30H11L16 9Z" fill="#0079C1"/>
+                <text x="33" y="23" fill="#003087" font-family="Arial, sans-serif" font-weight="bold" font-size="19" font-style="italic">PayPal</text>
+              </svg>
+            </div>
+          </div>
+
+          <p class="text-xs text-gray-500 leading-relaxed">
+            Zeronte mantiene protegida tu información de pago en todo momento. Nuestra tienda nunca tiene acceso a los datos confidenciales de tu tarjeta de crédito o cuenta bancaria.
+          </p>
+        </div>
+
+        <!-- Detalle A: Bizum -->
+        <div class="space-y-2 pt-2">
+          <h4 class="font-bold text-gray-900 text-sm sm:text-base flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#00AAAC]"></span>
+            <span>A. Bizum (Exclusivo para España)</span>
+          </h4>
+          <p class="text-gray-600 text-xs sm:text-sm">Es la opción más rápida e inmediata si compras desde España.</p>
+          <ul class="list-disc pl-5 space-y-1.5 text-gray-600">
+            <li><strong>Selección:</strong> Elige Bizum como forma de pago al realizar tu pedido.</li>
+            <li><strong>Envío del importe:</strong> Realiza el envío por el importe exacto de tu pedido al número de teléfono indicado durante el proceso de compra.</li>
+            <li><strong>Concepto:</strong> Es indispensable incluir en el concepto tu nombre o el número de pedido.</li>
+            <li><strong>Confirmación:</strong> En cuanto el pago sea verificado en cuenta (habitualmente en cuestión de segundos), comenzaremos a trabajar en tu partitura personalizada.</li>
+          </ul>
+        </div>
+
+        <!-- Detalle B: PayPal y Tarjetas -->
+        <div class="space-y-2 pt-2">
+          <h4 class="font-bold text-gray-900 text-sm sm:text-base flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#0070BA]"></span>
+            <span>B. PayPal y Tarjeta de Crédito/Débito (España e Internacional)</span>
+          </h4>
+          <p class="text-gray-600 text-xs sm:text-sm">Ideal para clientes internacionales o para quienes prefieran pagar con tarjeta de forma segura.</p>
+          <ul class="list-disc pl-5 space-y-1.5 text-gray-600">
+            <li><strong>Selección del Método:</strong> Selecciona PayPal al confirmar tu pedido.</li>
+            <li><strong>Acceso a la Pasarela:</strong> Serás redirigido de forma segura a la plataforma de PayPal.</li>
+            <li>
+              <strong>Elige cómo pagar (no necesitas cuenta previa):</strong>
+              <ul class="list-[circle] pl-5 mt-1 space-y-1 text-gray-600">
+                <li><em>Si tienes cuenta de PayPal:</em> Inicia sesión con tus datos y confirma el pago con tu saldo, cuenta bancaria o tarjeta vinculada.</li>
+                <li><em>Si no tienes cuenta de PayPal (Pago con Tarjeta):</em> Selecciona la opción "Pagar con tarjeta de crédito o débito". Podrás introducir los datos de tu tarjeta habitual (Visa, Mastercard, etc.) como invitado de forma 100% segura y sin necesidad de registrarte.</li>
+              </ul>
+            </li>
+            <li><strong>Número de Pedido (Nota opcional):</strong> Durante el proceso de pago en PayPal, verás un campo de notas o instrucciones. Te agradeceremos que indiques el número de pedido en ese espacio para agilizar la localización de tu pago. (No te preocupes si lo olvidas, ya que vincularemos el importe y tu correo automáticamente).</li>
+            <li><strong>Confirmación e Inicio:</strong> Recibiremos la notificación automática del pago e iniciaremos de inmediato la elaboración de tu archivo.</li>
+          </ul>
+        </div>
       </div>
-      <div class="border-t border-gray-100 pt-4">
-        <h3 id="txtPagosTitulo" class="font-bold text-gray-900 mb-1">Formas de pago seguras</h3>
-        <p id="txtPagosCuerpo">Aceptamos pagos directos y cifrados mediante Bizum y PayPal para total comodidad y agilidad.</p>
+
+      <!-- 3. Proceso de Trabajo y Revisiones -->
+      <div class="border-t border-gray-100 pt-6 space-y-3">
+        <h3 class="text-base sm:text-lg font-serif font-bold text-gray-900 flex items-center gap-2">
+          <i class="fa-solid fa-pen-ruler text-amber-600 text-sm"></i>
+          <span>3. Proceso de Trabajo y Revisiones</span>
+        </h3>
+        <ul class="list-disc pl-5 space-y-2">
+          <li><strong>Recogida de Datos:</strong> Es fundamental verificar que los nombres, mensajes y dedicatorias facilitados al realizar el pedido estén escritos correctamente.</li>
+          <li><strong>Garantía de Satisfacción y Revisiones:</strong> Queremos que el resultado final sea impecable. Si necesitas realizar cualquier ajuste o corrección en el texto, dedicatoria o detalles específicos tras la entrega, lo haremos sin ningún coste adicional.</li>
+        </ul>
       </div>
+
+      <!-- 4. Cancelaciones, Devoluciones y Excepciones -->
+      <div class="border-t border-gray-100 pt-6 space-y-3">
+        <h3 class="text-base sm:text-lg font-serif font-bold text-gray-900 flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-rose-600 text-sm"></i>
+          <span>4. Cancelaciones, Devoluciones y Excepciones</span>
+        </h3>
+        <ul class="list-disc pl-5 space-y-2">
+          <li><strong>Derecho de Desistimiento y Devoluciones:</strong> Al tratarse de bienes digitales hechos a medida y totalmente personalizados tras la confirmación del pedido, no se admiten devoluciones ni reembolsos una vez que el archivo final ha sido entregado.</li>
+          <li><strong>Cancelaciones Antes de la Entrega:</strong> Puedes solicitar la cancelación y el reembolso completo de tu pedido siempre y cuando la composición personalizada no se haya comenzado a trabajar. Una vez iniciado el proceso creativo, no se aceptarán cancelaciones.</li>
+          <li><strong>Archivos Defectuosos o Error de Descarga:</strong> Si tienes cualquier problema técnico para descargar, abrir o reproducir los archivos PDF o MP3, escríbeme y te los reenviaré por correo electrónico de forma inmediata sin coste alguno.</li>
+        </ul>
+      </div>
+
     </div>
   </div>
 
