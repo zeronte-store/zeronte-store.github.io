@@ -31,8 +31,55 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
+  <!-- Motor de traducción en tiempo real Google Translate -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'es',
+        includedLanguages: 'es,en,fr,de,it,pt,zh-CN',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <style>
+    /* Ocultar por completo barra superior, banners, iconos flotantes y marcos de Google Translate */
+    .goog-te-banner-frame,
+    .goog-te-banner-frame.skiptranslate,
+    iframe.goog-te-banner-frame,
+    iframe.skiptranslate,
+    .goog-te-gadget-simple,
+    .goog-te-gadget,
+    .goog-te-spinner-pos,
+    .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+    .VIpgJd-ZVi9od-aZ2wEe-OiiCO {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      height: 0 !important;
+      width: 0 !important;
+    }
+    body {
+      top: 0px !important;
+      position: static !important;
+    }
+    #goog-gt-tt,
+    .goog-te-balloon-frame,
+    .goog-tooltip,
+    .goog-tooltip:hover {
+      display: none !important;
+    }
+    .goog-text-highlight {
+      background: none !important;
+      box-shadow: none !important;
+    }
+  </style>
 </head>
 <body class="bg-[#f5f5f1] text-[#222222] antialiased min-h-screen selection:bg-[#222222] selection:text-white">
+
+  <!-- Contenedor requerido para el motor de traducción Google Translate -->
+  <div id="google_translate_element" class="hidden"></div>
 
   <!-- ==================== PANTALLA DE SINCRONIZACIÓN INICIAL CON BARRA DE PROGRESO ==================== -->
   <div id="pantallaCargaInicial" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#f5f5f1]/85 backdrop-blur-md transition-opacity duration-500 ease-out p-6 text-center select-none">
@@ -98,7 +145,7 @@
       <div class="flex items-center gap-2.5 w-full lg:w-auto justify-center lg:justify-end lg:self-center">
         <!-- Buscador de tienda (oculto en móvil, activo en escritorio) -->
         <div class="relative w-48 sm:w-60 md:w-64 hidden lg:block">
-          <input type="text" id="buscadorTienda" oninput="buscarProductos(this.value)" placeholder="Buscar artículo..." class="w-full bg-white border border-gray-300 rounded-full py-1.5 pl-4 pr-8 text-xs text-gray-800 focus:outline-none focus:border-gray-500 transition shadow-sm">
+          <input type="text" id="buscadorTienda" oninput="buscarProductos(this.value)" placeholder="Buscar artículo..." class="notranslate w-full bg-white border border-gray-300 rounded-full py-1.5 pl-4 pr-8 text-xs text-gray-800 focus:outline-none focus:border-gray-500 transition shadow-sm">
           <span class="absolute right-3 top-2 text-gray-400 text-xs pointer-events-none">
             <i class="fa-solid fa-magnifying-glass"></i>
           </span>
@@ -184,7 +231,7 @@
     <div class="block lg:hidden mb-5 space-y-3">
       <!-- Buscador estilo píldora Etsy con conteo dinámico -->
       <div class="relative w-full">
-        <input type="text" id="buscadorTiendaMovil" oninput="buscarProductos(this.value)" placeholder="Buscar entre los artículos..." class="w-full bg-[#ebebeb]/70 border-0 rounded-full py-3 pl-5 pr-11 text-sm text-[#222222] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black transition shadow-inner">
+        <input type="text" id="buscadorTiendaMovil" oninput="buscarProductos(this.value)" placeholder="Buscar entre los artículos..." class="notranslate w-full bg-[#ebebeb]/70 border-0 rounded-full py-3 pl-5 pr-11 text-sm text-[#222222] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black transition shadow-inner">
         <span class="absolute right-4 top-3.5 text-gray-700 pointer-events-none text-base">
           <i class="fa-solid fa-magnifying-glass"></i>
         </span>
@@ -1208,7 +1255,7 @@
     let listaResenasTotales = [];
     let idiomaActual = localStorage.getItem('zeronte_idioma') || 'es';
 
-    // ================= DICCIONARIO MULTILINGÜE COMPLETO Y EXHAUSTIVO =================
+    // ================= DICCIONARIO BASE LIGERO (TRADUCCIÓN VÍA GOOGLE) =================
     const TRADUCCIONES = {
       es: {
         flag: "https://flagcdn.com/w40/es.png", code: "ES",
@@ -1221,13 +1268,11 @@
         btnContacto: "Contacto",
         tabArticulos: "Artículos",
         tabResenas: "Reseñas",
+        tabMisPedidos: "Mis Pedidos",
         tabInformacion: "Sobre mí",
         tabPoliticas: "Políticas de la tienda",
         seccionesTitulo: "Secciones",
         catTodos: "Todos los artículos",
-        catPartituras: "Partituras personalizadas",
-        catNatalicios: "Natalicios",
-        catPosters: "Pósters y Láminas",
         cargandoArticulos: "Cargando artículos...",
         articulosSufijo: "artículos",
         noArticulos: "No se encontraron artículos.",
@@ -1237,8 +1282,8 @@
         sobre5: "5.0 sobre 5",
         valoraciones: "valoraciones",
         btnDejarResena: "Dejar una reseña",
-        formTituloResena: "Escribe tu opinión sobre tu pedido",
-        puntuacionForm: "Puntuación:",
+        formTituloResena: "Valoración de compra verificada",
+        puntuacionForm: "Calificación:",
         placeholderNombreResena: "Tu nombre o iniciales (Ej. María G.)",
         placeholderProdResena: "Producto comprado (Ej. Mi Nombre en Música)",
         placeholderTextoResena: "¿Qué te pareció la melodía, la rapidez y el diseño del encargo?...",
@@ -1247,14 +1292,6 @@
         btnSiguiente: "Siguiente",
         paginaDe: "Página {0} de {1}",
         articuloComprado: "Artículo comprado:",
-        sobreZeronte: "Sobre Zeronte",
-        sobreTexto: "Zeronte nace como un estudio de composición y arte sonoro especializado en transformar recuerdos, nombres, fechas y vivencias en obras musicales únicas e irrepetibles. Cada encargo es armonizado meticulosamente siguiendo sistemas de cifrado musical y orquestado con máxima dedicación artística.",
-        infoCol1Tit: "Ubicación",
-        infoCol1Desc: "Sevilla, España",
-        infoCol2Tit: "Especialidad",
-        infoCol2Desc: "Partituras personalizadas, arreglos y natalicios",
-        infoCol3Tit: "Trayectoria",
-        infoCol3Desc: "En tienda online desde 2023 · +1.000 partituras",
         politicasTitulo: "Políticas de la tienda",
         enviosTitulo: "Descargas y envíos digitales",
         enviosTexto: "Todos nuestros productos de partituras personalizadas se entregan en formato digital de alta resolución (PDF listo para enmarcar a 300 DPI) y archivo de audio original (MP3). Los plazos de creación y entrega habituales se sitúan entre 24 y 48 horas.",
@@ -1283,607 +1320,16 @@
         paypalPaso1: "Pulsa para abonar",
         paypalPaso1b: "con PayPal:",
         btnWpConfirmar: "Enviar justificante por WhatsApp",
-        navCatalogo: "Catálogo",
-        navPedir: "Pedir",
-        navChat: "Chat",
         footerDerechos: "© 2026 | Pilas (Sevilla) - SPAIN | (+34) 641 851 073 | zeronte.store@gmail.com",
-        meses: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
-        textosResenas: [
-          "Un regalo maravilloso y emocionante. Lloramos al escuchar la melodía con el código QR.",
-          "La calidad de la partitura para imprimir es fantástica. El audio para piano suena perfecto.",
-          "Trato súper atento y entrega muy rápida. Quedó genial en el marco que le compramos.",
-          "Súper original. El cifrado del nombre en notas musicales es un detalle de 10.",
-          "Es el segundo encargo que hago para un aniversario y ha vuelto a ser un éxito rotundo.",
-          "La lámina del natalicio para mi sobrina quedó preciosa. Muy recomendable.",
-          "Una joya de recuerdo. La dedicatoria y el QR son un acierto total.",
-          "Excelente servicio. Llegó en menos de 24 horas y con un audio impecable."
-        ]
-      },
-      en: {
-        flag: "https://flagcdn.com/w40/gb.png", code: "EN",
-        bannerTitulo: "We compose music for your most special moments",
-        bannerSub: "Custom melody for every memory",
-        ubicacion: "Seville, Spain",
-        ventasTexto: "sales",
-        enTienda: "Since 2023",
-        buscarPlaceholder: "Search item...",
-        btnContacto: "Contact",
-        tabArticulos: "Items",
-        tabResenas: "Reviews",
-        tabInformacion: "Shop info",
-        tabPoliticas: "Shop policies",
-        seccionesTitulo: "Sections",
-        catTodos: "All items",
-        catPartituras: "Custom sheet music",
-        catNatalicios: "Birth milestones",
-        catPosters: "Posters & Prints",
-        cargandoArticulos: "Loading items...",
-        articulosSufijo: "items",
-        noArticulos: "No items found.",
-        descargaDigital: "Digital download",
-        btnPedir: "Order",
-        resenasTitulo: "Shop reviews",
-        sobre5: "5.0 out of 5",
-        valoraciones: "ratings",
-        btnDejarResena: "Write a review",
-        formTituloResena: "Share your thoughts on your order",
-        puntuacionForm: "Rating:",
-        placeholderNombreResena: "Your name or initials (e.g. Mary G.)",
-        placeholderProdResena: "Purchased item (e.g. Name in Music)",
-        placeholderTextoResena: "How did you like the melody, speed and design?...",
-        btnPublicarResena: "Submit review",
-        btnAnterior: "Previous",
-        btnSiguiente: "Next",
-        paginaDe: "Page {0} of {1}",
-        articuloComprado: "Purchased item:",
-        sobreZeronte: "About Zeronte",
-        sobreTexto: "Zeronte is a musical art studio specialized in turning memories, names, dates and life moments into unique musical pieces. Each piece is meticulously arranged following musical ciphering and orchestrated with true artistic passion.",
-        infoCol1Tit: "Location",
-        infoCol1Desc: "Seville, Spain",
-        infoCol2Tit: "Specialty",
-        infoCol2Desc: "Custom sheet music, arrangements & birth milestones",
-        infoCol3Tit: "Experience",
-        infoCol3Desc: "Online shop since 2023 · 1,000+ sheet music prints",
-        politicasTitulo: "Shop Policies",
-        enviosTitulo: "Digital downloads & delivery",
-        enviosTexto: "All our custom sheet music products are delivered digitally in high-resolution printable PDF (300 DPI) and original audio (MP3). Typical turnaround time is 24 to 48 hours.",
-        cambiosTitulo: "Exchanges & cancellations",
-        cambiosTexto: "Since these are bespoke made-to-order commissions, returns are not accepted once final files are delivered. However, revisions to dedication texts are included free of charge.",
-        pagosTitulo: "Secure payment methods",
-        pagosTexto: "We accept encrypted direct payments via Bizum and PayPal for your convenience.",
-        modalSub: "Customize your piece",
-        lblNombre: "Full Name *",
-        placeholderNombre: "e.g. John Smith",
-        lblTel: "Phone / WhatsApp *",
-        lblEmail: "Email *",
-        lblDatos: "Customization Details *",
-        placeholderDatos: "Name(s) for the notes, dedication or dates...",
-        lblMetodo: "Preferred payment method",
-        btnConfirmar: "Confirm Order",
-        creandoPedido: "Creating order...",
-        exitoTitulo: "Order Registered!",
-        idPedidoLabel: "Order ID:",
-        bizumPaso0: "Payment via Bizum",
-        bizumPaso1: "1. Send",
-        bizumPaso1b: "to number:",
-        bizumPaso2: "2. Reference:",
-        btnCopiar: "Copy",
-        paypalPaso0: "Payment via PayPal",
-        paypalPaso1: "Click to pay",
-        paypalPaso1b: "with PayPal:",
-        btnWpConfirmar: "Send receipt via WhatsApp",
-        navCatalogo: "Catalog",
-        navPedir: "Order",
-        navChat: "Chat",
-        footerDerechos: "© 2026 All rights reserved.",
-        meses: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-        textosResenas: [
-          "A wonderful and emotional gift. We cried hearing the melody from the QR code.",
-          "Top quality printable sheet music. The piano audio sounds absolutely perfect.",
-          "Super attentive customer service and fast delivery. Looks great in the wooden frame.",
-          "So original! Ciphering our names into musical notes was a 10/10 idea.",
-          "This is the second order I place for an anniversary and it was a huge success again.",
-          "The birth milestone print for my niece turned out gorgeous. Highly recommended.",
-          "A treasure keepsake. The custom dedication and QR code make it truly special.",
-          "Outstanding service. Delivered in less than 24 hours with pristine audio quality."
-        ]
-      },
-      fr: {
-        flag: "https://flagcdn.com/w40/fr.png", code: "FR",
-        bannerTitulo: "Nous composons la musique de vos moments les plus précieux",
-        bannerSub: "Custom melody for every memory",
-        ubicacion: "Séville, Espagne",
-        ventasTexto: "ventes",
-        enTienda: "Depuis 2023",
-        buscarPlaceholder: "Rechercher un article...",
-        btnContacto: "Contact",
-        tabArticulos: "Articles",
-        tabResenas: "Avis",
-        tabInformacion: "Infos boutique",
-        tabPoliticas: "Conditions de vente",
-        seccionesTitulo: "Rayons",
-        catTodos: "Tous les articles",
-        catPartituras: "Partitions personnalisées",
-        catNatalicios: "Naissances",
-        catPosters: "Affiches & Posters",
-        cargandoArticulos: "Chargement des articles...",
-        articulosSufijo: "articles",
-        noArticulos: "Aucun article trouvé.",
-        descargaDigital: "Téléchargement numérique",
-        btnPedir: "Commander",
-        resenasTitulo: "Avis sur la boutique",
-        sobre5: "5,0 sur 5",
-        valoraciones: "évaluations",
-        btnDejarResena: "Laisser un avis",
-        formTituloResena: "Donnez votre avis sur votre commande",
-        puntuacionForm: "Note :",
-        placeholderNombreResena: "Votre nom ou initiales (ex. Marie L.)",
-        placeholderProdResena: "Produit acheté (ex. Mon Prénom en Musique)",
-        placeholderTextoResena: "Qu'avez-vous pensé de la mélodie, du délai et du design?...",
-        btnPublicarResena: "Publier l'avis",
-        btnAnterior: "Précédent",
-        btnSiguiente: "Suivant",
-        paginaDe: "Page {0} sur {1}",
-        articuloComprado: "Article acheté :",
-        sobreZeronte: "À propos de Zeronte",
-        sobreTexto: "Zeronte est un studio de création musicale dédié à transformer prénoms, dates et émotions en pièces musicales harmonisées sur mesure avec dévouement artistique.",
-        infoCol1Tit: "Emplacement",
-        infoCol1Desc: "Séville, Espagne",
-        infoCol2Tit: "Spécialité",
-        infoCol2Desc: "Partitions personnalisées, arrangements et naissances",
-        infoCol3Tit: "Expérience",
-        infoCol3Desc: "Boutique en ligne depuis 2023 · +1.000 partitions",
-        politicasTitulo: "Conditions de vente",
-        enviosTitulo: "Livraisons et téléchargements",
-        enviosTexto: "Toutes nos partitions sont livrées en format numérique haute résolution (PDF 300 DPI) et audio MP3 original en 24 à 48 heures.",
-        cambiosTitulo: "Retours et annulations",
-        cambiosTexto: "S'agissant d'œuvres personnalisées à la demande, les retours ne sont pas acceptés une fois le fichier livré. Révisions de texte gratuites.",
-        pagosTitulo: "Paiements sécurisés",
-        pagosTexto: "Nous acceptons les paiements sécurisés par Bizum et PayPal.",
-        modalSub: "Personnalisez votre œuvre",
-        lblNombre: "Nom et Prénom *",
-        placeholderNombre: "ex. Claire Dupont",
-        lblTel: "Téléphone / WhatsApp *",
-        lblEmail: "Email *",
-        lblDatos: "Détails de personnalisation *",
-        placeholderDatos: "Prénom(s) pour les notes, dédicace ou dates...",
-        lblMetodo: "Mode de paiement préféré",
-        btnConfirmar: "Confirmer la commande",
-        creandoPedido: "Création de la commande...",
-        exitoTitulo: "Commande enregistrée !",
-        idPedidoLabel: "Numéro de commande :",
-        bizumPaso0: "Paiement par Bizum",
-        bizumPaso1: "1. Envoyez",
-        bizumPaso1b: "au numéro :",
-        bizumPaso2: "2. Motif :",
-        btnCopiar: "Copier",
-        paypalPaso0: "Paiement par PayPal",
-        paypalPaso1: "Cliquez pour régler",
-        paypalPaso1b: "avec PayPal :",
-        btnWpConfirmar: "Envoyer le justificatif via WhatsApp",
-        navCatalogo: "Catalogue",
-        navPedir: "Commander",
-        navChat: "Discussion",
-        footerDerechos: "© 2026 Tous droits réservés.",
-        meses: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
-        textosResenas: [
-          "Un cadeau magnifique et très émouvant. Nous avons adoré la mélodie du QR code.",
-          "Superbe qualité d'impression de la partition. Le piano sonne à la perfection.",
-          "Service client très attentionné et livraison rapide. Parfait dans notre cadre.",
-          "Très original ! Coder les lettres du prénom en notes est une idée géniale.",
-          "Deuxième commande passée pour un anniversaire, toujours autant de succès.",
-          "L'affiche de naissance pour ma nièce est ravissante. Je recommande vivement.",
-          "Un souvenir précieux. La dédicace et le QR code sont un vrai plus.",
-          "Service impeccable, reçu en moins de 24 heures avec une piste audio parfaite."
-        ]
-      },
-      de: {
-        flag: "https://flagcdn.com/w40/de.png", code: "DE",
-        bannerTitulo: "Wir komponieren Musik für Ihre besonderen Momente",
-        bannerSub: "Custom melody for every memory",
-        ubicacion: "Sevilla, Spanien",
-        ventasTexto: "Verkäufe",
-        enTienda: "Seit 2023",
-        buscarPlaceholder: "Artikel suchen...",
-        btnContacto: "Kontakt",
-        tabArticulos: "Artikel",
-        tabResenas: "Bewertungen",
-        tabInformacion: "Shop-Details",
-        tabPoliticas: "Shop-Richtlinien",
-        seccionesTitulo: "Kategorien",
-        catTodos: "Alle Artikel",
-        catPartituras: "Personalisierte Noten",
-        catNatalicios: "Geburtsposter",
-        catPosters: "Poster & Drucke",
-        cargandoArticulos: "Artikel werden geladen...",
-        articulosSufijo: "Artikel",
-        noArticulos: "Keine Artikel gefunden.",
-        descargaDigital: "Digitaler Download",
-        btnPedir: "Bestellen",
-        resenasTitulo: "Shop-Bewertungen",
-        sobre5: "5,0 von 5",
-        valoraciones: "Bewertungen",
-        btnDejarResena: "Bewertung schreiben",
-        formTituloResena: "Schreiben Sie eine Bewertung zu Ihrer Bestellung",
-        puntuacionForm: "Bewertung:",
-        placeholderNombreResena: "Ihr Name (z. B. Julia K.)",
-        placeholderProdResena: "Gekaufter Artikel",
-        placeholderTextoResena: "Wie hat Ihnen die Melodie, die Schnelligkeit und das Design gefallen?...",
-        btnPublicarResena: "Bewertung veröffentlichen",
-        btnAnterior: "Zurück",
-        btnSiguiente: "Weiter",
-        paginaDe: "Seite {0} von {1}",
-        articuloComprado: "Gekaufter Artikel:",
-        sobreZeronte: "Über Zeronte",
-        sobreTexto: "Zeronte verwandelt Namen, Daten und besondere Erinnerungen in maßgeschneiderte musikalische Kunstwerke mit höchster kompositorischer Hingabe.",
-        infoCol1Tit: "Standort",
-        infoCol1Desc: "Sevilla, Spanien",
-        infoCol2Tit: "Spezialität",
-        infoCol2Desc: "Personalisierte Noten, Arrangements und Geburtsposter",
-        infoCol3Tit: "Erfahrung",
-        infoCol3Desc: "Online-Shop seit 2023 · +1.000 Notenblätter",
-        politicasTitulo: "Shop-Richtlinien",
-        enviosTitulo: "Digitaler Download & Lieferung",
-        enviosTexto: "Alle Notenblätter werden hochauflösend als PDF (300 DPI) und MP3-Audio innerhalb von 24–48 Stunden digital geliefert.",
-        cambiosTitulo: "Rückgabe & Stornierung",
-        cambiosTexto: "Da es sich um Sonderanfertigungen handelt, ist eine Rücknahme nach Fertigstellung ausgeschlossen. Widmungskorrekturen sind kostenlos.",
-        pagosTitulo: "Sichere Zahlung",
-        pagosTexto: "Wir akzeptieren sichere Zahlungen via Bizum und PayPal.",
-        modalSub: "Personalisieren Sie Ihr Kunstwerk",
-        lblNombre: "Vor- und Nachname *",
-        placeholderNombre: "z. B. Michael Weber",
-        lblTel: "Telefon / WhatsApp *",
-        lblEmail: "E-Mail *",
-        lblDatos: "Personalisierungsdaten *",
-        placeholderDatos: "Name(n) für die Noten, Widmung oder Daten...",
-        lblMetodo: "Bevorzugte Zahlungsart",
-        btnConfirmar: "Bestellung bestätigen",
-        creandoPedido: "Bestellung wird erstellt...",
-        exitoTitulo: "Bestellung registriert!",
-        idPedidoLabel: "Bestellnummer:",
-        bizumPaso0: "Zahlung per Bizum",
-        bizumPaso1: "1. Senden Sie",
-        bizumPaso1b: "an die Nummer:",
-        bizumPaso2: "2. Verwendungszweck:",
-        btnCopiar: "Kopieren",
-        paypalPaso0: "Zahlung per PayPal",
-        paypalPaso1: "Klicken Sie zum Bezahlen",
-        paypalPaso1b: "mit PayPal:",
-        btnWpConfirmar: "Beleg per WhatsApp senden",
-        navCatalogo: "Katalog",
-        navPedir: "Bestellen",
-        navChat: "Chat",
-        footerDerechos: "© 2026 Alle Rechte vorbehalten.",
-        meses: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
-        textosResenas: [
-          "Ein wundervolles und emotionales Geschenk. Die Melodie per QR-Code ist genial.",
-          "Erstklassige Notenqualität zum Ausdrucken. Das Klavierstück klingt traumhaft.",
-          "Sehr zuvorkommender Kundenservice und schnelle Lieferung. Sieht gerahmt toll aus.",
-          "Unglaublich originell! Den Namen in Noten zu verschlüsseln ist fantastisch.",
-          "Bereits meine zweite Bestellung für ein Jubiläum und wieder ein voller Erfolg.",
-          "Das Geburtsposter für meine Nichte ist wunderschön geworden. Sehr zu empfehlen.",
-          "Eine unvergessliche Erinnerung mit persönlicher Widmung und Audio.",
-          "Hervorragender Service, Lieferung in unter 24 Stunden mit makellosem Klang."
-        ]
-      },
-      it: {
-        flag: "https://flagcdn.com/w40/it.png", code: "IT",
-        bannerTitulo: "Componiamo musica per i tuoi momenti più speciali",
-        bannerSub: "Custom melody for every memory",
-        ubicacion: "Siviglia, Spagna",
-        ventasTexto: "vendite",
-        enTienda: "Dal 2023",
-        buscarPlaceholder: "Cerca un articolo...",
-        btnContacto: "Contatto",
-        tabArticulos: "Articoli",
-        tabResenas: "Recensioni",
-        tabInformacion: "Info sul negozio",
-        tabPoliticas: "Condizioni di vendita",
-        seccionesTitulo: "Sezioni",
-        catTodos: "Tutti gli articoli",
-        catPartituras: "Spartiti personalizzati",
-        catNatalicios: "Quadretti di nascita",
-        catPosters: "Poster e stampe",
-        cargandoArticulos: "Caricamento articoli...",
-        articulosSufijo: "articoli",
-        noArticulos: "Nessun articolo trovato.",
-        descargaDigital: "Download digitale",
-        btnPedir: "Ordina",
-        resenasTitulo: "Recensioni degli articoli",
-        sobre5: "5.0 su 5",
-        valoraciones: "valutazioni",
-        btnDejarResena: "Lascia una recensione",
-        formTituloResena: "Condividi la tua opinione sull'ordine",
-        puntuacionForm: "Valutazione:",
-        placeholderNombreResena: "Il tuo nome o iniziali (es. Giulia B.)",
-        placeholderProdResena: "Prodotto acquistato",
-        placeholderTextoResena: "Cosa ne pensi della melodia, della rapidità e del design?...",
-        btnPublicarResena: "Pubblica recensione",
-        btnAnterior: "Precedente",
-        btnSiguiente: "Successivo",
-        paginaDe: "Pagina {0} di {1}",
-        articuloComprado: "Articolo acquistato:",
-        sobreZeronte: "Su Zeronte",
-        sobreTexto: "Zeronte nasce come uno studio di composizione e arte sonora dedicato a trasformare nomi, date e ricordi in brani musicali armonizzati su misura con autentica passione artistica.",
-        infoCol1Tit: "Sede",
-        infoCol1Desc: "Siviglia, Spagna",
-        infoCol2Tit: "Specialità",
-        infoCol2Desc: "Spartiti personalizzati, arrangiamenti e quadretti nascita",
-        infoCol3Tit: "Esperienza",
-        infoCol3Desc: "Negozio online dal 2023 · +1.000 spartiti creati",
-        politicasTitulo: "Condizioni di vendita",
-        enviosTitulo: "Consegna e download digitali",
-        enviosTexto: "Tutti i nostri spartiti personalizzati vengono consegnati in formato digitale ad altissima risoluzione (PDF pronto da stampare a 300 DPI) e file audio MP3 originale entro 24-48 ore.",
-        cambiosTitulo: "Cambi e cancellazioni",
-        cambiosTexto: "Trattandosi di opere su misura realizzate su richiesta, non si accettano resi una volta consegnati i file finali. Eventuali modifiche al testo sono gratuite.",
-        pagosTitulo: "Metodi di pagamento sicuri",
-        pagosTexto: "Accettiamo pagamenti diretti e protetti tramite Bizum e PayPal per la massima comodità.",
-        modalSub: "Personalizza la tua opera",
-        lblNombre: "Nome e Cognome *",
-        placeholderNombre: "es. Matteo Rossi",
-        lblTel: "Telefono / WhatsApp *",
-        lblEmail: "Email *",
-        lblDatos: "Dettagli di personalizzazione *",
-        placeholderDatos: "Nome/i per le note, dedica o date...",
-        lblMetodo: "Metodo di pagamento preferito",
-        btnConfirmar: "Conferma Ordine",
-        creandoPedido: "Creazione ordine...",
-        exitoTitulo: "Ordine Registrato!",
-        idPedidoLabel: "Numero ordine:",
-        bizumPaso0: "Pagamento con Bizum",
-        bizumPaso1: "1. Invia",
-        bizumPaso1b: "al numero:",
-        bizumPaso2: "2. Causale:",
-        btnCopiar: "Copia",
-        paypalPaso0: "Pagamento con PayPal",
-        paypalPaso1: "Clicca per pagare",
-        paypalPaso1b: "con PayPal:",
-        btnWpConfirmar: "Invia ricevuta via WhatsApp",
-        navCatalogo: "Catalogo",
-        navPedir: "Ordina",
-        navChat: "Chat",
-        footerDerechos: "© 2026 Tutti i diritti riservati.",
-        meses: ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
-      },
-      pt: {
-        flag: "https://flagcdn.com/w40/pt.png", code: "PT",
-        bannerTitulo: "Compomos música para os seus momentos mais especiais",
-        bannerSub: "Custom melody for every memory",
-        ubicacion: "Sevilha, Espanha",
-        ventasTexto: "vendas",
-        enTienda: "Desde 2023",
-        buscarPlaceholder: "Procurar artigo...",
-        btnContacto: "Contacto",
-        tabArticulos: "Artigos",
-        tabResenas: "Avaliações",
-        tabInformacion: "Informações da loja",
-        tabPoliticas: "Políticas da loja",
-        seccionesTitulo: "Secções",
-        catTodos: "Todos os artigos",
-        catPartituras: "Partituras personalizadas",
-        catNatalicios: "Quadros de nascimento",
-        catPosters: "Pósteres e estampas",
-        cargandoArticulos: "A carregar artigos...",
-        articulosSufijo: "artigos",
-        noArticulos: "Nenhum artigo encontrado.",
-        descargaDigital: "Download digital",
-        btnPedir: "Pedir",
-        resenasTitulo: "Avaliações dos artigos",
-        sobre5: "5.0 de 5",
-        valoraciones: "avaliações",
-        btnDejarResena: "Deixar uma avaliação",
-        formTituloResena: "Partilhe a sua opinião sobre o pedido",
-        puntuacionForm: "Classificação:",
-        placeholderNombreResena: "O seu nome ou iniciais (ex. João P.)",
-        placeholderProdResena: "Produto comprado",
-        placeholderTextoResena: "O que achou da melodia, rapidez e design do pedido?...",
-        btnPublicarResena: "Publicar avaliação",
-        btnAnterior: "Anterior",
-        btnSiguiente: "Seguinte",
-        paginaDe: "Página {0} de {1}",
-        articuloComprado: "Artigo comprado:",
-        sobreZeronte: "Sobre a Zeronte",
-        sobreTexto: "A Zeronte nasce como um estúdio de composição e arte sonora especializado em transformar nomes, datas e memórias em peças musicais únicas com total dedicação artística.",
-        infoCol1Tit: "Localização",
-        infoCol1Desc: "Sevilha, Espanha",
-        infoCol2Tit: "Especialidade",
-        infoCol2Desc: "Partituras personalizadas, arranjos e quadros de nascimento",
-        infoCol3Tit: "Experiência",
-        infoCol3Desc: "Loja online desde 2023 · +1.000 partituras criadas",
-        politicasTitulo: "Políticas da loja",
-        enviosTitulo: "Envios e downloads digitais",
-        enviosTexto: "Todas as nossas partituras são entregues em formato digital de alta resolução (PDF pronto para emoldurar a 300 DPI) e ficheiro de áudio MP3 original no prazo de 24 a 48 horas.",
-        cambiosTitulo: "Trocas e cancelamentos",
-        cambiosTexto: "Por se tratarem de obras personalizadas feitas sob encomenda, não se aceitam devoluções após o envio do ficheiro. Ajustes no texto são gratuitos.",
-        pagosTitulo: "Formas de pagamento seguras",
-        pagosTexto: "Aceitamos pagamentos diretos e seguros através de Bizum e PayPal.",
-        modalSub: "Personalize a sua obra",
-        lblNombre: "Nome e Apelido *",
-        placeholderNombre: "ex. Tiago Silva",
-        lblTel: "Telefone / WhatsApp *",
-        lblEmail: "Email *",
-        lblDatos: "Dados de personalização *",
-        placeholderDatos: "Nome(s) para as notas, dedicatória ou datas...",
-        lblMetodo: "Método de pagamento preferido",
-        btnConfirmar: "Confirmar Pedido",
-        creandoPedido: "A criar pedido...",
-        exitoTitulo: "Pedido Registado!",
-        idPedidoLabel: "Identificador do pedido:",
-        bizumPaso0: "Pagamento por Bizum",
-        bizumPaso1: "1. Envie",
-        bizumPaso1b: "para o número:",
-        bizumPaso2: "2. Descrição:",
-        btnCopiar: "Copiar",
-        paypalPaso0: "Pagamento por PayPal",
-        paypalPaso1: "Clique para pagar",
-        paypalPaso1b: "com PayPal:",
-        btnWpConfirmar: "Enviar comprovativo por WhatsApp",
-        navCatalogo: "Catálogo",
-        navPedir: "Pedir",
-        navChat: "Conversa",
-        footerDerechos: "© 2026 Todos os direitos reservados.",
-        meses: ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]
-      },
-      zh: {
-        flag: "https://flagcdn.com/w40/cn.png", code: "ZH",
-        bannerTitulo: "为您生命中最特别的时刻谱写专属旋律",
-        bannerSub: "Custom melody for every memory",
-        ubicacion: "西班牙塞维利亚",
-        ventasTexto: "笔交易",
-        enTienda: "始于2023年",
-        buscarPlaceholder: "在店内搜索宝贝...",
-        btnContacto: "联系我们",
-        tabArticulos: "宝贝列表",
-        tabResenas: "买家评价",
-        tabInformacion: "店铺详情",
-        tabPoliticas: "定制须知",
-        seccionesTitulo: "宝贝分类",
-        catTodos: "全部宝贝",
-        catPartituras: "姓名专属乐谱",
-        catNatalicios: "新生儿诞生纪念",
-        catPosters: "音乐艺术海报",
-        cargandoArticulos: "加载宝贝中...",
-        articulosSufijo: "件宝贝",
-        noArticulos: "未找到相关宝贝。",
-        descargaDigital: "高清数字下载",
-        btnPedir: "立即定制",
-        resenasTitulo: "店铺评价",
-        sobre5: "5.0 / 5.0",
-        valoraciones: "条真实评价",
-        btnDejarResena: "发表评价",
-        formTituloResena: "分享您的定制体验",
-        puntuacionForm: "评分：",
-        placeholderNombreResena: "您的姓名或昵称",
-        placeholderProdResena: "定制商品名称",
-        placeholderTextoResena: "您对专属旋律、交付速度与乐谱设计满意吗？...",
-        btnPublicarResena: "提交评价",
-        btnAnterior: "上一页",
-        btnSiguiente: "下一页",
-        paginaDe: "第 {0} 页 / 共 {1} 页",
-        articuloComprado: "已购商品：",
-        sobreZeronte: "关于 Zeronte",
-        sobreTexto: "Zeronte 音乐工坊致力于将您的姓名、纪念日与珍贵回忆转化为独一无二的专属钢琴旋律与乐谱艺术品，每一份作品均由专业作曲家悉心创作与编配。",
-        infoCol1Tit: "工作室所在地",
-        infoCol1Desc: "西班牙塞维利亚",
-        infoCol2Tit: "主营业务",
-        infoCol2Desc: "姓名专属乐谱、纪念旋律编配、新生儿纪念谱",
-        infoCol3Tit: "创作经验",
-        infoCol3Desc: "始于2023年 · 已创作1,000+份专属乐谱",
-        politicasTitulo: "定制须知与政策",
-        enviosTitulo: "电子文件交付方式",
-        enviosTexto: "所有定制作品均以 300 DPI 印刷级可打印 PDF 格式及高清 MP3 原声文件交付，通常在 24 至 48 小时内完成发送。",
-        cambiosTitulo: "退款与售后说明",
-        cambiosTexto: "由于作品属于专属定制，电子文件交付后不支持退款。但免费提供题字、日期等文字细节修正服务，确保满意。",
-        pagosTitulo: "安全支付方式",
-        pagosTexto: "支持通过 Bizum 及 PayPal 进行安全加密付款。",
-        modalSub: "定制您的专属乐谱",
-        lblNombre: "您的姓名 *",
-        placeholderNombre: "例如：张先生 / 李女士",
-        lblTel: "联系电话 / WhatsApp *",
-        lblEmail: "电子邮箱 *",
-        lblDatos: "定制信息（姓名/寄语/日期）*",
-        placeholderDatos: "需要谱曲的名字、赠言题字或纪念日期...",
-        lblMetodo: "付款方式选择",
-        btnConfirmar: "确认并提交订单",
-        creandoPedido: "正在创建订单...",
-        exitoTitulo: "订单提交成功！",
-        idPedidoLabel: "订单编号：",
-        bizumPaso0: "Bizum 付款指引",
-        bizumPaso1: "1. 请转账",
-        bizumPaso1b: "至号码：",
-        bizumPaso2: "2. 附言请填写：",
-        btnCopiar: "复制号码",
-        paypalPaso0: "PayPal 付款指引",
-        paypalPaso1: "点击下方按钮支付",
-        paypalPaso1b: "通过 PayPal：",
-        btnWpConfirmar: "通过 WhatsApp 发送凭证",
-        navCatalogo: "商品目录",
-        navPedir: "立即定制",
-        navChat: "在线客服",
-        footerDerechos: "© 2026 Zeronte 版权所有。",
-        meses: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
-        textosResenas: [
-          "非常感人且有意义的礼物！扫描乐谱上的二维码听到旋律的那一刻大家都感动哭了。",
-          "乐谱打印出来的质感太棒了，琴谱清晰，配套的钢琴音频超级好听！",
-          "客服服务态度极佳，交付很迅速，装裱在木质相框里摆在家里特别显高级。",
-          "极具创意！用姓名字母转换成音符的想法简直绝了，10分好评！",
-          "这是我第二次为纪念日订购了，每一次都带来极大的惊喜。",
-          "为侄女定制的新生儿乐谱画太漂亮了，细节很走心，强烈推荐！",
-          "一辈子珍藏的浪漫纪念品，独一无二的专属旋律。",
-          "交付非常快，不到24小时就收到了乐谱和MP3音频，品质无可挑剔。"
-        ]
+        meses: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
       }
     };
 
-    // Diccionario de traducción de títulos de productos
-    const DICCIONARIO_TITULOS = {
-      en: {
-        "Mi Nombre en Música + MP3 + QR": "My Name in Music + MP3 + QR",
-        "Mi Nombre en Música": "My Name in Music",
-        "Tu Nombre con Melodía + MP3": "Your Name with Melody + MP3",
-        "Tu Nombre con Melodía": "Your Name with Melody",
-        "Nombre en Melodía Simple": "Name in Simple Melody",
-        "Lámina Natalicio con Partitura": "Birth Milestone Sheet Music Print",
-        "Póster Círculo de Quintas": "Circle of Fifths Poster",
-        "Nuestro Nombre en Música + MP3": "Our Names in Music + MP3",
-        "Prueba Partitura en Lienzo": "Sheet Music Canvas Print"
-      },
-      fr: {
-        "Mi Nombre en Música + MP3 + QR": "Mon Prénom en Musique + MP3 + QR",
-        "Mi Nombre en Música": "Mon Prénom en Musique",
-        "Tu Nombre con Melodía + MP3": "Ton Prénom en Mélodie + MP3",
-        "Tu Nombre con Melodía": "Ton Prénom en Mélodie",
-        "Nombre en Melodía Simple": "Prénom en Mélodie Simple",
-        "Lámina Natalicio con Partitura": "Affiche de Naissance avec Partition",
-        "Póster Círculo de Quintas": "Poster Cercle des Quintes",
-        "Nuestro Nombre en Música + MP3": "Nos Prénoms en Musique + MP3",
-        "Prueba Partitura en Lienzo": "Impression Partition sur Toile"
-      },
-      de: {
-        "Mi Nombre en Música + MP3 + QR": "Mein Name in Noten + MP3 + QR",
-        "Mi Nombre en Música": "Mein Name in Noten",
-        "Tu Nombre con Melodía + MP3": "Dein Name als Melodie + MP3",
-        "Tu Nombre con Melodía": "Dein Name als Melodie",
-        "Nombre en Melodía Simple": "Name als einfache Melodie",
-        "Lámina Natalicio con Partitura": "Geburtsposter mit Notenblatt",
-        "Póster Círculo de Quintas": "Quintenzirkel Poster",
-        "Nuestro Nombre en Música + MP3": "Unsere Namen in Musik + MP3",
-        "Prueba Partitura en Lienzo": "Notenblatt auf Leinwand"
-      },
-      it: {
-        "Mi Nombre en Música + MP3 + QR": "Il Mio Nome in Musica + MP3 + QR",
-        "Mi Nombre en Música": "Il Mio Nome in Musica",
-        "Tu Nombre con Melodía + MP3": "Il Tuo Nome in Melodia + MP3",
-        "Tu Nombre con Melodía": "Il Tuo Nome in Melodia",
-        "Nombre en Melodía Simple": "Nome in Melodia Semplice",
-        "Lámina Natalicio con Partitura": "Quadretto Nascita con Spartito",
-        "Póster Círculo de Quintas": "Poster Circolo delle Quinte",
-        "Nuestro Nombre en Música + MP3": "I Nostri Nomi in Musica + MP3",
-        "Prueba Partitura en Lienzo": "Spartito su Tela"
-      },
-      pt: {
-        "Mi Nombre en Música + MP3 + QR": "O Meu Nome em Música + MP3 + QR",
-        "Mi Nombre en Música": "O Meu Nome em Música",
-        "Tu Nombre con Melodía + MP3": "O Teu Nome em Melodia + MP3",
-        "Tu Nombre con Melodía": "O Teu Nome em Melodia",
-        "Nombre en Melodía Simple": "Nome em Melodia Simples",
-        "Lámina Natalicio con Partitura": "Quadro de Nascimento com Partitura",
-        "Póster Círculo de Quintas": "Póster Círculo de Quintas",
-        "Nuestro Nombre en Música + MP3": "Os Nossos Nomes em Música + MP3",
-        "Prueba Partitura en Lienzo": "Partitura em Tela"
-      },
-      zh: {
-        "Mi Nombre en Música + MP3 + QR": "姓名专属乐谱定制 + MP3 + QR二维码",
-        "Mi Nombre en Música": "姓名专属乐谱",
-        "Tu Nombre con Melodía + MP3": "定制姓名旋律 + MP3伴奏",
-        "Tu Nombre con Melodía": "定制姓名旋律",
-        "Nombre en Melodía Simple": "简约姓名旋律乐谱",
-        "Lámina Natalicio con Partitura": "新生儿诞生纪念乐谱画",
-        "Póster Círculo de Quintas": "五度相生圈教学海报",
-        "Nuestro Nombre en Música + MP3": "情侣姓名专属乐谱 + MP3",
-        "Prueba Partitura en Lienzo": "艺术油画布乐谱"
-      }
-    };
+    function traducirNombreCategoria(catNombre) {
+      return catNombre || "";
+    }
+
+    const DICCIONARIO_TITULOS = {};
 
     document.addEventListener("DOMContentLoaded", () => {
       inicializarResenas();
@@ -1893,15 +1339,17 @@
       actualizarContadorVentas();
       aplicarIdioma(idiomaActual);
 
-      // Auto-refresco en segundo plano cada 15 segundos sin F5
+      // Auto-refresco en segundo plano solo si el usuario está en español para evitar parpadeos de traducción
       setInterval(() => {
-        cargarCatalogoDinamico();
-        actualizarContadorVentas();
-      }, 15000);
+        if (idiomaActual === 'es') {
+          cargarCatalogoDinamico();
+          actualizarContadorVentas();
+        }
+      }, 25000);
 
-      // Si el cliente o administrador vuelve a poner la pestaña en primer plano, sincroniza al instante
+      // Si el cliente vuelve a poner la pestaña en primer plano, sincroniza sin alterar el idioma actual
       document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) {
+        if (!document.hidden && idiomaActual === 'es') {
           cargarCatalogoDinamico();
           actualizarContadorVentas();
           cargarResenasDesdeServidor();
@@ -1960,17 +1408,80 @@
       if (menu) menu.classList.toggle("hidden");
     }
 
+    let traduciendoActualmente = false;
+
+    function ejecutarTraduccionGoogle(lang) {
+      if (traduciendoActualmente) return;
+      traduciendoActualmente = true;
+
+      const codigoGoogle = (lang === 'zh') ? 'zh-CN' : lang;
+
+      // Sincronizar cookies de Google Translate de forma permanente
+      const valorCookie = (lang === 'es') ? '/es/es' : `/es/${codigoGoogle}`;
+      document.cookie = `googtrans=${valorCookie}; path=/;`;
+      if (window.location.hostname) {
+        document.cookie = `googtrans=${valorCookie}; domain=.${window.location.hostname}; path=/;`;
+      }
+
+      const combo = document.querySelector('.goog-te-combo');
+      if (combo) {
+        if (combo.value !== codigoGoogle && combo.value !== (lang === 'es' ? 'es' : codigoGoogle)) {
+          combo.value = (lang === 'es') ? 'es' : codigoGoogle;
+          combo.dispatchEvent(new Event('change'));
+        }
+        setTimeout(() => { traduciendoActualmente = false; }, 400);
+      } else {
+        let intentos = 0;
+        const intervalo = setInterval(() => {
+          const comboTardio = document.querySelector('.goog-te-combo');
+          if (comboTardio) {
+            comboTardio.value = (lang === 'es') ? 'es' : codigoGoogle;
+            comboTardio.dispatchEvent(new Event('change'));
+            clearInterval(intervalo);
+            setTimeout(() => { traduciendoActualmente = false; }, 400);
+          }
+          intentos++;
+          if (intentos > 20) {
+            clearInterval(intervalo);
+            traduciendoActualmente = false;
+          }
+        }, 150);
+      }
+    }
+
     function seleccionarIdioma(lang) {
+      if (idiomaActual === lang && !traduciendoActualmente) {
+        const menu = document.getElementById("menuIdiomas");
+        if (menu) menu.classList.add("hidden");
+        return;
+      }
+
       idiomaActual = lang;
       localStorage.setItem('zeronte_idioma', lang);
       const menu = document.getElementById("menuIdiomas");
       if (menu) menu.classList.add("hidden");
-      
-      // Aplicar traducciones a toda la web
-      aplicarIdioma(lang);
-      actualizarTextosResenasIdioma();
-      renderizarCatalogo(catalogoCompleto);
-      renderizarResenasPagina();
+
+      // Actualizar la bandera y el código visible (ES, EN, etc.)
+      const banderas = {
+        es: { flag: "https://flagcdn.com/w40/es.png", code: "ES" },
+        en: { flag: "https://flagcdn.com/w40/gb.png", code: "EN" },
+        fr: { flag: "https://flagcdn.com/w40/fr.png", code: "FR" },
+        de: { flag: "https://flagcdn.com/w40/de.png", code: "DE" },
+        it: { flag: "https://flagcdn.com/w40/it.png", code: "IT" },
+        pt: { flag: "https://flagcdn.com/w40/pt.png", code: "PT" },
+        zh: { flag: "https://flagcdn.com/w40/cn.png", code: "ZH" }
+      };
+
+      const infoLang = banderas[lang] || banderas.es;
+      const imgBandera = document.getElementById("banderaActualImg");
+      if (imgBandera) {
+        imgBandera.src = infoLang.flag;
+        imgBandera.alt = infoLang.code;
+      }
+      const codIdioma = document.getElementById("codigoIdiomaActual");
+      if (codIdioma) codIdioma.innerText = infoLang.code;
+
+      ejecutarTraduccionGoogle(lang);
     }
 
     function aplicarIdioma(lang) {
@@ -1995,13 +1506,15 @@
       const enTienda = document.getElementById("txtEnTiendaDesde");
       if (enTienda) enTienda.innerText = t.enTienda;
 
-      // Buscador y Contacto
+      // Buscador y Botones de Contacto
       const buscador = document.getElementById("buscadorTienda");
       if (buscador) buscador.placeholder = t.buscarPlaceholder;
+      const btnMsg = document.getElementById("btnMensajeTxt");
+      if (btnMsg) btnMsg.innerText = t.btnEnviarMensaje || "Enviar Mensaje";
       const btnC = document.getElementById("btnContactoTxt");
       if (btnC) btnC.innerText = t.btnContacto;
 
-      // Pestañas con protección de iconos
+      // Pestañas de navegación
       const tabArt = document.getElementById("tabArticulosTexto");
       if (tabArt) tabArt.innerText = t.tabArticulos;
       const tabRes = document.getElementById("tabResenasTexto");
@@ -2016,24 +1529,10 @@
       // Sidebar Categorías
       const secSidebar = document.getElementById("txtSeccionesSidebar");
       if (secSidebar) secSidebar.innerText = t.seccionesTitulo;
-      const catTod = document.getElementById("catTxtTodos");
-      if (catTod) catTod.innerText = t.catTodos;
-      const catPart = document.getElementById("catTxtPartituras");
-      if (catPart) catPart.innerText = t.catPartituras;
-      const catNat = document.getElementById("catTxtNatalicios");
-      if (catNat) catNat.innerText = t.catNatalicios;
-      const catPost = document.getElementById("catTxtPosters");
-      if (catPost) catPost.innerText = t.catPosters;
 
       // Título sección actual en catálogo
-      const tituloMap = {
-        'todos': t.catTodos,
-        'partitura': t.catPartituras,
-        'natalicio': t.catNatalicios,
-        'posters': t.catPosters
-      };
       const tSec = document.getElementById('tituloSeccionActual');
-      if (tSec) tSec.innerText = tituloMap[categoriaSeleccionada] || t.catTodos;
+      if (tSec) tSec.innerText = traducirNombreCategoria(categoriaSeleccionada, lang);
 
       const tDest = document.getElementById('tituloArticulosDestacados');
       if (tDest) {
@@ -2075,25 +1574,37 @@
       const bSig = document.getElementById("btnResenaSig");
       if (bSig) bSig.innerText = t.btnSiguiente;
 
-      // Sección Información Básica
-      const infoTit = document.getElementById("txtSobreZeronteTitulo");
-      if (infoTit) infoTit.innerText = t.sobreZeronte;
-      const infoCuerpo = document.getElementById("txtSobreZeronteCuerpo");
-      if (infoCuerpo) infoCuerpo.innerText = t.sobreTexto;
-      const i1t = document.getElementById("txtInfoCol1Titulo");
-      if (i1t) i1t.innerText = t.infoCol1Tit;
-      const i1d = document.getElementById("txtInfoCol1Desc");
-      if (i1d) i1d.innerText = t.infoCol1Desc;
-      const i2t = document.getElementById("txtInfoCol2Titulo");
-      if (i2t) i2t.innerText = t.infoCol2Tit;
-      const i2d = document.getElementById("txtInfoCol2Desc");
-      if (i2d) i2d.innerText = t.infoCol2Desc;
-      const i3t = document.getElementById("txtInfoCol3Titulo");
-      if (i3t) i3t.innerText = t.infoCol3Tit;
-      const i3d = document.getElementById("txtInfoCol3Desc");
-      if (i3d) i3d.innerText = t.infoCol3Desc;
+      // Sección Seguimiento Mis Pedidos
+      const segT = document.querySelector("#boxFormConsultaPedido h2");
+      if (segT) segT.innerText = t.segTitulo || "Seguimiento de tu Pedido";
+      const segP = document.querySelector("#boxFormConsultaPedido p");
+      if (segP) segP.innerText = t.segSub || "Introduce el email y el número de pedido con el que hiciste la compra.";
+      const lblSegEmail = document.querySelector('label[for="inputEmailSeguimiento"]') || document.querySelectorAll('#boxFormConsultaPedido label')[0];
+      if (lblSegEmail) lblSegEmail.innerText = t.segEmailLbl || "Email de compra *";
+      const lblSegId = document.querySelector('label[for="inputIdSeguimiento"]') || document.querySelectorAll('#boxFormConsultaPedido label')[1];
+      if (lblSegId) lblSegId.innerText = t.segIdLbl || "Nº de Pedido *";
+      const btnConsSeg = document.querySelector("#btnConsultarSeguimiento span");
+      if (btnConsSeg) btnConsSeg.innerText = t.segBtnConsultar || "Consultar estado";
+      const txtErrCons = document.getElementById("txtErrorConsulta");
+      if (txtErrCons) txtErrCons.innerText = t.segError || "No se ha encontrado ningún pedido con esos datos. Revisa el correo y el número de pedido.";
 
-      // Sección Políticas
+      // Modal de Contacto / Enviar Mensaje
+      const msgTit = document.getElementById("txtModalMensajeTitulo");
+      if (msgTit) msgTit.innerText = t.contactoTitulo || "Escríbenos tu consulta";
+      const msgDesc = document.getElementById("txtModalMensajeDesc");
+      if (msgDesc) msgDesc.innerText = t.contactoSub || "Te responderemos a tu email en la mayor brevedad posible.";
+      const lblMNom = document.getElementById("lblMsgNombre");
+      if (lblMNom) lblMNom.innerText = t.contactoNomLbl || "Tu Nombre *";
+      const lblMEmail = document.getElementById("lblMsgEmail");
+      if (lblMEmail) lblMEmail.innerText = t.contactoEmailLbl || "Tu Correo Electrónico *";
+      const lblMTxt = document.getElementById("lblMsgTexto");
+      if (lblMTxt) lblMTxt.innerText = t.contactoMsgLbl || "Mensaje o Duda *";
+      const inMsgTxt = document.getElementById("contactoMensaje");
+      if (inMsgTxt) inMsgTxt.placeholder = t.contactoMsgPlaceholder || "Escribe aquí tu consulta sobre pedidos, plazos, personalizaciones...";
+      const btnMsgEnv = document.getElementById("btnEnviarMsgTxt");
+      if (btnMsgEnv) btnMsgEnv.innerText = t.contactoBtn || "Enviar Mensaje";
+
+      // Políticas
       const polTit = document.getElementById("txtPoliticasTitulo");
       if (polTit) polTit.innerText = t.politicasTitulo;
       const envTit = document.getElementById("txtEnviosTitulo");
@@ -2120,18 +1631,12 @@
       if (lTel) lTel.innerText = t.lblTel;
       const lEm = document.getElementById("lblEmailCliente");
       if (lEm) lEm.innerText = t.lblEmail;
-      const lDat = document.getElementById("lblDatosCliente");
-      if (lDat) lDat.innerText = t.lblDatos;
-      const iDat = document.getElementById("personalizacionCliente");
-      if (iDat) iDat.placeholder = t.placeholderDatos;
       const lMet = document.getElementById("lblMetodoPago");
       if (lMet) lMet.innerText = t.lblMetodo;
       const bConf = document.getElementById("btnConfirmarTxt");
       if (bConf && bConf.innerText.indexOf("·") === -1) {
         bConf.innerText = (t.btnConfirmar || 'Confirmar').replace(/\s*pedido\b/i, '').trim();
       }
-      const bPrecTxt = document.getElementById("btnPrecioTexto");
-      if (bPrecTxt) bPrecTxt.innerText = "";
 
       // Pantalla Éxito
       const eTit = document.getElementById("txtExitoTitulo");
@@ -2157,13 +1662,6 @@
       const bWp = document.getElementById("btnWpConfirmarTxt");
       if (bWp) bWp.innerText = t.btnWpConfirmar;
 
-      // Navegación móvil y Footer
-      const nCat = document.getElementById("navMobileCatalogo");
-      if (nCat) nCat.innerText = t.navCatalogo;
-      const nPed = document.getElementById("navMobilePedir");
-      if (nPed) nPed.innerText = t.navPedir;
-      const nChat = document.getElementById("navMobileChat");
-      if (nChat) nChat.innerText = t.navChat;
       const fDer = document.getElementById("txtDerechosFooter");
       if (fDer) fDer.innerText = t.footerDerechos;
 
