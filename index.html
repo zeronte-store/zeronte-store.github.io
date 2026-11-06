@@ -69,10 +69,18 @@
     .goog-tooltip,
     .goog-tooltip:hover {
       display: none !important;
+      visibility: hidden !important;
     }
-    .goog-text-highlight {
-      background: none !important;
+    /* Eliminar por completo el recuadro/sombreado azul al pasar el raton por los textos */
+    .goog-text-highlight,
+    .goog-text-highlight:hover,
+    font[style*="background-color"],
+    font {
+      background-color: transparent !important;
+      background: transparent !important;
+      border: none !important;
       box-shadow: none !important;
+      outline: none !important;
     }
   </style>
 </head>
