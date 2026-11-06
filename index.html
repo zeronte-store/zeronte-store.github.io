@@ -2248,7 +2248,7 @@
             const titNorm = normalizar(p.titulo);
             let ventasPedidos = 0;
             for (const [clavePed, cant] of Object.entries(ventasPorProdMap)) {
-              if (clavePed === titNorm || titNorm.includes(clavePed) || clavePed.includes(titNorm)) {
+              if (clavePed === titNorm) {
                 ventasPedidos += cant;
               }
             }
