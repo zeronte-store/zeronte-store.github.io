@@ -3525,6 +3525,17 @@
       categoriaSeleccionada = cat;
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
 
+      // Limpiar texto de los buscadores y ocultar sugerencias flotantes
+      const inputMovil = document.getElementById('buscadorTiendaMovil');
+      const inputEscritorio = document.getElementById('buscadorTienda');
+      if (inputMovil) inputMovil.value = '';
+      if (inputEscritorio) inputEscritorio.value = '';
+
+      const sugW = document.getElementById('desplegableSugerenciasBuscador');
+      const sugM = document.getElementById('desplegableSugerenciasBuscadorMovil');
+      if (sugW) { sugW.classList.add('hidden'); sugW.innerHTML = ''; }
+      if (sugM) { sugM.classList.add('hidden'); sugM.innerHTML = ''; }
+
       // Sincronizar select móvil
       const selectMovil = document.getElementById('selectCategoriasMovil');
       if (selectMovil && selectMovil.value !== cat) {
@@ -3553,17 +3564,6 @@
       let filtrados = catalogoCompleto;
       if (cat !== 'todos') {
         filtrados = catalogoCompleto.filter(p => (p.categoria || '').trim().toLowerCase() === cat.trim().toLowerCase());
-      }
-
-      const inputMovil = document.getElementById('buscadorTiendaMovil');
-      const inputEscritorio = document.getElementById('buscadorTienda');
-      const q = ((inputMovil ? inputMovil.value : '') || (inputEscritorio ? inputEscritorio.value : '')).trim().toLowerCase();
-
-      if (q) {
-        filtrados = filtrados.filter(p => 
-          (p.titulo || '').toLowerCase().includes(q) || 
-          (p.descripcion || '').toLowerCase().includes(q)
-        );
       }
 
       renderizarCatalogo(aplicarOrden(filtrados));
@@ -3748,6 +3748,17 @@
 
     // ================= PESTAÑAS =================
     function cambiarPestana(id) {
+      // Limpiar texto de los buscadores y sugerencias flotantes al cambiar de sección
+      const inputMovil = document.getElementById('buscadorTiendaMovil');
+      const inputEscritorio = document.getElementById('buscadorTienda');
+      if (inputMovil) inputMovil.value = '';
+      if (inputEscritorio) inputEscritorio.value = '';
+
+      const sugW = document.getElementById('desplegableSugerenciasBuscador');
+      const sugM = document.getElementById('desplegableSugerenciasBuscadorMovil');
+      if (sugW) { sugW.classList.add('hidden'); sugW.innerHTML = ''; }
+      if (sugM) { sugM.classList.add('hidden'); sugM.innerHTML = ''; }
+
       document.querySelectorAll('.pestana-contenido').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.pestana-btn').forEach(btn => {
         btn.classList.remove('border-black', 'text-black', 'font-bold');
@@ -3769,6 +3780,11 @@
       if (boton) {
         boton.classList.add('border-black', 'text-black', 'font-bold');
         boton.classList.remove('border-transparent', 'text-gray-600');
+      }
+
+      // Si se vuelve a la pestaña de artículos, restaurar el catálogo completo limpio
+      if (id === 'articulos') {
+        renderizarCatalogo(aplicarOrden(catalogoCompleto));
       }
 
       // Si se abre la pestaña de reseñas, renderizar inmediatamente la lista
