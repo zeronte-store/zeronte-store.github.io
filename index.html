@@ -167,8 +167,8 @@
         <span id="tabMisPedidosTexto">Mis Pedidos</span>
       </button>
       <button onclick="cambiarPestana('informacion')" id="tab-informacion" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap hidden sm:inline-flex items-center gap-1.5">
-        <i class="fa-solid fa-circle-info text-xs text-gray-400"></i>
-        <span id="tabInformacionTexto">Información básica</span>
+        <i class="fa-solid fa-user text-xs text-gray-400"></i>
+        <span id="tabInformacionTexto">Sobre mí</span>
       </button>
       <button onclick="cambiarPestana('politicas')" id="tab-politicas" class="pestana-btn py-3 border-b-2 border-transparent text-gray-600 hover:text-black transition whitespace-nowrap hidden sm:inline-flex items-center gap-1.5">
         <i class="fa-solid fa-shield-halved text-xs text-gray-400"></i>
@@ -583,31 +583,154 @@
     </div>
   </div>
 
-  <!-- ==================== SECCIÓN 3: INFORMACIÓN BÁSICA ==================== -->
-  <div id="vistaInformacion" class="pestana-contenido hidden max-w-6xl mx-auto px-4 py-6">
-    <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
-      <div>
-        <h2 id="txtSobreZeronteTitulo" class="text-xl font-serif font-bold text-gray-900 mb-2">Sobre Zeronte</h2>
-        <p id="txtSobreZeronteCuerpo" class="text-xs sm:text-sm text-gray-600 leading-relaxed">
-          Zeronte nace como un estudio de composición y arte sonoro especializado en transformar recuerdos, nombres, fechas y vivencias en obras musicales únicas e irrepetibles. Cada encargo es armonizado meticulosamente siguiendo sistemas de cifrado musical y orquestado con máxima dedicación artística.
-        </p>
+  <!-- ==================== SECCIÓN 3: SOBRE MÍ ==================== -->
+  <div id="vistaInformacion" class="pestana-contenido hidden max-w-4xl mx-auto px-4 py-6">
+    <div class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-8">
+      
+      <!-- Carrusel de fotos automático con visor de tamaño fijo -->
+      <div class="relative w-full h-72 sm:h-96 md:h-[430px] rounded-2xl overflow-hidden bg-neutral-900 shadow-md border border-gray-200 group select-none">
+        <img id="imgVisorSobreMi" src="img/sobre-mi/Adrian01.jpg" alt="Adrián Zeronte" class="w-full h-full object-cover object-center transition-opacity duration-700 ease-in-out opacity-100" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/sobre-mi/Adrian01.jpg';">
+
+        <!-- Botones de navegación manual -->
+        <button type="button" onclick="cambiarFotoSobreMi(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition active:scale-95 z-10" title="Foto anterior">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+        <button type="button" onclick="cambiarFotoSobreMi(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition active:scale-95 z-10" title="Siguiente foto">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+
+        <!-- Puntos indicadores inferiores -->
+        <div id="indicadoresCarruselSobreMi" class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none"></div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-        <div class="p-4 bg-gray-50 rounded-xl">
-          <p id="txtInfoCol1Titulo" class="font-bold text-sm text-gray-900 mb-1">Ubicación</p>
-          <p id="txtInfoCol1Desc" class="text-xs text-gray-600">Sevilla, España</p>
+
+      <!-- Texto íntegro de Sobre Mí estructurado -->
+      <div class="space-y-6 text-[#222222] text-sm sm:text-[15px] leading-relaxed text-justify [text-align-last:left]">
+        
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-gray-900 mb-2">Sobre mí</h2>
+          <p class="font-medium text-gray-800">
+            ¡Hola! Qué alegría tenerte por aquí. Soy Adrián, el músico, compositor y artífice detrás de Zeronte.
+          </p>
         </div>
-        <div class="p-4 bg-gray-50 rounded-xl">
-          <p id="txtInfoCol2Titulo" class="font-bold text-sm text-gray-900 mb-1">Especialidad</p>
-          <p id="txtInfoCol2Desc" class="text-xs text-gray-600">Partituras personalizadas, arreglos y natalicios</p>
+
+        <div class="space-y-3 pt-2">
+          <h3 class="text-lg sm:text-xl font-bold font-serif text-gray-900 mb-2">Mi trayectoria en el mundo de la música</h3>
+          
+          <!-- Bloque con foto Adrian01 integrada y texto adaptado -->
+          <div class="flow-root">
+            <div class="w-full sm:w-44 md:w-52 float-none sm:float-left mb-3 sm:mb-2 sm:mr-5 rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-neutral-100 flex-shrink-0">
+              <img src="img/sobre-mi/Adrian01.jpg" alt="Adrián Zeronte" class="w-full h-56 sm:h-64 object-cover object-top" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/sobre-mi/Adrian01.jpg';">
+            </div>
+            <p class="text-gray-700 mb-3">
+              Mi vínculo con el arte sonoro viene de muy lejos (desde los 8 años ya estaba con un instrumento musical) y se ha nutrido tanto de los escenarios como de la enseñanza y la creación. Me formé en el Conservatorio Superior de Música “Manuel Castillo” de Sevilla, donde me licencié en el año 2005 bajo la dirección del catedrático D. Francisco Cano Ruíz, especializándome en trompeta (familia de viento metal).
+            </p>
+            <p class="text-gray-700">
+              A lo largo de mi carrera como intérprete, he tenido el privilegio de formar parte de una gran variedad de formaciones y estilos que han enriquecido mi visión musical:
+            </p>
+          </div>
+          <p class="text-gray-700">
+            He colaborado con agrupaciones en las que cabe destacar la Sociedad Filarmónica de Pilas, la Banda de Música del Maestro Tejera de Sevilla, la Banda Municipal de la Puebla del Río (Sevilla), la Orquesta Sinfónica Joven del Aljarafe (Sevilla), el grupo de metales “Las Fanfarrias de Roland” (con actuaciones internacionales en Francia) y el Quinteto de metales “Sevilla Brass”.
+          </p>
+          <p class="text-gray-700">
+            Mi experiencia en los escenarios se complementa con numerosas grabaciones en los Estudios Octava Planta de Sevilla para diversos proyectos y colaboraciones artísticas.
+          </p>
+          <p class="text-gray-700">
+            Desde 2011, formo parte por oposición como funcionario de la Banda Sinfónica Municipal de Huelva, un entorno en el que he tenido el honor de trabajar bajo la batuta de grandes directores internacionales (como Ferrer Ferrán, Carlos Garcés o Francisco Javier Gutiérrez Juan), junto a cantantes de gran nivel (como Pasión Vega, Argentina, Nuria Fergó o Álvaro Díaz), solistas de talla internacional (como el trompetista Rubén Simeó o el baterista Pepe Sánchez) y prestigiosos grupos de cámara como Spanish Brass. En la actualidad, soy el encargado de controlar todo el archivo musical de dicha Banda Profesional con la plaza de archivero.
+          </p>
+          <p class="text-gray-700">
+            Además de la interpretación, la docencia ocupó una década fundamental de mi vida entre 2003 y 2013, impartiendo clases en institutos concertados de Educación Secundaria y escuelas de música privadas para transmitir los conocimientos técnicos y teóricos a las nuevas generaciones. Como compositor, he desarrollado un repertorio que abarca desde la música de capilla (siendo galardonado en abril de 2025 con el 1er premio en el II Concurso Nacional de Música de Capilla en Jaén) hasta obras para banda y teatro.
+          </p>
         </div>
-        <div class="p-4 bg-gray-50 rounded-xl">
-          <p id="txtInfoCol3Titulo" class="font-bold text-sm text-gray-900 mb-1">Trayectoria</p>
-          <p id="txtInfoCol3Desc" class="text-xs text-gray-600">En tienda online desde 2023 · +1.000 partituras</p>
+
+        <div class="space-y-3 pt-2">
+          <h3 class="text-lg sm:text-xl font-bold font-serif text-gray-900">El viaje de Zeronte: De Etsy a la independencia</h3>
+          <p class="text-gray-700">
+            Entre 2023 y abril de 2026, Zeronte estuvo presente en la conocida plataforma de venta de Etsy. Aunque supuso una etapa de gran aprendizaje, las propias normas y límites de sus políticas a menudo encorsetaban la cercanía y flexibilidad que un proyecto de estas características necesita. Por ello, a partir de ese momento, decidí dejar la plataforma para continuar este camino de manera totalmente independiente y libre, lo que me permite seguir ofreciendo nuevos y mejores productos con la misma exigencia de siempre.
+          </p>
+          <p class="text-gray-700">
+            A través de esa andadura internacional, tuve el inmenso orgullo de enviar partituras personalizadas a países de todo el mundo como Estados Unidos, Alemania, Francia, Italia, Australia, Canadá, Finlandia, Noruega, etc. y, por supuesto, España. El resultado superó todas las expectativas: obtuve un gran éxito y una valoración media excelente de 5 estrellas, respaldada por un total de 1.092 ventas y 192 reseñas positivas de entre 4 y 5 estrellas.
+          </p>
         </div>
+
+        <div class="space-y-3 pt-2">
+          <h3 class="text-lg sm:text-xl font-bold font-serif text-gray-900">¿Qué hay detrás de Zeronte?</h3>
+          <p class="text-gray-700">
+            Aquí quiero serte muy sincero: no soy una gran empresa ni una multinacional ni nada que se le parezca. Detrás de Zeronte solo estoy yo, un músico independiente que comparte su profunda pasión por la música a través del arte de crear partituras.
+          </p>
+          <p class="text-gray-700">
+            Para mí, componer música y elaborar estas partituras personalizadas es exactamente la misma pasión. Ya sea para profesores/as, alumn@s o para quienes buscan un detalle inolvidable para un ser querid@, pongo todo mi mimo, mi experiencia, mi sabiduría y rigor profesional en cada partitura o producto musical. Todo se realiza de forma 100% artesanal, por encargo y sin la intervención de ninguna inteligencia artificial; cada nota nace directamente de mi talento, de mi esfuerzo, del cariño por el detalle y del trabajo bien hecho. Saber que disfrutas teniendo el arte que yo he creado en tus manos y que le das vida, me satisface enormemente.
+          </p>
+          <p class="text-gray-900 font-semibold pt-1">
+            Gracias por confiar en este proyecto de tú a tú y por formar parte de esta nueva etapa en libertad. Quiero seguir mostrando al mundo mi arte musical y por eso he creado esta tienda personal donde encontrar música personalizada sea un placer. ¡Espero que disfrutes de la música tanto como yo disfruto creándola para ti!.
+          </p>
+          <p class="text-gray-900 font-semibold pt-1">
+            Adrián Díaz Giráldez.
+          </p>
+        </div>
+
       </div>
+
     </div>
   </div>
+
+  <script>
+    // Lógica del Carrusel automático de 6 segundos para Sobre Mí
+    const fotosSobreMi = [
+      "img/sobre-mi/Adrian01.jpg", "img/sobre-mi/Adrian02.jpg", "img/sobre-mi/Adrian03.jpg",
+      "img/sobre-mi/Adrian04.jpg", "img/sobre-mi/Adrian05.jpg", "img/sobre-mi/Adrian06.jpg",
+      "img/sobre-mi/Adrian07.jpg", "img/sobre-mi/Adrian08.jpg", "img/sobre-mi/Adrian09.jpg",
+      "img/sobre-mi/Adrian10.jpg", "img/sobre-mi/Adrian11.jpg", "img/sobre-mi/Adrian12.jpg"
+    ];
+    let indiceFotoSobreMi = 0;
+    let timerCarruselSobreMi = null;
+
+    function iniciarCarruselSobreMi() {
+      const contenedorPuntos = document.getElementById('indicadoresCarruselSobreMi');
+      if (contenedorPuntos) {
+        contenedorPuntos.innerHTML = fotosSobreMi.map((_, i) => `
+          <span class="punto-sobre-mi w-2 h-2 rounded-full transition-all duration-300 ${i === 0 ? 'bg-white w-4' : 'bg-white/50'}"></span>
+        `).join('');
+      }
+
+      mostrarFotoSobreMi(0);
+
+      if (timerCarruselSobreMi) clearInterval(timerCarruselSobreMi);
+      timerCarruselSobreMi = setInterval(() => {
+        cambiarFotoSobreMi(1);
+      }, 6000);
+    }
+
+    function mostrarFotoSobreMi(idx) {
+      const visor = document.getElementById('imgVisorSobreMi');
+      if (!visor) return;
+
+      indiceFotoSobreMi = (idx + fotosSobreMi.length) % fotosSobreMi.length;
+      const rutaFoto = fotosSobreMi[indiceFotoSobreMi];
+
+      visor.style.opacity = '0';
+      setTimeout(() => {
+        visor.onerror = function() {
+          this.onerror = null;
+          this.src = 'https://zeronte-store.github.io/' + rutaFoto;
+        };
+        visor.src = rutaFoto;
+        visor.style.opacity = '1';
+      }, 250);
+
+      const puntos = document.querySelectorAll('.punto-sobre-mi');
+      puntos.forEach((p, i) => {
+        p.className = `punto-sobre-mi h-2 rounded-full transition-all duration-300 ${i === indiceFotoSobreMi ? 'bg-white w-4' : 'bg-white/50 w-2'}`;
+      });
+    }
+
+    function cambiarFotoSobreMi(delta) {
+      mostrarFotoSobreMi(indiceFotoSobreMi + delta);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      iniciarCarruselSobreMi();
+    });
+  </script>
 
   <!-- ==================== SECCIÓN 4: POLÍTICAS DE LA TIENDA ==================== -->
   <div id="vistaPoliticas" class="pestana-contenido hidden max-w-6xl mx-auto px-4 py-6">
@@ -1063,8 +1186,8 @@
   <footer class="bg-black border-t border-zinc-900 py-8 px-4 text-center text-xs text-zinc-500">
     <div class="max-w-6xl mx-auto flex flex-col items-center justify-center gap-3">
       <img src="logo-zeronte.png" alt="Zeronte" class="w-8 h-8 rounded-lg opacity-80" onerror="this.style.display='none'">
-      <p class="font-bold tracking-widest brand-font text-zinc-300">ZERONTE · WE ARE YOUR SOUNDTRACK</p>
-      <p id="txtDerechosFooter">© 2026 Todos los derechos reservados.</p>
+      <p class="font-bold tracking-widest brand-font text-zinc-300">ZERONTE · SOMOS TU BANDA SONORA</p>
+      <p id="txtDerechosFooter">© 2026 | Pilas (Sevilla) - SPAIN | (+34) 641 851 073 | zeronte.store@gmail.com</p>
     </div>
   </footer>
 
@@ -1096,7 +1219,7 @@
         btnContacto: "Contacto",
         tabArticulos: "Artículos",
         tabResenas: "Reseñas",
-        tabInformacion: "Información básica",
+        tabInformacion: "Sobre mí",
         tabPoliticas: "Políticas de la tienda",
         seccionesTitulo: "Secciones",
         catTodos: "Todos los artículos",
@@ -1161,7 +1284,7 @@
         navCatalogo: "Catálogo",
         navPedir: "Pedir",
         navChat: "Chat",
-        footerDerechos: "© 2026 Todos los derechos reservados.",
+        footerDerechos: "© 2026 | Pilas (Sevilla) - SPAIN | (+34) 641 851 073 | zeronte.store@gmail.com",
         meses: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
         textosResenas: [
           "Un regalo maravilloso y emocionante. Lloramos al escuchar la melodía con el código QR.",
