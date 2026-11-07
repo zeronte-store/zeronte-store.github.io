@@ -3487,8 +3487,8 @@
         return;
       }
 
-      // Ordenar para mostrar primero la parte (1/2), etc.
-      listaCoincidentesClienteGlobal.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+      // Ordenar para mostrar primero la parte (1/2), etc. en orden numérico natural ascendente
+      listaCoincidentesClienteGlobal.sort((a, b) => (a.id || "").localeCompare(b.id || "", undefined, { numeric: true, sensitivity: 'base' }));
 
       // Renderizar con el primer pedido seleccionado por defecto
       renderizarSeguimientoAmazon(listaCoincidentesClienteGlobal[0]);
@@ -3524,7 +3524,28 @@
       const nombreProductoLimpio = (p.producto || "Partitura personalizada").replace(/\s*\(x\d+\)/gi, '').trim();
       document.getElementById('tituloSeguimientoProducto').innerText = nombreProductoLimpio;
       
-      document.getElementById('precioSeguimientoProducto').innerText = (p.precio || "0.00 €").toString().includes('€') ? p.precio : `${p.precio} €`;
+      (function(){
+        const precioRaw = (p.precio || "0.00 €").toString().trim();
+        const precioTotalFormateado = precioRaw.includes('€') ? precioRaw : `${precioRaw} €`;
+        const numTotal = parseFloat(precioRaw.replace('€', '').trim().replace(',', '.')) || 0;
+        
+        let totalUnidades = 1;
+        const matchFraccion = (p.id || '').toString().match(/\((\d+)\/(\d+)\)/);
+        const matchCantidad = (p.producto || '').toString().match(/\(x(\d+)\)/i);
+        
+        if (matchFraccion && matchFraccion[2]) {
+          totalUnidades = parseInt(matchFraccion[2], 10);
+        } else if (matchCantidad && matchCantidad[1]) {
+          totalUnidades = parseInt(matchCantidad[1], 10);
+        }
+
+        if (totalUnidades > 1 && numTotal > 0) {
+          const precioUnitario = (numTotal / totalUnidades).toFixed(2);
+          document.getElementById('precioSeguimientoProducto').innerText = `${precioTotalFormateado} (${precioUnitario} €/ud)`;
+        } else {
+          document.getElementById('precioSeguimientoProducto').innerText = precioTotalFormateado;
+        }
+      })();
       document.getElementById('metodoSeguimientoProducto').innerText = p.metodoPago || "Bizum";
 
       // FORMATEO DE PERSONALIZACIÓN IDÉNTICO AL PANEL ADMIN
