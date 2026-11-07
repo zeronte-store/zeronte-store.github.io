@@ -1855,14 +1855,14 @@
         if (data && data.status === "success" && Array.isArray(data.productos) && data.productos.length > 0) {
           let productos = data.productos;
 
-          // Obtener los pedidos reales registrados para computar las ventas sin duplicar fracciones (1/2, 2/2)
+          // Obtener los pedidos reales registrados en la web
           let ventasPorProdMap = {};
+          const normalizar = s => (s || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
           try {
             const resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
             const dataPed = await resPed.json();
             const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
-            const normalizar = s => (s || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-
             const pedidosProcesadosId = new Set();
 
             pedidos.forEach(ped => {
@@ -1891,22 +1891,20 @@
             console.warn("No se pudieron contabilizar pedidos remotos:", ePed);
           }
 
-          // Asignar el total de ventas sumando los pedidos reales coincidentes con cada producto
+          // Asignar el total de ventas sumando las ventas de Etsy + los nuevos pedidos
           let maxVentas = -1;
           let idxMasVendido = -1;
-          const normalizar = s => (s || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
           productos = productos.map((p, idx) => {
             const titNorm = normalizar(p.titulo);
-            let ventasPedidos = 0;
-            for (const [clavePed, cant] of Object.entries(ventasPorProdMap)) {
-              if (clavePed === titNorm) {
-                ventasPedidos += cant;
-              }
-            }
+            // Coincidencia EXACTA para no fusionar productos distintos
+            let ventasPedidosWeb = ventasPorProdMap[titNorm] || 0;
 
-            const ventasDirectas = parseInt(p.totalVentas || p.ventas || p.Ventas || p.sales || 0, 10) || 0;
-            const v = Math.max(ventasDirectas, ventasPedidos);
+            // Ventas reales contabilizadas directamente de la hoja 'Ventas ETSY 23-26'
+            const ventasEtsy = parseInt(p.ventasEtsy || 0, 10);
+
+            // Suma total: Ventas acumuladas de Etsy + Nuevas ventas en la web
+            const v = ventasEtsy + ventasPedidosWeb;
 
             if (v > maxVentas) {
               maxVentas = v;
