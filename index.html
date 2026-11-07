@@ -114,7 +114,14 @@
   <section class="max-w-6xl mx-auto px-4 pt-4 sm:pt-6">
     <!-- Portada / Banner -->
     <div class="w-full h-36 sm:h-56 rounded-2xl overflow-hidden bg-gradient-to-r from-zinc-900 to-black relative shadow-sm border border-gray-200">
-      <img src="img/banner-zeronte.png" alt="Zeronte Banner" class="w-full h-full object-cover object-center" onerror="this.style.display='none'; document.getElementById('etsyBannerFallback').classList.remove('hidden');">
+      <picture class="w-full h-full">
+        <!-- Imagen para pantallas móviles -->
+        <source media="(max-width: 639px)" srcset="img/banner-zeronte-movil.png">
+        <!-- Imagen para pantallas PC y tablets -->
+        <source media="(min-width: 640px)" srcset="img/banner-zeronte-pc.png">
+        <!-- Imagen por defecto y respaldo -->
+        <img src="img/banner-zeronte-pc.png" alt="Zeronte Banner" class="w-full h-full object-cover object-center" onerror="this.style.display='none'; document.getElementById('etsyBannerFallback').classList.remove('hidden');">
+      </picture>
       <div id="etsyBannerFallback" class="hidden absolute inset-0 flex flex-col justify-center px-8 text-white">
         <h2 id="bannerTitulo" class="text-xl sm:text-3xl font-serif font-bold">Escribimos música para tus momentos más especiales</h2>
         <p id="bannerSub" class="text-xs sm:text-sm text-zinc-300 mt-1">Custom melody for every memory</p>
