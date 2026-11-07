@@ -240,10 +240,18 @@
                 <span class="text-xs text-slate-400" id="contadorPedidos">0 pedidos</span>
               </div>
 
-              <!-- Buscador -->
-              <div class="relative w-full">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-                <input type="text" id="inputBuscador" oninput="filtrarPedidos()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+              <!-- Buscador y Ordenación -->
+              <div class="flex flex-col sm:flex-row items-center gap-2 w-full">
+                <div class="relative flex-grow w-full">
+                  <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+                  <input type="text" id="inputBuscador" oninput="filtrarPedidos()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto w-full sm:w-auto">
+                  <select id="ordenPedidos" onchange="cambiarOrdenPedidos(this.value)" class="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-slate-400 focus:bg-white transition cursor-pointer">
+                    <option value="recientes">Más recientes primero</option>
+                    <option value="antiguos">Más antiguos primero</option>
+                  </select>
+                </div>
               </div>
 
               <!-- Pestañas de Estado con Flechas de Navegación Lateral -->
@@ -1552,8 +1560,14 @@
     let listaProductosGlobal = [];
     let mensajesClientes = [];
     let filtroEstadoActual = "todos";
+    let ordenPedidosActual = "recientes";
     let paginaActualPedidos = 1;
     const pedidosPorPagina = 10;
+
+    function cambiarOrdenPedidos(nuevoOrden) {
+      ordenPedidosActual = nuevoOrden;
+      filtrarPedidos(true);
+    }
     const idsEliminadosLocalmente = new Set(JSON.parse(localStorage.getItem('zeronte_pedidos_eliminados') || '[]'));
     const filasLeidasLocalmente = new Set();
 
@@ -2270,6 +2284,20 @@
         ].join(" ").toLowerCase();
 
         return terminos.every(term => camposBuscables.includes(term));
+      });
+
+      // Ordenar: Por defecto los más recientes primero
+      pedidosFiltrados.sort((a, b) => {
+        const fechaA = (typeof parsearFechaPedido === 'function') ? (parsearFechaPedido(a.fecha)?.getTime() || 0) : new Date(a.fecha || 0).getTime();
+        const fechaB = (typeof parsearFechaPedido === 'function') ? (parsearFechaPedido(b.fecha)?.getTime() || 0) : new Date(b.fecha || 0).getTime();
+        const filaA = Number(a.fila) || 0;
+        const filaB = Number(b.fila) || 0;
+
+        if (ordenPedidosActual === "antiguos") {
+          return (fechaA - fechaB) || (filaA - filaB);
+        } else {
+          return (fechaB - fechaA) || (filaB - filaA);
+        }
       });
 
       renderizarPedidos(pedidosFiltrados);
