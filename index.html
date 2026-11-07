@@ -2233,7 +2233,7 @@
                       <span>-${porcentajeDescuento}%</span>
                       <span>•</span>
                       <span>La oferta termina en</span>
-                      <span class="countdown-etsy-timer font-bold font-mono tabular-nums inline-block min-w-[4.4rem] text-center" data-fin="${fechaFinOferta || (ahora + 33687000)}">
+                      <span class="countdown-etsy-timer font-semibold tabular-nums [font-feature-settings:'tnum'] inline-block text-center" data-fin="${fechaFinOferta || (ahora + 33687000)}">
                         ${formatearTiempoEtsy((fechaFinOferta || (ahora + 33687000)) - ahora)}
                       </span>
                     </div>
@@ -2329,7 +2329,7 @@
                   <span>-${porcentajeDescuento}%</span>
                   <span>•</span>
                   <span>La oferta termina en</span>
-                  <span class="countdown-etsy-timer font-bold font-mono tabular-nums inline-block min-w-[4.4rem] text-center" data-fin="${fechaFinOferta || (ahora + 33687000)}">
+                  <span class="countdown-etsy-timer font-semibold tabular-nums [font-feature-settings:'tnum'] inline-block text-center" data-fin="${fechaFinOferta || (ahora + 33687000)}">
                     ${formatearTiempoEtsy((fechaFinOferta || (ahora + 33687000)) - ahora)}
                   </span>
                 </div>
@@ -2571,7 +2571,7 @@
             if (cAct && cAct.fechaFin && !cAct.sinFin) finMs = cAct.fechaFin;
           } catch(e){}
           const finFinal = finMs || (Date.now() + 33687000);
-          elBadgeDto.innerHTML = `-${dto}% • La oferta termina en <span class="countdown-etsy-timer font-bold font-mono tabular-nums inline-block min-w-[4.8rem] text-center" data-fin="${finFinal}">${formatearTiempoEtsy(finFinal - Date.now())}</span>`;
+          elBadgeDto.innerHTML = `-${dto}% • La oferta termina en <span class="countdown-etsy-timer font-semibold tabular-nums [font-feature-settings:'tnum'] inline-block text-center" data-fin="${finFinal}">${formatearTiempoEtsy(finFinal - Date.now())}</span>`;
           elBadgeDto.className = "text-xs font-bold text-[#0f766e] bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-md inline-flex items-center gap-1 select-none whitespace-nowrap";
           elBadgeDto.classList.remove('hidden');
         }
