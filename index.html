@@ -1930,7 +1930,14 @@
           catalogoCompleto = productos;
 
           actualizarConteosCategorias();
-          filtrarCategoria(categoriaSeleccionada, null);
+          const inW = document.getElementById('buscadorTienda');
+          const inM = document.getElementById('buscadorTiendaMovil');
+          const textoActivo = ((inW ? inW.value : '') || (inM ? inM.value : '')).trim();
+          if (textoActivo) {
+            buscarProductos(textoActivo);
+          } else {
+            filtrarCategoria(categoriaSeleccionada, null);
+          }
           actualizarSelectProductosResena();
 
           // Abrir automáticamente la ficha si la URL contiene el parámetro ?prod=...
