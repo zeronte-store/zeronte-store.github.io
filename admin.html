@@ -296,7 +296,7 @@
                     <th class="pb-3 text-right pr-2"></th>
                   </tr>
                 </thead>
-                <tbody id="tablaPedidosPC" class="divide-y divide-slate-100">
+                <tbody id="tablaPedidosPC">
                   <!-- Renderizado dinámico -->
                 </tbody>
               </table>
@@ -482,6 +482,53 @@
                       Guardar
                     </button>
                   </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- MODAL FLOTANTE: CONFIRMACIÓN DE ELIMINACIÓN DE PEDIDO -->
+          <div id="modalEliminarPedido" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 select-none">
+            <div class="bg-white border border-slate-200 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-rose-50/70">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xs shadow-2xs">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-slate-900">Eliminar Pedido</h3>
+                    <p class="text-[10px] text-slate-500 font-mono" id="subtituloModalEliminar">PED-XXXX</p>
+                  </div>
+                </div>
+                <button type="button" onclick="cerrarModalEliminarPedido()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl transition">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <form onsubmit="ejecutarEliminacionConfirmada(event)" class="p-5 space-y-4 text-xs text-slate-700">
+                <input type="hidden" id="eliminarFilaPedido">
+                <input type="hidden" id="eliminarOrderIdPedido">
+
+                <div class="bg-rose-50/50 border border-rose-200/80 rounded-2xl p-3 text-[11px] text-rose-900 leading-relaxed">
+                  ⚠️ <strong>Acción permanente:</strong> Este pedido se borrará de forma definitiva tanto del panel como de la base de datos de Google Sheets.
+                </div>
+
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1.5">
+                    Escribe <span class="text-rose-600 font-extrabold select-all">Eliminar pedido</span> para confirmar:
+                  </label>
+                  <input type="text" id="inputConfirmarEliminarTexto" required autocomplete="off" placeholder="Eliminar pedido" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 font-bold focus:outline-none focus:border-rose-500 focus:bg-white transition text-center">
+                  <span id="errorTextoEliminarModal" class="text-[10px] text-rose-600 font-semibold mt-1 hidden block">Debes escribir exactamente "Eliminar pedido"</span>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                  <button type="button" onclick="cerrarModalEliminarPedido()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                    Cancelar
+                  </button>
+                  <button type="submit" id="btnConfirmarEliminarDefinitivo" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 shadow-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                    <span>Eliminar</span>
+                  </button>
                 </div>
               </form>
             </div>
@@ -1756,6 +1803,11 @@ function extraerUrlArchivoPedido(pedido) {
         const datosCambiaron = JSON.stringify(listaPedidosGlobal) !== JSON.stringify(data.pedidos || []) ||
                                JSON.stringify(listaProductosGlobal) !== JSON.stringify(data.productos || []);
 
+        // Purgar claves antiguas residuales de pago en localStorage
+        Object.keys(localStorage).forEach(k => {
+          if (k.startsWith('pago_pedido_')) localStorage.removeItem(k);
+        });
+
         const pedidosServidor = data.pedidos || [];
         listaPedidosGlobal = pedidosServidor.filter(p => !idsEliminadosLocalmente.has(p.id));
 
@@ -2164,12 +2216,10 @@ function extraerUrlArchivoPedido(pedido) {
       document.body.removeChild(areaTemporal);
     }
 
-    // 1. Cálculo de Métricas y Contadores (Sincronizado con Columna Q - Pagado)
+    // 1. Detección estricta: SOLO está pagado si la columna Q de Sheets tiene fecha/hora
     function esPedidoPagado(p) {
       if (!p) return false;
-      if (p.fechaPago && p.fechaPago.toString().trim() !== "") return true;
-      const est = (p.estado || "").toString().toLowerCase().trim();
-      return est === "pagado";
+      return !!(p.fechaPago && p.fechaPago.toString().trim() !== "");
     }
 
     function actualizarMetricas() {
@@ -2296,27 +2346,27 @@ function extraerUrlArchivoPedido(pedido) {
       return `${diaSemana}, ${diaNum}/${mesNum}/${anioCorto} - ${hora}:${min}h`;
     }
 
-    // Botón limpio debajo del estado: muestra únicamente 'Pagado: SÍ' o 'Pagado: NO'
+    // Botón limpio: muestra ÚNICAMENTE lo que dicta la columna Q de Sheets
     function getCobroBadge(pedido) {
       const pagado = esPedidoPagado(pedido);
       const fPago = pedido.fechaPago ? pedido.fechaPago.toString().trim() : "";
       if (pagado) {
         return `
-          <button type="button" onclick="event.stopPropagation(); alternarPagoPedido(${pedido.fila}, '${(pedido.id || '').replace(/'/g, "\\'")}', '${fPago.replace(/'/g, "\\'")}')" title="Clic para ver o modificar el cobro" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition active:scale-95 shadow-2xs">
+          <button type="button" onclick="event.stopPropagation(); alternarPagoPedido(${pedido.fila}, '${(pedido.id || '').replace(/'/g, "\\'")}', '${fPago.replace(/'/g, "\\'")}')" title="Clic para ver o modificar el cobro en Sheets" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition active:scale-95 shadow-2xs">
             <i class="fa-solid fa-check text-[9px] text-emerald-700"></i>
             <span>Pagado: SÍ</span>
           </button>
         `;
       }
       return `
-        <button type="button" onclick="event.stopPropagation(); alternarPagoPedido(${pedido.fila}, '${(pedido.id || '').replace(/'/g, "\\'")}', '')" title="Clic para registrar fecha y hora del cobro" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 transition active:scale-95 shadow-2xs">
+        <button type="button" onclick="event.stopPropagation(); alternarPagoPedido(${pedido.fila}, '${(pedido.id || '').replace(/'/g, "\\'")}', '')" title="Clic para registrar fecha y hora del cobro en Sheets" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 transition active:scale-95 shadow-2xs">
           <i class="fa-regular fa-clock text-[9px]"></i>
           <span>Pagado: NO</span>
         </button>
       `;
     }
 
-    // Modal interactivo que registra la fecha y hora exacta del pago (individual o en lote para pedidos fraccionados)
+    // Apertura y control del Modal Emergente Centrado
     function formatearFechaIsoLocal(fechaStr) {
       let d = new Date();
       if (fechaStr) {
@@ -2420,19 +2470,18 @@ function extraerUrlArchivoPedido(pedido) {
 
       const pedidosAActualizar = aplicarATodos ? pedidosMismoGrupo : [listaPedidosGlobal.find(p => p.fila === fila || p.id === orderId)].filter(Boolean);
 
+      // Actualizar visualmente en memoria
       pedidosAActualizar.forEach(item => {
         item.fechaPago = nuevaFechaPago;
-        if (item.id) {
-          localStorage.setItem(`pago_pedido_${item.id}`, nuevaFechaPago);
-        }
       });
 
       actualizarMetricas();
       filtrarPedidos(false);
 
+      // Guardar de inmediato en la hoja de cálculo de Google Sheets
       for (const item of pedidosAActualizar) {
         try {
-          fetch(APPS_SCRIPT_URL, {
+          await fetch(APPS_SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
@@ -2444,9 +2493,12 @@ function extraerUrlArchivoPedido(pedido) {
             })
           });
         } catch (err) {
-          console.warn("Pago guardado localmente:", err);
+          console.error("Error al guardar pago en Sheets:", err);
         }
       }
+
+      // Sincronizar desde Google Sheets para confirmar que los datos provienen de la base de datos
+      await cargarDatos(true);
     }
 
     // Desplazar lateralmente el carrusel de categorías en móvil
@@ -2825,11 +2877,6 @@ function extraerUrlArchivoPedido(pedido) {
 
       // Escritorio (PC)
       tablaPC.innerHTML = pedidosPaginados.map((p, idx) => {
-        if (!p.fechaPago && p.id) {
-          const fGuardada = localStorage.getItem(`pago_pedido_${p.id}`);
-          if (fGuardada) p.fechaPago = fGuardada;
-        }
-
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
         const precioRealUnitario = obtenerImporteRealFila(p);
@@ -2872,7 +2919,7 @@ function extraerUrlArchivoPedido(pedido) {
 
         return `
           <!-- FILA PRINCIPAL COMPACTA -->
-          <tr onclick="toggleDetallePedido('${detalleId}')" class="${fondoPastel} cursor-pointer transition select-none border-b border-inherit">
+          <tr onclick="toggleDetallePedido('${detalleId}')" class="${fondoPastel} cursor-pointer transition select-none border-b-2 border-slate-300/80 hover:brightness-95">
             <td class="py-2.5 px-3 text-center align-middle whitespace-nowrap">
               <span class="inline-flex items-center justify-center min-w-[3.5rem] px-2 h-7 rounded-lg bg-white/80 border border-slate-200 text-xs font-bold text-slate-800 shadow-2xs">
                 #${numVentaDescendente}
@@ -2928,7 +2975,7 @@ function extraerUrlArchivoPedido(pedido) {
           </tr>
 
           <!-- FILA DESPLEGABLE CON EL RESTO DE INFORMACIÓN -->
-          <tr id="${detalleId}" class="${estaAbierto ? '' : 'hidden'} ${fondoPastel} border-b-2 border-slate-300">
+          <tr id="${detalleId}" class="${estaAbierto ? '' : 'hidden'} ${fondoPastel} border-b-2 border-slate-400/90 shadow-inner">
             <td colspan="7" class="p-4 bg-white/70">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4" onclick="event.stopPropagation()">
                 <!-- Estado de producción & Acciones -->
@@ -3064,11 +3111,6 @@ function extraerUrlArchivoPedido(pedido) {
 
       // Smartphone (Móvil)
       vistaMovil.innerHTML = pedidosPaginados.map((p, idx) => {
-        if (!p.fechaPago && p.id) {
-          const fGuardada = localStorage.getItem(`pago_pedido_${p.id}`);
-          if (fGuardada) p.fechaPago = fGuardada;
-        }
-
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
         const precioRealUnitario = obtenerImporteRealFila(p);
@@ -3302,16 +3344,46 @@ function extraerUrlArchivoPedido(pedido) {
       }
     }
 
-    async function confirmarEliminarPedido(fila, orderId) {
-      const claveSeguridad = prompt(`⚠️ ATENCIÓN: Estás a punto de eliminar el pedido ${orderId} de forma permanente.\n\nEscribe "Eliminar pedido" para confirmar:`);
+    // Apertura y control del Modal Flotante de Confirmación de Eliminación
+    function confirmarEliminarPedido(fila, orderId) {
+      const modal = document.getElementById('modalEliminarPedido');
+      if (!modal) return;
+
+      document.getElementById('eliminarFilaPedido').value = fila;
+      document.getElementById('eliminarOrderIdPedido').value = orderId;
+      document.getElementById('subtituloModalEliminar').innerText = orderId;
+
+      const inputTexto = document.getElementById('inputConfirmarEliminarTexto');
+      inputTexto.value = "";
       
-      if (claveSeguridad === null) return;
-      
-      if (claveSeguridad.trim() !== "Eliminar pedido") {
-        alert("❌ Clave incorrecta. La eliminación ha sido cancelada.");
+      const errTexto = document.getElementById('errorTextoEliminarModal');
+      if (errTexto) errTexto.classList.add('hidden');
+
+      modal.classList.remove('hidden');
+      setTimeout(() => inputTexto.focus(), 50);
+    }
+
+    function cerrarModalEliminarPedido() {
+      const modal = document.getElementById('modalEliminarPedido');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function ejecutarEliminacionConfirmada(e) {
+      e.preventDefault();
+      const fila = Number(document.getElementById('eliminarFilaPedido').value);
+      const orderId = document.getElementById('eliminarOrderIdPedido').value;
+      const textoConfirmacion = document.getElementById('inputConfirmarEliminarTexto').value.trim();
+      const errTexto = document.getElementById('errorTextoEliminarModal');
+
+      if (textoConfirmacion !== "Eliminar pedido") {
+        if (errTexto) errTexto.classList.remove('hidden');
+        document.getElementById('inputConfirmarEliminarTexto').focus();
         return;
       }
 
+      cerrarModalEliminarPedido();
+
+      // Eliminación en memoria local
       idsEliminadosLocalmente.add(orderId);
       localStorage.setItem('zeronte_pedidos_eliminados', JSON.stringify(Array.from(idsEliminadosLocalmente)));
       listaPedidosGlobal = listaPedidosGlobal.filter(p => p.id !== orderId);
@@ -3325,6 +3397,7 @@ function extraerUrlArchivoPedido(pedido) {
         renderizarClientes();
       }
 
+      // Sincronización en segundo plano con Google Sheets
       try {
         await fetch(APPS_SCRIPT_URL, {
           method: "POST",
@@ -3335,8 +3408,8 @@ function extraerUrlArchivoPedido(pedido) {
             id: orderId
           })
         });
-      } catch (e) {
-        console.error("Error al sincronizar eliminación con la base de datos:", e);
+      } catch (err) {
+        console.error("Error al sincronizar eliminación con la base de datos:", err);
       }
     }
 
