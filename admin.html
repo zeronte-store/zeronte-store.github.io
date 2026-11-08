@@ -429,6 +429,64 @@
           </div>
         </div>
 
+        <!-- MODAL FLOTANTE: REGISTRAR FECHA Y HORA DE COBRO (CON CALENDARIO Y CHECK EN LOTE) -->
+          <div id="modalRegistrarPago" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 select-none">
+            <div class="bg-white border border-slate-200 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-emerald-50/60">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs shadow-2xs">
+                    <i class="fa-solid fa-receipt"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-slate-900">Registro de Cobro</h3>
+                    <p class="text-[10px] text-slate-500" id="subtituloModalPago">PED-XXXX</p>
+                  </div>
+                </div>
+                <button type="button" onclick="cerrarModalPago()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl transition">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <form onsubmit="ejecutarGuardadoModalPago(event)" class="p-5 space-y-4 text-xs text-slate-700">
+                <input type="hidden" id="pagoModalFila">
+                <input type="hidden" id="pagoModalOrderId">
+
+                <!-- Selector nativo de Fecha con Calendario y Hora -->
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1.5">Fecha y hora del pago recibido *</label>
+                  <div class="relative">
+                    <input type="datetime-local" step="1" id="inputFechaHoraPago" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-800 font-semibold focus:outline-none focus:border-emerald-500 focus:bg-white transition cursor-pointer">
+                  </div>
+                  <span class="text-[10px] text-slate-400 block mt-1">Pulsa en el icono de calendario para elegir día y hora exacta.</span>
+                </div>
+
+                <!-- Checkbox condicional para aplicar a todas las unidades fraccionadas -->
+                <div id="cajaCheckPagoLote" class="hidden bg-emerald-50/70 border border-emerald-200 p-3 rounded-2xl">
+                  <label class="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input type="checkbox" id="checkPagoLoteUnidades" checked class="mt-0.5 rounded border-emerald-300 text-emerald-600 focus:ring-0">
+                    <div class="leading-tight">
+                      <span class="font-bold text-emerald-950 block text-xs" id="txtTituloPagoLote">Marcar todas las partes</span>
+                      <span class="text-[10px] text-emerald-700" id="txtSubtituloPagoLote">Aplica esta misma fecha y hora a las fracciones del pedido.</span>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="pt-2 flex items-center justify-between border-t border-slate-100 gap-2">
+                  <button type="button" onclick="desmarcarCobroDesdeModal()" id="btnDesmarcarPagoModal" class="text-rose-600 hover:bg-rose-50 px-2.5 py-2 rounded-xl text-xs font-bold transition">
+                    Marcar como NO pagado
+                  </button>
+                  <div class="flex items-center gap-1.5 ml-auto">
+                    <button type="button" onclick="cerrarModalPago()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 shadow-xs">
+                      Guardar
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
         <!-- ================= SECCIÓN 2: CATÁLOGO DE PARTITURAS (ESTILO ETSY) ================= -->
         <div id="vistaSeccionCatalogo" class="hidden space-y-5">
           <!-- CABECERA ESTILO ETSY -->
@@ -2106,7 +2164,14 @@ function extraerUrlArchivoPedido(pedido) {
       document.body.removeChild(areaTemporal);
     }
 
-    // 1. Cálculo de Métricas y Contadores (Todo lo pagado se suma a enviados)
+    // 1. Cálculo de Métricas y Contadores (Sincronizado con Columna Q - Pagado)
+    function esPedidoPagado(p) {
+      if (!p) return false;
+      if (p.fechaPago && p.fechaPago.toString().trim() !== "") return true;
+      const est = (p.estado || "").toString().toLowerCase().trim();
+      return est === "pagado";
+    }
+
     function actualizarMetricas() {
       let totalIngresos = 0;
       let totalPagado = 0;
@@ -2115,7 +2180,7 @@ function extraerUrlArchivoPedido(pedido) {
 
       let pendientesCount = 0;
       let procesoCount = 0;
-      let soloEnviadosCount = 0;
+      let enviadosCount = 0;
       let pagadosCount = 0;
       let canceladosCount = 0;
       let hoyPedidosCount = 0;
@@ -2131,8 +2196,8 @@ function extraerUrlArchivoPedido(pedido) {
         const num = obtenerImporteRealFila(p);
         const est = (p.estado !== undefined && p.estado !== null) ? p.estado.toString().toLowerCase().trim() : "";
         const fechaPedido = (p.fecha || "").toString();
-
         const esDeHoy = fechaPedido.includes(hoyISO) || fechaPedido.includes(hoyES);
+        const estaPagado = esPedidoPagado(p);
 
         if (est.includes("cancelado")) {
           canceladosCount++;
@@ -2144,27 +2209,22 @@ function extraerUrlArchivoPedido(pedido) {
             hoyPedidosCount++;
           }
 
-          const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
-          const esEnviado = est.includes("enviado") || est.includes("completado");
-
-          if (esPagado) {
+          if (estaPagado) {
             pagadosCount++;
             totalPagado += num;
-          } else if (esEnviado) {
-            soloEnviadosCount++;
+          } else {
             totalPendiente += num;
+          }
+
+          if (est.includes("enviado") || est.includes("completado")) {
+            enviadosCount++;
           } else if (est.includes("proceso")) {
             procesoCount++;
-            totalPendiente += num;
           } else {
             pendientesCount++;
-            totalPendiente += num;
           }
         }
       });
-
-      // LÓGICA SOLICITADA: Enviados muestra la suma de los que están como Enviado + los que están como Pagado
-      const totalEnviadosCalculado = soloEnviadosCount + pagadosCount;
 
       document.getElementById('statHoyDinero').innerText = hoyDinero.toFixed(2) + " €";
       document.getElementById('statIngresos').innerText = totalIngresos.toFixed(2) + " €";
@@ -2175,39 +2235,218 @@ function extraerUrlArchivoPedido(pedido) {
       document.getElementById('statPedidos').innerText = listaPedidosGlobal.length;
       document.getElementById('statPendientesCount').innerText = pendientesCount;
       document.getElementById('statProcesoCount').innerText = procesoCount;
-      document.getElementById('statCompletadosCount').innerText = totalEnviadosCalculado;
+      document.getElementById('statCompletadosCount').innerText = enviadosCount;
       document.getElementById('statPagadosCount').innerText = pagadosCount;
       document.getElementById('statCanceladosCount').innerText = canceladosCount;
       document.getElementById('contadorPedidos').innerText = `${listaPedidosGlobal.length} pedidos registrados`;
     }
 
-    // 2. Colores e indicadores de estado (Enviado en Azul, Pagado en Verde)
+    // 2. Estado de producción (Pendiente, En proceso, Enviado, Cancelado)
     function getEstadoBadge(estado) {
       const est = (estado || "").toString().toLowerCase().trim();
-      if (est.includes("pendiente")) {
-        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-600 border border-rose-500/30">
-                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Pendiente
+      if (est.includes("cancelado")) {
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-500 border border-slate-300">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Cancelado
+                </span>`;
+      } else if (est.includes("enviado") || est.includes("completado")) {
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-600 border border-blue-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Enviado
                 </span>`;
       } else if (est.includes("proceso")) {
         return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-600 border border-amber-500/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> En Proceso
                 </span>`;
-      } else if (est.includes("enviado") || est.includes("completado")) {
-        // ENVIADO EN AZUL
-        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-600 border border-blue-500/30">
-                  <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Enviado
-                </span>`;
-      } else if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) {
-        // PAGADO EN VERDE
-        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 border border-emerald-500/30">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Pagado
-                </span>`;
-      } else if (est.includes("cancelado")) {
-        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-500 border border-slate-300">
-                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Cancelado
-                </span>`;
       }
-      return `<span class="text-slate-400 text-[10px]">${estado}</span>`;
+      return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-600 border border-rose-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Pendiente
+              </span>`;
+    }
+
+    // Función auxiliar para formatear la fecha de cobro: "Domingo, 08/11/26 - 20:18h"
+    function formatearFechaCobroDetalle(fechaRaw) {
+      if (!fechaRaw) return "";
+      let d = null;
+      const str = fechaRaw.toString().trim();
+      
+      const partes = str.split(/[\/\s:]+/);
+      if (partes.length >= 3 && str.includes('/')) {
+        const dia = parseInt(partes[0], 10);
+        const mes = parseInt(partes[1], 10) - 1;
+        const anio = parseInt(partes[2], 10);
+        const h = parseInt(partes[3] || "0", 10);
+        const m = parseInt(partes[4] || "0", 10);
+        d = new Date(anio, mes, dia, h, m);
+      } else {
+        const dAuto = new Date(str);
+        if (!isNaN(dAuto.getTime())) d = dAuto;
+      }
+
+      if (!d || isNaN(d.getTime())) return fechaRaw;
+
+      let diaSemana = new Intl.DateTimeFormat('es-ES', { weekday: 'long', timeZone: 'Europe/Madrid' }).format(d);
+      diaSemana = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
+
+      const pad = (n) => String(n).padStart(2, '0');
+      const diaNum = pad(d.getDate());
+      const mesNum = pad(d.getMonth() + 1);
+      const anioCorto = String(d.getFullYear()).slice(-2);
+      const hora = pad(d.getHours());
+      const min = pad(d.getMinutes());
+
+      return `${diaSemana}, ${diaNum}/${mesNum}/${anioCorto} - ${hora}:${min}h`;
+    }
+
+    // Botón limpio debajo del estado: muestra únicamente 'Pagado: SÍ' o 'Pagado: NO'
+    function getCobroBadge(pedido) {
+      const pagado = esPedidoPagado(pedido);
+      const fPago = pedido.fechaPago ? pedido.fechaPago.toString().trim() : "";
+      if (pagado) {
+        return `
+          <button type="button" onclick="event.stopPropagation(); alternarPagoPedido(${pedido.fila}, '${(pedido.id || '').replace(/'/g, "\\'")}', '${fPago.replace(/'/g, "\\'")}')" title="Clic para ver o modificar el cobro" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition active:scale-95 shadow-2xs">
+            <i class="fa-solid fa-check text-[9px] text-emerald-700"></i>
+            <span>Pagado: SÍ</span>
+          </button>
+        `;
+      }
+      return `
+        <button type="button" onclick="event.stopPropagation(); alternarPagoPedido(${pedido.fila}, '${(pedido.id || '').replace(/'/g, "\\'")}', '')" title="Clic para registrar fecha y hora del cobro" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 transition active:scale-95 shadow-2xs">
+          <i class="fa-regular fa-clock text-[9px]"></i>
+          <span>Pagado: NO</span>
+        </button>
+      `;
+    }
+
+    // Modal interactivo que registra la fecha y hora exacta del pago (individual o en lote para pedidos fraccionados)
+    function formatearFechaIsoLocal(fechaStr) {
+      let d = new Date();
+      if (fechaStr) {
+        const partes = fechaStr.toString().split(/[\/\s:]+/);
+        if (partes.length >= 3 && fechaStr.includes('/')) {
+          const dia = parseInt(partes[0], 10);
+          const mes = parseInt(partes[1], 10) - 1;
+          const anio = parseInt(partes[2], 10);
+          const h = parseInt(partes[3] || "0", 10);
+          const m = parseInt(partes[4] || "0", 10);
+          const s = parseInt(partes[5] || "0", 10);
+          const dObj = new Date(anio, mes, dia, h, m, s);
+          if (!isNaN(dObj.getTime())) d = dObj;
+        } else {
+          const dAuto = new Date(fechaStr);
+          if (!isNaN(dAuto.getTime())) d = dAuto;
+        }
+      }
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function alternarPagoPedido(fila, orderId, fechaPagoActual) {
+      const modal = document.getElementById('modalRegistrarPago');
+      if (!modal) return;
+
+      document.getElementById('pagoModalFila').value = fila;
+      document.getElementById('pagoModalOrderId').value = orderId;
+      document.getElementById('subtituloModalPago').innerText = `${orderId} ${fechaPagoActual ? '• Modificar pago' : '• Registrar nuevo pago'}`;
+
+      const inputFecha = document.getElementById('inputFechaHoraPago');
+      inputFecha.value = formatearFechaIsoLocal(fechaPagoActual);
+
+      const idBase = (orderId || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
+      const pedidosMismoGrupo = listaPedidosGlobal.filter(p => {
+        const baseActual = (p.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
+        return baseActual === idBase;
+      });
+
+      const cajaCheckLote = document.getElementById('cajaCheckPagoLote');
+      const checkLote = document.getElementById('checkPagoLoteUnidades');
+      const txtTitulo = document.getElementById('txtTituloPagoLote');
+
+      if (pedidosMismoGrupo.length > 1) {
+        cajaCheckLote.classList.remove('hidden');
+        checkLote.checked = true;
+        txtTitulo.innerText = `Marcar las ${pedidosMismoGrupo.length} partes de (${idBase})`;
+      } else {
+        cajaCheckLote.classList.add('hidden');
+        checkLote.checked = false;
+      }
+
+      const btnDesmarcar = document.getElementById('btnDesmarcarPagoModal');
+      if (btnDesmarcar) {
+        btnDesmarcar.style.display = fechaPagoActual ? 'inline-block' : 'none';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function cerrarModalPago() {
+      const modal = document.getElementById('modalRegistrarPago');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function desmarcarCobroDesdeModal() {
+      const fila = Number(document.getElementById('pagoModalFila').value);
+      const orderId = document.getElementById('pagoModalOrderId').value;
+      guardarCobroFinal(fila, orderId, "");
+      cerrarModalPago();
+    }
+
+    function ejecutarGuardadoModalPago(e) {
+      e.preventDefault();
+      const fila = Number(document.getElementById('pagoModalFila').value);
+      const orderId = document.getElementById('pagoModalOrderId').value;
+      const valorInput = document.getElementById('inputFechaHoraPago').value;
+
+      if (!valorInput) {
+        alert("Por favor, selecciona una fecha y hora.");
+        return;
+      }
+
+      const d = new Date(valorInput);
+      const pad = (n) => String(n).padStart(2, '0');
+      const fechaFormateada = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+      guardarCobroFinal(fila, orderId, fechaFormateada);
+      cerrarModalPago();
+    }
+
+    async function guardarCobroFinal(fila, orderId, nuevaFechaPago) {
+      const idBase = (orderId || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
+      const pedidosMismoGrupo = listaPedidosGlobal.filter(p => {
+        const baseActual = (p.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
+        return baseActual === idBase;
+      });
+
+      const checkLote = document.getElementById('checkPagoLoteUnidades');
+      const aplicarATodos = (pedidosMismoGrupo.length > 1 && checkLote && checkLote.checked);
+
+      const pedidosAActualizar = aplicarATodos ? pedidosMismoGrupo : [listaPedidosGlobal.find(p => p.fila === fila || p.id === orderId)].filter(Boolean);
+
+      pedidosAActualizar.forEach(item => {
+        item.fechaPago = nuevaFechaPago;
+        if (item.id) {
+          localStorage.setItem(`pago_pedido_${item.id}`, nuevaFechaPago);
+        }
+      });
+
+      actualizarMetricas();
+      filtrarPedidos(false);
+
+      for (const item of pedidosAActualizar) {
+        try {
+          fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              accion: "actualizarPagoPedido",
+              clave: tokenClave || "zeronte2026",
+              fila: item.fila,
+              id: item.id,
+              fechaPago: nuevaFechaPago
+            })
+          });
+        } catch (err) {
+          console.warn("Pago guardado localmente:", err);
+        }
+      }
     }
 
     // Desplazar lateralmente el carrusel de categorías en móvil
@@ -2221,7 +2460,6 @@ function extraerUrlArchivoPedido(pedido) {
     function setFiltroEstado(estado, btn) {
       filtroEstadoActual = estado;
       
-      // Resetear estilo de todos los botones de filtro
       document.querySelectorAll('.filtro-btn-estado').forEach(b => {
         b.classList.remove('bg-slate-900', '!text-white', 'text-white', 'shadow-xs');
         b.classList.add('bg-slate-100', 'text-slate-700');
@@ -2232,7 +2470,6 @@ function extraerUrlArchivoPedido(pedido) {
         }
       });
 
-      // Activar el botón pulsado con texto blanco 100% visible
       if (btn) {
         btn.classList.remove('bg-slate-100', 'text-slate-700');
         btn.classList.add('bg-slate-900', '!text-white', 'shadow-xs');
@@ -2243,14 +2480,11 @@ function extraerUrlArchivoPedido(pedido) {
         }
       }
 
-      // Aplicar el filtro a la tabla
       filtrarPedidos();
     }
 
-    // 3. Filtrar directamente al pulsar una tarjeta superior
     function filtrarDesdeTarjeta(estado) {
       if (estado === 'pagado' || estado === 'hoy') {
-        // Quita la selección de los botones inferiores para indicar un filtro especial
         document.querySelectorAll('.filtro-btn-estado').forEach(b => {
           b.classList.remove('bg-slate-900', 'text-white');
           b.classList.add('bg-slate-100', 'text-slate-600');
@@ -2265,10 +2499,8 @@ function extraerUrlArchivoPedido(pedido) {
       }
     }
 
-    // Conjunto en memoria para recordar los pedidos desplegados aunque se refresquen los datos
     const pedidosDesplegadosSet = new Set();
 
-    // Función para alternar el despliegue al pulsar la fila o tarjeta
     function toggleDetallePedido(id) {
       const el = document.getElementById(id);
       const icon = document.getElementById('icon-' + id);
@@ -2286,13 +2518,11 @@ function extraerUrlArchivoPedido(pedido) {
       }
     }
 
-    // 4. Filtrado reactivo ultra potente con reset a la página 1
     function filtrarPedidos(reiniciarPagina = true) {
       if (reiniciarPagina) {
         paginaActualPedidos = 1;
       }
       
-      // Función auxiliar para quitar acentos/tildes y normalizar a minúsculas
       const quitarTildes = (str) => {
         return (str || "")
           .toString()
@@ -2306,6 +2536,7 @@ function extraerUrlArchivoPedido(pedido) {
 
       const pedidosFiltrados = listaPedidosGlobal.filter((p, idx) => {
         const est = (p.estado || "").toLowerCase();
+        const estaPagado = esPedidoPagado(p);
         let coincideEstado = true;
 
         const ahora = new Date();
@@ -2317,7 +2548,7 @@ function extraerUrlArchivoPedido(pedido) {
 
         if (filtroEstadoActual === "pendiente") coincideEstado = est.includes("pendiente");
         if (filtroEstadoActual === "proceso") coincideEstado = est.includes("proceso");
-        if (filtroEstadoActual === "pagado") coincideEstado = (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso")));
+        if (filtroEstadoActual === "pagado") coincideEstado = estaPagado;
         if (filtroEstadoActual === "completado") coincideEstado = (est.includes("enviado") || est.includes("completado"));
         if (filtroEstadoActual === "cancelado") coincideEstado = est.includes("cancelado");
         if (filtroEstadoActual === "hoy") {
@@ -2347,13 +2578,13 @@ function extraerUrlArchivoPedido(pedido) {
           p.metodoPago || "",
           p.precio || "",
           p.estado || "",
-          p.fecha || ""
+          p.fecha || "",
+          p.fechaPago || ""
         ].join(" "));
 
         return terminos.every(term => camposBuscables.includes(term));
       });
 
-      // Ordenar: Por defecto los más recientes primero según el Nº de Venta real
       pedidosFiltrados.sort((a, b) => {
         const numA = parseInt(a.numVenta, 10) || 0;
         const numB = parseInt(b.numVenta, 10) || 0;
@@ -2370,13 +2601,11 @@ function extraerUrlArchivoPedido(pedido) {
       renderizarPedidos(pedidosFiltrados);
     }
 
-    // Cambiar de página
     function cambiarPaginaPedidos(nuevaPagina) {
       paginaActualPedidos = nuevaPagina;
       filtrarPedidos(false);
     }
 
-    // Renderizar controles de paginación « ‹ 1, 2, 3... › »
     function renderizarControlesPaginacion(totalItems) {
       const barra = document.getElementById('barraPaginacionPedidos');
       const contenedorBotones = document.getElementById('botonesPaginacionPedidos');
@@ -2397,21 +2626,18 @@ function extraerUrlArchivoPedido(pedido) {
 
       let html = '';
 
-      // Botón « (Primera)
       html += `
         <button onclick="cambiarPaginaPedidos(1)" ${paginaActualPedidos === 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Primera página" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition">
           <i class="fa-solid fa-angles-left text-[10px]"></i>
         </button>
       `;
 
-      // Botón ‹ (Anterior)
       html += `
         <button onclick="cambiarPaginaPedidos(${paginaActualPedidos - 1})" ${paginaActualPedidos === 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Página anterior" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition mr-1">
           <i class="fa-solid fa-chevron-left text-[10px]"></i>
         </button>
       `;
 
-      // Rango de páginas con elipsis (...) si hay muchas
       let paginas = [];
       if (totalPaginas <= 7) {
         for (let i = 1; i <= totalPaginas; i++) paginas.push(i);
@@ -2438,14 +2664,12 @@ function extraerUrlArchivoPedido(pedido) {
         }
       });
 
-      // Botón › (Siguiente)
       html += `
         <button onclick="cambiarPaginaPedidos(${paginaActualPedidos + 1})" ${paginaActualPedidos === totalPaginas ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Página siguiente" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition ml-1">
           <i class="fa-solid fa-chevron-right text-[10px]"></i>
         </button>
       `;
 
-      // Botón » (Última)
       html += `
         <button onclick="cambiarPaginaPedidos(${totalPaginas})" ${paginaActualPedidos === totalPaginas ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-100 text-slate-700 active:scale-95"'} title="Última página" class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold text-xs transition">
           <i class="fa-solid fa-angles-right text-[10px]"></i>
@@ -2455,7 +2679,6 @@ function extraerUrlArchivoPedido(pedido) {
       contenedorBotones.innerHTML = html;
     }
 
-    // 5. Renderizar pedidos compacto con paginación de 10 en 10
     function renderizarPedidos(pedidos) {
       const tablaPC = document.getElementById('tablaPedidosPC');
       const vistaMovil = document.getElementById('vistaMovilPedidos');
@@ -2471,21 +2694,17 @@ function extraerUrlArchivoPedido(pedido) {
       }
       sinRes.classList.add('hidden');
 
-      // Validar que la página actual no sobrepase el total
       const totalPaginas = Math.ceil(pedidos.length / pedidosPorPagina);
       if (paginaActualPedidos > totalPaginas) {
         paginaActualPedidos = totalPaginas || 1;
       }
 
-      // Cortar únicamente los 10 pedidos de la página activa
       const indiceInicio = (paginaActualPedidos - 1) * pedidosPorPagina;
       const indiceFin = indiceInicio + pedidosPorPagina;
       const pedidosPaginados = pedidos.slice(indiceInicio, indiceFin);
 
-      // Renderizar los controles « ‹ 1, 2, 3... › »
       renderizarControlesPaginacion(pedidos.length);
 
-      // 1. Agrupar pedidos estrictamente por cada Pedido individual (ID Base)
       const mapaPedidosPorId = {};
       listaPedidosGlobal.forEach(p => {
         const idBase = (p.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
@@ -2495,30 +2714,20 @@ function extraerUrlArchivoPedido(pedido) {
         mapaPedidosPorId[idBase].push(p);
       });
 
-      // 2. Localizar portada del producto soportando formatos simples y galerías múltiples
       const obtenerFotoProducto = (nombreProducto) => {
         if (!nombreProducto) return "";
         const prod = buscarProductoEnCatalogo(nombreProducto);
         if (!prod || !prod.imagen) return "";
-
-        // Si es un array directo de imágenes
-        if (Array.isArray(prod.imagen) && prod.imagen.length > 0) {
-          return prod.imagen[0];
-        }
-
-        // Si es un JSON serializado
+        if (Array.isArray(prod.imagen) && prod.imagen.length > 0) return prod.imagen[0];
         if (typeof prod.imagen === 'string' && prod.imagen.startsWith('[')) {
           try {
             const parsed = JSON.parse(prod.imagen);
             if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
           } catch (e) {}
         }
-
-        // Si es una URL directa en texto
         return prod.imagen;
       };
 
-      // 3. Forzar siempre formato con dos decimales y símbolo €
       const formatearMonedaEuro = (valorRaw) => {
         if (!valorRaw) return "0.00 €";
         const limpio = valorRaw.toString().replace('€', '').trim().replace(',', '.');
@@ -2527,18 +2736,16 @@ function extraerUrlArchivoPedido(pedido) {
         return `${num.toFixed(2)} €`;
       };
 
-      // 4. Color de fondo pastel según estado (Enviado en Azul, Pagado en Verde)
-      const obtenerFondoPastel = (estado) => {
-        const est = (estado || "").toString().toLowerCase().trim();
-        if (est.includes("pendiente")) return "bg-rose-50/70 border-rose-200/80 hover:bg-rose-100/60";
-        if (est.includes("proceso")) return "bg-amber-50/70 border-amber-200/80 hover:bg-amber-100/60";
-        if (est.includes("enviado") || est.includes("completado")) return "bg-blue-50/70 border-blue-200/80 hover:bg-blue-100/60";
-        if (est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"))) return "bg-emerald-50/70 border-emerald-200/80 hover:bg-emerald-100/60";
+      const obtenerFondoPastel = (p) => {
+        const est = (p.estado || "").toString().toLowerCase().trim();
+        const pagado = esPedidoPagado(p);
         if (est.includes("cancelado")) return "bg-slate-100/70 border-slate-200/80 hover:bg-slate-200/50";
-        return "bg-white border-slate-200 hover:bg-slate-50";
+        if (est.includes("enviado") || est.includes("completado")) return "bg-blue-50/70 border-blue-200/80 hover:bg-blue-100/60";
+        if (est.includes("proceso")) return "bg-amber-50/70 border-amber-200/80 hover:bg-amber-100/60";
+        if (pagado) return "bg-emerald-50/60 border-emerald-200/80 hover:bg-emerald-100/50";
+        return "bg-rose-50/70 border-rose-200/80 hover:bg-rose-100/60";
       };
 
-      // Helper para renderizar logo de método de pago (Bizum / PayPal / Genérico)
       const renderizarMetodoPago = (metodoRaw) => {
         const m = (metodoRaw || "Web").toString().trim();
         const mLower = m.toLowerCase();
@@ -2560,12 +2767,10 @@ function extraerUrlArchivoPedido(pedido) {
         return `<strong class="text-slate-700">${m}</strong>`;
       };
 
-      // Helper para limpiar ID eliminando (1/2), (2/2), etc.
       const limpiarIdPedido = (idRaw) => {
         return (idRaw || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim();
       };
 
-      // Helper para formatear personalización limpia con botones de copiar independientes
       const renderizarPersonalizacionLimpia = (textoRaw) => {
         if (!textoRaw || textoRaw.trim() === "") return '<span class="italic text-slate-400">Sin dedicatoria</span>';
 
@@ -2620,6 +2825,11 @@ function extraerUrlArchivoPedido(pedido) {
 
       // Escritorio (PC)
       tablaPC.innerHTML = pedidosPaginados.map((p, idx) => {
+        if (!p.fechaPago && p.id) {
+          const fGuardada = localStorage.getItem(`pago_pedido_${p.id}`);
+          if (fGuardada) p.fechaPago = fGuardada;
+        }
+
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
         const precioRealUnitario = obtenerImporteRealFila(p);
@@ -2632,7 +2842,6 @@ function extraerUrlArchivoPedido(pedido) {
 
         const numVentaDescendente = p.numVenta || "-";
 
-        // Extraer la fracción real del propio ID del pedido (ej. de "PED-9009 (2/2)" obtiene "2/2")
         const matchFraccion = (p.id || "").toString().match(/\((\d+\/\d+)\)/);
         let badgeCliente = "1/1";
         let totalUnidadesPedido = 1;
@@ -2654,9 +2863,12 @@ function extraerUrlArchivoPedido(pedido) {
         const personalizacionHtml = renderizarPersonalizacionLimpia(p.personalizacion);
         const notaActual = obtenerNotaPedido(p.id);
 
-        const fondoPastel = obtenerFondoPastel(p.estado);
+        const fondoPastel = obtenerFondoPastel(p);
         const detalleId = `detalle-pc-${(p.id || idx).toString().replace(/[^a-zA-Z0-9_-]/g, '_')}`;
         const estaAbierto = pedidosDesplegadosSet.has(detalleId);
+
+        // Formateo del estado de cobro para el interior del desplegable
+        const fechaCobroFormateada = p.fechaPago ? formatearFechaCobroDetalle(p.fechaPago) : "";
 
         return `
           <!-- FILA PRINCIPAL COMPACTA -->
@@ -2668,7 +2880,10 @@ function extraerUrlArchivoPedido(pedido) {
             </td>
 
             <td class="py-2.5 px-3 align-middle whitespace-nowrap">
-              ${getEstadoBadge(p.estado)}
+              <div class="flex flex-col gap-1 items-start">
+                ${getEstadoBadge(p.estado)}
+                ${getCobroBadge(p)}
+              </div>
             </td>
 
             <td class="py-2.5 px-3 align-middle whitespace-nowrap">
@@ -2716,16 +2931,15 @@ function extraerUrlArchivoPedido(pedido) {
           <tr id="${detalleId}" class="${estaAbierto ? '' : 'hidden'} ${fondoPastel} border-b-2 border-slate-300">
             <td colspan="7" class="p-4 bg-white/70">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4" onclick="event.stopPropagation()">
-                <!-- Estado & Acciones -->
+                <!-- Estado de producción & Acciones -->
                 <div class="space-y-3 bg-white border border-slate-200/90 p-3 rounded-xl shadow-2xs">
                   <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Cambiar Estado</label>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Estado de Producción</label>
                     <div class="flex items-center gap-2">
                       <select onchange="cambiarEstado(${p.fila}, this.value)" class="w-full bg-slate-50 border border-slate-300 text-xs rounded-xl px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-slate-500 font-medium">
                         <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
                         <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
                         <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🔵 Enviado</option>
-                        <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🟢 Pagado</option>
                         <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
                       </select>
                       <button type="button" onclick="confirmarEliminarPedido(${p.fila}, '${p.id}')" title="Eliminar pedido definitivamente" class="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 transition active:scale-90 shadow-2xs">
@@ -2737,7 +2951,29 @@ function extraerUrlArchivoPedido(pedido) {
                     <span class="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">Método de Pago: ${renderizarMetodoPago(p.metodoPago)}</span>
                     ${calcularDiasTranscurridosPedido(p.fecha, p.estado)}
                   </div>
-                  <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+
+                  <!-- Indicador de Pago con fecha y hora debajo de método de pago y arriba de WhatsApp/Email -->
+                  <div class="pt-2 border-t border-slate-100">
+                    ${fechaCobroFormateada ? `
+                      <div class="flex items-center justify-between gap-1.5 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1.5 rounded-lg text-emerald-800 text-[11px] font-bold">
+                        <span class="flex items-center gap-1.5">
+                          <i class="fa-solid fa-circle-check text-emerald-600 text-xs"></i>
+                          <span>Pagado el ${fechaCobroFormateada}</span>
+                        </span>
+                        <button type="button" onclick="alternarPagoPedido(${p.fila}, '${(p.id || '').replace(/'/g, "\\'")}', '${p.fechaPago.replace(/'/g, "\\'")}')" class="text-[10px] text-emerald-700 hover:text-emerald-950 underline font-semibold ml-1">Modificar</button>
+                      </div>
+                    ` : `
+                      <div class="flex items-center justify-between gap-1.5 bg-rose-50 border border-rose-200/80 px-2.5 py-1.5 rounded-lg text-rose-700 text-[11px] font-bold">
+                        <span class="flex items-center gap-1.5">
+                          <i class="fa-regular fa-clock text-rose-600 text-xs"></i>
+                          <span>Pago pendiente de recibir</span>
+                        </span>
+                        <button type="button" onclick="alternarPagoPedido(${p.fila}, '${(p.id || '').replace(/'/g, "\\'")}', '')" class="text-[10px] text-rose-700 hover:text-rose-950 underline font-semibold ml-1">Registrar cobro</button>
+                      </div>
+                    `}
+                  </div>
+
+                  <div class="flex items-center gap-2 pt-1">
                     <a href="https://wa.me/${telInfo.waNumber}?text=${msg}" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold py-1.5 rounded-xl text-xs transition active:scale-95 shadow-xs">
                       <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
                     </a>
@@ -2828,6 +3064,11 @@ function extraerUrlArchivoPedido(pedido) {
 
       // Smartphone (Móvil)
       vistaMovil.innerHTML = pedidosPaginados.map((p, idx) => {
+        if (!p.fechaPago && p.id) {
+          const fGuardada = localStorage.getItem(`pago_pedido_${p.id}`);
+          if (fGuardada) p.fechaPago = fGuardada;
+        }
+
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
         const precioRealUnitario = obtenerImporteRealFila(p);
@@ -2840,7 +3081,6 @@ function extraerUrlArchivoPedido(pedido) {
 
         const numVentaDescendente = p.numVenta || "-";
 
-        // Extraer la fracción real del propio ID del pedido (ej. de "PED-9009 (2/2)" obtiene "2/2")
         const matchFraccion = (p.id || "").toString().match(/\((\d+\/\d+)\)/);
         let badgeCliente = "1/1";
         let totalUnidadesPedido = 1;
@@ -2862,9 +3102,11 @@ function extraerUrlArchivoPedido(pedido) {
         const personalizacionHtml = renderizarPersonalizacionLimpia(p.personalizacion);
         const notaActual = obtenerNotaPedido(p.id);
 
-        const fondoPastel = obtenerFondoPastel(p.estado);
+        const fondoPastel = obtenerFondoPastel(p);
         const detalleId = `detalle-movil-${(p.id || idx).toString().replace(/[^a-zA-Z0-9_-]/g, '_')}`;
         const estaAbierto = pedidosDesplegadosSet.has(detalleId);
+
+        const fechaCobroFormateada = p.fechaPago ? formatearFechaCobroDetalle(p.fechaPago) : "";
 
         return `
           <div class="border rounded-2xl shadow-xs overflow-hidden transition ${fondoPastel}">
@@ -2884,9 +3126,12 @@ function extraerUrlArchivoPedido(pedido) {
                     <span class="text-[10px] text-slate-500 font-medium block leading-none mt-1">${fechaFormateada}</span>
                   </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  ${getEstadoBadge(p.estado)}
-                  <i id="icon-${detalleId}" class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200 ${estaAbierto ? 'rotate-180' : ''}"></i>
+                <div class="flex flex-col items-end gap-1">
+                  <div class="flex items-center gap-1.5">
+                    ${getEstadoBadge(p.estado)}
+                    <i id="icon-${detalleId}" class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200 ${estaAbierto ? 'rotate-180' : ''}"></i>
+                  </div>
+                  ${getCobroBadge(p)}
                 </div>
               </div>
 
@@ -2914,6 +3159,28 @@ function extraerUrlArchivoPedido(pedido) {
                 <span class="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">Método: ${renderizarMetodoPago(p.metodoPago)}</span>
                 ${calcularDiasTranscurridosPedido(p.fecha, p.estado)}
               </div>
+
+              <!-- Indicador de Pago en Móvil con fecha y hora -->
+              <div class="pt-1 pb-1">
+                ${fechaCobroFormateada ? `
+                  <div class="flex items-center justify-between gap-1.5 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1.5 rounded-lg text-emerald-800 text-[11px] font-bold">
+                    <span class="flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-check text-emerald-600 text-xs"></i>
+                      <span>Pagado el ${fechaCobroFormateada}</span>
+                    </span>
+                    <button type="button" onclick="alternarPagoPedido(${p.fila}, '${(p.id || '').replace(/'/g, "\\'")}', '${p.fechaPago.replace(/'/g, "\\'")}')" class="text-[10px] text-emerald-700 hover:text-emerald-950 underline font-semibold ml-1">Modificar</button>
+                  </div>
+                ` : `
+                  <div class="flex items-center justify-between gap-1.5 bg-rose-50 border border-rose-200/80 px-2.5 py-1.5 rounded-lg text-rose-700 text-[11px] font-bold">
+                    <span class="flex items-center gap-1.5">
+                      <i class="fa-regular fa-clock text-rose-600 text-xs"></i>
+                      <span>Pago pendiente de recibir</span>
+                    </span>
+                    <button type="button" onclick="alternarPagoPedido(${p.fila}, '${(p.id || '').replace(/'/g, "\\'")}', '')" class="text-[10px] text-rose-700 hover:text-rose-950 underline font-semibold ml-1">Registrar cobro</button>
+                  </div>
+                `}
+              </div>
+
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                 <div class="flex items-center gap-1.5">
                   <span class="text-slate-700 font-medium">${telInfo.visible}</span>
@@ -2983,7 +3250,6 @@ function extraerUrlArchivoPedido(pedido) {
                   <option value="Pendiente de pago" ${p.estado === 'Pendiente de pago' ? 'selected' : ''}>🔴 Pendiente</option>
                   <option value="En proceso" ${p.estado === 'En proceso' ? 'selected' : ''}>🟠 En proceso</option>
                   <option value="Enviado / Completado" ${p.estado === 'Enviado / Completado' ? 'selected' : ''}>🔵 Enviado</option>
-                  <option value="Pagado" ${p.estado === 'Pagado' ? 'selected' : ''}>🟢 Pagado</option>
                   <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>⚪ Cancelado</option>
                 </select>
                 <button type="button" onclick="confirmarLlamadaCliente('${telInfo.visible}', '${telInfo.waNumber}')" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl text-xs flex items-center justify-center active:scale-95 shadow-xs shrink-0" title="Llamar al cliente">
@@ -3010,7 +3276,7 @@ function extraerUrlArchivoPedido(pedido) {
       const item = listaPedidosGlobal.find(p => p.fila === fila);
       if (item) item.estado = nuevoEstado;
       actualizarMetricas();
-      filtrarPedidos();
+      filtrarPedidos(false);
 
       try {
         await fetch(APPS_SCRIPT_URL, {
@@ -3050,6 +3316,7 @@ function extraerUrlArchivoPedido(pedido) {
       localStorage.setItem('zeronte_pedidos_eliminados', JSON.stringify(Array.from(idsEliminadosLocalmente)));
       listaPedidosGlobal = listaPedidosGlobal.filter(p => p.id !== orderId);
       localStorage.removeItem(`nota_pedido_${orderId}`);
+      localStorage.removeItem(`pago_pedido_${orderId}`);
       actualizarMetricas();
       filtrarPedidos();
 
