@@ -1574,6 +1574,60 @@
     const idsEliminadosLocalmente = new Set(JSON.parse(localStorage.getItem('zeronte_pedidos_eliminados') || '[]'));
     const filasLeidasLocalmente = new Set();
 
+function extraerUrlArchivoPedido(pedido) {
+      if (!pedido) return "";
+
+      // Función auxiliar para inspeccionar un objeto y extraer cualquier enlace web o de Google Drive
+      const buscarUrlEnObjeto = (obj) => {
+        if (!obj || typeof obj !== 'object') return "";
+        // 1. Comprobación directa de claves comunes
+        const claves = ['archivo', 'Archivo', 'archivoUrl', 'urlArchivo', 'enlace', 'link', 'drive', 'url', 'columnaM', 'file'];
+        for (const k of claves) {
+          if (obj[k] && typeof obj[k] === 'string' && obj[k].trim().startsWith('http')) {
+            return obj[k].trim();
+          }
+        }
+        // 2. Inspección profunda de todas las propiedades del objeto
+        for (const clave in obj) {
+          const val = obj[clave];
+          if (typeof val === 'string' && (val.includes('drive.google.com') || val.startsWith('https://drive.'))) {
+            const matchHttp = val.match(/https?:\/\/[^\s"',;]+/);
+            if (matchHttp) return matchHttp[0];
+          }
+        }
+        return "";
+      };
+
+      // 1. Buscar en el pedido actual
+      let url = buscarUrlEnObjeto(pedido);
+
+      // 2. Si no lo encuentra, buscar en cualquier pedido hermano (mismo PED-XXXX o mismo número de fila / cliente)
+      if (!url && pedido.id) {
+        const idBase = (pedido.id || "").toString().replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+        const hermano = listaPedidosGlobal.find(item => {
+          if (!item) return false;
+          const hermanoBase = (item.id || "").toString().replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+          if (hermanoBase && hermanoBase === idBase) {
+            return !!buscarUrlEnObjeto(item);
+          }
+          return false;
+        });
+        if (hermano) {
+          url = buscarUrlEnObjeto(hermano);
+        }
+      }
+
+      url = (url || "").toString().trim();
+      if (!url || !url.startsWith("http")) return "";
+
+      // Convertir enlaces estándar de Google Drive al enlace de descarga directa directa
+      const matchDrive = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+      if (matchDrive && matchDrive[1]) {
+        return `https://drive.google.com/uc?export=download&id=${matchDrive[1]}`;
+      }
+      return url;
+    }
+
     function autenticar(e) {
       if (e) e.preventDefault();
       tokenClave = document.getElementById('inputClave').value;
@@ -2237,7 +2291,17 @@
       if (reiniciarPagina) {
         paginaActualPedidos = 1;
       }
-      const texto = (document.getElementById('inputBuscador').value || "").toLowerCase().trim();
+      
+      // Función auxiliar para quitar acentos/tildes y normalizar a minúsculas
+      const quitarTildes = (str) => {
+        return (str || "")
+          .toString()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+      };
+
+      const texto = quitarTildes(document.getElementById('inputBuscador')?.value || "").trim();
       const terminos = texto.split(/\s+/).filter(Boolean);
 
       const pedidosFiltrados = listaPedidosGlobal.filter((p, idx) => {
@@ -2269,7 +2333,7 @@
         const idCatalogo = (typeof obtenerIdProducto === 'function') ? obtenerIdProducto(p.producto) : "";
         const nota = (typeof obtenerNotaPedido === 'function') ? obtenerNotaPedido(p.id) : (p.nota || "");
 
-        const camposBuscables = [
+        const camposBuscables = quitarTildes([
           p.id || "",
           numVenta,
           numVentaConHash,
@@ -2284,7 +2348,7 @@
           p.precio || "",
           p.estado || "",
           p.fecha || ""
-        ].join(" ").toLowerCase();
+        ].join(" "));
 
         return terminos.every(term => camposBuscables.includes(term));
       });
@@ -2701,15 +2765,13 @@
                   <!-- Botón de Descarga directa desde la Columna Archivo (Google Drive) -->
                   <div>
                     ${(() => {
-                      const urlRaw = (p.archivo || p.Archivo || p.archivoUrl || '').toString().trim();
-                      if (urlRaw && urlRaw.startsWith('http')) {
-                        let urlDescargaDirecta = urlRaw;
-                        const matchDrive = urlRaw.match(/\/d\/([a-zA-Z0-9_-]+)/) || urlRaw.match(/id=([a-zA-Z0-9_-]+)/);
-                        if (matchDrive && matchDrive[1]) {
-                          urlDescargaDirecta = `https://drive.google.com/uc?export=download&id=${matchDrive[1]}`;
-                        }
+                      const urlDescargaDirecta = (typeof extraerUrlArchivoPedido === 'function') 
+                        ? extraerUrlArchivoPedido(p) 
+                        : (p.archivo || p.Archivo || p.archivoUrl || '');
+
+                      if (urlDescargaDirecta) {
                         return `
-                          <a href="${urlDescargaDirecta}" download target="_blank" rel="noopener noreferrer" title="Descargar archivo entregado al cliente" class="w-full flex items-center justify-center gap-2 py-2 px-3 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl font-bold text-xs transition active:scale-95 shadow-2xs">
+                          <a href="${urlDescargaDirecta}" download target="_blank" rel="noopener noreferrer" title="Descargar archivo entregado al cliente desde Google Drive" class="w-full flex items-center justify-center gap-2 py-2 px-3 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl font-bold text-xs transition active:scale-95 shadow-2xs">
                             <i class="fa-solid fa-file-zipper text-sm text-amber-600"></i>
                             <i class="fa-solid fa-arrow-down text-[11px] text-amber-700"></i>
                             <span>Descargar Archivo Enviado</span>
@@ -2717,7 +2779,7 @@
                         `;
                       } else {
                         return `
-                          <div title="Sin archivo registrado en la columna Archivo" class="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-50 border border-slate-200/70 text-slate-400 rounded-xl font-semibold text-xs opacity-60 cursor-not-allowed select-none">
+                          <div title="Este pedido aún no tiene archivo entregado" class="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-50 border border-slate-200/70 text-slate-400 rounded-xl font-semibold text-xs opacity-60 cursor-not-allowed select-none">
                             <i class="fa-solid fa-file-zipper text-sm text-slate-400"></i>
                             <span>Sin archivo entregado</span>
                           </div>
@@ -2866,6 +2928,23 @@
                   </button>
                 </div>
               </div>
+
+              <!-- Descarga de archivo en Smartphone -->
+              ${(() => {
+                const urlDescargaMovil = (typeof extraerUrlArchivoPedido === 'function') ? extraerUrlArchivoPedido(p) : (p.archivo || p.Archivo || '');
+                if (urlDescargaMovil) {
+                  return `
+                    <div>
+                      <a href="${urlDescargaMovil}" download target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-center gap-2 py-2 px-3 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl font-bold text-xs transition active:scale-95 shadow-2xs">
+                        <i class="fa-solid fa-file-zipper text-sm text-amber-600"></i>
+                        <i class="fa-solid fa-arrow-down text-[11px] text-amber-700"></i>
+                        <span>Descargar Archivo Enviado</span>
+                      </a>
+                    </div>
+                  `;
+                }
+                return '';
+              })()}
 
               <!-- Personalización -->
               <div class="bg-blue-50/70 border border-blue-200/70 p-2.5 rounded-xl text-xs text-[#002b49] space-y-1">
