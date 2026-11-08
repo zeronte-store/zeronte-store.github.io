@@ -2498,13 +2498,28 @@
         return (idRaw || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim();
       };
 
-      // Helper para formatear personalización limpia con opciones en negro sin negrita y texto del cliente en negrita
+      // Helper para formatear personalización limpia con botones de copiar independientes
       const renderizarPersonalizacionLimpia = (textoRaw) => {
         if (!textoRaw || textoRaw.trim() === "") return '<span class="italic text-slate-400">Sin dedicatoria</span>';
 
         let limpio = textoRaw.replace(/["“”«»]/g, '')
                              .replace(/\[\s*UNIDAD\s*\d+\/\d+\s*\]\s*\|?/gi, '')
                              .trim();
+
+        const generarFilaConBotonCopiar = (etiqueta, contenido) => {
+          const textoParaCopiar = (contenido || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          return `
+            <div class="flex items-start justify-between gap-1.5 py-0.5 border-b border-blue-100/60 last:border-b-0 leading-tight">
+              <div class="min-w-0 pr-1">
+                <span class="font-normal text-slate-600 text-[11px]">${etiqueta ? etiqueta + ':' : ''}</span> 
+                <strong class="font-bold text-slate-900 text-xs">${contenido}</strong>
+              </div>
+              <button type="button" onclick="event.stopPropagation(); copiarDato('${textoParaCopiar}', this)" title="Copiar '${etiqueta || 'texto'}'" class="shrink-0 text-slate-400 hover:text-slate-800 p-1 rounded hover:bg-blue-100/70 transition active:scale-90">
+                <i class="fa-regular fa-copy text-xs"></i>
+              </button>
+            </div>
+          `;
+        };
 
         if (limpio.includes('|')) {
           const partes = limpio.split('|').map(p => p.trim()).filter(Boolean);
@@ -2513,9 +2528,9 @@
             if (indexColon !== -1) {
               const etiqueta = parte.substring(0, indexColon).trim();
               const contenido = parte.substring(indexColon + 1).trim();
-              return `<div class="leading-relaxed"><span class="font-normal text-black">${etiqueta}:</span> <strong class="font-bold text-slate-900">${contenido}</strong></div>`;
+              return generarFilaConBotonCopiar(etiqueta, contenido);
             }
-            return `<div class="leading-relaxed">${parte}</div>`;
+            return generarFilaConBotonCopiar('', parte);
           }).join('');
         }
 
@@ -2524,16 +2539,16 @@
           const trozos = limpio.split(/(\d+\.\s*[^:]+:)/).filter(Boolean);
           let html = '';
           for (let i = 0; i < trozos.length; i += 2) {
-            const label = trozos[i] ? trozos[i].trim() : '';
+            const label = trozos[i] ? trozos[i].replace(/:$/, '').trim() : '';
             const val = trozos[i + 1] ? trozos[i + 1].trim() : '';
             if (label) {
-              html += `<div class="leading-relaxed"><span class="font-normal text-black">${label}</span> <strong class="font-bold text-slate-900">${val}</strong></div>`;
+              html += generarFilaConBotonCopiar(label, val);
             }
           }
           if (html) return html;
         }
 
-        return `<div class="leading-relaxed font-bold text-slate-900">${limpio}</div>`;
+        return generarFilaConBotonCopiar('', limpio);
       };
 
       // Escritorio (PC)
