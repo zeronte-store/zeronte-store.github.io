@@ -1053,7 +1053,7 @@
             <div id="wrapperCheckMismaPers" class="hidden pt-1.5 pb-1.5 border-b border-gray-200">
               <label class="flex items-start gap-2.5 cursor-pointer select-none">
                 <input type="checkbox" id="checkMismaPersonalizacion" onchange="toggleMismaPersonalizacion(this.checked)" class="mt-1 w-4 h-4 rounded border-gray-400 text-black focus:ring-0 cursor-pointer">
-                <span class="text-xs sm:text-sm font-semibold text-[#111111]">Usar la misma personalización para todos excepto el nombre (2. Nombre)</span>
+                <span class="text-xs sm:text-sm font-semibold text-[#111111]">Usar la misma personalización en todas las casillas excepto el nombre (2. Nombre)</span>
               </label>
             </div>
 
@@ -2482,7 +2482,7 @@
               <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['titulo']}. Cambiar Título (Opcional):</label>
               <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].titulo || '') : (item.titulo || '')}" 
                 placeholder="Ej. Eres mi armonía" 
-                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'titulo', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
+                ${esSecundarioReplicado ? 'data-pers-campo="titulo" data-pers-replicado="true" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'titulo', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
             </div>` : ''}
 
             ${camposActivos.includes('nombre') ? `
@@ -2499,7 +2499,7 @@
               <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['dedicatoria']}. Dedicatoria (máx. 90 car.):</label>
               <input type="text" maxlength="90" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].dedicatoria || '') : (item.dedicatoria || '')}" 
                 placeholder="Ej. Gracias por llenar mi vida de armonía. 24/09/2024" 
-                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'dedicatoria', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
+                ${esSecundarioReplicado ? 'data-pers-campo="dedicatoria" data-pers-replicado="true" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'dedicatoria', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
             </div>` : ''}
 
             ${camposActivos.includes('compositor') ? `
@@ -2507,7 +2507,7 @@
               <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['compositor']}. Compositor (Opcional):</label>
               <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].compositor || '') : (item.compositor || '')}" 
                 placeholder="Ej. W. A. Mozart" 
-                ${esSecundarioReplicado ? 'disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'compositor', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
+                ${esSecundarioReplicado ? 'data-pers-campo="compositor" data-pers-replicado="true" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'compositor', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
             </div>` : ''}
           </div>
         `;
@@ -2522,9 +2522,10 @@
 
       const chkMisma = document.getElementById('checkMismaPersonalizacion');
       if (chkMisma && chkMisma.checked && idx === 0 && campo !== 'nombre') {
-        const inputCant = document.getElementById('cantidadFicha');
-        const cant = parseInt(inputCant ? inputCant.value : '1', 10) || 1;
-        renderizarCamposPersonalizacion(cant);
+        const inputsReplicados = document.querySelectorAll(`[data-pers-campo="${campo}"][data-pers-replicado="true"]`);
+        inputsReplicados.forEach(inp => {
+          inp.value = valor;
+        });
       }
     }
 
