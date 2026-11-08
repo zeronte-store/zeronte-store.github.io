@@ -2261,7 +2261,7 @@
         if (!coincideEstado) return false;
         if (terminos.length === 0) return true;
 
-        const numVenta = (listaPedidosGlobal.length - idx).toString();
+        const numVenta = (p.numVenta || (1072 + Number(p.fila || idx + 1))).toString();
         const numVentaConHash = `#${numVenta}`;
         const idCatalogo = (typeof obtenerIdProducto === 'function') ? obtenerIdProducto(p.producto) : "";
         const nota = (typeof obtenerNotaPedido === 'function') ? obtenerNotaPedido(p.id) : (p.nota || "");
@@ -2286,18 +2286,18 @@
         return terminos.every(term => camposBuscables.includes(term));
       });
 
-      // Ordenar: Por defecto los más recientes primero
+      // Ordenar: Por defecto los más recientes primero según el Nº de Venta real
       pedidosFiltrados.sort((a, b) => {
+        const numA = parseInt(a.numVenta, 10) || 0;
+        const numB = parseInt(b.numVenta, 10) || 0;
+
+        if (numA && numB) {
+          return ordenPedidosActual === "antiguos" ? (numA - numB) : (numB - numA);
+        }
+
         const fechaA = (typeof parsearFechaPedido === 'function') ? (parsearFechaPedido(a.fecha)?.getTime() || 0) : new Date(a.fecha || 0).getTime();
         const fechaB = (typeof parsearFechaPedido === 'function') ? (parsearFechaPedido(b.fecha)?.getTime() || 0) : new Date(b.fecha || 0).getTime();
-        const filaA = Number(a.fila) || 0;
-        const filaB = Number(b.fila) || 0;
-
-        if (ordenPedidosActual === "antiguos") {
-          return (fechaA - fechaB) || (filaA - filaB);
-        } else {
-          return (fechaB - fechaA) || (filaB - filaA);
-        }
+        return ordenPedidosActual === "antiguos" ? (fechaA - fechaB) : (fechaB - fechaA);
       });
 
       renderizarPedidos(pedidosFiltrados);
@@ -2418,14 +2418,14 @@
       // Renderizar los controles « ‹ 1, 2, 3... › »
       renderizarControlesPaginacion(pedidos.length);
 
-      // 1. Agrupar pedidos estrictamente por Nombre completo
-      const mapaPedidosCliente = {};
+      // 1. Agrupar pedidos estrictamente por cada Pedido individual (ID Base)
+      const mapaPedidosPorId = {};
       listaPedidosGlobal.forEach(p => {
-        const idCliente = (p.nombre || p.telefono || "cliente").toString().trim().toLowerCase();
-        if (!mapaPedidosCliente[idCliente]) {
-          mapaPedidosCliente[idCliente] = [];
+        const idBase = (p.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
+        if (!mapaPedidosPorId[idBase]) {
+          mapaPedidosPorId[idBase] = [];
         }
-        mapaPedidosCliente[idCliente].push(p);
+        mapaPedidosPorId[idBase].push(p);
       });
 
       // 2. Localizar portada del producto soportando formatos simples y galerías múltiples
@@ -2548,15 +2548,23 @@
         const cuerpoEmail = encodeURIComponent(`Hola ${p.nombre},\n\nTe escribimos de Zeronte en relación a tu encargo ${p.id} (${p.producto}).\n\n`);
         const mailtoUrl = `mailto:${p.email}?subject=${asuntoEmail}&body=${cuerpoEmail}`;
 
-        const indiceEnGlobal = listaPedidosGlobal.findIndex(item => item.id === p.id);
-        const numVentaDescendente = indiceEnGlobal !== -1 ? (listaPedidosGlobal.length - indiceEnGlobal) : "-";
+        const numVentaDescendente = p.numVenta || "-";
 
-        const idCl = (p.nombre || p.telefono || "cliente").toString().trim().toLowerCase();
-        const listaDelCliente = mapaPedidosCliente[idCl] || [p];
-        const totalDelCliente = listaDelCliente.length;
-        const posicionCliente = listaDelCliente.findIndex(item => item.id === p.id);
-        const indiceCliente = posicionCliente !== -1 ? (totalDelCliente - posicionCliente) : 1;
-        const badgeCliente = `${indiceCliente}/${totalDelCliente}`;
+        // Extraer la fracción real del propio ID del pedido (ej. de "PED-9009 (2/2)" obtiene "2/2")
+        const matchFraccion = (p.id || "").toString().match(/\((\d+\/\d+)\)/);
+        let badgeCliente = "1/1";
+        let totalUnidadesPedido = 1;
+
+        if (matchFraccion && matchFraccion[1]) {
+          badgeCliente = matchFraccion[1];
+          totalUnidadesPedido = parseInt(matchFraccion[1].split('/')[1], 10) || 1;
+        } else {
+          const idBasePed = (p.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
+          const itemsMismoPedido = mapaPedidosPorId[idBasePed] || [p];
+          totalUnidadesPedido = itemsMismoPedido.length;
+          const posPed = itemsMismoPedido.findIndex(item => item.id === p.id);
+          badgeCliente = `${posPed !== -1 ? (posPed + 1) : 1}/${totalUnidadesPedido}`;
+        }
 
         const fotoProd = obtenerFotoProducto(p.producto);
         const idProd = obtenerIdProducto(p.producto);
@@ -2584,7 +2592,7 @@
             <td class="py-2.5 px-3 align-middle whitespace-nowrap">
               <div class="flex items-center gap-1.5 leading-tight">
                 <span class="font-mono font-bold text-slate-900 text-xs">${idLimpio}</span>
-                <span class="text-[10px] font-bold px-1.5 py-0.2 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white/80 text-slate-500 border border-slate-200'}">
+                <span class="text-[10px] font-bold px-1.5 py-0.2 rounded-md ${totalUnidadesPedido > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white/80 text-slate-500 border border-slate-200'}">
                   ${badgeCliente}
                 </span>
               </div>
@@ -2723,15 +2731,23 @@
         const cuerpoEmail = encodeURIComponent(`Hola ${p.nombre},\n\nTe escribimos de Zeronte en relación a tu encargo ${p.id} (${p.producto}).\n\n`);
         const mailtoUrl = `mailto:${p.email}?subject=${asuntoEmail}&body=${cuerpoEmail}`;
 
-        const indiceEnGlobal = listaPedidosGlobal.findIndex(item => item.id === p.id);
-        const numVentaDescendente = indiceEnGlobal !== -1 ? (listaPedidosGlobal.length - indiceEnGlobal) : "-";
+        const numVentaDescendente = p.numVenta || "-";
 
-        const idCl = (p.nombre || p.telefono || "cliente").toString().trim().toLowerCase();
-        const listaDelCliente = mapaPedidosCliente[idCl] || [p];
-        const totalDelCliente = listaDelCliente.length;
-        const posicionCliente = listaDelCliente.findIndex(item => item.id === p.id);
-        const indiceCliente = posicionCliente !== -1 ? (totalDelCliente - posicionCliente) : 1;
-        const badgeCliente = `${indiceCliente}/${totalDelCliente}`;
+        // Extraer la fracción real del propio ID del pedido (ej. de "PED-9009 (2/2)" obtiene "2/2")
+        const matchFraccion = (p.id || "").toString().match(/\((\d+\/\d+)\)/);
+        let badgeCliente = "1/1";
+        let totalUnidadesPedido = 1;
+
+        if (matchFraccion && matchFraccion[1]) {
+          badgeCliente = matchFraccion[1];
+          totalUnidadesPedido = parseInt(matchFraccion[1].split('/')[1], 10) || 1;
+        } else {
+          const idBasePed = (p.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
+          const itemsMismoPedido = mapaPedidosPorId[idBasePed] || [p];
+          totalUnidadesPedido = itemsMismoPedido.length;
+          const posPed = itemsMismoPedido.findIndex(item => item.id === p.id);
+          badgeCliente = `${posPed !== -1 ? (posPed + 1) : 1}/${totalUnidadesPedido}`;
+        }
 
         const fotoProd = obtenerFotoProducto(p.producto);
         const idProd = obtenerIdProducto(p.producto);
@@ -2754,7 +2770,7 @@
                   <div>
                     <div class="flex items-center gap-1.5 leading-none">
                       <span class="font-mono font-bold text-slate-900 text-xs">${idLimpio}</span>
-                      <span class="text-[9px] font-bold px-1.5 py-0.2 rounded-md ${totalDelCliente > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white/80 text-slate-500 border border-slate-200'}">
+                      <span class="text-[9px] font-bold px-1.5 py-0.2 rounded-md ${totalUnidadesPedido > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white/80 text-slate-500 border border-slate-200'}">
                         ${badgeCliente}
                       </span>
                     </div>
