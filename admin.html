@@ -451,11 +451,11 @@
                 <input type="hidden" id="pagoModalFila">
                 <input type="hidden" id="pagoModalOrderId">
 
-                <!-- Selector nativo de Fecha con Calendario y Hora -->
+                <!-- Selector nativo de Fecha con Calendario y Hora (Sin segundos) -->
                 <div>
                   <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1.5">Fecha y hora del pago recibido *</label>
                   <div class="relative">
-                    <input type="datetime-local" step="1" id="inputFechaHoraPago" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-800 font-semibold focus:outline-none focus:border-emerald-500 focus:bg-white transition cursor-pointer">
+                    <input type="datetime-local" id="inputFechaHoraPago" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-800 font-semibold focus:outline-none focus:border-emerald-500 focus:bg-white transition cursor-pointer">
                   </div>
                   <span class="text-[10px] text-slate-400 block mt-1">Pulsa en el icono de calendario para elegir día y hora exacta.</span>
                 </div>
@@ -2377,8 +2377,7 @@ function extraerUrlArchivoPedido(pedido) {
           const anio = parseInt(partes[2], 10);
           const h = parseInt(partes[3] || "0", 10);
           const m = parseInt(partes[4] || "0", 10);
-          const s = parseInt(partes[5] || "0", 10);
-          const dObj = new Date(anio, mes, dia, h, m, s);
+          const dObj = new Date(anio, mes, dia, h, m);
           if (!isNaN(dObj.getTime())) d = dObj;
         } else {
           const dAuto = new Date(fechaStr);
@@ -2386,7 +2385,7 @@ function extraerUrlArchivoPedido(pedido) {
         }
       }
       const pad = (n) => String(n).padStart(2, '0');
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
     function alternarPagoPedido(fila, orderId, fechaPagoActual) {
@@ -2452,7 +2451,7 @@ function extraerUrlArchivoPedido(pedido) {
 
       const d = new Date(valorInput);
       const pad = (n) => String(n).padStart(2, '0');
-      const fechaFormateada = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      const fechaFormateada = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
       guardarCobroFinal(fila, orderId, fechaFormateada);
       cerrarModalPago();
