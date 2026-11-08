@@ -378,7 +378,10 @@
                 <!-- Tarjeta Resumen del Pedido -->
                 <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl flex items-center justify-between">
                   <div>
-                    <span id="entregaPedidoIdLabel" class="font-mono font-bold text-xs bg-slate-900 text-white px-1.5 py-0.5 rounded">PED-0000</span>
+                    <div class="flex items-center gap-1.5">
+                      <span id="entregaNumVentaLabel" class="inline-flex items-center justify-center min-w-[3rem] px-1.5 h-5 rounded-md bg-white border border-slate-200 text-[11px] font-bold text-slate-800 shadow-2xs">#---</span>
+                      <span id="entregaPedidoIdLabel" class="font-mono font-bold text-xs bg-slate-900 text-white px-1.5 py-0.5 rounded">PED-0000</span>
+                    </div>
                     <h4 id="entregaClienteLabel" class="font-bold text-slate-900 mt-1">Nombre Cliente</h4>
                     <span id="entregaProductoLabel" class="text-[11px] text-slate-500 block truncate max-w-[280px]">Producto</span>
                   </div>
@@ -5681,6 +5684,10 @@
       document.getElementById('entregaEmailCliente').value = p.email || "";
       document.getElementById('entregaNombreCliente').value = p.nombre || "Cliente";
       document.getElementById('entregaProductoNombre').value = p.producto || "";
+
+      const numVentaDesc = p.numVenta || "-";
+      const lblNumVenta = document.getElementById('entregaNumVentaLabel');
+      if (lblNumVenta) lblNumVenta.innerText = `#${numVentaDesc}`;
 
       document.getElementById('entregaPedidoIdLabel').innerText = p.id;
       document.getElementById('entregaClienteLabel').innerText = `${p.nombre} (${p.email || 'Sin email'})`;
