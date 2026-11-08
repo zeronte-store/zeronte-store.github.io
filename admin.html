@@ -5647,12 +5647,13 @@ function extraerUrlArchivoPedido(pedido) {
       if (iconoProcesar) {
         const btnProcesar = iconoProcesar.closest('.nav-item-btn');
         const estaSeleccionado = btnProcesar && btnProcesar.classList.contains('bg-slate-900');
-        if (pedidosPendientesOProceso.length > 0) {
-          iconoProcesar.classList.remove('text-slate-600', 'text-white');
+        iconoProcesar.classList.remove('text-amber-500', 'text-slate-600', 'text-white');
+        if (estaSeleccionado) {
+          iconoProcesar.classList.add('text-white');
+        } else if (pedidosPendientesOProceso.length > 0) {
           iconoProcesar.classList.add('text-amber-500');
         } else {
-          iconoProcesar.classList.remove('text-amber-500');
-          iconoProcesar.classList.add(estaSeleccionado ? 'text-white' : 'text-slate-600');
+          iconoProcesar.classList.add('text-slate-600');
         }
       }
 
