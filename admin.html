@@ -2695,6 +2695,33 @@
                       <i class="fa-regular fa-copy text-xs"></i>
                     </button>
                   </div>
+                  <!-- Botón de Descarga directa desde la Columna Archivo (Google Drive) -->
+                  <div>
+                    ${(() => {
+                      const urlRaw = (p.archivo || p.Archivo || p.archivoUrl || '').toString().trim();
+                      if (urlRaw && urlRaw.startsWith('http')) {
+                        let urlDescargaDirecta = urlRaw;
+                        const matchDrive = urlRaw.match(/\/d\/([a-zA-Z0-9_-]+)/) || urlRaw.match(/id=([a-zA-Z0-9_-]+)/);
+                        if (matchDrive && matchDrive[1]) {
+                          urlDescargaDirecta = `https://drive.google.com/uc?export=download&id=${matchDrive[1]}`;
+                        }
+                        return `
+                          <a href="${urlDescargaDirecta}" download target="_blank" rel="noopener noreferrer" title="Descargar archivo entregado al cliente" class="w-full flex items-center justify-center gap-2 py-2 px-3 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl font-bold text-xs transition active:scale-95 shadow-2xs">
+                            <i class="fa-solid fa-file-zipper text-sm text-amber-600"></i>
+                            <i class="fa-solid fa-arrow-down text-[11px] text-amber-700"></i>
+                            <span>Descargar Archivo Enviado</span>
+                          </a>
+                        `;
+                      } else {
+                        return `
+                          <div title="Sin archivo registrado en la columna Archivo" class="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-50 border border-slate-200/70 text-slate-400 rounded-xl font-semibold text-xs opacity-60 cursor-not-allowed select-none">
+                            <i class="fa-solid fa-file-zipper text-sm text-slate-400"></i>
+                            <span>Sin archivo entregado</span>
+                          </div>
+                        `;
+                      }
+                    })()}
+                  </div>
                 </div>
 
                 <!-- Personalización y Notas -->
@@ -5748,17 +5775,27 @@
         porc.innerText = '100%';
         txt.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> ¡Pedido enviado y completado con éxito!`;
 
-        // Actualizar en la lista local en memoria
+        // Capturar la URL de Google Drive devuelta para la columna Archivo
+        let urlDriveGenerada = "";
+        try {
+          const resData = await res.json();
+          urlDriveGenerada = resData.url || resData.archivoUrl || resData.archivo || "";
+        } catch (_) {}
+
+        // Actualizar el pedido en memoria con el enlace de la columna Archivo
         const itemP = listaPedidosGlobal.find(p => p.fila === Number(fila));
         if (itemP) {
           itemP.estado = "Enviado / Completado";
+          if (urlDriveGenerada) itemP.archivo = urlDriveGenerada;
         }
         actualizarMetricas();
         filtrarPedidos();
 
-        setTimeout(() => {
+        setTimeout(async () => {
           cerrarModalEntrega();
           renderizarModuloProcesarPedidos();
+          // Sincroniza de inmediato con tu Google Sheets para cargar la columna Archivo
+          await cargarDatos(true);
         }, 1200);
 
       } catch(err) {
