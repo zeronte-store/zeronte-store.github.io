@@ -472,15 +472,28 @@
                 </div>
 
                 <!-- Botones de Acción -->
-                <div class="pt-2 flex items-center justify-between border-t border-slate-100 gap-2">
+                <div id="cajaBotonesModalPago" class="pt-2 flex items-center justify-between border-t border-slate-100 gap-2">
                   <button type="button" onclick="desmarcarCobroDesdeModal()" id="btnDesmarcarPagoModal" class="text-rose-600 hover:bg-rose-50 px-2.5 py-2 rounded-xl text-xs font-bold transition">
                     Marcar como NO pagado
                   </button>
                   <div class="flex items-center gap-1.5 ml-auto">
                     <button type="button" onclick="cerrarModalPago()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
-                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 shadow-xs">
+                    <button type="submit" id="btnConfirmarGuardarPago" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 shadow-xs">
                       Guardar
                     </button>
+                  </div>
+                </div>
+
+                <!-- Barra de Progreso de Guardado en Google Sheets -->
+                <div id="progresoGuardadoPagoBox" class="hidden space-y-2 pt-3 border-t border-slate-100 select-none">
+                  <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                    <span id="txtProgresoPago" class="flex items-center gap-1.5 text-emerald-800">
+                      <i class="fa-solid fa-circle-notch fa-spin text-emerald-600"></i> Guardando en Google Sheets...
+                    </span>
+                    <span id="porcProgresoPago" class="font-mono text-emerald-700">0%</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                    <div id="barraProgresoPago" class="bg-emerald-600 h-2 rounded-full transition-all duration-300 ease-out" style="width: 0%;"></div>
                   </div>
                 </div>
               </form>
@@ -2423,6 +2436,16 @@ function extraerUrlArchivoPedido(pedido) {
         btnDesmarcar.style.display = fechaPagoActual ? 'inline-block' : 'none';
       }
 
+      // Restaurar estado visual inicial de la barra y botones
+      const boxProgreso = document.getElementById('progresoGuardadoPagoBox');
+      const cajaBotones = document.getElementById('cajaBotonesModalPago');
+      const barra = document.getElementById('barraProgresoPago');
+      const porc = document.getElementById('porcProgresoPago');
+      if (boxProgreso) boxProgreso.classList.add('hidden');
+      if (cajaBotones) cajaBotones.classList.remove('hidden');
+      if (barra) barra.style.width = '0%';
+      if (porc) porc.innerText = '0%';
+
       modal.classList.remove('hidden');
     }
 
@@ -2435,7 +2458,6 @@ function extraerUrlArchivoPedido(pedido) {
       const fila = Number(document.getElementById('pagoModalFila').value);
       const orderId = document.getElementById('pagoModalOrderId').value;
       guardarCobroFinal(fila, orderId, "");
-      cerrarModalPago();
     }
 
     function ejecutarGuardadoModalPago(e) {
@@ -2454,7 +2476,6 @@ function extraerUrlArchivoPedido(pedido) {
       const fechaFormateada = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
       guardarCobroFinal(fila, orderId, fechaFormateada);
-      cerrarModalPago();
     }
 
     async function guardarCobroFinal(fila, orderId, nuevaFechaPago) {
@@ -2466,22 +2487,44 @@ function extraerUrlArchivoPedido(pedido) {
 
       const checkLote = document.getElementById('checkPagoLoteUnidades');
       const aplicarATodos = (pedidosMismoGrupo.length > 1 && checkLote && checkLote.checked);
-
       const pedidosAActualizar = aplicarATodos ? pedidosMismoGrupo : [listaPedidosGlobal.find(p => p.fila === fila || p.id === orderId)].filter(Boolean);
 
-      // Actualizar visualmente en memoria
+      // 1. Actualizar memoria y UI de inmediato (cero retraso visual)
       pedidosAActualizar.forEach(item => {
         item.fechaPago = nuevaFechaPago;
       });
-
       actualizarMetricas();
       filtrarPedidos(false);
 
-      // Guardar de inmediato en la hoja de cálculo de Google Sheets
-      for (const item of pedidosAActualizar) {
-        try {
-          await fetch(APPS_SCRIPT_URL, {
+      // 2. Activar barra visual en el modal
+      const boxProgreso = document.getElementById('progresoGuardadoPagoBox');
+      const cajaBotones = document.getElementById('cajaBotonesModalPago');
+      const barra = document.getElementById('barraProgresoPago');
+      const porc = document.getElementById('porcProgresoPago');
+      const txt = document.getElementById('txtProgresoPago');
+
+      if (boxProgreso) boxProgreso.classList.remove('hidden');
+      if (cajaBotones) cajaBotones.classList.add('hidden');
+
+      let progresoActual = 30;
+      if (barra) barra.style.width = '30%';
+      if (porc) porc.innerText = '30%';
+      if (txt) txt.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-emerald-600"></i> Guardando en Google Sheets...`;
+
+      const intervaloProgreso = setInterval(() => {
+        if (progresoActual < 88) {
+          progresoActual += 10;
+          if (barra) barra.style.width = progresoActual + '%';
+          if (porc) porc.innerText = progresoActual + '%';
+        }
+      }, 150);
+
+      // 3. Enviar peticiones a Google Sheets de forma paralela y sin bloqueo de bucle
+      try {
+        const promesas = pedidosAActualizar.map(item => {
+          return fetch(APPS_SCRIPT_URL, {
             method: "POST",
+            mode: "no-cors",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
               accion: "actualizarPagoPedido",
@@ -2491,13 +2534,22 @@ function extraerUrlArchivoPedido(pedido) {
               fechaPago: nuevaFechaPago
             })
           });
-        } catch (err) {
-          console.error("Error al guardar pago en Sheets:", err);
-        }
+        });
+
+        await Promise.all(promesas);
+      } catch (err) {
+        console.error("Error al guardar pago en Sheets:", err);
       }
 
-      // Sincronizar desde Google Sheets para confirmar que los datos provienen de la base de datos
-      await cargarDatos(true);
+      // 4. Completar al 100% y cerrar suavemente
+      clearInterval(intervaloProgreso);
+      if (barra) barra.style.width = '100%';
+      if (porc) porc.innerText = '100%';
+      if (txt) txt.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> ¡Guardado en Google Sheets con éxito!`;
+
+      setTimeout(() => {
+        cerrarModalPago();
+      }, 500);
     }
 
     // Desplazar lateralmente el carrusel de categorías en móvil
