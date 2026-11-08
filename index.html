@@ -149,7 +149,7 @@
             </span>
             <button onclick="cambiarPestana('resenas')" class="text-gray-700 font-semibold hover:underline" id="labelResenasHeader">(192)</button>
             <span class="text-gray-300">|</span>
-            <span class="text-gray-700 font-bold" id="totalVentasEtsy">1.092 ventas</span>
+            <span class="text-gray-700 font-bold" id="totalVentasEtsy">1.093 ventas</span>
             <span class="text-gray-300">|</span>
             <span class="text-gray-500" id="txtEnTiendaDesde">Desde 2023</span>
           </div>
@@ -1371,8 +1371,8 @@
     const MI_TELEFONO_WHATSAPP = "34641851073";
     const MI_PAYPAL_USER = "paypal.me/adriandiazgiraldez";
 
-    // 1092 ventas base de Etsy
-    const VENTAS_BASE_ETSY = 1092;
+    // Base de ventas inicial
+    let totalVentasGlobalSincronizado = 1093;
     let catalogoCompleto = [];
     let categoriaSeleccionada = 'todos';
     let paginaResenasActual = 1;
@@ -1796,25 +1796,20 @@
     // ================= VENTAS Y CATÁLOGO =================
     async function actualizarContadorVentas() {
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
-      const pedidosLocales = parseInt(localStorage.getItem('zeronte_pedidos_locales_count') || '0', 10);
-      let pedidosRemotos = 0;
 
       try {
-        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerConteoVentas`);
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerConteoVentas&_t=${Date.now()}`);
         const data = await res.json();
-        if (data.status === "success" && typeof data.totalPedidos === "number") {
-          pedidosRemotos = data.totalPedidos;
+        if (data && data.status === "success" && typeof data.totalPedidos === "number" && data.totalPedidos >= 1072) {
+          totalVentasGlobalSincronizado = data.totalPedidos;
         }
       } catch (e) {
-        pedidosRemotos = 0;
+        // En caso de fallo de red temporal mantiene el valor sincronizado
       }
-
-      const extra = Math.max(pedidosLocales, pedidosRemotos);
-      const totalVentas = VENTAS_BASE_ETSY + extra;
 
       const elVentas = document.getElementById('totalVentasEtsy');
       if (elVentas) {
-        elVentas.innerText = `${totalVentas.toLocaleString('es-ES')} ${t.ventasTexto}`;
+        elVentas.innerText = `${totalVentasGlobalSincronizado.toLocaleString('es-ES')} ${t.ventasTexto}`;
       }
     }
 
