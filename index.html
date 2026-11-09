@@ -5421,11 +5421,15 @@
     }
 
     function mostrarExito(orderId, datos) {
-      // 1. Forzar reseteo del formulario de encargo (Nombre, Email, Teléfono)
+      // 1. Vaciar completamente la cesta de la compra y actualizar su almacenamiento y vista
+      carritoProductos = [];
+      guardarCarritoEnStorage();
+
+      // 2. Forzar reseteo del formulario de encargo (Nombre, Email, Teléfono)
       const formPedido = document.getElementById('formularioPedido');
       if (formPedido) formPedido.reset();
 
-      // 2. Forzar vaciado y reseteo completo de la personalización de la obra
+      // 3. Forzar vaciado y reseteo completo de la personalización de la obra
       datosPersonalizaciones = [{ titulo: '', nombre: '', dedicatoria: '', compositor: '' }];
       const chkMisma = document.getElementById('checkMismaPersonalizacion');
       if (chkMisma) chkMisma.checked = false;
