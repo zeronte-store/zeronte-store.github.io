@@ -1098,10 +1098,21 @@
           </div>
 
           <!-- Botón Añadir al Carrito -->
-          <button type="button" onclick="procederCompraDesdeFicha()" class="w-full bg-black hover:bg-gray-800 text-white font-bold py-4 rounded-full text-sm sm:text-base uppercase tracking-wider transition active:scale-98 shadow-md flex items-center justify-center gap-2">
+          <button id="btnAnadirCarritoFicha" type="button" onclick="procederCompraDesdeFicha()" class="w-full bg-black hover:bg-gray-800 text-white font-bold py-4 rounded-full text-sm sm:text-base uppercase tracking-wider transition duration-200 active:scale-98 shadow-md flex items-center justify-center gap-2">
             <i class="fa-solid fa-cart-plus text-base text-amber-400"></i>
-            <span>Añadir al Carrito</span>
+            <span id="txtBtnAnadirCarritoFicha">Añadir al Carrito</span>
           </button>
+
+          <!-- Notificación temporal en medio de la pantalla -->
+          <div id="toastAnadidoCarrito" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/90 text-white border border-gray-700 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md hidden z-[90] flex items-center gap-3 transition-opacity duration-300 pointer-events-none select-none">
+            <span class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold shadow-sm">
+              <i class="fa-solid fa-check"></i>
+            </span>
+            <div class="text-left">
+              <p class="text-xs font-bold text-white tracking-wide">¡Artículo añadido a tu cesta!</p>
+              <p class="text-[11px] text-gray-400 font-medium">Puedes continuar personalizando o explorando.</p>
+            </div>
+          </div>
 
         </div>
 
@@ -3714,7 +3725,7 @@
         fotoProd = galeriaFichaActual[0].url;
       }
 
-      // Añade el artículo al carrito y abre el panel
+      // Añade el artículo al carrito
       carritoProductos.push({
         id: articuloFichaActual.id,
         titulo: traducirTituloProducto(articuloFichaActual.titulo, idiomaActual),
@@ -3725,8 +3736,43 @@
       });
 
       guardarCarritoEnStorage();
-      cerrarFichaArticulo();
-      abrirDrawerCarrito();
+
+      // 1. Efecto visual en el botón
+      const btn = document.getElementById('btnAnadirCarritoFicha');
+      const txtBtn = document.getElementById('txtBtnAnadirCarritoFicha');
+      if (btn && txtBtn) {
+        btn.classList.remove('bg-black', 'hover:bg-gray-800');
+        btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+        btn.innerHTML = `<i class="fa-solid fa-check text-base text-white"></i> <span>¡Añadido a la cesta!</span>`;
+
+        setTimeout(() => {
+          btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+          btn.classList.add('bg-black', 'hover:bg-gray-800');
+          btn.innerHTML = `<i class="fa-solid fa-cart-plus text-base text-amber-400"></i> <span id="txtBtnAnadirCarritoFicha">Añadir al Carrito</span>`;
+        }, 1800);
+      }
+
+      // 2. Notificación temporal en el centro de la pantalla
+      const toast = document.getElementById('toastAnadidoCarrito');
+      if (toast) {
+        toast.classList.remove('hidden');
+        toast.style.opacity = '1';
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => {
+            toast.classList.add('hidden');
+          }, 300);
+        }, 1800);
+      }
+
+      // 3. Pequeña animación de salto/escala en el botón del carrito de la cabecera
+      const btnCarritoHeader = document.getElementById('btnAbrirCarritoHeader');
+      if (btnCarritoHeader) {
+        btnCarritoHeader.classList.add('scale-115', 'ring-2', 'ring-amber-400');
+        setTimeout(() => {
+          btnCarritoHeader.classList.remove('scale-115', 'ring-2', 'ring-amber-400');
+        }, 400);
+      }
     }
 
     function procederCheckoutDesdeCarrito() {
