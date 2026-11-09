@@ -1350,7 +1350,7 @@
   </div>
 
   <!-- ==================== MODAL DE COMPRA (BOTTOM-SHEET EN MÓVIL) ==================== -->
-  <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-end sm:items-center justify-center z-50 backdrop-blur-xs">
+  <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-end sm:items-center justify-center z-[80] backdrop-blur-md">
     
     <div class="bg-[#f5f5f1] border border-gray-200 rounded-t-3xl sm:rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto text-[#222222]">
       
@@ -3731,7 +3731,7 @@
 
     function procederCheckoutDesdeCarrito() {
       if (carritoProductos.length === 0) return;
-      cerrarDrawerCarrito();
+      // No cerramos el drawer de la cesta para que se mantenga como fondo difuminado
 
       const totalGlobal = carritoProductos.reduce((acc, item) => acc + (item.precioUnitario * item.cantidad), 0);
       const totalUnidades = carritoProductos.reduce((acc, item) => acc + item.cantidad, 0);
@@ -3785,6 +3785,13 @@
         mCompra.classList.remove('hidden');
         mCompra.classList.add('flex');
       }
+
+      // Bloquear completamente el desplazamiento de fondo
+      document.body.style.overflow = 'hidden';
+      const drawer = document.getElementById('drawerCarrito');
+      if (drawer && !drawer.classList.contains('hidden')) {
+        drawer.style.overflow = 'hidden';
+      }
     }
 
     function cerrarModal() {
@@ -3793,7 +3800,14 @@
         mCompra.classList.add('hidden');
         mCompra.classList.remove('flex');
       }
-      if (articuloFichaActual) {
+
+      const drawer = document.getElementById('drawerCarrito');
+      const drawerAbierto = drawer && !drawer.classList.contains('hidden');
+
+      if (drawerAbierto) {
+        drawer.style.overflow = 'auto';
+        document.body.style.overflow = 'hidden';
+      } else if (articuloFichaActual) {
         document.body.style.overflow = 'hidden';
       } else {
         document.body.style.overflow = '';
