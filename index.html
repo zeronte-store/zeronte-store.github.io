@@ -1241,15 +1241,15 @@
             <ul class="space-y-2 text-gray-600 pl-1">
               <li class="flex items-start gap-2">
                 <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
-                <span><strong>Confirmación:</strong> Rellena tus datos al tramitar el pedido y elige si deseas pagar por Bizum o con PayPal / Tarjeta.</span>
+                <span><strong>Confirmación:</strong> Rellena tus datos al tramitar el pedido y elige si deseas pagar por Bizum, con PayPal o con Tarjeta de crédito o débito a través de la pasarela de pago de PayPal (no es necesario estar registrado).</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
-                <span><strong>Elaboración artesanal:</strong> Adrián compondrá y maquetará cada partitura a mano según tus dedicatorias (plazo habitual de 1 a 4 días).</span>
+                <span><strong>Elaboración artesanal:</strong> Una vez recibido el justificante confirmando el pago del pedido (por mensaje de WhatsApp o email), Adrián compondrá y maquetará cada partitura a mano según tus dedicatorias (plazo habitual de 1 a 4 días según la demanda del momento al iniciar tu pedido).</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
-                <span><strong>Entrega digital:</strong> Recibirás los PDFs a 300 DPI listos para enmarcar y los audios MP3 en tu correo y en la sección 'Mis Pedidos'.</span>
+                <span><strong>Entrega digital:</strong> Recibirás el archivo digital en tu correo electrónico que registrarás al tramitar el pedido y en la sección superior de esta página web "Mis Pedidos"también lo tendrás disponible para descargar.</span>
               </li>
             </ul>
 
@@ -1265,6 +1265,41 @@
       </div>
 
     </main>
+  </div>
+
+  <!-- ==================== MODAL EDITAR PERSONALIZACIÓN DESDE CESTA ==================== -->
+  <div id="modalEditarPersonalizacionCesta" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[80] backdrop-blur-xs p-4 select-none">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-200 space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-pen"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-900" id="tituloModalEditarPers">Editar personalización</h3>
+            <span class="text-[11px] text-gray-500 font-medium" id="subtituloModalEditarPers">Unidad 1 de 1</span>
+          </div>
+        </div>
+        <button type="button" onclick="cerrarModalEditarPersonalizacion()" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center text-xs transition">✕</button>
+      </div>
+
+      <div id="contenedorCamposEditarPers" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+        <!-- Render dinámico de campos a editar -->
+      </div>
+
+      <div id="errorEditarPers" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+        El campo "Nombre *" es obligatorio.
+      </div>
+
+      <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+        <button type="button" onclick="cerrarModalEditarPersonalizacion()" class="flex-1 py-2.5 rounded-full border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition">
+          Cancelar
+        </button>
+        <button type="button" onclick="guardarEdicionPersonalizacionCesta()" class="flex-1 py-2.5 rounded-full bg-black hover:bg-zinc-800 text-white text-xs font-bold transition shadow-sm">
+          Guardar cambios
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- ==================== MODAL CONFIRMACIÓN VACIAR CESTA ==================== -->
@@ -3141,49 +3176,222 @@
       actualizarBadgesYDrawerCarrito();
     }
 
-    function formatearPersonalizacionCestaVisual(textoRaw) {
-      if (!textoRaw) return '';
+    // Control de índice visible por cada artículo de la cesta
+    const indicesCarruselCesta = {};
+    let itemEditandoIndex = null;
+    let subUnidadEditandoIndex = null;
+
+    function desglosarBloquesPersonalizacion(textoRaw) {
+      if (!textoRaw) return [];
       const t = textoRaw.trim();
       if (!t || t.toLowerCase().includes('producto directo sin personalización') || t.toLowerCase().includes('sin personalización')) {
-        return '';
+        return [];
       }
 
-      const bloquesUnidad = t.split(/(?=\[UNIDAD\s*\d+\/\d+\])/g).filter(Boolean);
+      const bloques = t.split(/(?=\[UNIDAD\s*\d+\/\d+\])/g).filter(Boolean);
+      return bloques.map((b, idxB) => {
+        let limpio = b.trim();
+        const mEnc = limpio.match(/\[UNIDAD\s*(\d+\/\d+)\]/i);
+        const fraccion = mEnc ? mEnc[1] : `${idxB + 1}/${bloques.length}`;
 
-      return bloquesUnidad.map(b => {
-        let bloqueLimpio = b.trim();
-        const mEncabezado = bloqueLimpio.match(/\[UNIDAD\s*(\d+\/\d+)\]/i);
-        const etiquetaUnidad = mEncabezado ? `Unidad ${mEncabezado[1]}` : '';
+        limpio = limpio.replace(/\[UNIDAD\s*\d+\/\d+\]\s*\|?/gi, '').trim();
+        const trozos = limpio.split('|').map(c => c.trim()).filter(Boolean);
 
-        bloqueLimpio = bloqueLimpio.replace(/\[UNIDAD\s*\d+\/\d+\]\s*\|?/gi, '').trim();
-        const campos = bloqueLimpio.split('|').map(c => c.trim()).filter(Boolean);
-
-        const filasHtml = campos.map((campo, idxCampo) => {
+        const campos = trozos.map(campo => {
           const sep = campo.indexOf(':');
-          let rotulo = '';
-          let valor = campo;
           if (sep !== -1) {
-            rotulo = campo.substring(0, sep + 1).trim();
-            valor = campo.substring(sep + 1).trim();
+            return {
+              rotulo: campo.substring(0, sep + 1).trim(),
+              valor: campo.substring(sep + 1).trim()
+            };
           }
+          return { rotulo: '', valor: campo };
+        });
 
-          const bordeSeparador = (idxCampo > 0) ? 'border-t border-[#d8e7f8] pt-2 mt-2' : '';
+        return {
+          fraccion: fraccion,
+          campos: campos,
+          textoCrudo: b
+        };
+      });
+    }
 
+    function navegarCarruselCesta(idxArticulo, delta, total) {
+      const actual = indicesCarruselCesta[idxArticulo] || 0;
+      let nuevo = actual + delta;
+      if (nuevo < 0) nuevo = total - 1;
+      if (nuevo >= total) nuevo = 0;
+      indicesCarruselCesta[idxArticulo] = nuevo;
+      actualizarBadgesYDrawerCarrito();
+    }
+
+    function abrirModalEditarPersonalizacion(idxItem, idxSubUnidad) {
+      const item = carritoProductos[idxItem];
+      if (!item) return;
+
+      itemEditandoIndex = idxItem;
+      subUnidadEditandoIndex = idxSubUnidad;
+
+      const unidades = desglosarBloquesPersonalizacion(item.personalizacionTexto);
+      const unidad = unidades[idxSubUnidad];
+      if (!unidad) return;
+
+      const tit = document.getElementById('tituloModalEditarPers');
+      const sub = document.getElementById('subtituloModalEditarPers');
+      const cont = document.getElementById('contenedorCamposEditarPers');
+      const err = document.getElementById('errorEditarPers');
+
+      if (tit) tit.innerText = `Editar ${item.titulo}`;
+      if (sub) sub.innerText = `Personalización de la Unidad ${unidad.fraccion}`;
+      if (err) err.classList.add('hidden');
+
+      if (cont) {
+        cont.innerHTML = unidad.campos.map((c, i) => {
+          const esNombre = c.rotulo.toLowerCase().includes('nombre');
+          const esDedicatoria = c.rotulo.toLowerCase().includes('dedicatoria');
           return `
-            <div class="${bordeSeparador} leading-relaxed">
-              <span class="text-slate-600 font-medium">${rotulo}</span>
-              <strong class="text-black font-bold ml-1">${valor}</strong>
+            <div>
+              <label class="block text-xs font-bold text-gray-800 mb-1">
+                ${c.rotulo || `Campo ${i + 1}:`} ${esNombre ? '<span class="text-rose-600">*</span>' : ''}
+              </label>
+              <input type="text" 
+                data-idx-campo="${i}" 
+                data-rotulo="${c.rotulo.replace(/"/g, '&quot;')}" 
+                ${esDedicatoria ? 'maxlength="90"' : ''}
+                value="${c.valor.replace(/"/g, '&quot;')}" 
+                class="campo-editar-pers-input w-full bg-white border border-gray-300 rounded-xl px-3 py-2.5 text-xs text-gray-900 font-semibold focus:outline-none focus:border-black transition">
             </div>
           `;
         }).join('');
+      }
 
+      const modal = document.getElementById('modalEditarPersonalizacionCesta');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function cerrarModalEditarPersonalizacion() {
+      const modal = document.getElementById('modalEditarPersonalizacionCesta');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      itemEditandoIndex = null;
+      subUnidadEditandoIndex = null;
+    }
+
+    function guardarEdicionPersonalizacionCesta() {
+      if (itemEditandoIndex === null || subUnidadEditandoIndex === null) return;
+      const item = carritoProductos[itemEditandoIndex];
+      if (!item) return;
+
+      const inputs = document.querySelectorAll('.campo-editar-pers-input');
+      const err = document.getElementById('errorEditarPers');
+
+      // Validar si el campo nombre está vacío
+      for (const inp of inputs) {
+        const rot = (inp.getAttribute('data-rotulo') || '').toLowerCase();
+        if (rot.includes('nombre') && !inp.value.trim()) {
+          if (err) err.classList.remove('hidden');
+          inp.focus();
+          return;
+        }
+      }
+
+      const unidades = desglosarBloquesPersonalizacion(item.personalizacionTexto);
+      const unidad = unidades[subUnidadEditandoIndex];
+      if (!unidad) return;
+
+      inputs.forEach(inp => {
+        const i = parseInt(inp.getAttribute('data-idx-campo'), 10);
+        if (unidad.campos[i]) {
+          unidad.campos[i].valor = inp.value.trim();
+        }
+      });
+
+      // Reconstruir el bloque de la unidad editada
+      const nuevoBloqueUnidad = `[UNIDAD ${unidad.fraccion}] | ` + unidad.campos.map(c => `${c.rotulo} ${c.valor}`).join(' | ');
+
+      // Reconstruir todo el texto consolidado del artículo
+      const nuevosBloquesTodos = unidades.map((u, i) => {
+        if (i === subUnidadEditandoIndex) {
+          return nuevoBloqueUnidad;
+        }
+        return `[UNIDAD ${u.fraccion}] | ` + u.campos.map(c => `${c.rotulo} ${c.valor}`).join(' | ');
+      });
+
+      item.personalizacionTexto = nuevosBloquesTodos.join('\n');
+      guardarCarritoEnStorage();
+      cerrarModalEditarPersonalizacion();
+    }
+
+    function formatearPersonalizacionCestaVisual(textoRaw, idxArticulo) {
+      const unidades = desglosarBloquesPersonalizacion(textoRaw);
+      if (unidades.length === 0) return '';
+
+      const totalUnidades = unidades.length;
+      let indiceActivo = indicesCarruselCesta[idxArticulo] || 0;
+      if (indiceActivo >= totalUnidades) indiceActivo = 0;
+      indicesCarruselCesta[idxArticulo] = indiceActivo;
+
+      const u = unidades[indiceActivo];
+
+      const filasHtml = u.campos.map((campo, idxCampo) => {
+        const bordeSeparador = (idxCampo > 0) ? 'border-t border-[#d8e7f8] pt-2 mt-2' : '';
         return `
-          <div class="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-3.5 sm:p-4 text-xs text-black shadow-2xs space-y-1 mb-2.5 last:mb-0">
-            ${etiquetaUnidad ? `<div class="text-[10px] font-bold uppercase tracking-wider text-blue-700 pb-1 mb-1 border-b border-[#d8e7f8]">${etiquetaUnidad}</div>` : ''}
-            ${filasHtml}
+          <div class="${bordeSeparador} leading-relaxed">
+            <span class="text-slate-600 font-medium">${campo.rotulo}</span>
+            <strong class="text-black font-bold ml-1">${campo.valor}</strong>
           </div>
         `;
       }).join('');
+
+      return `
+        <div class="w-full relative">
+          <!-- Contenedor con flechas laterales si tiene más de 1 unidad -->
+          <div class="flex items-center gap-2">
+            ${totalUnidades > 1 ? `
+              <button type="button" onclick="navegarCarruselCesta(${idxArticulo}, -1, ${totalUnidades})" class="w-8 h-8 rounded-full bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 shadow-xs flex items-center justify-center text-xs font-bold transition active:scale-90 shrink-0" title="Ver personalización anterior">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+            ` : ''}
+
+            <!-- Tarjeta azul única visible -->
+            <div class="flex-1 bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-3.5 sm:p-4 text-xs text-black shadow-2xs space-y-1">
+              <div class="flex items-center justify-between pb-1.5 mb-1 border-b border-[#d8e7f8]">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700">Unidad ${u.fraccion}</span>
+                  ${totalUnidades > 1 ? `<span class="text-[10px] text-blue-500 font-semibold">(${indiceActivo + 1} de ${totalUnidades})</span>` : ''}
+                </div>
+                
+                <!-- Botón de lápiz para editar en caliente -->
+                <button type="button" onclick="abrirModalEditarPersonalizacion(${idxArticulo}, ${indiceActivo})" class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:text-blue-900 hover:bg-blue-100/70 px-2 py-0.5 rounded-md transition" title="Modificar esta personalización">
+                  <i class="fa-solid fa-pen text-[10px]"></i>
+                  <span>Modificar</span>
+                </button>
+              </div>
+
+              ${filasHtml}
+            </div>
+
+            ${totalUnidades > 1 ? `
+              <button type="button" onclick="navegarCarruselCesta(${idxArticulo}, 1, ${totalUnidades})" class="w-8 h-8 rounded-full bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 shadow-xs flex items-center justify-center text-xs font-bold transition active:scale-90 shrink-0" title="Ver siguiente personalización">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            ` : ''}
+          </div>
+
+          <!-- Mensaje explicativo si hay varias unidades -->
+          ${totalUnidades > 1 ? `
+            <div class="flex items-center justify-center gap-1.5 text-[11px] text-blue-600 font-medium mt-1.5 select-none">
+              <i class="fa-solid fa-circle-info text-[10px]"></i>
+              <span>Pulsa las flechas para comprobar o modificar las demás personalizaciones (${totalUnidades} en total).</span>
+            </div>
+          ` : ''}
+        </div>
+      `;
     }
 
     function confirmarVaciarCarrito() {
@@ -3245,7 +3453,7 @@
         const itemTotal = item.precioUnitario * item.cantidad;
         sumaTotal += itemTotal;
 
-        const htmlPersonalizacion = formatearPersonalizacionCestaVisual(item.personalizacionTexto);
+        const htmlPersonalizacion = formatearPersonalizacionCestaVisual(item.personalizacionTexto, idx);
 
         return `
           <div class="pt-4 first:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
