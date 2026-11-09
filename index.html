@@ -3780,9 +3780,14 @@
 
       const totalGlobal = carritoProductos.reduce((acc, item) => acc + (item.precioUnitario * item.cantidad), 0);
       const totalUnidades = carritoProductos.reduce((acc, item) => acc + item.cantidad, 0);
-      const resumenNombres = carritoProductos.map(item => `${item.titulo} (x${item.cantidad})`).join(' + ');
 
-      // Desglosar cada unidad individual para que el backend la procese en una fila independiente
+      // Resumen donde el (xN) va pegado a su artículo específico y si es 1 no lleva multiplicador
+      const resumenNombres = carritoProductos.map(item => {
+        const c = item.cantidad || 1;
+        return c > 1 ? `${item.titulo} (x${c})` : item.titulo;
+      }).join(' + ');
+
+      // Desglosar cada unidad individual con su producto asignado
       let listaUnidadesFinales = [];
       carritoProductos.forEach(item => {
         const unidadesDesglosadas = desglosarBloquesPersonalizacion(item.personalizacionTexto);
@@ -3804,13 +3809,16 @@
         }
       });
 
-      // Formatear texto limpio con etiqueta [UNIDAD X/N] idéntica a pedidos anteriores
       const totalItems = listaUnidadesFinales.length;
       const textoFinalConsolidado = listaUnidadesFinales.map((it, idx) => {
         return `[UNIDAD ${idx + 1}/${totalItems}] [PROD:${it.producto}] ${it.personalizacion}`;
       }).join('\n');
 
       abrirModal(resumenNombres, totalGlobal, totalItems);
+
+      // Asignar el total real de unidades (4) sin que abrirModal lo altere
+      const prodInput = document.getElementById('productoInput');
+      if (prodInput) prodInput.value = resumenNombres;
 
       const campoOculto = document.getElementById('personalizacionCliente');
       if (campoOculto) campoOculto.value = textoFinalConsolidado;
@@ -5391,17 +5399,72 @@
 
             doc.setFontSize(8.5);
             if (!sinPers) {
+              // Encabezado de unidad con número de venta en negrita
               doc.setFont("helvetica", "bold");
-              doc.setTextColor(70, 70, 70);
+              doc.setTextColor(50, 50, 50);
               const prefijoVenta = `* #${numVentaArt} (UNIDAD ${fraccionStr}) `;
               doc.text(prefijoVenta, 104, yDetalle);
-              const anchoPrefijo = doc.getTextWidth(prefijoVenta);
 
-              doc.setFont("helvetica", "normal");
-              doc.setTextColor(90, 90, 90);
-              const lineasP = doc.splitTextToSize(textoPersLimpio, 88 - anchoPrefijo);
-              doc.text(lineasP, 104 + anchoPrefijo, yDetalle);
-              yDetalle += (lineasP.length * 4.2) + 3;
+              let xActual = 104 + doc.getTextWidth(prefijoVenta);
+              const xMargenIzq = 104;
+              const xMaximo = 192;
+              const altoRenglon = 4.2;
+
+              // Separar cada campo (1. Título, 2. Nombre, etc.)
+              const partesCampos = textoPersLimpio.split("|").map(t => t.trim()).filter(Boolean);
+
+              partesCampos.forEach((campoStr, idxCampo) => {
+                const tieneSep = campoStr.indexOf(":");
+                let etiqueta = "";
+                let valor = "";
+
+                if (tieneSep !== -1) {
+                  etiqueta = campoStr.substring(0, tieneSep + 1).trim() + " ";
+                  valor = campoStr.substring(tieneSep + 1).trim();
+                } else {
+                  valor = campoStr;
+                }
+
+                if (idxCampo > 0) {
+                  etiqueta = " | " + etiqueta;
+                }
+
+                // 1. Imprimir la etiqueta en fuente NORMAL
+                if (etiqueta) {
+                  doc.setFont("helvetica", "normal");
+                  doc.setTextColor(100, 100, 100);
+                  const palabrasEtq = etiqueta.split(" ");
+                  palabrasEtq.forEach((p, pIdx) => {
+                    const token = p + (pIdx < palabrasEtq.length - 1 ? " " : "");
+                    const wToken = doc.getTextWidth(token);
+                    if (xActual + wToken > xMaximo) {
+                      xActual = xMargenIzq;
+                      yDetalle += altoRenglon;
+                    }
+                    doc.text(token, xActual, yDetalle);
+                    xActual += wToken;
+                  });
+                }
+
+                // 2. Imprimir el valor del cliente en NEGRITA DESTACADA
+                if (valor) {
+                  doc.setFont("helvetica", "bold");
+                  doc.setTextColor(20, 20, 20); // Negro oscuro para resaltar
+                  const palabrasVal = valor.split(" ");
+                  palabrasVal.forEach((p, pIdx) => {
+                    const token = p + (pIdx < palabrasVal.length - 1 ? " " : "");
+                    const wToken = doc.getTextWidth(token);
+                    if (xActual + wToken > xMaximo) {
+                      xActual = xMargenIzq;
+                      yDetalle += altoRenglon;
+                    }
+                    doc.text(token, xActual, yDetalle);
+                    xActual += wToken;
+                  });
+                }
+              });
+
+              yDetalle += altoRenglon + 2.5;
             } else {
               // Si no tiene personalización, solo imprimimos el número de venta correspondiente
               doc.setFont("helvetica", "bold");
