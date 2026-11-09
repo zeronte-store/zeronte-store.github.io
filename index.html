@@ -213,11 +213,11 @@
           <span id="btnContactoTxt">Contacto</span>
         </a>
 
-        <!-- Botón Carrito de Compras (En móvil muestra sólo icono + número; en PC muestra 'Carrito') -->
-        <button id="btnAbrirCarritoHeader" onclick="abrirDrawerCarrito()" class="relative flex-shrink-0 flex items-center gap-1 sm:gap-1.5 border border-gray-900 bg-black text-white hover:bg-zinc-800 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm transition active:scale-95">
-          <i class="fa-solid fa-cart-shopping text-xs sm:text-sm text-amber-400"></i>
+        <!-- Botón Carrito de Compras (Estilo blanco coherente en 0) -->
+        <button id="btnAbrirCarritoHeader" onclick="abrirDrawerCarrito()" class="relative flex-shrink-0 flex items-center gap-1 sm:gap-1.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm transition active:scale-95">
+          <i class="fa-solid fa-cart-shopping text-xs sm:text-sm text-amber-500"></i>
           <span id="txtBtnCarrito" class="hidden sm:inline">Carrito</span>
-          <span id="badgeContadorCarrito" class="bg-amber-400 text-black text-[10px] font-black min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center">0</span>
+          <span id="badgeContadorCarrito" class="bg-gray-100 border border-gray-200 text-gray-700 text-[10px] font-bold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center">0</span>
         </button>
       </div>
     </div>
@@ -946,11 +946,20 @@
         <span>Volver a la tienda</span>
       </button>
 
-      <span class="font-serif font-bold text-base text-gray-900 tracking-wider">ZERONTE</span>
+      <span class="font-serif font-bold text-base text-gray-900 tracking-wider hidden sm:inline">ZERONTE</span>
 
-      <button onclick="cerrarFichaArticulo()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold transition">
-        ✕
-      </button>
+      <!-- Bloque derecho: Botón Carrito siempre visible + Botón Cerrar -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="btnAbrirCarritoFichaHeader" onclick="abrirDrawerCarrito()" class="relative flex-shrink-0 flex items-center gap-1 sm:gap-1.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm transition active:scale-95">
+          <i class="fa-solid fa-cart-shopping text-xs sm:text-sm text-amber-500"></i>
+          <span class="hidden sm:inline">Carrito</span>
+          <span id="badgeContadorCarritoFicha" class="bg-gray-100 border border-gray-200 text-gray-700 text-[10px] font-bold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center">0</span>
+        </button>
+
+        <button onclick="cerrarFichaArticulo()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold transition">
+          ✕
+        </button>
+      </div>
     </header>
 
     <!-- Contenedor Principal a ancho completo -->
@@ -3456,11 +3465,32 @@
     function actualizarBadgesYDrawerCarrito() {
       const totalUnidades = carritoProductos.reduce((acc, item) => acc + item.cantidad, 0);
       const badge = document.getElementById('badgeContadorCarrito');
+      const badgeFicha = document.getElementById('badgeContadorCarritoFicha');
       const conteoCesta = document.getElementById('conteoCestaDrawer');
       const btnVaciar = document.getElementById('btnVaciarCarritoHeader');
 
       if (badge) badge.innerText = totalUnidades;
+      if (badgeFicha) badgeFicha.innerText = totalUnidades;
       if (conteoCesta) conteoCesta.innerText = `${totalUnidades} ${totalUnidades === 1 ? 'artículo' : 'artículos'}`;
+
+      // Alternar diseño: Fondo blanco coherente en 0 artículos vs. Negro/Oro al tener artículos
+      const botonesCarrito = [
+        { btn: document.getElementById('btnAbrirCarritoHeader'), b: badge },
+        { btn: document.getElementById('btnAbrirCarritoFichaHeader'), b: badgeFicha }
+      ];
+
+      botonesCarrito.forEach(({ btn, b }) => {
+        if (!btn || !b) return;
+        if (totalUnidades > 0) {
+          // Diseño activo: Fondo negro, texto blanco y burbuja amarilla
+          btn.className = "relative flex-shrink-0 flex items-center gap-1 sm:gap-1.5 border border-gray-900 bg-black text-white hover:bg-zinc-800 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm transition active:scale-95";
+          b.className = "bg-amber-400 text-black text-[10px] font-black min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center";
+        } else {
+          // Diseño en 0: Coherente con "Enviar Mensaje" y "Contacto" (Fondo blanco, borde gris)
+          btn.className = "relative flex-shrink-0 flex items-center gap-1 sm:gap-1.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm transition active:scale-95";
+          b.className = "bg-gray-100 border border-gray-200 text-gray-700 text-[10px] font-bold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center";
+        }
+      });
 
       const contItems = document.getElementById('contenedorItemsCarrito');
       const footer = document.getElementById('footerCarrito');
@@ -3765,14 +3795,15 @@
         }, 1800);
       }
 
-      // 3. Pequeña animación de salto/escala en el botón del carrito de la cabecera
-      const btnCarritoHeader = document.getElementById('btnAbrirCarritoHeader');
-      if (btnCarritoHeader) {
-        btnCarritoHeader.classList.add('scale-115', 'ring-2', 'ring-amber-400');
-        setTimeout(() => {
-          btnCarritoHeader.classList.remove('scale-115', 'ring-2', 'ring-amber-400');
-        }, 400);
-      }
+      // 3. Animación de rebote en los botones del carrito (tanto en tienda como en ficha)
+      [document.getElementById('btnAbrirCarritoHeader'), document.getElementById('btnAbrirCarritoFichaHeader')].forEach(btnHeader => {
+        if (btnHeader) {
+          btnHeader.classList.add('scale-115', 'ring-2', 'ring-amber-400');
+          setTimeout(() => {
+            btnHeader.classList.remove('scale-115', 'ring-2', 'ring-amber-400');
+          }, 400);
+        }
+      });
     }
 
     function procederCheckoutDesdeCarrito() {
