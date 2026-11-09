@@ -1234,7 +1234,12 @@
                 <div class="bg-white border border-gray-200 rounded-lg px-2.5 py-1 flex items-center shadow-2xs h-8">
                   <svg class="h-4 w-auto" viewBox="0 0 100 32" fill="none"><path d="M12 4H21C25 4 28 6.5 27 11.5C26 16.5 22.5 19 18.5 19H14.5L12 30H7L12 4Z" fill="#003087"/><path d="M16 9H23C26.5 9 29.5 11 28.5 15.5C27.5 20.5 24 23 20 23H17L15.5 30H11L16 9Z" fill="#0079C1"/><text x="33" y="23" fill="#003087" font-family="Arial, sans-serif" font-weight="bold" font-size="19" font-style="italic">PayPal</text></svg>
                 </div>
+                <!-- Tarjeta Crédito / Débito -->
+                <div class="bg-white border border-gray-200 rounded-lg px-2.5 py-1 flex items-center gap-1.5 shadow-2xs h-8 text-gray-700">
+                  <i class="fa-regular fa-credit-card text-xs text-gray-800"></i>
+                  <span class="text-[11px] font-semibold text-gray-800">Tarjeta crédito/débito</span>
                 </div>
+              </div>
             </div>
 
             <!-- Pasos claros de elaboración y entrega -->
@@ -1249,7 +1254,7 @@
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
-                <span><strong>Entrega digital:</strong> Recibirás el archivo digital en tu correo electrónico que registrarás al tramitar el pedido y en la sección superior de esta página web "Mis Pedidos"también lo tendrás disponible para descargar.</span>
+                <span><strong>Entrega digital:</strong> Recibirás el archivo digital en tu correo electrónico que registrarás al tramitar el pedido y en la sección superior de esta página web "Mis Pedidos" también lo tendrás disponible para descargar.</span>
               </li>
             </ul>
 
@@ -1297,6 +1302,27 @@
         </button>
         <button type="button" onclick="guardarEdicionPersonalizacionCesta()" class="flex-1 py-2.5 rounded-full bg-black hover:bg-zinc-800 text-white text-xs font-bold transition shadow-sm">
           Guardar cambios
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL CONFIRMACIÓN ELIMINAR ARTÍCULO ==================== -->
+  <div id="modalConfirmarEliminarItem" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[80] backdrop-blur-xs p-4 select-none">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-gray-200 space-y-4">
+      <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-xl">
+        <i class="fa-regular fa-trash-can"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-gray-900">¿Estás seguro?</h3>
+        <p class="text-xs text-gray-500 mt-1" id="textoConfirmarEliminarItem">¿Deseas eliminar este artículo de tu cesta de compra?</p>
+      </div>
+      <div class="flex items-center gap-2 pt-2">
+        <button type="button" onclick="cerrarModalEliminarItem()" class="flex-1 py-2.5 rounded-full border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition">
+          Cancelar
+        </button>
+        <button type="button" onclick="ejecutarEliminarItem()" class="flex-1 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-sm">
+          Sí, eliminar
         </button>
       </div>
     </div>
@@ -3511,9 +3537,41 @@
       }
     }
 
+    let indiceItemAEliminar = null;
+
+    function pedirConfirmacionEliminarItem(indice) {
+      indiceItemAEliminar = indice;
+      const item = carritoProductos[indice];
+      const txt = document.getElementById('textoConfirmarEliminarItem');
+      if (txt && item) {
+        txt.innerText = `¿Deseas eliminar "${item.titulo}" de tu cesta de compra?`;
+      }
+      const modal = document.getElementById('modalConfirmarEliminarItem');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function cerrarModalEliminarItem() {
+      const modal = document.getElementById('modalConfirmarEliminarItem');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      indiceItemAEliminar = null;
+    }
+
+    function ejecutarEliminarItem() {
+      if (indiceItemAEliminar !== null && carritoProductos[indiceItemAEliminar]) {
+        carritoProductos.splice(indiceItemAEliminar, 1);
+        guardarCarritoEnStorage();
+      }
+      cerrarModalEliminarItem();
+    }
+
     function eliminarItemCarrito(indice) {
-      carritoProductos.splice(indice, 1);
-      guardarCarritoEnStorage();
+      pedirConfirmacionEliminarItem(indice);
     }
 
     function procederCompraDesdeFicha() {
