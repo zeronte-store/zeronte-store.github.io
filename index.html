@@ -5252,86 +5252,140 @@
         doc.setTextColor(80, 80, 80);
         doc.text(`Pagado con ${datosPedido.metodoPago || 'Bizum'}`, 20, 135);
 
-        // Columna Derecha: Cabecera de artículo
-        const cant = datosPedido.cantidad || 1;
+        // Columna Derecha: Desglose individual de cada artículo
+        const baseVentaNum = (totalVentasGlobalSincronizado || 1093);
+        const persCruda = (datosPedido.personalizacion || "").replace(/["“”«»]/g, '').trim();
+        const bloquesPersRaw = persCruda ? persCruda.split(/(?=\[UNIDAD\s*\d+\/\d+\])/g).filter(Boolean) : [];
+
+        // Extraer lista de productos desde la cesta o reconstruir desde datos
+        let listaItemsDesglose = [];
+        if (carritoProductos && carritoProductos.length > 0) {
+          listaItemsDesglose = carritoProductos;
+        } else {
+          listaItemsDesglose = [{
+            titulo: (datosPedido.producto || "Artículo").replace(/\(x\d+\)/gi, '').trim(),
+            cantidad: datosPedido.cantidad || 1,
+            precioUnitario: parseFloat((datosPedido.precio || "0").toString().replace('€','').trim().replace(',','.')) || 0,
+            imagen: urlPortada || ""
+          }];
+        }
+
+        // Calcular total real de unidades
+        const totalUdsCesta = listaItemsDesglose.reduce((acc, it) => acc + (it.cantidad || 1), 0);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
         doc.setTextColor(34, 34, 34);
-        doc.text(`${cant} ${cant === 1 ? 'artículo' : 'artículos'}`, 82, 55);
+        doc.text(`${totalUdsCesta} ${totalUdsCesta === 1 ? 'artículo' : 'artículos'}`, 82, 55);
 
         doc.setDrawColor(180, 180, 180);
         doc.setLineWidth(0.4);
         doc.line(82, 59, 192, 59);
 
-        // Foto real de portada del artículo en miniatura cuadrada
-        if (base64FotoProd) {
-          try {
-            doc.addImage(base64FotoProd, "JPEG", 82, 65, 18, 18);
-            doc.setDrawColor(210, 210, 210);
-            doc.setLineWidth(0.2);
-            doc.rect(82, 65, 18, 18, "S");
-          } catch(errImg) {
+        // Cargar miniaturas de cada artículo en Base64
+        const imagenesArticulosBase64 = await Promise.all(
+          listaItemsDesglose.map(it => obtenerBase64Seguro(it.imagen || urlPortada))
+        );
+
+        let yPos = 65;
+        let contadorUnidadGlobal = 0;
+
+        for (let i = 0; i < listaItemsDesglose.length; i++) {
+          const item = listaItemsDesglose[i];
+          const imgBase64 = imagenesArticulosBase64[i];
+          const cantItem = item.cantidad || 1;
+          const precioUnit = item.precioUnitario || 0;
+          const totalItem = (precioUnit * cantItem).toFixed(2);
+
+          // 1. Foto en miniatura
+          if (imgBase64) {
+            try {
+              doc.addImage(imgBase64, "JPEG", 82, yPos, 18, 18);
+              doc.setDrawColor(210, 210, 210);
+              doc.setLineWidth(0.2);
+              doc.rect(82, yPos, 18, 18, "S");
+            } catch(e) {
+              doc.setFillColor(245, 245, 245);
+              doc.roundedRect(82, yPos, 18, 18, 1, 1, "F");
+            }
+          } else {
             doc.setFillColor(245, 245, 245);
-            doc.roundedRect(82, 65, 18, 18, 1, 1, "F");
+            doc.roundedRect(82, yPos, 18, 18, 1, 1, "F");
           }
-        } else {
-          doc.setFillColor(245, 245, 245);
-          doc.roundedRect(82, 65, 18, 18, 1, 1, "F");
-        }
 
-        // Título del artículo y desglose de precio
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(10);
-        doc.setTextColor(34, 34, 34);
-        const tituloLimpio = (datosPedido.producto || "").replace(/\(x\d+\)/gi, '').trim();
-        const lineasTitulo = doc.splitTextToSize(tituloLimpio, 66);
-        doc.text(lineasTitulo, 104, 69);
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.text(`${cant} x ${datosPedido.precio}`, 192, 69, { align: "right" });
-
-        // Desglose de personalizaciones por unidad con su número de venta (#1096...)
-        let yPers = 69 + (lineasTitulo.length * 5) + 3;
-        const persCruda = (datosPedido.personalizacion || "").replace(/["“”«»]/g, '').trim();
-        const bloquesRaw = persCruda ? persCruda.split(/(?=\[UNIDAD\s*\d+\/\d+\])/g).filter(Boolean) : [];
-        const baseVentaNum = (totalVentasGlobalSincronizado || 1093);
-
-        if (bloquesRaw.length > 0) {
-          doc.setFontSize(9);
+          // 2. Título, desglose de cantidad y precio
           doc.setFont("helvetica", "bold");
-          doc.setTextColor(70, 70, 70);
-          doc.text("Personalización:", 104, yPers);
-          yPers += 5;
+          doc.setFontSize(10);
+          doc.setTextColor(34, 34, 34);
+          const lineasTit = doc.splitTextToSize(item.titulo || "Artículo", 66);
+          doc.text(lineasTit, 104, yPos + 4);
 
-          bloquesRaw.forEach((bTexto, bIdx) => {
-            const numVentaUnidad = baseVentaNum + bIdx + 1;
-            const fraccionMatch = bTexto.match(/\[UNIDAD\s*(\d+\/\d+)\]/i);
-            const fraccionStr = fraccionMatch ? fraccionMatch[1] : `${bIdx + 1}/${bloquesRaw.length}`;
-            let detalleTexto = bTexto
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9.5);
+          doc.setTextColor(60, 60, 60);
+          doc.text(`${cantItem} x ${precioUnit.toFixed(2)} €`, 192, yPos + 4, { align: "right" });
+
+          // Salto de línea amplio entre el título del artículo y la primera línea de personalización
+          let yDetalle = yPos + (lineasTit.length * 5) + 6;
+
+          // 3. Procesar las unidades y personalizaciones pertenecientes a este artículo
+          for (let u = 0; u < cantItem; u++) {
+            contadorUnidadGlobal++;
+            const numVentaArt = baseVentaNum + contadorUnidadGlobal;
+            const fraccionStr = `${contadorUnidadGlobal}/${totalUdsCesta}`;
+
+            const bloqueUnidad = bloquesPersRaw[contadorUnidadGlobal - 1] || "";
+            let textoPersLimpio = bloqueUnidad
               .replace(/\[UNIDAD\s*\d+\/\d+\]\s*\|?/gi, '')
               .replace(/\[PROD:[^\]]+\]\s*/gi, '')
               .trim();
 
-            const lineaBloque = `* #${numVentaUnidad} (UNIDAD ${fraccionStr}) ${detalleTexto}`;
-            doc.setFont("helvetica", "normal");
+            const sinPers = !textoPersLimpio || 
+                            textoPersLimpio.toLowerCase().includes("sin personalización") || 
+                            textoPersLimpio.toLowerCase().includes("producto directo");
+
             doc.setFontSize(8.5);
-            doc.setTextColor(80, 80, 80);
-            const lineasPart = doc.splitTextToSize(lineaBloque, 86);
-            doc.text(lineasPart, 104, yPers);
-            yPers += (lineasPart.length * 4.2) + 2.5;
-          });
-        } else if (persCruda) {
-          doc.setFontSize(8.5);
-          doc.setFont("helvetica", "normal");
-          doc.setTextColor(80, 80, 80);
-          const lineasPers = doc.splitTextToSize(`Personalización: ${persCruda}`, 86);
-          doc.text(lineasPers, 104, yPers);
-          yPers += (lineasPers.length * 4.5) + 4;
+            if (!sinPers) {
+              doc.setFont("helvetica", "bold");
+              doc.setTextColor(70, 70, 70);
+              const prefijoVenta = `* #${numVentaArt} (UNIDAD ${fraccionStr}) `;
+              doc.text(prefijoVenta, 104, yDetalle);
+              const anchoPrefijo = doc.getTextWidth(prefijoVenta);
+
+              doc.setFont("helvetica", "normal");
+              doc.setTextColor(90, 90, 90);
+              const lineasP = doc.splitTextToSize(textoPersLimpio, 88 - anchoPrefijo);
+              doc.text(lineasP, 104 + anchoPrefijo, yDetalle);
+              yDetalle += (lineasP.length * 4.2) + 3;
+            } else {
+              // Si no tiene personalización, solo imprimimos el número de venta correspondiente
+              doc.setFont("helvetica", "bold");
+              doc.setTextColor(80, 80, 80);
+              doc.text(`* #${numVentaArt} (UNIDAD ${fraccionStr})`, 104, yDetalle);
+              yDetalle += 6;
+            }
+          }
+
+          // 4. Subtotal del artículo con separación limpia
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          doc.setTextColor(50, 50, 50);
+          doc.text(`Subtotal: ${totalItem} €`, 192, yDetalle + 2, { align: "right" });
+          yDetalle += 6;
+
+          // Asegurar que la altura supere la imagen miniatura
+          yPos = Math.max(yDetalle + 3, yPos + 22);
+
+          // Separador sutil entre artículos (si no es el último)
+          if (i < listaItemsDesglose.length - 1) {
+            doc.setDrawColor(230, 230, 230);
+            doc.setLineWidth(0.2);
+            doc.line(82, yPos, 192, yPos);
+            yPos += 5;
+          }
         }
 
-        // Línea divisoria total
-        const yLineaFinal = Math.max(yPers + 4, 120);
+        // Línea divisoria total final
+        const yLineaFinal = Math.max(yPos + 2, 125);
         doc.setDrawColor(180, 180, 180);
         doc.setLineWidth(0.4);
         doc.line(82, yLineaFinal, 192, yLineaFinal);
@@ -5340,9 +5394,9 @@
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
         doc.setTextColor(34, 34, 34);
-        doc.text("Total del pedido", 130, yLineaFinal + 12);
+        doc.text("Total del pedido", 130, yLineaFinal + 9);
         doc.setFontSize(12);
-        doc.text(datosPedido.precio || "0.00 €", 192, yLineaFinal + 12, { align: "right" });
+        doc.text(datosPedido.precio || "0.00 €", 192, yLineaFinal + 9, { align: "right" });
 
         // Pie de página oficial
         doc.setFont("helvetica", "normal");
