@@ -1400,60 +1400,95 @@
             </div>
           </section>
 
-          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <div>
-                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+          <!-- SECCIÓN 1: RENDIMIENTO DE PRODUCTOS -->
+          <section class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs transition">
+            <div onclick="alternarColapsoBloqueStats('bloqueStatsProductos', 'iconoStatsProductos')" class="p-4 sm:p-5 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/70 transition">
+              <div class="min-w-0">
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                   <i class="fa-solid fa-chart-column text-slate-500 text-sm"></i> Rendimiento de Productos
                 </h2>
                 <p class="text-[11px] text-slate-400 mt-0.5">Ranking de los artículos más vendidos ordenados de mayor a menor.</p>
               </div>
-              <span id="badgeTotalProductosVendidos" class="self-start sm:self-auto text-xs bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold">
-                0 unidades vendidas
-              </span>
+              <div class="flex items-center gap-2.5 shrink-0">
+                <span id="badgeTotalProductosVendidos" class="hidden sm:inline-flex text-xs bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold">
+                  0 unidades vendidas
+                </span>
+                <span class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center transition shadow-2xs">
+                  <i id="iconoStatsProductos" class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                </span>
+              </div>
             </div>
-
-            <!-- Listado Ranking de Productos -->
-            <div id="contenedorRankingProductos" class="space-y-3">
-              <!-- Render dinámico -->
+            <div id="bloqueStatsProductos" class="p-4 sm:p-5 pt-0 border-t border-slate-100">
+              <div id="contenedorRankingProductos" class="space-y-3 pt-4"></div>
             </div>
           </section>
 
-          <!-- NUEVO BLOQUE: TOP CLIENTES (FUSIÓN WEB + ETSY) -->
-          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <div>
-                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+          <!-- SECCIÓN 2: TOP CLIENTES (FUSIÓN WEB + ETSY) -->
+          <section class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs transition">
+            <div onclick="alternarColapsoBloqueStats('bloqueStatsClientes', 'iconoStatsClientes')" class="p-4 sm:p-5 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/70 transition">
+              <div class="min-w-0">
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                   <i class="fa-solid fa-crown text-amber-500 text-sm"></i> Top Clientes con Más Compras
                 </h2>
                 <p class="text-[11px] text-slate-400 mt-0.5">Ranking acumulado consolidando ventas de la Tienda Web y de Etsy.</p>
               </div>
-              <span id="badgeTotalClientesStats" class="self-start sm:self-auto text-xs bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-xl font-bold">
-                0 clientes consolidados
-              </span>
+              <div class="flex items-center gap-2.5 shrink-0">
+                <span id="badgeTotalClientesStats" class="hidden sm:inline-flex text-xs bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-xl font-bold">
+                  0 clientes consolidados
+                </span>
+                <span class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center transition shadow-2xs">
+                  <i id="iconoStatsClientes" class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                </span>
+              </div>
             </div>
-
-            <div id="contenedorTopClientesFusion" class="space-y-3">
-              <!-- Render dinámico -->
+            <div id="bloqueStatsClientes" class="p-4 sm:p-5 pt-0 border-t border-slate-100">
+              <div id="contenedorTopClientesFusion" class="space-y-3 pt-4"></div>
             </div>
           </section>
 
-          <!-- NUEVO BLOQUE: INGRESOS POR MESES Y AÑOS (FUSIÓN WEB + ETSY) -->
-          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <div>
-                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+          <!-- SECCIÓN 3: TOP PAÍSES COMPRADORES (FUSIÓN WEB + ETSY) -->
+          <section class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs transition">
+            <div onclick="alternarColapsoBloqueStats('bloqueStatsPaises', 'iconoStatsPaises')" class="p-4 sm:p-5 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/70 transition">
+              <div class="min-w-0">
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-earth-americas text-emerald-600 text-sm"></i> Top Países Compradores
+                </h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">Distribución geográfica combinada de compras por país.</p>
+              </div>
+              <div class="flex items-center gap-2.5 shrink-0">
+                <span id="badgeTotalPaisesStats" class="hidden sm:inline-flex text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-xl font-bold">
+                  0 países
+                </span>
+                <span class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center transition shadow-2xs">
+                  <i id="iconoStatsPaises" class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                </span>
+              </div>
+            </div>
+            <div id="bloqueStatsPaises" class="p-4 sm:p-5 pt-0 border-t border-slate-100">
+              <div id="contenedorTopPaisesFusion" class="space-y-2.5 pt-4"></div>
+            </div>
+          </section>
+
+          <!-- SECCIÓN 4: INGRESOS POR MESES Y AÑOS (FUSIÓN WEB + ETSY) -->
+          <section class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs transition">
+            <div onclick="alternarColapsoBloqueStats('bloqueStatsIngresos', 'iconoStatsIngresos')" class="p-4 sm:p-5 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/70 transition">
+              <div class="min-w-0">
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                   <i class="fa-solid fa-calendar-days text-blue-600 text-sm"></i> Ingresos por Meses y Años
                 </h2>
                 <p class="text-[11px] text-slate-400 mt-0.5">Histórico global de facturación combinando ventas de Etsy y la Tienda Web.</p>
               </div>
-              <span id="badgeTotalFacturacionHistorica" class="self-start sm:self-auto text-xs bg-blue-50 border border-blue-200 text-blue-800 px-3 py-1.5 rounded-xl font-bold">
-                0.00 € total histórico
-              </span>
+              <div class="flex items-center gap-2.5 shrink-0">
+                <span id="badgeTotalFacturacionHistorica" class="hidden sm:inline-flex text-xs bg-blue-50 border border-blue-200 text-blue-800 px-3 py-1.5 rounded-xl font-bold">
+                  0.00 € total histórico
+                </span>
+                <span class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center transition shadow-2xs">
+                  <i id="iconoStatsIngresos" class="fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                </span>
+              </div>
             </div>
-
-            <div id="contenedorIngresosPorPeriodoFusion" class="space-y-4">
-              <!-- Render dinámico -->
+            <div id="bloqueStatsIngresos" class="p-4 sm:p-5 pt-0 border-t border-slate-100">
+              <div id="contenedorIngresosPorPeriodoFusion" class="space-y-4 pt-4"></div>
             </div>
           </section>
         </div>
@@ -5004,7 +5039,33 @@ function extraerUrlArchivoPedido(pedido) {
       }
     }
 
-    // ==================== SECCIÓN: ESTADÍSTICAS ====================
+    // ==================== SECCIÓN: ESTADÍSTICAS (ACORDEÓN Y VISTA DE 1 ELEMENTO) ====================
+    const estadoExpancionStats = {
+      prods: false,
+      clientes: false,
+      paises: false,
+      ingresos: false
+    };
+
+    function alternarColapsoBloqueStats(bloqueId, iconoId) {
+      const b = document.getElementById(bloqueId);
+      const icon = document.getElementById(iconoId);
+      if (!b) return;
+      const estaOculto = b.classList.contains('hidden');
+      if (estaOculto) {
+        b.classList.remove('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+      } else {
+        b.classList.add('hidden');
+        if (icon) icon.classList.add('rotate-180');
+      }
+    }
+
+    function toggleVerTodosStats(clave) {
+      estadoExpancionStats[clave] = !estadoExpancionStats[clave];
+      renderizarEstadisticas();
+    }
+
     function renderizarEstadisticas() {
       // -------------------------------------------------------------
       // 1. RANKING DE PRODUCTOS (TIENDA WEB)
@@ -5025,28 +5086,21 @@ function extraerUrlArchivoPedido(pedido) {
         const precio = obtenerImporteRealFila(p);
 
         if (!mapaProductos[titulo]) {
-          mapaProductos[titulo] = {
-            titulo: titulo,
-            unidades: 0,
-            ingresos: 0
-          };
+          mapaProductos[titulo] = { titulo: titulo, unidades: 0, ingresos: 0 };
         }
-
         mapaProductos[titulo].unidades += 1;
         mapaProductos[titulo].ingresos += precio;
         totalUnidades += 1;
         totalVentasGlobal += precio;
       });
 
-      const ranking = Object.values(mapaProductos).sort((a, b) => b.unidades - a.unidades || b.ingresos - a.ingresos);
+      const rankingProds = Object.values(mapaProductos).sort((a, b) => b.unidades - a.unidades || b.ingresos - a.ingresos);
 
-      if (badgeTotal) {
-        badgeTotal.innerText = `${totalUnidades} ${totalUnidades === 1 ? 'unidad vendida' : 'unidades vendidas'}`;
-      }
+      if (badgeTotal) badgeTotal.innerText = `${totalUnidades} ${totalUnidades === 1 ? 'unidad vendida' : 'unidades vendidas'}`;
 
       if (contenedorProds) {
-        if (ranking.length === 0) {
-          contenedorProds.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">No hay datos suficientes de ventas para mostrar estadísticas.</div>';
+        if (rankingProds.length === 0) {
+          contenedorProds.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">No hay datos de ventas disponibles.</div>';
         } else {
           const obtenerFoto = (nombre) => {
             const prod = buscarProductoEnCatalogo(nombre);
@@ -5054,51 +5108,55 @@ function extraerUrlArchivoPedido(pedido) {
             const fotos = extraerFotosProducto(prod.imagen);
             return (fotos && fotos.length > 0) ? fotos[0] : "";
           };
+          const obtenerId = (nombre) => (typeof obtenerIdProducto === 'function') ? obtenerIdProducto(nombre) : "PROD";
 
-          const obtenerId = (nombre) => {
-            return (typeof obtenerIdProducto === 'function') ? obtenerIdProducto(nombre) : "PROD";
-          };
+          const mostrarTodos = estadoExpancionStats.prods;
+          const prodsAMostrar = mostrarTodos ? rankingProds : rankingProds.slice(0, 1);
 
-          contenedorProds.innerHTML = ranking.map((item, idx) => {
+          const itemsHtml = prodsAMostrar.map((item, idx) => {
             const porcentaje = totalUnidades > 0 ? ((item.unidades / totalUnidades) * 100).toFixed(1) : 0;
             const foto = obtenerFoto(item.titulo);
             const idProd = obtenerId(item.titulo);
             const medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
 
             return `
-              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 transition hover:border-slate-300">
+              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 sm:p-4 hover:border-slate-300 transition">
                 <div class="flex items-center justify-between gap-3 mb-2.5">
                   <div class="flex items-center gap-3 min-w-0">
-                    <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-center shrink-0 shadow-2xs">
-                      ${medalla}
-                    </span>
+                    <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-center shrink-0 shadow-2xs">${medalla}</span>
                     <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
-                      ${foto ? `
-                        <img src="${foto}" alt="${item.titulo}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/logo-zeronte.png';">
-                      ` : `
-                        <span class="text-white font-bold text-xs bg-slate-900 w-full h-full flex items-center justify-center brand-font">Z</span>
-                      `}
+                      ${foto ? `<img src="${foto}" alt="${item.titulo}" class="w-full h-full object-cover">` : `<span class="text-white font-bold text-xs bg-slate-900 w-full h-full flex items-center justify-center">Z</span>`}
                     </div>
                     <div class="min-w-0">
                       <div class="flex items-center gap-1.5">
-                        <span class="bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider shadow-2xs shrink-0">${idProd}</span>
+                        <span class="bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded shadow-2xs shrink-0">${idProd}</span>
                         <h3 class="font-bold text-slate-900 text-xs sm:text-sm truncate">${item.titulo}</h3>
                       </div>
-                      <span class="text-[10px] text-slate-400 block mt-0.5">${item.unidades} ${item.unidades === 1 ? 'pedido realizado' : 'pedidos realizados'} (${porcentaje}% del total)</span>
+                      <span class="text-[10px] text-slate-400 block mt-0.5">${item.unidades} ${item.unidades === 1 ? 'pedido' : 'pedidos'} (${porcentaje}% del total)</span>
                     </div>
                   </div>
                   <div class="text-right shrink-0">
-                    <span class="text-[10px] uppercase font-bold text-slate-400 block">Recaudado</span>
+                    <span class="text-[9px] uppercase font-bold text-slate-400 block">Recaudado</span>
                     <span class="text-sm sm:text-base font-bold text-slate-900">${item.ingresos.toFixed(2)} €</span>
                   </div>
                 </div>
-
-                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                  <div class="bg-slate-900 h-2 rounded-full transition-all duration-500" style="width: ${porcentaje}%"></div>
+                <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-slate-900 h-1.5 rounded-full transition-all duration-500" style="width: ${porcentaje}%"></div>
                 </div>
               </div>
             `;
           }).join('');
+
+          const btnVerMas = rankingProds.length > 1 ? `
+            <div class="text-center pt-1">
+              <button type="button" onclick="toggleVerTodosStats('prods')" class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition active:scale-95 shadow-2xs">
+                <i class="fa-solid ${mostrarTodos ? 'fa-chevron-up' : 'fa-list'} text-[11px]"></i>
+                <span>${mostrarTodos ? 'Mostrar solo el artículo Nº 1' : `Mostrar los ${rankingProds.length} productos (+${rankingProds.length - 1} más)`}</span>
+              </button>
+            </div>
+          ` : '';
+
+          contenedorProds.innerHTML = itemsHtml + btnVerMas;
         }
       }
 
@@ -5109,36 +5167,24 @@ function extraerUrlArchivoPedido(pedido) {
       const badgeTotalClientes = document.getElementById('badgeTotalClientesStats');
 
       const mapaClientesFusion = {};
+      const normalizarClave = (str) => (str || "").toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-      const normalizarClave = (str) => {
-        return (str || "").toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      };
-
-      // 2.A. Sumar pedidos de la Tienda Web
       listaPedidosGlobal.forEach(p => {
         const est = (p.estado || "").toLowerCase();
         if (est.includes("cancelado")) return;
-
         const email = (p.email || "").trim().toLowerCase();
         const nombre = (p.nombre || "Cliente Web").trim();
         const clave = email ? `email_${email}` : `nom_${normalizarClave(nombre)}`;
         const importe = obtenerImporteRealFila(p);
 
         if (!mapaClientesFusion[clave]) {
-          mapaClientesFusion[clave] = {
-            nombre: nombre,
-            email: email,
-            totalGastado: 0,
-            pedidosWeb: 0,
-            pedidosEtsy: 0
-          };
+          mapaClientesFusion[clave] = { nombre: nombre, email: email, totalGastado: 0, pedidosWeb: 0, pedidosEtsy: 0 };
         }
         mapaClientesFusion[clave].totalGastado += importe;
         mapaClientesFusion[clave].pedidosWeb += 1;
         if (!mapaClientesFusion[clave].email && email) mapaClientesFusion[clave].email = email;
       });
 
-      // 2.B. Sumar pedidos de Etsy
       (typeof listaVentasEtsyGlobal !== 'undefined' ? listaVentasEtsyGlobal : []).forEach(v => {
         const email = (v.email || "").trim().toLowerCase();
         const nombre = (v.nombre || "Cliente Etsy").trim();
@@ -5146,13 +5192,7 @@ function extraerUrlArchivoPedido(pedido) {
         const importe = parseFloat(v.precio) || 0;
 
         if (!mapaClientesFusion[clave]) {
-          mapaClientesFusion[clave] = {
-            nombre: nombre,
-            email: email,
-            totalGastado: 0,
-            pedidosWeb: 0,
-            pedidosEtsy: 0
-          };
+          mapaClientesFusion[clave] = { nombre: nombre, email: email, totalGastado: 0, pedidosWeb: 0, pedidosEtsy: 0 };
         }
         mapaClientesFusion[clave].totalGastado += importe;
         mapaClientesFusion[clave].pedidosEtsy += 1;
@@ -5163,18 +5203,17 @@ function extraerUrlArchivoPedido(pedido) {
         .map(c => ({ ...c, totalPedidos: c.pedidosWeb + c.pedidosEtsy }))
         .sort((a, b) => b.totalPedidos - a.totalPedidos || b.totalGastado - a.totalGastado);
 
-      if (badgeTotalClientes) {
-        badgeTotalClientes.innerText = `${rankingClientes.length} clientes consolidados`;
-      }
+      if (badgeTotalClientes) badgeTotalClientes.innerText = `${rankingClientes.length} clientes consolidados`;
 
       if (contTopClientes) {
         if (rankingClientes.length === 0) {
           contTopClientes.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">No hay datos de clientes registrados todavía.</div>';
         } else {
           const maxGasto = rankingClientes[0] ? (rankingClientes[0].totalGastado || 1) : 1;
-          const top20Clientes = rankingClientes.slice(0, 15);
+          const mostrarTodosClientes = estadoExpancionStats.clientes;
+          const clientesAMostrar = mostrarTodosClientes ? rankingClientes.slice(0, 20) : rankingClientes.slice(0, 1);
 
-          contTopClientes.innerHTML = top20Clientes.map((c, idx) => {
+          const itemsHtml = clientesAMostrar.map((c, idx) => {
             const medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
             const porcentajeGasto = maxGasto > 0 ? Math.min(100, ((c.totalGastado / maxGasto) * 100)).toFixed(0) : 0;
 
@@ -5182,9 +5221,7 @@ function extraerUrlArchivoPedido(pedido) {
               <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 sm:p-4 hover:border-slate-300 transition">
                 <div class="flex items-center justify-between gap-3 mb-2">
                   <div class="flex items-center gap-2.5 min-w-0">
-                    <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 flex items-center justify-center shrink-0 shadow-2xs">
-                      ${medalla}
-                    </span>
+                    <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 flex items-center justify-center shrink-0 shadow-2xs">${medalla}</span>
                     <div class="min-w-0">
                       <div class="flex items-center gap-1.5 flex-wrap">
                         <h4 class="font-bold text-slate-900 text-xs sm:text-sm truncate">${c.nombre}</h4>
@@ -5194,7 +5231,6 @@ function extraerUrlArchivoPedido(pedido) {
                       <span class="text-[10px] text-slate-400 block truncate mt-0.5">${c.email || 'Sin correo registrado'}</span>
                     </div>
                   </div>
-
                   <div class="text-right shrink-0">
                     <span class="text-sm font-bold text-slate-900 block">${c.totalGastado.toFixed(2)} €</span>
                     <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md inline-block mt-0.5">
@@ -5202,18 +5238,102 @@ function extraerUrlArchivoPedido(pedido) {
                     </span>
                   </div>
                 </div>
-
                 <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
                   <div class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: ${porcentajeGasto}%"></div>
                 </div>
               </div>
             `;
           }).join('');
+
+          const btnVerMas = rankingClientes.length > 1 ? `
+            <div class="text-center pt-1">
+              <button type="button" onclick="toggleVerTodosStats('clientes')" class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition active:scale-95 shadow-2xs">
+                <i class="fa-solid ${mostrarTodosClientes ? 'fa-chevron-up' : 'fa-users'} text-[11px]"></i>
+                <span>${mostrarTodosClientes ? 'Mostrar solo el cliente Nº 1' : `Mostrar los mejores clientes (+${rankingClientes.length - 1} más)`}</span>
+              </button>
+            </div>
+          ` : '';
+
+          contTopClientes.innerHTML = itemsHtml + btnVerMas;
         }
       }
 
       // -------------------------------------------------------------
-      // 3. INGRESOS POR MESES Y AÑOS (FUSIÓN WEB + ETSY)
+      // 3. TOP PAÍSES COMPRADORES (FUSIÓN WEB + ETSY)
+      // -------------------------------------------------------------
+      const contTopPaises = document.getElementById('contenedorTopPaisesFusion');
+      const badgeTotalPaises = document.getElementById('badgeTotalPaisesStats');
+
+      const mapaPaisesFusion = {};
+      let totalVentasConPais = 0;
+
+      // 3.A. Países desde Etsy
+      (typeof listaVentasEtsyGlobal !== 'undefined' ? listaVentasEtsyGlobal : []).forEach(v => {
+        const pais = (v.pais || "España").trim();
+        if (!mapaPaisesFusion[pais]) mapaPaisesFusion[pais] = { pais: pais, ventas: 0, facturado: 0 };
+        mapaPaisesFusion[pais].ventas += 1;
+        mapaPaisesFusion[pais].facturado += (parseFloat(v.precio) || 0);
+        totalVentasConPais += 1;
+      });
+
+      // 3.B. Países desde Tienda Web (España por defecto si no consta)
+      listaPedidosGlobal.forEach(p => {
+        const est = (p.estado || "").toLowerCase();
+        if (est.includes("cancelado")) return;
+        const pais = (p.pais || "España").trim();
+        if (!mapaPaisesFusion[pais]) mapaPaisesFusion[pais] = { pais: pais, ventas: 0, facturado: 0 };
+        mapaPaisesFusion[pais].ventas += 1;
+        mapaPaisesFusion[pais].facturado += obtenerImporteRealFila(p);
+        totalVentasConPais += 1;
+      });
+
+      const rankingPaises = Object.values(mapaPaisesFusion).sort((a, b) => b.ventas - a.ventas || b.facturado - a.facturado);
+
+      if (badgeTotalPaises) badgeTotalPaises.innerText = `${rankingPaises.length} ${rankingPaises.length === 1 ? 'país' : 'países'}`;
+
+      if (contTopPaises) {
+        if (rankingPaises.length === 0) {
+          contTopPaises.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">No hay datos geográficos disponibles.</div>';
+        } else {
+          const mostrarTodosPaises = estadoExpancionStats.paises;
+          const paisesAMostrar = mostrarTodosPaises ? rankingPaises : rankingPaises.slice(0, 1);
+
+          const itemsHtml = paisesAMostrar.map((item, idx) => {
+            const porcentaje = totalVentasConPais > 0 ? ((item.ventas / totalVentasConPais) * 100).toFixed(0) : 0;
+            const medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+
+            return `
+              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition">
+                <div class="flex items-center gap-2.5 truncate">
+                  <span class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-center shrink-0 shadow-2xs">${medalla}</span>
+                  <div class="min-w-0">
+                    <span class="font-bold text-slate-900 text-xs sm:text-sm truncate block">${item.pais}</span>
+                    <span class="text-[10px] text-slate-400 block">${item.facturado.toFixed(2)} € facturados</span>
+                  </div>
+                </div>
+                <div class="text-right shrink-0">
+                  <span class="font-bold text-slate-900 text-sm">${item.ventas} ${item.ventas === 1 ? 'pedido' : 'pedidos'}</span>
+                  <span class="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded-md font-semibold ml-1">(${porcentaje}%)</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          const btnVerMas = rankingPaises.length > 1 ? `
+            <div class="text-center pt-1">
+              <button type="button" onclick="toggleVerTodosStats('paises')" class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition active:scale-95 shadow-2xs">
+                <i class="fa-solid ${mostrarTodosPaises ? 'fa-chevron-up' : 'fa-earth-americas'} text-[11px]"></i>
+                <span>${mostrarTodosPaises ? 'Mostrar solo el país Nº 1' : `Mostrar los ${rankingPaises.length} países (+${rankingPaises.length - 1} más)`}</span>
+              </button>
+            </div>
+          ` : '';
+
+          contTopPaises.innerHTML = itemsHtml + btnVerMas;
+        }
+      }
+
+      // -------------------------------------------------------------
+      // 4. INGRESOS POR MESES Y AÑOS (FUSIÓN WEB + ETSY)
       // -------------------------------------------------------------
       const contPeriodos = document.getElementById('contenedorIngresosPorPeriodoFusion');
       const badgeFacturacionHistorica = document.getElementById('badgeTotalFacturacionHistorica');
@@ -5227,25 +5347,10 @@ function extraerUrlArchivoPedido(pedido) {
         if (mesIndex === null || isNaN(mesIndex) || mesIndex < 0 || mesIndex > 11) mesIndex = 0;
 
         if (!mapaAnios[anio]) {
-          mapaAnios[anio] = {
-            anio: anio,
-            totalAnio: 0,
-            totalWeb: 0,
-            totalEtsy: 0,
-            pedidosAnio: 0,
-            meses: {}
-          };
+          mapaAnios[anio] = { anio: anio, totalAnio: 0, totalWeb: 0, totalEtsy: 0, pedidosAnio: 0, meses: {} };
         }
-
         if (!mapaAnios[anio].meses[mesIndex]) {
-          mapaAnios[anio].meses[mesIndex] = {
-            mesIndex: mesIndex,
-            nombreMes: mesesNombres[mesIndex],
-            totalMes: 0,
-            totalWeb: 0,
-            totalEtsy: 0,
-            pedidosMes: 0
-          };
+          mapaAnios[anio].meses[mesIndex] = { mesIndex: mesIndex, nombreMes: mesesNombres[mesIndex], totalMes: 0, totalWeb: 0, totalEtsy: 0, pedidosMes: 0 };
         }
 
         mapaAnios[anio].totalAnio += importe;
@@ -5264,23 +5369,19 @@ function extraerUrlArchivoPedido(pedido) {
         granTotalHistorico += importe;
       };
 
-      // 3.A. Procesar Web
       listaPedidosGlobal.forEach(p => {
         const est = (p.estado || "").toLowerCase();
         if (est.includes("cancelado")) return;
         const fechaObj = (typeof parsearFechaPedido === 'function') ? parsearFechaPedido(p.fecha) : new Date(p.fecha);
         if (fechaObj && !isNaN(fechaObj.getTime())) {
-          const imp = obtenerImporteRealFila(p);
-          registrarIngresoEnPeriodo(fechaObj.getFullYear(), fechaObj.getMonth(), imp, 'web');
+          registrarIngresoEnPeriodo(fechaObj.getFullYear(), fechaObj.getMonth(), obtenerImporteRealFila(p), 'web');
         }
       });
 
-      // 3.B. Procesar Etsy
       (typeof listaVentasEtsyGlobal !== 'undefined' ? listaVentasEtsyGlobal : []).forEach(v => {
         const imp = parseFloat(v.precio) || 0;
         let anio = parseInt(v.anio, 10);
         let mes = 0;
-
         const fechaRaw = (v.fecha || "").toString();
         const partes = fechaRaw.split(/[\/\-\s]+/);
         if (partes.length >= 3) {
@@ -5290,18 +5391,14 @@ function extraerUrlArchivoPedido(pedido) {
           if (d3 > 2000) { anio = d3; mes = d2 - 1; }
           else if (d1 > 2000) { anio = d1; mes = d2 - 1; }
         }
-
         if (!anio || isNaN(anio)) {
           const mAnio = fechaRaw.match(/\b(202[3-6])\b/);
           anio = mAnio ? parseInt(mAnio[1], 10) : 2024;
         }
-
         registrarIngresoEnPeriodo(anio, mes, imp, 'etsy');
       });
 
-      if (badgeFacturacionHistorica) {
-        badgeFacturacionHistorica.innerText = `${granTotalHistorico.toFixed(2)} € total consolidado`;
-      }
+      if (badgeFacturacionHistorica) badgeFacturacionHistorica.innerText = `${granTotalHistorico.toFixed(2)} € total consolidado`;
 
       if (contPeriodos) {
         const aniosOrdenados = Object.keys(mapaAnios).map(Number).sort((a, b) => b - a);
@@ -5309,24 +5406,23 @@ function extraerUrlArchivoPedido(pedido) {
         if (aniosOrdenados.length === 0) {
           contPeriodos.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">No hay datos históricos disponibles.</div>';
         } else {
-          contPeriodos.innerHTML = aniosOrdenados.map(anioKey => {
+          const mostrarTodosAnios = estadoExpancionStats.ingresos;
+          const aniosAMostrar = mostrarTodosAnios ? aniosOrdenados : aniosOrdenados.slice(0, 1);
+
+          const itemsHtml = aniosAMostrar.map(anioKey => {
             const datoAnio = mapaAnios[anioKey];
             const mesesDelAnio = Object.values(datoAnio.meses).sort((a, b) => b.mesIndex - a.mesIndex);
 
             return `
               <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
-                <!-- Cabecera de Año -->
                 <div class="bg-slate-900 text-white p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div class="flex items-center gap-2.5">
-                    <span class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center font-bold text-sm">
-                      ${datoAnio.anio}
-                    </span>
+                    <span class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center font-bold text-sm">${datoAnio.anio}</span>
                     <div>
                       <h3 class="font-bold text-sm sm:text-base leading-none">Año ${datoAnio.anio}</h3>
                       <span class="text-[10px] text-slate-300 mt-0.5 block">${datoAnio.pedidosAnio} pedidos totales</span>
                     </div>
                   </div>
-
                   <div class="flex items-center gap-3 self-end sm:self-auto text-right">
                     <div class="text-right">
                       <span class="text-[9px] uppercase font-bold text-slate-400 block leading-none">Total Año</span>
@@ -5339,7 +5435,6 @@ function extraerUrlArchivoPedido(pedido) {
                   </div>
                 </div>
 
-                <!-- Desglose por Meses del Año -->
                 <div class="p-3 sm:p-4 bg-white divide-y divide-slate-100 space-y-2">
                   ${mesesDelAnio.map(m => {
                     const porcMes = datoAnio.totalAnio > 0 ? ((m.totalMes / datoAnio.totalAnio) * 100).toFixed(0) : 0;
@@ -5359,8 +5454,8 @@ function extraerUrlArchivoPedido(pedido) {
                             <span class="text-[10px] text-slate-400 ml-1 font-semibold">(${porcMes}%)</span>
                           </div>
                         </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/60">
-                          <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: ${porcMes}%"></div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200/60">
+                          <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: ${porcMes}%"></div>
                         </div>
                       </div>
                     `;
@@ -5369,6 +5464,17 @@ function extraerUrlArchivoPedido(pedido) {
               </div>
             `;
           }).join('');
+
+          const btnVerMas = aniosOrdenados.length > 1 ? `
+            <div class="text-center pt-1">
+              <button type="button" onclick="toggleVerTodosStats('ingresos')" class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition active:scale-95 shadow-2xs">
+                <i class="fa-solid ${mostrarTodosAnios ? 'fa-chevron-up' : 'fa-calendar'} text-[11px]"></i>
+                <span>${mostrarTodosAnios ? 'Mostrar solo el año más reciente' : `Ver histórico completo de años (+${aniosOrdenados.length - 1} años)`}</span>
+              </button>
+            </div>
+          ` : '';
+
+          contPeriodos.innerHTML = itemsHtml + btnVerMas;
         }
       }
     }
