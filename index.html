@@ -2169,6 +2169,18 @@
             return (b.totalVentas || 0) - (a.totalVentas || 0);
           });
 
+          // Descargar ofertas sincronizadas desde Google Sheets
+          try {
+            const resOf = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerOfertas&_t=${Date.now()}`);
+            const dataOf = await resOf.json();
+            if (dataOf && dataOf.status === "success" && Array.isArray(dataOf.ofertas)) {
+              campanasOfertasRemotas = dataOf.ofertas;
+              localStorage.setItem('zeronte_campanas_ofertas', JSON.stringify(dataOf.ofertas));
+            }
+          } catch(errOf) {
+            console.warn("No se pudieron cargar ofertas remotas:", errOf);
+          }
+
           catalogoCompleto = productos;
 
           actualizarConteosCategorias();
@@ -2364,29 +2376,31 @@
       return `${pad(horas)}:${pad(min)}:${pad(seg)}`;
     }
 
-    function obtenerFechaFinOfertaSincronizada(p, ahora) {
-      try {
-        const campanasLocales = JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]');
-        if (Array.isArray(campanasLocales) && campanasLocales.length > 0) {
-          const camp = campanasLocales.find(c => 
-            c.activa && 
-            ahora >= c.fechaInicio && 
-            (!c.fechaFin || ahora <= c.fechaFin) &&
-            Array.isArray(c.idsObjetivo) && 
-            c.idsObjetivo.map(x=>x.toLowerCase()).includes((p.id||'').toLowerCase())
-          );
-          if (camp && camp.fechaFin && !camp.sinFin) {
-            return camp.fechaFin;
-          }
-          const campGenerica = campanasLocales.find(c => c.activa && c.fechaFin && !c.sinFin && ahora <= c.fechaFin);
-          if (campGenerica) {
-            return campGenerica.fechaFin;
-          }
-        }
-      } catch(e){}
+    let campanasOfertasRemotas = [];
 
-      // Si se abre en un móvil que no tiene acceso al localStorage del panel admin,
-      // sincronizar con el fin del ciclo de oferta de 48 horas exactas
+    function obtenerFechaFinOfertaSincronizada(p, ahora) {
+      const listaCampanas = (Array.isArray(campanasOfertasRemotas) && campanasOfertasRemotas.length > 0)
+        ? campanasOfertasRemotas
+        : (function(){ try { return JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]'); } catch(e){ return []; } })();
+
+      if (Array.isArray(listaCampanas) && listaCampanas.length > 0) {
+        const pIdLower = (p.id || '').toLowerCase();
+        const camp = listaCampanas.find(c => 
+          c.activa && 
+          ahora >= c.fechaInicio && 
+          (!c.fechaFin || ahora <= c.fechaFin) &&
+          Array.isArray(c.idsObjetivo) && 
+          c.idsObjetivo.map(x => (x || '').toLowerCase()).includes(pIdLower)
+        );
+        if (camp && camp.fechaFin && !camp.sinFin) {
+          return camp.fechaFin;
+        }
+        const campGenerica = listaCampanas.find(c => c.activa && c.fechaFin && !c.sinFin && ahora <= c.fechaFin);
+        if (campGenerica) {
+          return campGenerica.fechaFin;
+        }
+      }
+
       const ciclo48h = 48 * 60 * 60 * 1000;
       return (Math.floor(ahora / ciclo48h) + 1) * ciclo48h;
     }
