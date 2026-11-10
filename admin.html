@@ -2968,6 +2968,12 @@ function extraerUrlArchivoPedido(pedido) {
         // Formateo del estado de cobro para el interior del desplegable
         const fechaCobroFormateada = p.fechaPago ? formatearFechaCobroDetalle(p.fechaPago) : "";
 
+        // Detección de cambio de número de pedido con el siguiente elemento
+        const idBaseActual = (p.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
+        const siguientePedido = pedidosPaginados[idx + 1];
+        const idBaseSiguiente = siguientePedido ? (siguientePedido.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase() : null;
+        const esUltimoDelGrupo = siguientePedido && (idBaseActual !== idBaseSiguiente);
+
         return `
           <!-- FILA PRINCIPAL COMPACTA -->
           <tr onclick="toggleDetallePedido('${detalleId}')" class="${fondoPastel} cursor-pointer transition select-none border-b-2 border-slate-300/80 hover:brightness-95">
@@ -3157,11 +3163,17 @@ function extraerUrlArchivoPedido(pedido) {
               </div>
             </td>
           </tr>
+          ${esUltimoDelGrupo ? '<tr class="bg-white pointer-events-none select-none"><td colspan="7" class="h-4 p-0 bg-white border-0"></td></tr>' : ''}
         `;
       }).join('');
 
       // Smartphone (Móvil)
       vistaMovil.innerHTML = pedidosPaginados.map((p, idx) => {
+        const idBaseActualMovil = (p.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase();
+        const siguientePedidoMovil = pedidosPaginados[idx + 1];
+        const idBaseSiguienteMovil = siguientePedidoMovil ? (siguientePedidoMovil.id || "").toString().replace(/\s*\(\d+\/\d+\)/g, '').trim().toUpperCase() : null;
+        const esUltimoDelGrupoMovil = siguientePedidoMovil && (idBaseActualMovil !== idBaseSiguienteMovil);
+
         const telInfo = formatearTelefonoConPrefijo(p.telefono);
         const fechaFormateada = formatearFechaEspanol(p.fecha);
         const precioRealUnitario = obtenerImporteRealFila(p);
@@ -3360,6 +3372,7 @@ function extraerUrlArchivoPedido(pedido) {
               </div>
             </div>
           </div>
+          ${esUltimoDelGrupoMovil ? '<div class="h-3 bg-white w-full pointer-events-none"></div>' : ''}
         `;
       }).join('');
     }
