@@ -54,6 +54,19 @@
 
         <button type="submit" id="btnEntrar" class="w-full bg-white hover:bg-gold text-black font-bold py-3.5 rounded-xl uppercase text-xs tracking-wider transition active:scale-98">Acceder</button>
         
+        <!-- Barra de Progreso con Porcentaje al Acceder -->
+        <div id="progresoLoginBox" class="hidden space-y-2 pt-2 text-left">
+          <div class="flex items-center justify-between text-[11px] font-bold text-zinc-400">
+            <span id="txtProgresoLogin" class="flex items-center gap-1.5 text-zinc-300">
+              <i class="fa-solid fa-circle-notch fa-spin text-gold"></i> Verificando credenciales...
+            </span>
+            <span id="porcProgresoLogin" class="font-mono text-gold font-extrabold">0%</span>
+          </div>
+          <div class="w-full bg-zinc-800 rounded-full h-2 overflow-hidden border border-zinc-700">
+            <div id="barraProgresoLogin" class="bg-gold h-2 rounded-full transition-all duration-200" style="width: 0%;"></div>
+          </div>
+        </div>
+        
         </form>
     </div>
   </div>
@@ -944,7 +957,7 @@
                       <span class="w-[1px] h-4 bg-slate-300 mx-1"></span>
                       <button type="button" onmousedown="event.preventDefault()" onclick="aplicarFormato('justifyFull')" title="Justificar texto" class="w-7 h-7 flex items-center justify-center rounded-lg bg-white shadow-2xs text-slate-900 border border-slate-200 transition"><i class="fa-solid fa-align-justify text-xs"></i></button>
                     </div>
-                    <div id="editorDescripcion" contenteditable="true" class="p-3 min-h-[120px] max-h-[220px] overflow-y-auto text-xs text-slate-800 leading-relaxed text-justify [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 focus:outline-none"></div>
+                    <div id="editorDescripcion" contenteditable="true" style="resize: vertical;" class="p-3 min-h-[140px] max-h-[550px] overflow-y-auto text-xs text-slate-800 leading-relaxed text-justify [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 focus:outline-none"></div>
                   </div>
                   <input type="hidden" id="nuevaDesc">
                 </div>
@@ -1864,23 +1877,68 @@ function extraerUrlArchivoPedido(pedido) {
 
     async function cargarDatos(esSilencioso = false) {
       const btn = document.getElementById('btnEntrar');
-      if (btn && !esSilencioso) btn.innerText = "Cargando...";
+      const boxProgreso = document.getElementById('progresoLoginBox');
+      const barra = document.getElementById('barraProgresoLogin');
+      const porc = document.getElementById('porcProgresoLogin');
+      const txt = document.getElementById('txtProgresoLogin');
+      let intervaloProgresoLogin = null;
+
+      if (!esSilencioso) {
+        if (btn) {
+          btn.classList.add('hidden');
+          btn.disabled = true;
+        }
+        if (boxProgreso) boxProgreso.classList.remove('hidden');
+        if (barra) barra.style.width = '15%';
+        if (porc) porc.innerText = '15%';
+        if (txt) txt.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-gold"></i> Conectando al servidor...`;
+
+        let valorProgreso = 15;
+        intervaloProgresoLogin = setInterval(() => {
+          if (valorProgreso < 88) {
+            valorProgreso += Math.floor(Math.random() * 8) + 4;
+            if (valorProgreso > 88) valorProgreso = 88;
+            if (barra) barra.style.width = valorProgreso + '%';
+            if (porc) porc.innerText = valorProgreso + '%';
+            if (valorProgreso > 50 && txt) {
+              txt.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-gold"></i> Descargando base de datos...`;
+            }
+          }
+        }, 180);
+      }
 
       try {
         const res = await fetch(`${APPS_SCRIPT_URL}?accion=datosAdmin&clave=${encodeURIComponent(tokenClave)}`);
         const data = await res.json();
 
         if (data.status !== "success") {
+          if (intervaloProgresoLogin) clearInterval(intervaloProgresoLogin);
+          if (boxProgreso) boxProgreso.classList.add('hidden');
+          if (btn) {
+            btn.classList.remove('hidden');
+            btn.innerText = "Acceder";
+            btn.disabled = false;
+          }
           if (!esSilencioso) alert("Clave incorrecta");
-          if (btn) btn.innerText = "Acceder";
           return;
+        }
+
+        if (!esSilencioso) {
+          if (intervaloProgresoLogin) clearInterval(intervaloProgresoLogin);
+          if (barra) barra.style.width = '100%';
+          if (porc) porc.innerText = '100%';
+          if (txt) txt.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Acceso concedido`;
+          await new Promise(r => setTimeout(r, 400));
         }
 
         document.getElementById('pantallaLogin').classList.add('hidden');
         document.getElementById('panelDashboard').classList.remove('hidden');
 
-        // Dejar el botón en su estado natural ("Acceder") para futuros cierres de sesión
+        // Dejar el botón y barra en su estado natural para futuros cierres de sesión
+        if (boxProgreso) boxProgreso.classList.add('hidden');
+        if (barra) barra.style.width = '0%';
         if (btn) {
+          btn.classList.remove('hidden');
           btn.innerText = "Acceder";
           btn.disabled = false;
         }
@@ -3899,11 +3957,18 @@ function extraerUrlArchivoPedido(pedido) {
 
       if (!modal || !form) return;
 
+      // Restablecer el scroll al punto más alto siempre
+      form.scrollTop = 0;
+      modal.scrollTop = 0;
+
       form.reset();
       resetearSlotsFotosEtsy();
       previsualizarVideoEtsy('');
       const editorDesc = document.getElementById('editorDescripcion');
-      if (editorDesc) editorDesc.innerHTML = '';
+      if (editorDesc) {
+        editorDesc.innerHTML = '';
+        editorDesc.scrollTop = 0;
+      }
       alternarNuevaCategoria('');
 
       if (prodId) {
@@ -4026,9 +4091,27 @@ function extraerUrlArchivoPedido(pedido) {
         if (chkDestacado) chkDestacado.checked = false;
       }
 
-      // Bloquear scroll del fondo
+      // Bloquear scroll del fondo y mostrar modal
       document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
+
+      // Restablecer altura redimensionada de la descripción para que no empuje el formulario
+      if (editorDesc) {
+        editorDesc.style.height = '';
+        editorDesc.scrollTop = 0;
+      }
+
+      // Forzar de forma inmediata que el formulario aparezca arriba del todo
+      form.scrollTop = 0;
+      modal.scrollTop = 0;
+      requestAnimationFrame(() => {
+        form.scrollTop = 0;
+        modal.scrollTop = 0;
+        setTimeout(() => {
+          form.scrollTop = 0;
+          modal.scrollTop = 0;
+        }, 30);
+      });
     }
 
     function cerrarModalProducto() {
