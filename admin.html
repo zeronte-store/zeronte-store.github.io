@@ -569,10 +569,13 @@
                 <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Catálogo de Productos</h1>
                 <span id="badgeTotalCatalogo" class="text-xs bg-slate-200/80 text-slate-700 px-2 py-0.5 rounded-full font-bold">0</span>
               </div>
-              <p class="text-xs text-slate-400 mt-0.5">Gestión y rendimiento individualizado de tus artículos publicados en la web de Zeronte</p>
+              <p class="text-xs text-slate-400 mt-0.5">Gestión de los artículos publicados en la web de Zeronte</p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-end gap-2 flex-wrap w-full md:w-auto shrink-0 ml-auto">
+              <button type="button" onclick="abrirModalPreciosLote()" class="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs">
+                <i class="fa-solid fa-tags text-xs"></i> Precios por lote
+              </button>
               <button onclick="abrirModalProducto()" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs">
                 <i class="fa-solid fa-plus text-xs"></i> Añadir artículo
               </button>
@@ -625,6 +628,168 @@
           <div id="sinArticulosCatalogo" class="hidden text-center py-16 bg-white border border-slate-200 rounded-2xl shadow-xs">
             <i class="fa-solid fa-box-open text-slate-300 text-3xl mb-2 block"></i>
             <p class="text-xs text-slate-500 font-medium">No se encontraron artículos con ese criterio.</p>
+          </div>
+
+          <!-- MODAL FLOTANTE: MODIFICACIÓN DE PRECIOS POR LOTE -->
+          <div id="modalPreciosLote" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-y-auto select-none">
+            <div class="bg-white border border-slate-200 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-6 transform transition-all animate-in fade-in zoom-in-95 duration-150">
+              
+              <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-emerald-50/70">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs shadow-2xs">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-slate-900">Modificar Precios por Lotes</h3>
+                    <p class="text-[10px] text-slate-500">Actualiza masivamente tarifas y ofertas por categoría o productos seleccionados.</p>
+                  </div>
+                </div>
+                <button type="button" onclick="cerrarModalPreciosLote()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl transition">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <form onsubmit="ejecutarCambioPreciosLote(event)" class="p-5 space-y-4 text-xs text-slate-700 max-h-[80vh] overflow-y-auto">
+                
+                <!-- 1. Alcance / Artículos a modificar -->
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-600 mb-1.5">1. ¿Qué artículos deseas modificar? *</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="setAlcancePreciosLote('categoria', this)" data-alcance-lote="categoria" class="btn-alcance-lote p-2.5 rounded-xl border border-emerald-400 bg-emerald-50 text-emerald-950 font-bold text-center transition active:scale-95 shadow-2xs">
+                      <i class="fa-solid fa-layer-group text-xs mb-1 block text-emerald-600"></i>
+                      <span>Por Categoría</span>
+                    </button>
+                    <button type="button" onclick="setAlcancePreciosLote('individual', this)" data-alcance-lote="individual" class="btn-alcance-lote p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-center transition active:scale-95 shadow-2xs">
+                      <i class="fa-solid fa-list-check text-xs mb-1 block text-slate-400"></i>
+                      <span>Seleccionar productos</span>
+                    </button>
+                    <button type="button" onclick="setAlcancePreciosLote('todos', this)" data-alcance-lote="todos" class="btn-alcance-lote p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-center transition active:scale-95 shadow-2xs">
+                      <i class="fa-solid fa-shop text-xs mb-1 block text-slate-400"></i>
+                      <span>Toda la tienda</span>
+                    </button>
+                  </div>
+
+                  <!-- Desplegable categoría -->
+                  <div id="cajaSubAlcanceLoteCategoria" class="mt-2.5">
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Elige la categoría objetivo:</label>
+                    <select id="selectCategoriaLote" onchange="actualizarPrevisualizacionConteoLote()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                      <!-- Dinámico -->
+                    </select>
+                  </div>
+
+                  <!-- Lista interactiva de productos seleccionables con buscador y select all -->
+                  <div id="cajaSubAlcanceLoteIndividual" class="hidden mt-2.5 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="relative flex-grow">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-[10px] text-slate-400"></i>
+                        <input type="text" id="buscadorProdsLote" oninput="filtrarCheckboxProdsLote(this.value)" placeholder="Buscar productos para marcar..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+                      </div>
+                      <button type="button" onclick="toggleTodosCheckboxLote()" class="shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-xl hover:bg-emerald-100 transition">
+                        Marcar / Desmarcar todos
+                      </button>
+                    </div>
+
+                    <div id="listaCheckboxesProdsLote" class="max-h-44 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50">
+                      <!-- Dinámico -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Operación a aplicar -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3">
+                  <label class="block text-[10px] uppercase font-bold text-slate-600">2. Acción sobre el Precio Base (€) *</label>
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <select id="operacionPrecioLote" onchange="actualizarPlaceholderOperacionLote(this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                        <option value="fijar">Fijar nuevo precio exacto (€)</option>
+                        <option value="sumar_fijo">Sumar importe (+ €)</option>
+                        <option value="restar_fijo">Restar importe (- €)</option>
+                        <option value="sumar_porc">Aumentar porcentaje (+ %)</option>
+                        <option value="restar_porc">Reducir porcentaje (- %)</option>
+                        <option value="no_cambiar">No modificar precio base</option>
+                      </select>
+                    </div>
+
+                    <div class="relative" id="cajaInputValorPrecioLote">
+                      <input type="number" step="0.01" min="0" id="valorOperacionPrecioLote" placeholder="Ej. 1.99" class="w-full bg-white border border-slate-300 rounded-xl pl-3 pr-8 py-2 text-xs text-slate-900 font-bold focus:outline-none focus:border-emerald-500 transition">
+                      <span id="simboloOperacionPrecioLote" class="absolute right-3 top-2 text-slate-400 font-bold">€</span>
+                    </div>
+                  </div>
+
+                  <!-- Ajuste complementario para Precio de Oferta -->
+                  <div class="pt-2 border-t border-slate-200/70">
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Precio de Oferta (Opcional):</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <select id="operacionOfertaLote" onchange="toggleCajaOfertaLote(this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer">
+                        <option value="mantener">Mantener ofertas actuales sin cambios</option>
+                        <option value="fijar_oferta">Fijar precio de oferta exacto (€)</option>
+                        <option value="quitar_oferta">Quitar oferta (dejar sin rebaja)</option>
+                      </select>
+                      <div id="cajaInputValorOfertaLote" class="hidden relative">
+                        <input type="number" step="0.01" min="0" id="valorOfertaLote" placeholder="Ej. 0.99" class="w-full bg-white border border-slate-300 rounded-xl pl-3 pr-8 py-2 text-xs text-slate-900 font-bold focus:outline-none focus:border-emerald-500">
+                        <span class="absolute right-3 top-2 text-slate-400 font-bold">€</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Resumen de impacto en tiempo real -->
+                <div class="bg-emerald-50/70 border border-emerald-200 p-3 rounded-2xl flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-emerald-600 text-sm"></i>
+                    <span class="text-emerald-950 font-semibold" id="txtResumenImpactoLote">Se actualizarán 0 productos.</span>
+                  </div>
+                  <span class="font-bold text-emerald-800 text-[11px]" id="badgeTotalAfectadosLote">0 arts.</span>
+                </div>
+
+                <!-- Barra de Progreso de Guardado en Lote -->
+                <div id="progresoPreciosLoteBox" class="hidden space-y-2 pt-2 border-t border-slate-100 select-none">
+                  <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                    <span id="txtProgresoPreciosLote" class="flex items-center gap-1.5 text-emerald-800">
+                      <i class="fa-solid fa-circle-notch fa-spin text-emerald-600"></i> Actualizando artículos en Google Sheets...
+                    </span>
+                    <span id="porcProgresoPreciosLote" class="font-mono text-emerald-700">0%</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                    <div id="barraProgresoPreciosLote" class="bg-emerald-600 h-2 rounded-full transition-all duration-300 ease-out" style="width: 0%;"></div>
+                  </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div id="cajaBotonesModalPreciosLote" class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                  <button type="button" onclick="cerrarModalPreciosLote()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
+                  <button type="submit" id="btnConfirmarPreciosLote" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 shadow-xs flex items-center gap-2">
+                    <i class="fa-solid fa-check text-xs"></i>
+                    <span>Aplicar Cambios en Lote</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- MODAL FLOTANTE: CONFIRMACIÓN PERSONALIZADA PRECIOS POR LOTE -->
+          <div id="modalConfirmarCambioLote" class="fixed inset-0 bg-black/70 z-[60] hidden flex items-center justify-center p-4 select-none animate-in fade-in duration-150">
+            <div class="bg-white border border-slate-200 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden p-6 text-center space-y-4 animate-in zoom-in-95 duration-150">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center text-2xl mx-auto shadow-2xs">
+                <i class="fa-solid fa-tags"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900">¿Confirmar actualización?</h3>
+                <p id="txtMensajeConfirmarLote" class="text-xs text-slate-500 mt-1 leading-relaxed">
+                  ¿Deseas aplicar estos cambios de precio a los productos seleccionados?
+                </p>
+              </div>
+              <div class="flex items-center gap-2 pt-2">
+                <button type="button" onclick="cerrarModalConfirmarLote()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition active:scale-95">
+                  Cancelar
+                </button>
+                <button type="button" onclick="confirmarYEjecutarLoteDefinitivo()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs flex items-center justify-center gap-1.5">
+                  <i class="fa-solid fa-check text-xs"></i>
+                  <span>Aceptar</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- MODAL FLOTANTE / FORMULARIO: CREAR O EDITAR ARTÍCULO -->
@@ -3877,6 +4042,319 @@ function extraerUrlArchivoPedido(pedido) {
         if (Array.isArray(parsed)) return parsed.filter(Boolean);
       } catch (e) {}
       return [imagenRaw];
+    }
+
+    // =========================================================================
+    // MODIFICADOR DE PRECIOS POR LOTE
+    // =========================================================================
+    let alcancePreciosLoteActual = 'categoria';
+
+    function abrirModalPreciosLote() {
+      const modal = document.getElementById('modalPreciosLote');
+      if (!modal) return;
+
+      // Población de categorías reales en el select
+      const selectCat = document.getElementById('selectCategoriaLote');
+      if (selectCat) {
+        const categorias = new Set();
+        listaProductosGlobal.forEach(p => {
+          if (p.categoria && p.categoria.trim()) categorias.add(p.categoria.trim());
+        });
+        selectCat.innerHTML = Array.from(categorias).map(cat => {
+          const nombreVis = cat.charAt(0).toUpperCase() + cat.slice(1);
+          const totalEnCat = listaProductosGlobal.filter(p => (p.categoria || '').trim().toLowerCase() === cat.trim().toLowerCase()).length;
+          return `<option value="${cat}">${nombreVis} (${totalEnCat} arts.)</option>`;
+        }).join('');
+      }
+
+      // Población de lista individual de productos
+      const boxLista = document.getElementById('listaCheckboxesProdsLote');
+      if (boxLista) {
+        boxLista.innerHTML = listaProductosGlobal.map(p => {
+          const precioNum = parseFloat((p.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
+          return `
+            <label class="item-prod-lote-check flex items-center gap-2 p-1.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-emerald-50/50 transition">
+              <input type="checkbox" name="prods_precios_lote_chk" value="${p.id}" onchange="actualizarPrevisualizacionConteoLote()" class="rounded border-slate-300 text-emerald-600 focus:ring-0">
+              <span class="font-mono text-[9px] font-bold bg-slate-900 text-white px-1.5 py-0.5 rounded">${p.id}</span>
+              <span class="text-xs text-slate-800 truncate flex-grow">${p.titulo}</span>
+              <span class="text-xs text-slate-400 font-bold shrink-0">${precioNum.toFixed(2)} €</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      // Resetear opciones visuales por defecto
+      const btnCat = document.querySelector('.btn-alcance-lote[data-alcance-lote="categoria"]');
+      if (btnCat) setAlcancePreciosLote('categoria', btnCat);
+
+      const opPrecio = document.getElementById('operacionPrecioLote');
+      if (opPrecio) {
+        opPrecio.value = 'fijar';
+        actualizarPlaceholderOperacionLote('fijar');
+      }
+
+      const valPrecio = document.getElementById('valorOperacionPrecioLote');
+      if (valPrecio) valPrecio.value = '';
+
+      const opOferta = document.getElementById('operacionOfertaLote');
+      if (opOferta) {
+        opOferta.value = 'mantener';
+        toggleCajaOfertaLote('mantener');
+      }
+
+      const valOferta = document.getElementById('valorOfertaLote');
+      if (valOferta) valOferta.value = '';
+
+      const busqInp = document.getElementById('buscadorProdsLote');
+      if (busqInp) busqInp.value = '';
+
+      // Restaurar barra y botones
+      const boxProg = document.getElementById('progresoPreciosLoteBox');
+      const boxBtns = document.getElementById('cajaBotonesModalPreciosLote');
+      if (boxProg) boxProg.classList.add('hidden');
+      if (boxBtns) boxBtns.classList.remove('hidden');
+
+      actualizarPrevisualizacionConteoLote();
+
+      document.body.style.overflow = 'hidden';
+      modal.classList.remove('hidden');
+    }
+
+    function cerrarModalPreciosLote() {
+      const modal = document.getElementById('modalPreciosLote');
+      if (modal) modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function setAlcancePreciosLote(alcance, btn) {
+      alcancePreciosLoteActual = alcance;
+
+      document.querySelectorAll('.btn-alcance-lote').forEach(b => {
+        b.className = 'btn-alcance-lote p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-center transition active:scale-95 shadow-2xs';
+        const i = b.querySelector('i');
+        if (i) i.className = i.className.replace('text-emerald-600', 'text-slate-400');
+      });
+
+      if (btn) {
+        btn.className = 'btn-alcance-lote p-2.5 rounded-xl border border-emerald-400 bg-emerald-50 text-emerald-950 font-bold text-center transition active:scale-95 shadow-2xs';
+        const i = btn.querySelector('i');
+        if (i) i.className = i.className.replace('text-slate-400', 'text-emerald-600');
+      }
+
+      const cajaCat = document.getElementById('cajaSubAlcanceLoteCategoria');
+      const cajaInd = document.getElementById('cajaSubAlcanceLoteIndividual');
+      if (cajaCat) cajaCat.classList.toggle('hidden', alcance !== 'categoria');
+      if (cajaInd) cajaInd.classList.toggle('hidden', alcance !== 'individual');
+
+      actualizarPrevisualizacionConteoLote();
+    }
+
+    function actualizarPlaceholderOperacionLote(tipo) {
+      const cajaInp = document.getElementById('cajaInputValorPrecioLote');
+      const inp = document.getElementById('valorOperacionPrecioLote');
+      const simb = document.getElementById('simboloOperacionPrecioLote');
+
+      if (tipo === 'no_cambiar') {
+        if (cajaInp) cajaInp.classList.add('hidden');
+        if (inp) inp.required = false;
+        return;
+      }
+      if (cajaInp) cajaInp.classList.remove('hidden');
+      if (inp) inp.required = true;
+
+      if (tipo.includes('porc')) {
+        if (simb) simb.innerText = '%';
+        if (inp) { inp.placeholder = 'Ej. 10'; inp.min = '0'; inp.max = '100'; }
+      } else {
+        if (simb) simb.innerText = '€';
+        if (inp) { inp.placeholder = tipo === 'fijar' ? 'Ej. 1.99' : 'Ej. 0.50'; inp.min = '0'; inp.removeAttribute('max'); }
+      }
+    }
+
+    function toggleCajaOfertaLote(val) {
+      const caja = document.getElementById('cajaInputValorOfertaLote');
+      const inp = document.getElementById('valorOfertaLote');
+      if (caja) caja.classList.toggle('hidden', val !== 'fijar_oferta');
+      if (inp) inp.required = (val === 'fijar_oferta');
+    }
+
+    function filtrarCheckboxProdsLote(busq) {
+      const normalizar = (str) => (str || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+      const q = normalizar(busq);
+      document.querySelectorAll('#listaCheckboxesProdsLote .item-prod-lote-check').forEach(label => {
+        const txt = normalizar(label.innerText);
+        label.classList.toggle('hidden', q !== '' && !txt.includes(q));
+      });
+    }
+
+    function toggleTodosCheckboxLote() {
+      const checks = Array.from(document.querySelectorAll('input[name="prods_precios_lote_chk"]:not([disabled])'));
+      const algunDesmarcado = checks.some(c => !c.checked);
+      checks.forEach(c => {
+        // Solo alternar si su contenedor es visible
+        const cont = c.closest('.item-prod-lote-check');
+        if (!cont || !cont.classList.contains('hidden')) {
+          c.checked = algunDesmarcado;
+        }
+      });
+      actualizarPrevisualizacionConteoLote();
+    }
+
+    function obtenerArticulosObjetivoLote() {
+      if (alcancePreciosLoteActual === 'todos') {
+        return listaProductosGlobal;
+      } else if (alcancePreciosLoteActual === 'categoria') {
+        const catSel = (document.getElementById('selectCategoriaLote')?.value || '').trim().toLowerCase();
+        return listaProductosGlobal.filter(p => (p.categoria || '').trim().toLowerCase() === catSel);
+      } else if (alcancePreciosLoteActual === 'individual') {
+        const marcados = new Set(Array.from(document.querySelectorAll('input[name="prods_precios_lote_chk"]:checked')).map(c => c.value));
+        return listaProductosGlobal.filter(p => marcados.has(p.id));
+      }
+      return [];
+    }
+
+    function actualizarPrevisualizacionConteoLote() {
+      const prods = obtenerArticulosObjetivoLote();
+      const txt = document.getElementById('txtResumenImpactoLote');
+      const badge = document.getElementById('badgeTotalAfectadosLote');
+      if (txt) txt.innerText = `Se actualizarán ${prods.length} ${prods.length === 1 ? 'producto' : 'productos'}.`;
+      if (badge) badge.innerText = `${prods.length} arts.`;
+    }
+
+    let datosPendientesLoteConfirmacion = null;
+
+    function abrirModalConfirmarLote(cantidad, datosEjecucion) {
+      datosPendientesLoteConfirmacion = datosEjecucion;
+      const txt = document.getElementById('txtMensajeConfirmarLote');
+      if (txt) {
+        txt.innerHTML = `¿Confirmas aplicar esta actualización de precios a <strong>${cantidad}</strong> ${cantidad === 1 ? 'producto' : 'productos'}?`;
+      }
+      const modal = document.getElementById('modalConfirmarCambioLote');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function cerrarModalConfirmarLote() {
+      const modal = document.getElementById('modalConfirmarCambioLote');
+      if (modal) modal.classList.add('hidden');
+      datosPendientesLoteConfirmacion = null;
+    }
+
+    async function ejecutarCambioPreciosLote(e) {
+      e.preventDefault();
+      const prodsObjetivo = obtenerArticulosObjetivoLote();
+
+      if (prodsObjetivo.length === 0) {
+        alert("No hay ningún producto seleccionado para aplicar el cambio.");
+        return;
+      }
+
+      const opPrecio = document.getElementById('operacionPrecioLote').value;
+      const valPrecio = parseFloat(document.getElementById('valorOperacionPrecioLote')?.value || '0') || 0;
+      const opOferta = document.getElementById('operacionOfertaLote').value;
+      const valOferta = parseFloat(document.getElementById('valorOfertaLote')?.value || '0') || 0;
+
+      if (opPrecio !== 'no_cambiar' && valPrecio <= 0 && opPrecio === 'fijar') {
+        alert("Por favor, ingresa un precio válido mayor a 0.");
+        return;
+      }
+
+      abrirModalConfirmarLote(prodsObjetivo.length, {
+        prodsObjetivo,
+        opPrecio,
+        valPrecio,
+        opOferta,
+        valOferta
+      });
+    }
+
+    async function confirmarYEjecutarLoteDefinitivo() {
+      if (!datosPendientesLoteConfirmacion) return;
+      const { prodsObjetivo, opPrecio, valPrecio, opOferta, valOferta } = datosPendientesLoteConfirmacion;
+      cerrarModalConfirmarLote();
+
+      const boxProg = document.getElementById('progresoPreciosLoteBox');
+      const boxBtns = document.getElementById('cajaBotonesModalPreciosLote');
+      const barra = document.getElementById('barraProgresoPreciosLote');
+      const porc = document.getElementById('porcProgresoPreciosLote');
+      const txt = document.getElementById('txtProgresoPreciosLote');
+
+      if (boxProg) boxProg.classList.remove('hidden');
+      if (boxBtns) boxBtns.classList.add('hidden');
+      if (barra) barra.style.width = '25%';
+      if (porc) porc.innerText = '25%';
+
+      let valorProgreso = 25;
+      const intervalo = setInterval(() => {
+        if (valorProgreso < 85) {
+          valorProgreso += 10;
+          if (barra) barra.style.width = valorProgreso + '%';
+          if (porc) porc.innerText = valorProgreso + '%';
+        }
+      }, 150);
+
+      // Calcular nuevos precios en memoria y preparar el paquete para Apps Script
+      const cambiosLote = {};
+
+      prodsObjetivo.forEach(p => {
+        const idLower = (p.id || '').toLowerCase();
+        let precioActual = parseFloat((p.precio || '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
+        let nuevoPrecio = precioActual;
+
+        if (opPrecio === 'fijar') {
+          nuevoPrecio = valPrecio;
+        } else if (opPrecio === 'sumar_fijo') {
+          nuevoPrecio = precioActual + valPrecio;
+        } else if (opPrecio === 'restar_fijo') {
+          nuevoPrecio = Math.max(0.01, precioActual - valPrecio);
+        } else if (opPrecio === 'sumar_porc') {
+          nuevoPrecio = precioActual * (1 + (valPrecio / 100));
+        } else if (opPrecio === 'restar_porc') {
+          nuevoPrecio = Math.max(0.01, precioActual * (1 - (valPrecio / 100)));
+        }
+
+        nuevoPrecio = Math.round(nuevoPrecio * 100) / 100;
+        p.precio = nuevoPrecio;
+
+        let nuevaOferta = (p.precioOferta !== undefined && p.precioOferta !== null) ? p.precioOferta : "";
+        if (opOferta === 'fijar_oferta') {
+          nuevaOferta = (valOferta > 0) ? (Math.round(valOferta * 100) / 100).toFixed(2) : "";
+        } else if (opOferta === 'quitar_oferta') {
+          nuevaOferta = "";
+        }
+        p.precioOferta = nuevaOferta;
+
+        cambiosLote[idLower] = {
+          precio: nuevoPrecio.toFixed(2),
+          precioOferta: nuevaOferta
+        };
+      });
+
+      // Actualizar UI del catálogo inmediatamente
+      renderizarProductos();
+
+      // Enviar a Google Sheets
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "actualizarPreciosLote",
+            clave: tokenClave || "zeronte2026",
+            cambios: cambiosLote
+          })
+        });
+      } catch (err) {
+        console.error("Error al sincronizar precios por lote en Sheets:", err);
+      }
+
+      clearInterval(intervalo);
+      if (barra) barra.style.width = '100%';
+      if (porc) porc.innerText = '100%';
+      if (txt) txt.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> ¡Precios actualizados con éxito!`;
+
+      setTimeout(() => {
+        cerrarModalPreciosLote();
+      }, 600);
     }
 
     function cambiarModoVistaCatalogo(modo) {
