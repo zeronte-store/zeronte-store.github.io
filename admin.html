@@ -5115,8 +5115,7 @@ function extraerUrlArchivoPedido(pedido) {
 
       movimientosFinanzasFiltrados.forEach(p => {
         const num = obtenerImporteRealFila(p);
-        const est = (p.estado || "").toLowerCase();
-        const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
+        const esPagado = esPedidoPagado(p);
 
         if (esPagado) {
           cobrado += num;
@@ -5166,8 +5165,7 @@ function extraerUrlArchivoPedido(pedido) {
         const filasMovimientos = grupo.pedidos.map(p => {
           const precioNum = obtenerImporteRealFila(p);
           const precioForm = precioNum.toFixed(2) + " €";
-          const est = (p.estado || "").toLowerCase();
-          const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
+          const esPagado = esPedidoPagado(p);
           const hora = parsearFechaPedido(p.fecha) ? new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Madrid' }).format(parsearFechaPedido(p.fecha)) + 'h' : '--:--';
 
           return `
@@ -5209,7 +5207,7 @@ function extraerUrlArchivoPedido(pedido) {
     }
 
     // ==================== GENERADOR PDF DE FINANZAS ====================
-    function descargarPdfFinanzas() {
+    async function descargarPdfFinanzas() {
       if (!movimientosFinanzasFiltrados || movimientosFinanzasFiltrados.length === 0) {
         alert("No hay movimientos en el período seleccionado para exportar.");
         return;
@@ -5224,32 +5222,97 @@ function extraerUrlArchivoPedido(pedido) {
 
       const hoyString = new Date().toLocaleDateString("es-ES", { day: '2-digit', month: '2-digit', year: 'numeric' });
 
+      // 1. Cargar el logotipo oficial en Base64
+      const cargarLogoBase64 = () => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.onload = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL("image/png"));
+            } catch (e) {
+              resolve(null);
+            }
+          };
+          img.onerror = () => resolve(null);
+          img.src = "https://zeronte-store.github.io/img/logo-zeronte.png";
+        });
+      };
+
+      const logoDataUrl = await cargarLogoBase64();
+
+      // 2. Determinar el texto del filtrado aplicado
+      let textoFiltro = "Histórico completo";
+      const ahora = new Date();
+      const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+
+      if (filtroFinanzasModo === 'mesActual') {
+        const nombreMes = meses[ahora.getMonth()];
+        const anio = ahora.getFullYear();
+        textoFiltro = `Este mes (${nombreMes} ${anio})`;
+      } else if (filtroFinanzasModo === 'mesAnterior') {
+        const fechaAnt = new Date(ahora.getFullYear(), ahora.getMonth() - 1, 1);
+        const nombreMesAnt = meses[fechaAnt.getMonth()];
+        const anioAnt = fechaAnt.getFullYear();
+        textoFiltro = `Mes anterior (${nombreMesAnt} ${anioAnt})`;
+      } else if (filtroFinanzasModo === 'anoActual') {
+        textoFiltro = `Este año (${ahora.getFullYear()})`;
+      } else if (filtroFinanzasModo === 'rango') {
+        const fDesdeVal = document.getElementById('finanzasFechaDesde')?.value;
+        const fHastaVal = document.getElementById('finanzasFechaHasta')?.value;
+        const formatearFechaCorta = (val) => {
+          if (!val) return "---";
+          const p = val.split('-');
+          return `${p[2]}/${p[1]}/${p[0]}`;
+        };
+        const desdeStr = formatearFechaCorta(fDesdeVal);
+        const hastaStr = formatearFechaCorta(fHastaVal);
+        textoFiltro = `Rango personalizado: ${desdeStr} - ${hastaStr}`;
+      }
+
       let cobrado = 0;
       let pendiente = 0;
       movimientosFinanzasFiltrados.forEach(p => {
-        const num = parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0;
-        const est = (p.estado || "").toLowerCase();
-        const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
+        const num = obtenerImporteRealFila(p);
+        const esPagado = esPedidoPagado(p);
         if (esPagado) cobrado += num; else pendiente += num;
       });
 
-      // Cabecera
+      // Cabecera: Logo Zeronte + Textos
+      if (logoDataUrl) {
+        doc.addImage(logoDataUrl, "PNG", 14, 11, 14, 14);
+      }
+
+      const posXTexto = logoDataUrl ? 31 : 14;
+
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
+      doc.setFontSize(17);
       doc.setTextColor(15, 23, 42);
-      doc.text("ZERONTE", 14, 18);
+      doc.text("ZERONTE", posXTexto, 16);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text("INFORME DE FINANZAS & MOVIMIENTOS BANCARIOS", posXTexto, 20.5);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Período: ${textoFiltro}`, posXTexto, 25);
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.setTextColor(100, 116, 139);
-      doc.text("INFORME DE FINANZAS & MOVIMIENTOS BANCARIOS", 14, 23);
-
-      doc.setFontSize(8);
-      doc.text(`Fecha de emisión: ${hoyString}`, 196, 18, { align: "right" });
+      doc.text(`Fecha de emisión: ${hoyString}`, 196, 16, { align: "right" });
 
       doc.setDrawColor(226, 232, 240);
       doc.setLineWidth(0.5);
-      doc.line(14, 27, 196, 27);
+      doc.line(14, 28, 196, 28);
 
       // Tarjeta Resumen
       doc.setFillColor(248, 250, 252);
@@ -5277,7 +5340,6 @@ function extraerUrlArchivoPedido(pedido) {
 
       // Tabla de Movimientos
       const filasTabla = movimientosFinanzasFiltrados.map(p => {
-        // Fecha ultra compacta: DD/MM/AA (ej: 28/10/26)
         let fechaCorta = "---";
         const fObj = parsearFechaPedido(p.fecha);
         if (fObj) {
@@ -5287,9 +5349,9 @@ function extraerUrlArchivoPedido(pedido) {
           fechaCorta = `${dia}/${mes}/${anioCorto}`;
         }
 
-        const precioForm = (parseFloat((p.precio || "0").toString().replace('€', '').trim().replace(',', '.')) || 0).toFixed(2) + " €";
-        const est = (p.estado || "").toLowerCase();
-        const esPagado = est === "pagado" || (est.includes("pagado") && !est.includes("pendiente") && !est.includes("proceso"));
+        const numReal = obtenerImporteRealFila(p);
+        const precioForm = numReal.toFixed(2) + " €";
+        const esPagado = esPedidoPagado(p);
 
         return [
           fechaCorta,
@@ -5338,7 +5400,7 @@ function extraerUrlArchivoPedido(pedido) {
           doc.setTextColor(148, 163, 184);
           doc.setDrawColor(226, 232, 240);
           doc.line(14, 283, 196, 283);
-          doc.text("Zeronte · Extracto Oficial de Finanzas · Documento vectorial", 105, 288, { align: "center" });
+          doc.text("www.zerontemusic.com · (+34) 641 851 073 · zeronte.store@gmail.com", 105, 288, { align: "center" });
         }
       });
 
