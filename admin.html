@@ -1418,6 +1418,44 @@
               <!-- Render dinámico -->
             </div>
           </section>
+
+          <!-- NUEVO BLOQUE: TOP CLIENTES (FUSIÓN WEB + ETSY) -->
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-crown text-amber-500 text-sm"></i> Top Clientes con Más Compras
+                </h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">Ranking acumulado consolidando ventas de la Tienda Web y de Etsy.</p>
+              </div>
+              <span id="badgeTotalClientesStats" class="self-start sm:self-auto text-xs bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-xl font-bold">
+                0 clientes consolidados
+              </span>
+            </div>
+
+            <div id="contenedorTopClientesFusion" class="space-y-3">
+              <!-- Render dinámico -->
+            </div>
+          </section>
+
+          <!-- NUEVO BLOQUE: INGRESOS POR MESES Y AÑOS (FUSIÓN WEB + ETSY) -->
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-calendar-days text-blue-600 text-sm"></i> Ingresos por Meses y Años
+                </h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">Histórico global de facturación combinando ventas de Etsy y la Tienda Web.</p>
+              </div>
+              <span id="badgeTotalFacturacionHistorica" class="self-start sm:self-auto text-xs bg-blue-50 border border-blue-200 text-blue-800 px-3 py-1.5 rounded-xl font-bold">
+                0.00 € total histórico
+              </span>
+            </div>
+
+            <div id="contenedorIngresosPorPeriodoFusion" class="space-y-4">
+              <!-- Render dinámico -->
+            </div>
+          </section>
         </div>
 
         <!-- ================= SECCIÓN: FINANZAS ================= -->
@@ -4968,9 +5006,11 @@ function extraerUrlArchivoPedido(pedido) {
 
     // ==================== SECCIÓN: ESTADÍSTICAS ====================
     function renderizarEstadisticas() {
-      const contenedor = document.getElementById('contenedorRankingProductos');
+      // -------------------------------------------------------------
+      // 1. RANKING DE PRODUCTOS (TIENDA WEB)
+      // -------------------------------------------------------------
+      const contenedorProds = document.getElementById('contenedorRankingProductos');
       const badgeTotal = document.getElementById('badgeTotalProductosVendidos');
-      if (!contenedor) return;
 
       const mapaProductos = {};
       let totalUnidades = 0;
@@ -5004,63 +5044,333 @@ function extraerUrlArchivoPedido(pedido) {
         badgeTotal.innerText = `${totalUnidades} ${totalUnidades === 1 ? 'unidad vendida' : 'unidades vendidas'}`;
       }
 
-      if (ranking.length === 0) {
-        contenedor.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">No hay datos suficientes de ventas para mostrar estadísticas.</div>';
-        return;
+      if (contenedorProds) {
+        if (ranking.length === 0) {
+          contenedorProds.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">No hay datos suficientes de ventas para mostrar estadísticas.</div>';
+        } else {
+          const obtenerFoto = (nombre) => {
+            const prod = buscarProductoEnCatalogo(nombre);
+            if (!prod || !prod.imagen) return "";
+            const fotos = extraerFotosProducto(prod.imagen);
+            return (fotos && fotos.length > 0) ? fotos[0] : "";
+          };
+
+          const obtenerId = (nombre) => {
+            return (typeof obtenerIdProducto === 'function') ? obtenerIdProducto(nombre) : "PROD";
+          };
+
+          contenedorProds.innerHTML = ranking.map((item, idx) => {
+            const porcentaje = totalUnidades > 0 ? ((item.unidades / totalUnidades) * 100).toFixed(1) : 0;
+            const foto = obtenerFoto(item.titulo);
+            const idProd = obtenerId(item.titulo);
+            const medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+
+            return `
+              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 transition hover:border-slate-300">
+                <div class="flex items-center justify-between gap-3 mb-2.5">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-center shrink-0 shadow-2xs">
+                      ${medalla}
+                    </span>
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
+                      ${foto ? `
+                        <img src="${foto}" alt="${item.titulo}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/logo-zeronte.png';">
+                      ` : `
+                        <span class="text-white font-bold text-xs bg-slate-900 w-full h-full flex items-center justify-center brand-font">Z</span>
+                      `}
+                    </div>
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-1.5">
+                        <span class="bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider shadow-2xs shrink-0">${idProd}</span>
+                        <h3 class="font-bold text-slate-900 text-xs sm:text-sm truncate">${item.titulo}</h3>
+                      </div>
+                      <span class="text-[10px] text-slate-400 block mt-0.5">${item.unidades} ${item.unidades === 1 ? 'pedido realizado' : 'pedidos realizados'} (${porcentaje}% del total)</span>
+                    </div>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block">Recaudado</span>
+                    <span class="text-sm sm:text-base font-bold text-slate-900">${item.ingresos.toFixed(2)} €</span>
+                  </div>
+                </div>
+
+                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                  <div class="bg-slate-900 h-2 rounded-full transition-all duration-500" style="width: ${porcentaje}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
       }
 
-      const obtenerFoto = (nombre) => {
-        const prod = buscarProductoEnCatalogo(nombre);
-        if (!prod || !prod.imagen) return "";
-        const fotos = extraerFotosProducto(prod.imagen);
-        return (fotos && fotos.length > 0) ? fotos[0] : "";
+      // -------------------------------------------------------------
+      // 2. TOP CLIENTES CON MÁS COMPRAS (FUSIÓN WEB + ETSY)
+      // -------------------------------------------------------------
+      const contTopClientes = document.getElementById('contenedorTopClientesFusion');
+      const badgeTotalClientes = document.getElementById('badgeTotalClientesStats');
+
+      const mapaClientesFusion = {};
+
+      const normalizarClave = (str) => {
+        return (str || "").toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       };
 
-      const obtenerId = (nombre) => {
-        return (typeof obtenerIdProducto === 'function') ? obtenerIdProducto(nombre) : "PROD";
-      };
+      // 2.A. Sumar pedidos de la Tienda Web
+      listaPedidosGlobal.forEach(p => {
+        const est = (p.estado || "").toLowerCase();
+        if (est.includes("cancelado")) return;
 
-      contenedor.innerHTML = ranking.map((item, idx) => {
-        const porcentaje = totalUnidades > 0 ? ((item.unidades / totalUnidades) * 100).toFixed(1) : 0;
-        const foto = obtenerFoto(item.titulo);
-        const idProd = obtenerId(item.titulo);
-        const medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+        const email = (p.email || "").trim().toLowerCase();
+        const nombre = (p.nombre || "Cliente Web").trim();
+        const clave = email ? `email_${email}` : `nom_${normalizarClave(nombre)}`;
+        const importe = obtenerImporteRealFila(p);
 
-        return `
-          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 transition hover:border-slate-300">
-            <div class="flex items-center justify-between gap-3 mb-2.5">
-              <div class="flex items-center gap-3 min-w-0">
-                <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-center shrink-0 shadow-2xs">
-                  ${medalla}
-                </span>
-                <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
-                  ${foto ? `
-                    <img src="${foto}" alt="${item.titulo}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/logo-zeronte.png';">
-                  ` : `
-                    <span class="text-white font-bold text-xs bg-slate-900 w-full h-full flex items-center justify-center brand-font">Z</span>
-                  `}
-                </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-1.5">
-                    <span class="bg-slate-900 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider shadow-2xs shrink-0">${idProd}</span>
-                    <h3 class="font-bold text-slate-900 text-xs sm:text-sm truncate">${item.titulo}</h3>
+        if (!mapaClientesFusion[clave]) {
+          mapaClientesFusion[clave] = {
+            nombre: nombre,
+            email: email,
+            totalGastado: 0,
+            pedidosWeb: 0,
+            pedidosEtsy: 0
+          };
+        }
+        mapaClientesFusion[clave].totalGastado += importe;
+        mapaClientesFusion[clave].pedidosWeb += 1;
+        if (!mapaClientesFusion[clave].email && email) mapaClientesFusion[clave].email = email;
+      });
+
+      // 2.B. Sumar pedidos de Etsy
+      (typeof listaVentasEtsyGlobal !== 'undefined' ? listaVentasEtsyGlobal : []).forEach(v => {
+        const email = (v.email || "").trim().toLowerCase();
+        const nombre = (v.nombre || "Cliente Etsy").trim();
+        const clave = email ? `email_${email}` : `nom_${normalizarClave(nombre)}`;
+        const importe = parseFloat(v.precio) || 0;
+
+        if (!mapaClientesFusion[clave]) {
+          mapaClientesFusion[clave] = {
+            nombre: nombre,
+            email: email,
+            totalGastado: 0,
+            pedidosWeb: 0,
+            pedidosEtsy: 0
+          };
+        }
+        mapaClientesFusion[clave].totalGastado += importe;
+        mapaClientesFusion[clave].pedidosEtsy += 1;
+        if (!mapaClientesFusion[clave].email && email) mapaClientesFusion[clave].email = email;
+      });
+
+      const rankingClientes = Object.values(mapaClientesFusion)
+        .map(c => ({ ...c, totalPedidos: c.pedidosWeb + c.pedidosEtsy }))
+        .sort((a, b) => b.totalPedidos - a.totalPedidos || b.totalGastado - a.totalGastado);
+
+      if (badgeTotalClientes) {
+        badgeTotalClientes.innerText = `${rankingClientes.length} clientes consolidados`;
+      }
+
+      if (contTopClientes) {
+        if (rankingClientes.length === 0) {
+          contTopClientes.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">No hay datos de clientes registrados todavía.</div>';
+        } else {
+          const maxGasto = rankingClientes[0] ? (rankingClientes[0].totalGastado || 1) : 1;
+          const top20Clientes = rankingClientes.slice(0, 15);
+
+          contTopClientes.innerHTML = top20Clientes.map((c, idx) => {
+            const medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+            const porcentajeGasto = maxGasto > 0 ? Math.min(100, ((c.totalGastado / maxGasto) * 100)).toFixed(0) : 0;
+
+            return `
+              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 sm:p-4 hover:border-slate-300 transition">
+                <div class="flex items-center justify-between gap-3 mb-2">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 flex items-center justify-center shrink-0 shadow-2xs">
+                      ${medalla}
+                    </span>
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <h4 class="font-bold text-slate-900 text-xs sm:text-sm truncate">${c.nombre}</h4>
+                        ${c.pedidosWeb > 0 ? `<span class="bg-slate-900 text-white text-[9px] font-bold px-1.5 py-0.2 rounded">Web (${c.pedidosWeb})</span>` : ''}
+                        ${c.pedidosEtsy > 0 ? `<span class="bg-[#F1641E] text-white text-[9px] font-bold px-1.5 py-0.2 rounded">Etsy (${c.pedidosEtsy})</span>` : ''}
+                      </div>
+                      <span class="text-[10px] text-slate-400 block truncate mt-0.5">${c.email || 'Sin correo registrado'}</span>
+                    </div>
                   </div>
-                  <span class="text-[10px] text-slate-400 block mt-0.5">${item.unidades} ${item.unidades === 1 ? 'pedido realizado' : 'pedidos realizados'} (${porcentaje}% del total)</span>
+
+                  <div class="text-right shrink-0">
+                    <span class="text-sm font-bold text-slate-900 block">${c.totalGastado.toFixed(2)} €</span>
+                    <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md inline-block mt-0.5">
+                      ${c.totalPedidos} ${c.totalPedidos === 1 ? 'pedido' : 'pedidos'}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: ${porcentajeGasto}%"></div>
                 </div>
               </div>
-              <div class="text-right shrink-0">
-                <span class="text-[10px] uppercase font-bold text-slate-400 block">Recaudado</span>
-                <span class="text-sm sm:text-base font-bold text-slate-900">${item.ingresos.toFixed(2)} €</span>
-              </div>
-            </div>
+            `;
+          }).join('');
+        }
+      }
 
-            <!-- Barra de progreso visual -->
-            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-              <div class="bg-slate-900 h-2 rounded-full transition-all duration-500" style="width: ${porcentaje}%"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
+      // -------------------------------------------------------------
+      // 3. INGRESOS POR MESES Y AÑOS (FUSIÓN WEB + ETSY)
+      // -------------------------------------------------------------
+      const contPeriodos = document.getElementById('contenedorIngresosPorPeriodoFusion');
+      const badgeFacturacionHistorica = document.getElementById('badgeTotalFacturacionHistorica');
+
+      const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+      const mapaAnios = {};
+      let granTotalHistorico = 0;
+
+      const registrarIngresoEnPeriodo = (anio, mesIndex, importe, origen) => {
+        if (!anio || isNaN(anio) || anio < 2000) return;
+        if (mesIndex === null || isNaN(mesIndex) || mesIndex < 0 || mesIndex > 11) mesIndex = 0;
+
+        if (!mapaAnios[anio]) {
+          mapaAnios[anio] = {
+            anio: anio,
+            totalAnio: 0,
+            totalWeb: 0,
+            totalEtsy: 0,
+            pedidosAnio: 0,
+            meses: {}
+          };
+        }
+
+        if (!mapaAnios[anio].meses[mesIndex]) {
+          mapaAnios[anio].meses[mesIndex] = {
+            mesIndex: mesIndex,
+            nombreMes: mesesNombres[mesIndex],
+            totalMes: 0,
+            totalWeb: 0,
+            totalEtsy: 0,
+            pedidosMes: 0
+          };
+        }
+
+        mapaAnios[anio].totalAnio += importe;
+        mapaAnios[anio].pedidosAnio += 1;
+        mapaAnios[anio].meses[mesIndex].totalMes += importe;
+        mapaAnios[anio].meses[mesIndex].pedidosMes += 1;
+
+        if (origen === 'web') {
+          mapaAnios[anio].totalWeb += importe;
+          mapaAnios[anio].meses[mesIndex].totalWeb += importe;
+        } else {
+          mapaAnios[anio].totalEtsy += importe;
+          mapaAnios[anio].meses[mesIndex].totalEtsy += importe;
+        }
+
+        granTotalHistorico += importe;
+      };
+
+      // 3.A. Procesar Web
+      listaPedidosGlobal.forEach(p => {
+        const est = (p.estado || "").toLowerCase();
+        if (est.includes("cancelado")) return;
+        const fechaObj = (typeof parsearFechaPedido === 'function') ? parsearFechaPedido(p.fecha) : new Date(p.fecha);
+        if (fechaObj && !isNaN(fechaObj.getTime())) {
+          const imp = obtenerImporteRealFila(p);
+          registrarIngresoEnPeriodo(fechaObj.getFullYear(), fechaObj.getMonth(), imp, 'web');
+        }
+      });
+
+      // 3.B. Procesar Etsy
+      (typeof listaVentasEtsyGlobal !== 'undefined' ? listaVentasEtsyGlobal : []).forEach(v => {
+        const imp = parseFloat(v.precio) || 0;
+        let anio = parseInt(v.anio, 10);
+        let mes = 0;
+
+        const fechaRaw = (v.fecha || "").toString();
+        const partes = fechaRaw.split(/[\/\-\s]+/);
+        if (partes.length >= 3) {
+          const d1 = parseInt(partes[0], 10);
+          const d2 = parseInt(partes[1], 10);
+          const d3 = parseInt(partes[2], 10);
+          if (d3 > 2000) { anio = d3; mes = d2 - 1; }
+          else if (d1 > 2000) { anio = d1; mes = d2 - 1; }
+        }
+
+        if (!anio || isNaN(anio)) {
+          const mAnio = fechaRaw.match(/\b(202[3-6])\b/);
+          anio = mAnio ? parseInt(mAnio[1], 10) : 2024;
+        }
+
+        registrarIngresoEnPeriodo(anio, mes, imp, 'etsy');
+      });
+
+      if (badgeFacturacionHistorica) {
+        badgeFacturacionHistorica.innerText = `${granTotalHistorico.toFixed(2)} € total consolidado`;
+      }
+
+      if (contPeriodos) {
+        const aniosOrdenados = Object.keys(mapaAnios).map(Number).sort((a, b) => b - a);
+
+        if (aniosOrdenados.length === 0) {
+          contPeriodos.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">No hay datos históricos disponibles.</div>';
+        } else {
+          contPeriodos.innerHTML = aniosOrdenados.map(anioKey => {
+            const datoAnio = mapaAnios[anioKey];
+            const mesesDelAnio = Object.values(datoAnio.meses).sort((a, b) => b.mesIndex - a.mesIndex);
+
+            return `
+              <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+                <!-- Cabecera de Año -->
+                <div class="bg-slate-900 text-white p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center font-bold text-sm">
+                      ${datoAnio.anio}
+                    </span>
+                    <div>
+                      <h3 class="font-bold text-sm sm:text-base leading-none">Año ${datoAnio.anio}</h3>
+                      <span class="text-[10px] text-slate-300 mt-0.5 block">${datoAnio.pedidosAnio} pedidos totales</span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-3 self-end sm:self-auto text-right">
+                    <div class="text-right">
+                      <span class="text-[9px] uppercase font-bold text-slate-400 block leading-none">Total Año</span>
+                      <span class="text-base sm:text-lg font-black text-white block mt-0.5">${datoAnio.totalAnio.toFixed(2)} €</span>
+                    </div>
+                    <div class="flex flex-col gap-0.5 text-[10px] font-semibold text-left border-l border-white/20 pl-3">
+                      <span class="text-slate-300">Web: <strong class="text-white">${datoAnio.totalWeb.toFixed(2)} €</strong></span>
+                      <span class="text-orange-300">Etsy: <strong class="text-white">${datoAnio.totalEtsy.toFixed(2)} €</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Desglose por Meses del Año -->
+                <div class="p-3 sm:p-4 bg-white divide-y divide-slate-100 space-y-2">
+                  ${mesesDelAnio.map(m => {
+                    const porcMes = datoAnio.totalAnio > 0 ? ((m.totalMes / datoAnio.totalAnio) * 100).toFixed(0) : 0;
+                    return `
+                      <div class="pt-2 first:pt-0">
+                        <div class="flex items-center justify-between gap-2 text-xs mb-1">
+                          <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-900 text-xs w-24">${m.nombreMes}</span>
+                            <span class="text-[10px] text-slate-400">(${m.pedidosMes} ${m.pedidosMes === 1 ? 'pedido' : 'pedidos'})</span>
+                            <div class="hidden sm:flex items-center gap-1.5 text-[10px]">
+                              ${m.totalWeb > 0 ? `<span class="bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded font-semibold">Web: ${m.totalWeb.toFixed(2)} €</span>` : ''}
+                              ${m.totalEtsy > 0 ? `<span class="bg-orange-50 text-orange-800 border border-orange-200 px-1.5 py-0.2 rounded font-semibold">Etsy: ${m.totalEtsy.toFixed(2)} €</span>` : ''}
+                            </div>
+                          </div>
+                          <div class="text-right shrink-0">
+                            <span class="font-bold text-slate-900">${m.totalMes.toFixed(2)} €</span>
+                            <span class="text-[10px] text-slate-400 ml-1 font-semibold">(${porcMes}%)</span>
+                          </div>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/60">
+                          <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: ${porcMes}%"></div>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
     }
 
     // ==================== SECCIÓN: FINANZAS ====================
