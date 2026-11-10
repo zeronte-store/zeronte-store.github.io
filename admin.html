@@ -1957,7 +1957,12 @@ function extraerUrlArchivoPedido(pedido) {
 
         const productosServidor = data.productos || [];
         
-        // Obtener ofertas vigentes locales
+        // Sincronizar campañas de ofertas recibidas desde Google Sheets
+        if (Array.isArray(data.ofertas)) {
+          listaCampanasOfertasGlobal = data.ofertas;
+          localStorage.setItem('zeronte_campanas_ofertas', JSON.stringify(data.ofertas));
+        }
+
         const campanasVigentes = (typeof obtenerCampanasOfertas === 'function') ? obtenerCampanasOfertas() : [];
         const ahoraMomento = Date.now();
         const mapaOfertasVigentes = {};
@@ -1989,7 +1994,7 @@ function extraerUrlArchivoPedido(pedido) {
             prodActualizado.precioOferta = "";
           }
 
-          // Si el producto tiene una campaña local en curso, PRIORIZAR LA OFERTA VIGENTE LOCAL
+          // Si el producto tiene una campaña en curso, PRIORIZAR LA OFERTA VIGENTE
           if (mapaOfertasVigentes[pIdLower] && pBase > 0) {
             const infoDesc = mapaOfertasVigentes[pIdLower];
             let precioOfertaCalculado = (infoDesc.tipo === 'porcentaje')
@@ -6118,18 +6123,26 @@ function extraerUrlArchivoPedido(pedido) {
     // =========================================================================
     // MOTOR DE OFERTAS & CAMPAÑAS MASIVAS AUTOMATIZADAS (ESTILO ETSY)
     // =========================================================================
+    let listaCampanasOfertasGlobal = [];
     let alcanceOfertaActual = 'todos';
     let intervaloCuentaAtrasOfertas = null;
 
     function obtenerCampanasOfertas() {
-      try {
-        return JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]');
-      } catch(e) {
-        return [];
+      if (Array.isArray(listaCampanasOfertasGlobal) && listaCampanasOfertasGlobal.length > 0) {
+        return listaCampanasOfertasGlobal;
       }
+      try {
+        const local = JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]');
+        if (Array.isArray(local) && local.length > 0) {
+          listaCampanasOfertasGlobal = local;
+          return local;
+        }
+      } catch(e) {}
+      return [];
     }
 
     function guardarCampanasOfertas(lista) {
+      listaCampanasOfertasGlobal = lista;
       localStorage.setItem('zeronte_campanas_ofertas', JSON.stringify(lista));
     }
 
@@ -6351,6 +6364,21 @@ function extraerUrlArchivoPedido(pedido) {
       guardarCampanasOfertas(campanas);
       cerrarModalCrearOferta();
 
+      // Guardar la campaña en la hoja Ofertas de Google Sheets
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "guardarCampanaOferta",
+            clave: tokenClave || "zeronte2026",
+            campana: nuevaCampana
+          })
+        });
+      } catch (errCamp) {
+        console.error("Error al sincronizar campana con Google Sheets:", errCamp);
+      }
+
       // Aplicar ofertas a los productos seleccionados y enviar DIRECTAMENTE a Sheets
       const cambiosParaServidor = {};
       listaProductosGlobal.forEach(prod => {
@@ -6396,6 +6424,21 @@ function extraerUrlArchivoPedido(pedido) {
       const campanaEliminar = campanas.find(c => c.id === campanaId);
       campanas = campanas.filter(c => c.id !== campanaId);
       guardarCampanasOfertas(campanas);
+
+      // Eliminar de la hoja Ofertas en Google Sheets
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "eliminarCampanaOferta",
+            clave: tokenClave || "zeronte2026",
+            id: campanaId
+          })
+        });
+      } catch (errDelCamp) {
+        console.error("Error al eliminar campana de Google Sheets:", errDelCamp);
+      }
 
       const cambiosParaServidor = {};
       if (campanaEliminar && Array.isArray(campanaEliminar.idsObjetivo)) {
