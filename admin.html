@@ -994,7 +994,7 @@
                 </h1>
                 <span id="badgeEstadoOfertasGeneral" class="text-xs bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded-full font-bold">0 en curso</span>
               </div>
-              <p class="text-xs text-slate-400 mt-0.5">Lanza descuentos masivos, programa campañas automáticas (Black Friday, Navidad) o gestiona rebajas de tu tienda Zeronte.</p>
+              <p class="text-xs text-slate-400 mt-0.5">Lanza descuentos masivos, programa campañas automáticas (Halloween, Black Friday, Navidad) o gestiona rebajas de tu tienda Zeronte.</p>
             </div>
 
             <button type="button" onclick="abrirModalCrearOferta()" class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs">
@@ -1069,9 +1069,9 @@
                     <label class="block text-[10px] uppercase font-bold text-slate-400">Nombre de la oferta / campaña *</label>
                     <div class="flex items-center gap-1.5 flex-wrap">
                       <span class="text-[9px] text-slate-400 font-semibold">Plantillas:</span>
+                      <button type="button" onclick="aplicarPlantillaCampana('Halloween', 30)" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px]">Halloween (-30%)</button>
                       <button type="button" onclick="aplicarPlantillaCampana('Black Friday', 50)" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px]">Black Friday (-50%)</button>
                       <button type="button" onclick="aplicarPlantillaCampana('Navidad Especial', 25)" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px]">Navidad (-25%)</button>
-                      <button type="button" onclick="aplicarPlantillaCampana('Rebajas Flash 48h', 30)" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px]">Flash 48h (-30%)</button>
                     </div>
                   </div>
                   <input type="text" id="ofertaNombre" required placeholder="Ej. Black Friday Zeronte" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
