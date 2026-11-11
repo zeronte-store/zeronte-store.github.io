@@ -1792,11 +1792,18 @@
           </a>
         </div>
 
-        <!-- Botón WhatsApp -->
-        <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
-          <i class="fa-brands fa-whatsapp text-lg"></i>
-          <span id="btnWpConfirmarTxt">Enviar justificante por WhatsApp</span>
-        </a>
+        <!-- Botones para enviar justificante (WhatsApp o Email) -->
+        <div class="space-y-2.5">
+          <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
+            <i class="fa-brands fa-whatsapp text-lg"></i>
+            <span id="btnWpConfirmarTxt">Enviar justificante por WhatsApp</span>
+          </a>
+          
+          <a id="btnEmailConfirmar" href="#" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
+            <i class="fa-solid fa-envelope text-base text-blue-400"></i>
+            <span id="btnEmailConfirmarTxt">Enviar justificante por Email</span>
+          </a>
+        </div>
       </div>
 
     </div>
@@ -6650,6 +6657,24 @@ function cargarFAQs() {
 
       const msg = encodeURIComponent(`Hola Zeronte! Acabo de hacer el encargo ${orderId} (${datos.producto}) por ${datos.precio}. Mi nombre es ${datos.nombre}.`);
       document.getElementById('btnWhatsappConfirmar').href = `https://wa.me/${MI_TELEFONO_WHATSAPP}?text=${msg}`;
+
+      // Configuración automática de plantilla para la app de correo por defecto
+      const asuntoEmail = encodeURIComponent(`Justificante de pago - Pedido ${orderId} - ${datos.nombre}`);
+      const cuerpoEmail = encodeURIComponent(
+        `Hola Zeronte,\n\n` +
+        `Adjunto en este correo el justificante de pago correspondiente a mi pedido:\n\n` +
+        `• Nº de Pedido: ${orderId}\n` +
+        `• Nombre: ${datos.nombre}\n` +
+        `• Producto: ${datos.producto}\n` +
+        `• Importe: ${datos.precio}\n` +
+        `• Método: ${datos.metodoPago}\n\n` +
+        `[Adjunta aquí tu captura, foto o recibo PDF del pago]\n\n` +
+        `¡Muchas gracias!`
+      );
+      const enlaceEmail = document.getElementById('btnEmailConfirmar');
+      if (enlaceEmail) {
+        enlaceEmail.href = `mailto:zeronte.store@gmail.com?subject=${asuntoEmail}&body=${cuerpoEmail}`;
+      }
     }
 
     function copiarTexto(texto) {
