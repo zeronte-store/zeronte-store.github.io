@@ -727,17 +727,17 @@
       <!-- Cabecera de Estado Actual con Selector Desplegable y Cerrar Sesión -->
       <div class="pb-4 border-b border-gray-100 space-y-3">
         <!-- Fila superior: Estado a la izquierda y Botón Cerrar Sesión arriba a la derecha -->
-        <div class="flex items-start justify-between gap-3">
-          <div>
+        <div class="flex items-start justify-between gap-2 flex-wrap sm:flex-nowrap">
+          <div class="min-w-0 flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Estado de tu pedido</span>
-            <div id="tituloEstadoPedidoAmazon" class="text-xl sm:text-2xl font-bold mt-0.5 flex items-center gap-2">
+            <div id="tituloEstadoPedidoAmazon" class="text-lg sm:text-2xl font-bold mt-0.5 flex items-center gap-1.5 flex-wrap">
               <span class="text-emerald-600">Recibido</span>
               <span class="text-gray-300">·</span>
               <span class="text-rose-600">Pendiente</span>
             </div>
           </div>
-          <button onclick="volverAConsultarPedido()" title="Cerrar sesión / Buscar otro pedido" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-xs font-bold transition active:scale-95 shadow-2xs">
-            <i class="fa-solid fa-arrow-right-from-bracket text-[11px]"></i>
+          <button onclick="volverAConsultarPedido()" title="Cerrar sesión / Buscar otro pedido" class="flex-shrink-0 inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-[11px] sm:text-xs font-bold transition active:scale-95 shadow-2xs">
+            <i class="fa-solid fa-arrow-right-from-bracket text-[10px] sm:text-[11px]"></i>
             <span>Cerrar sesión</span>
           </button>
         </div>
@@ -4862,9 +4862,16 @@ function cargarFAQs() {
                              .replace(/\[\s*UNIDAD\s*\d+\/\d+\s*\]\s*\|?/gi, '')
                              .trim();
 
+        let bloqueProdHtml = '';
+        const matchProd = limpio.match(/\[PROD:\s*([^\]]+)\]/i);
+        if (matchProd) {
+          bloqueProdHtml = `<div class="leading-relaxed pb-1 mb-1 border-b border-blue-200/60 font-semibold text-slate-800">[PROD: <strong class="font-bold text-black">${matchProd[1].trim()}</strong>]</div>`;
+          limpio = limpio.replace(/\[PROD:\s*[^\]]+\]\s*\|?/gi, '').trim();
+        }
+
         if (limpio.includes('|')) {
           const partes = limpio.split('|').map(x => x.trim()).filter(Boolean);
-          return partes.map(parte => {
+          const lineasHtml = partes.map(parte => {
             const indexColon = parte.indexOf(':');
             if (indexColon !== -1) {
               const etiqueta = parte.substring(0, indexColon).trim();
@@ -4873,6 +4880,7 @@ function cargarFAQs() {
             }
             return `<div class="leading-relaxed font-bold text-slate-900">${parte}</div>`;
           }).join('');
+          return bloqueProdHtml + lineasHtml;
         }
 
         const regexCampos = /(\d+\.\s*[^:]+:)/g;
@@ -4886,10 +4894,10 @@ function cargarFAQs() {
               html += `<div class="leading-relaxed"><span class="font-normal text-black">${label}</span> <strong class="font-bold text-slate-900">${val}</strong></div>`;
             }
           }
-          if (html) return html;
+          if (html) return bloqueProdHtml + html;
         }
 
-        return `<div class="leading-relaxed font-bold text-slate-900">${limpio}</div>`;
+        return bloqueProdHtml + `<div class="leading-relaxed font-bold text-slate-900">${limpio}</div>`;
       };
 
       document.getElementById('cajaPersonalizacionSeguimiento').innerHTML = formatearPersonalizacionVisual(p.personalizacion || "");
