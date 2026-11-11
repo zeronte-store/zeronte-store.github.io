@@ -396,6 +396,126 @@
         </button>
       </div>
 
+      <!-- CARRUSEL ESTILO AMAZON: RESEÑAS CON IMÁGENES -->
+      <div id="seccionCarruselFotosAmazon" class="hidden pt-5 pb-6 border-b border-gray-200 select-none">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base sm:text-lg font-bold text-gray-900 tracking-tight">Reseñas con imágenes</h3>
+          <span id="conteoFotosCarruselAmazon" class="text-xs text-blue-600 font-semibold cursor-pointer hover:underline" onclick="abrirPrimeraFotoGaleriaAmazon()">Ver todas las fotos &gt;</span>
+        </div>
+        <div class="relative group/carrusel">
+          <!-- Flecha izquierda carrusel -->
+          <button type="button" onclick="scrollCarruselFotosAmazon(-1)" class="absolute -left-2 sm:-left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/95 hover:bg-white text-gray-800 shadow-md border border-gray-200 flex items-center justify-center text-xs font-bold transition active:scale-90 z-20">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          
+          <!-- Contenedor scroll horizontal de miniaturas -->
+          <div id="trackCarruselFotosAmazon" class="flex gap-3 overflow-x-auto no-scrollbar scroll-smooth py-1 px-1">
+            <!-- Inyectado dinámicamente -->
+          </div>
+
+          <!-- Flecha derecha carrusel -->
+          <button type="button" onclick="scrollCarruselFotosAmazon(1)" class="absolute -right-2 sm:-right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/95 hover:bg-white text-gray-800 shadow-md border border-gray-200 flex items-center justify-center text-xs font-bold transition active:scale-90 z-20">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- MODAL CUADRÍCULA ESTILO AMAZON: VER TODAS LAS FOTOS (MOSAICO) -->
+      <div id="modalCuadriculaFotosAmazon" class="fixed inset-0 z-[115] bg-black/80 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-6 select-none" onclick="if(event.target===this) cerrarCuadriculaFotosAmazon()">
+        <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-gray-200 max-w-4xl w-full max-h-[90vh] flex flex-col relative" onclick="event.stopPropagation()">
+          <!-- Cabecera modal cuadrícula -->
+          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+            <h3 class="text-base sm:text-lg font-bold text-gray-900 tracking-tight" id="tituloCuadriculaFotosAmazon">Fotos de clientes</h3>
+            <button type="button" onclick="cerrarCuadriculaFotosAmazon()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold transition active:scale-95">✕</button>
+          </div>
+
+          <!-- Rejilla de fotos scrollable idéntica a la captura -->
+          <div class="p-4 sm:p-6 overflow-y-auto flex-1">
+            <div id="gridCuadriculaFotosAmazon" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3 sm:gap-4">
+              <!-- Se inyectan las fotos en miniatura -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL ESTILO AMAZON: VISTA DETALLADA DE RESEÑA CON FOTOS -->
+      <div id="modalDetalleResenaAmazon" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-xs hidden items-center justify-center p-2 sm:p-6 select-none" onclick="if(event.target===this) cerrarModalResenaAmazon()">
+        <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-gray-200 max-w-4xl w-full max-h-[92vh] flex flex-col relative" onclick="event.stopPropagation()">
+          <!-- Boton superior de cierre estilo Amazon -->
+          <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white z-20">
+            <button type="button" onclick="volverACuadriculaDesdeDetalleAmazon()" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-gray-700 hover:text-black transition active:scale-95">
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+              <span>Todas las fotos</span>
+            </button>
+            <button type="button" onclick="cerrarModalResenaAmazonTotal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold transition active:scale-95">✕</button>
+          </div>
+
+          <!-- Cuerpo a 2 columnas (Foto a la izquierda y Datos de la reseña a la derecha) -->
+          <div class="grid grid-cols-1 md:grid-cols-12 flex-1 overflow-y-auto">
+            <!-- COLUMNA IZQUIERDA: Visor de foto con flechas -->
+            <div class="md:col-span-7 bg-neutral-900 flex items-center justify-center relative min-h-[300px] sm:min-h-[460px] p-4">
+              <!-- Flecha foto anterior -->
+              <button id="btnAmazonFotoAnt" type="button" onclick="navegarFotoDetalleAmazon(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center text-sm transition active:scale-90 z-20 shadow-md">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              
+              <img id="imgDetalleAmazonGrande" src="" alt="Foto reseña" class="max-h-[68vh] w-auto max-w-full object-contain rounded-xl shadow-lg">
+
+              <!-- Flecha foto siguiente -->
+              <button id="btnAmazonFotoSig" type="button" onclick="navegarFotoDetalleAmazon(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center text-sm transition active:scale-90 z-20 shadow-md">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <!-- COLUMNA DERECHA: Datos del autor, estrellas, opinión y miniaturas del cliente -->
+            <div class="md:col-span-5 p-5 sm:p-7 flex flex-col justify-between bg-white text-left space-y-4 overflow-y-auto">
+              <div class="space-y-3.5">
+                <!-- Cabecera usuario -->
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-neutral-200 text-gray-600 flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                  <div>
+                    <h4 id="nombreAutorAmazon" class="text-sm font-bold text-gray-900 leading-tight">Cliente</h4>
+                    <span id="paisAutorAmazon" class="text-[11px] text-gray-400 block mt-0.5"></span>
+                  </div>
+                </div>
+
+                <!-- Estrellas + Compra verificada -->
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span id="estrellasAmazonBox" class="flex text-amber-500 text-xs gap-0.5">
+                    <!-- Estrellas -->
+                  </span>
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                    <i class="fa-solid fa-shield-check text-xs"></i>
+                    <span>Compra verificada</span>
+                  </span>
+                </div>
+
+                <!-- Fecha y artículo -->
+                <div class="text-[11px] text-gray-500 space-y-0.5 border-b border-gray-100 pb-3">
+                  <div>Fecha: <strong id="fechaAmazonLabel" class="text-gray-800"></strong></div>
+                  <div>Artículo: <strong id="articuloAmazonLabel" class="text-gray-800"></strong></div>
+                </div>
+
+                <!-- Texto completo de la reseña -->
+                <div class="text-xs sm:text-[13px] text-gray-800 leading-relaxed max-h-48 overflow-y-auto pr-1">
+                  <p id="textoResenaAmazon" class="whitespace-pre-line"></p>
+                </div>
+              </div>
+
+              <!-- Miniaturas de fotos pertenecientes a esta misma reseña -->
+              <div id="carruselSubFotosAmazonWrapper" class="pt-3 border-t border-gray-100">
+                <span class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Fotos de esta reseña:</span>
+                <div id="gridSubFotosAmazon" class="flex items-center gap-2 flex-wrap">
+                  <!-- Se generan las fotos del cliente actual -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Formulario para nuevos clientes con Verificación de Comprador -->
       <div id="formNuevaResena" class="hidden bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-6 mt-4">
         <div class="flex items-center justify-between mb-3">
@@ -4743,6 +4863,7 @@
       }).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
       actualizarContadoresResenas();
+      renderizarCarruselFotosAmazon();
     }
 
     function actualizarContadoresResenas() {
@@ -5065,6 +5186,214 @@
       }
     }
 
+    // ================= CARRUSEL Y MODAL DE RESEÑAS CON IMÁGENES ESTILO AMAZON =================
+    let todasLasFotosAmazon = []; // { url, resena }
+    let resenaActivaAmazon = null;
+    let indiceFotoActualEnResena = 0;
+
+    function renderizarCarruselFotosAmazon() {
+      const seccion = document.getElementById('seccionCarruselFotosAmazon');
+      const track = document.getElementById('trackCarruselFotosAmazon');
+      const conteoLabel = document.getElementById('conteoFotosCarruselAmazon');
+      if (!seccion || !track) return;
+
+      todasLasFotosAmazon = [];
+
+      listaResenasTotales.forEach(r => {
+        if (Array.isArray(r.fotos) && r.fotos.length > 0) {
+          r.fotos.forEach((urlFoto, idxFoto) => {
+            todasLasFotosAmazon.push({
+              url: urlFoto,
+              resena: r,
+              indiceFoto: idxFoto
+            });
+          });
+        }
+      });
+
+      if (todasLasFotosAmazon.length === 0) {
+        seccion.classList.add('hidden');
+        return;
+      }
+
+      seccion.classList.remove('hidden');
+      if (conteoLabel) {
+        conteoLabel.innerText = `Ver las ${todasLasFotosAmazon.length} fotos >`;
+      }
+
+      track.innerHTML = todasLasFotosAmazon.map((item, indexGlobal) => `
+        <div onclick="abrirModalResenaAmazonPorIndexGlobal(${indexGlobal})" class="w-28 sm:w-36 h-28 sm:h-36 flex-shrink-0 rounded-2xl overflow-hidden border border-gray-200 bg-gray-100 cursor-pointer hover:opacity-95 hover:scale-102 transition shadow-xs aspect-square group">
+          <img src="${item.url}" alt="Foto reseña" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+        </div>
+      `).join('');
+    }
+
+    function scrollCarruselFotosAmazon(direccion) {
+      const track = document.getElementById('trackCarruselFotosAmazon');
+      if (track) {
+        track.scrollBy({ left: direccion * 320, behavior: 'smooth' });
+      }
+    }
+
+    function abrirPrimeraFotoGaleriaAmazon() {
+      // Abre la cuadrícula de mosaico idéntica a la captura de Amazon
+      abrirCuadriculaFotosAmazon();
+    }
+
+    function abrirCuadriculaFotosAmazon() {
+      const modal = document.getElementById('modalCuadriculaFotosAmazon');
+      const grid = document.getElementById('gridCuadriculaFotosAmazon');
+      const titulo = document.getElementById('tituloCuadriculaFotosAmazon');
+      if (!modal || !grid) return;
+
+      if (titulo) {
+        titulo.innerText = `Fotos de clientes (${todasLasFotosAmazon.length})`;
+      }
+
+      grid.innerHTML = todasLasFotosAmazon.map((item, idxGlobal) => `
+        <div onclick="abrirFotoDesdeCuadriculaAmazon(${idxGlobal})" class="w-full aspect-square rounded-2xl overflow-hidden border border-gray-200 bg-gray-100 cursor-pointer hover:opacity-90 hover:scale-102 transition shadow-xs group">
+          <img src="${item.url}" alt="Foto cliente" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarCuadriculaFotosAmazon() {
+      const modal = document.getElementById('modalCuadriculaFotosAmazon');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function abrirFotoDesdeCuadriculaAmazon(idxGlobal) {
+      // Oculta la cuadrícula y abre el detalle de la reseña
+      const modalCuadricula = document.getElementById('modalCuadriculaFotosAmazon');
+      if (modalCuadricula) {
+        modalCuadricula.classList.add('hidden');
+        modalCuadricula.classList.remove('flex');
+      }
+      abrirModalResenaAmazonPorIndexGlobal(idxGlobal);
+    }
+
+    function volverACuadriculaDesdeDetalleAmazon() {
+      // Cierra la reseña actual y regresa a la cuadrícula de fotos
+      cerrarModalResenaAmazon();
+      abrirCuadriculaFotosAmazon();
+    }
+
+    function cerrarModalResenaAmazonTotal() {
+      cerrarModalResenaAmazon();
+      cerrarCuadriculaFotosAmazon();
+    }
+
+    function abrirModalResenaAmazonPorIndexGlobal(idxGlobal) {
+      const item = todasLasFotosAmazon[idxGlobal];
+      if (!item) return;
+      abrirModalDetalleResenaAmazon(item.resena, item.indiceFoto);
+    }
+
+    function abrirModalDetalleResenaAmazon(resena, indiceFoto = 0) {
+      resenaActivaAmazon = resena;
+      indiceFotoActualEnResena = indiceFoto;
+      actualizarVistaModalAmazon();
+
+      const modal = document.getElementById('modalDetalleResenaAmazon');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function actualizarVistaModalAmazon() {
+      if (!resenaActivaAmazon) return;
+
+      const fotos = resenaActivaAmazon.fotos || [];
+      if (indiceFotoActualEnResena < 0) indiceFotoActualEnResena = fotos.length - 1;
+      if (indiceFotoActualEnResena >= fotos.length) indiceFotoActualEnResena = 0;
+
+      // Foto principal
+      const imgPrincipal = document.getElementById('imgDetalleAmazonGrande');
+      if (imgPrincipal && fotos[indiceFotoActualEnResena]) {
+        imgPrincipal.src = fotos[indiceFotoActualEnResena];
+      }
+
+      // Flechas
+      const btnAnt = document.getElementById('btnAmazonFotoAnt');
+      const btnSig = document.getElementById('btnAmazonFotoSig');
+      const tieneVarias = fotos.length > 1;
+      if (btnAnt) btnAnt.classList.toggle('hidden', !tieneVarias);
+      if (btnSig) btnSig.classList.toggle('hidden', !tieneVarias);
+
+      // Datos del autor
+      const nombreEl = document.getElementById('nombreAutorAmazon');
+      if (nombreEl) nombreEl.innerText = resenaActivaAmazon.autor || "Cliente";
+
+      const paisEl = document.getElementById('paisAutorAmazon');
+      if (paisEl) {
+        paisEl.innerText = resenaActivaAmazon.pais ? `📍 ${resenaActivaAmazon.pais}` : '';
+      }
+
+      // Estrellas
+      const estrellasBox = document.getElementById('estrellasAmazonBox');
+      if (estrellasBox) {
+        const estNum = Math.round(resenaActivaAmazon.puntuacion || 5);
+        let htmlEst = '';
+        for (let s = 1; s <= 5; s++) {
+          htmlEst += s <= estNum ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star text-gray-300"></i>';
+        }
+        estrellasBox.innerHTML = htmlEst;
+      }
+
+      // Fecha y artículo
+      const fechaEl = document.getElementById('fechaAmazonLabel');
+      if (fechaEl) fechaEl.innerText = resenaActivaAmazon.fecha || '';
+
+      const artEl = document.getElementById('articuloAmazonLabel');
+      if (artEl) artEl.innerText = resenaActivaAmazon.articulo || '';
+
+      // Texto
+      const txtEl = document.getElementById('textoResenaAmazon');
+      if (txtEl) txtEl.innerText = resenaActivaAmazon.texto || '';
+
+      // Miniaturas subfotos
+      const subTrack = document.getElementById('gridSubFotosAmazon');
+      const subWrapper = document.getElementById('carruselSubFotosAmazonWrapper');
+      if (subWrapper && subTrack) {
+        if (fotos.length > 1) {
+          subWrapper.classList.remove('hidden');
+          subTrack.innerHTML = fotos.map((f, i) => `
+            <div onclick="indiceFotoActualEnResena=${i}; actualizarVistaModalAmazon();" class="w-14 h-14 rounded-xl overflow-hidden cursor-pointer border-2 transition aspect-square ${i === indiceFotoActualEnResena ? 'border-blue-600 scale-105 shadow-md' : 'border-gray-200 opacity-70 hover:opacity-100'}">
+              <img src="${f}" class="w-full h-full object-cover">
+            </div>
+          `).join('');
+        } else {
+          subWrapper.classList.add('hidden');
+        }
+      }
+    }
+
+    function navegarFotoDetalleAmazon(delta) {
+      if (!resenaActivaAmazon || !resenaActivaAmazon.fotos || resenaActivaAmazon.fotos.length <= 1) return;
+      indiceFotoActualEnResena += delta;
+      actualizarVistaModalAmazon();
+    }
+
+    function cerrarModalResenaAmazon() {
+      const modal = document.getElementById('modalDetalleResenaAmazon');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+      }
+      resenaActivaAmazon = null;
+    }
+
     // Control del Carrusel del Visor de Fotos con Teclado
     let galeriaFotosVisorActiva = [];
     let indiceFotoVisorActivo = 0;
@@ -5127,9 +5456,22 @@
     }
 
     // Navegación con teclado en PC (Flecha Izquierda / Flecha Derecha / Escape)
-    document.addEventListener('keydown', (e) => {
-      const modal = document.getElementById('modalVisorFotoResena');
-      if (!modal || modal.classList.contains('hidden')) return;
+    document.addEventListener('keydown', function(e) {
+      const modalVisor = document.getElementById('modalVisorFotoResena');
+      const modalAmazon = document.getElementById('modalDetalleResenaAmazon');
+
+      if (modalAmazon && !modalAmazon.classList.contains('hidden')) {
+        if (e.key === 'ArrowLeft') {
+          navegarFotoDetalleAmazon(-1);
+        } else if (e.key === 'ArrowRight') {
+          navegarFotoDetalleAmazon(1);
+        } else if (e.key === 'Escape') {
+          cerrarModalResenaAmazon();
+        }
+        return;
+      }
+
+      if (!modalVisor || modalVisor.classList.contains('hidden')) return;
 
       if (e.key === 'ArrowLeft') {
         navegarFotoResena(-1);
