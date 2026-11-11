@@ -413,7 +413,20 @@
         <form onsubmit="guardarNuevaResena(event)" class="space-y-3">
           <div>
             <label class="block text-[11px] font-semibold text-gray-600 mb-1">Nº de Pedido *</label>
-            <input type="text" id="pedidoIdResena" required placeholder="Ej. PED-4821 o 4821" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 font-mono focus:outline-none focus:border-black transition">
+            <input type="text" id="pedidoIdResena" oninput="comprobarPedidoEnFormResena(this.value)" required placeholder="Ej. PED-4821 o 4821" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 font-mono focus:outline-none focus:border-black transition">
+          </div>
+
+          <!-- Bloque dinámico: Identificación de cliente y selector de artículo si hay varios -->
+          <div id="infoCompradorResenaBox" class="hidden p-3 rounded-xl bg-blue-50/80 border border-blue-200 text-xs space-y-2">
+            <div class="flex items-center gap-2 text-blue-900 font-semibold">
+              <i class="fa-solid fa-circle-check text-blue-600"></i>
+              <span>Comprador/a: <strong id="nombreCompradorDetectado" class="font-bold text-gray-900"></strong></span>
+            </div>
+            <div id="selectorArticuloResenaWrapper" class="hidden space-y-1">
+              <label class="block text-[11px] font-bold text-gray-700">Selecciona el artículo a reseñar:</label>
+              <select id="selectArticuloPedidoResena" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-2 text-xs text-gray-800 font-medium focus:outline-none focus:border-black cursor-pointer">
+              </select>
+            </div>
           </div>
 
           <div>
@@ -5124,17 +5137,79 @@
       });
     }
 
+    let pedidosEncontradosFormResena = [];
+
+    async function comprobarPedidoEnFormResena(valor) {
+      const limpio = (valor || '').trim().toUpperCase();
+      const soloDigitos = limpio.replace(/[^0-9]/g, '');
+      const boxInfo = document.getElementById('infoCompradorResenaBox');
+      const nombreLabel = document.getElementById('nombreCompradorDetectado');
+      const wrapperSelect = document.getElementById('selectorArticuloResenaWrapper');
+      const selectArt = document.getElementById('selectArticuloPedidoResena');
+
+      if (!limpio || (limpio.length < 4 && soloDigitos.length < 3)) {
+        if (boxInfo) boxInfo.classList.add('hidden');
+        pedidosEncontradosFormResena = [];
+        return;
+      }
+
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
+        const data = await res.json();
+        const lista = (data && data.pedidos) ? data.pedidos : (Array.isArray(data) ? data : []);
+
+        pedidosEncontradosFormResena = lista.filter(p => {
+          const pId = (p.id || p.ID || "").toString().trim().toUpperCase();
+          const digitosP = pId.replace(/[^0-9]/g, '');
+          return (pId === limpio) || (pId.includes(limpio)) || (soloDigitos && digitosP === soloDigitos);
+        });
+
+        if (pedidosEncontradosFormResena.length > 0) {
+          const primer = pedidosEncontradosFormResena[0];
+          const nombreReal = primer.nombre || "Cliente Verificado";
+          if (nombreLabel) nombreLabel.innerText = nombreReal;
+          if (boxInfo) boxInfo.classList.remove('hidden');
+
+          // Extraer productos únicos del pedido
+          const listaProductos = [];
+          pedidosEncontradosFormResena.forEach(p => {
+            const nomProd = (p.producto || p.Producto || "Partitura personalizada").replace(/\s*\(x\d+\)/gi, '').trim();
+            if (nomProd && !listaProductos.includes(nomProd)) {
+              listaProductos.push(nomProd);
+            }
+          });
+
+          if (listaProductos.length > 1) {
+            if (selectArt) {
+              selectArt.innerHTML = listaProductos.map(prod => `<option value="${prod.replace(/"/g, '&quot;')}">${prod}</option>`).join('');
+            }
+            if (wrapperSelect) wrapperSelect.classList.remove('hidden');
+          } else {
+            if (selectArt) {
+              selectArt.innerHTML = `<option value="${(listaProductos[0] || 'Partitura personalizada').replace(/"/g, '&quot;')}">${listaProductos[0] || 'Partitura personalizada'}</option>`;
+            }
+            if (wrapperSelect) wrapperSelect.classList.add('hidden');
+          }
+        } else {
+          if (boxInfo) boxInfo.classList.add('hidden');
+        }
+      } catch (err) {
+        console.warn("Error al comprobar pedido en vivo:", err);
+      }
+    }
+
     async function guardarNuevaResena(e) {
       e.preventDefault();
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       const pedidoInput = document.getElementById('pedidoIdResena').value.trim().toUpperCase();
+      const soloDigitosBuscados = pedidoInput.replace(/[^0-9]/g, '');
       const texto = document.getElementById('textoResena').value.trim();
       const puntuacion = parseFloat(document.getElementById('puntuacionValor').value) || 5;
       const btn = document.getElementById('btnPublicarResena');
 
-      const esValido = /^PED-\d{3,8}$/i.test(pedidoInput) || /^\d{4,8}$/.test(pedidoInput);
+      const esValido = /^PED-\d{3,8}$/i.test(pedidoInput) || /^\d{3,8}$/.test(pedidoInput);
       if (!esValido) {
-        alert("Por favor, introduce un número de pedido válido (ejemplo: PED-4821 o 4821).");
+        alert("Por favor, introduce un número de pedido válido (ejemplo: PED-9009 o 9009).");
         document.getElementById('pedidoIdResena').focus();
         return;
       }
@@ -5146,29 +5221,36 @@
       let productoExtraido = "Partitura personalizada";
 
       try {
-        const resConsulta = await fetch(`${APPS_SCRIPT_URL}?accion=verificarPedido&pedidoId=${encodeURIComponent(pedidoInput)}`);
-        const dataPedido = await resConsulta.json();
-        if (dataPedido && dataPedido.status === "success" && dataPedido.pedido) {
-          if (dataPedido.pedido.nombre) nombreExtraido = dataPedido.pedido.nombre;
-          if (dataPedido.pedido.producto) productoExtraido = dataPedido.pedido.producto;
+        // Consultar la lista completa de pedidos para encontrar nombre y producto exacto
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
+        const data = await res.json();
+        const lista = (data && data.pedidos) ? data.pedidos : (Array.isArray(data) ? data : []);
+
+        const pedidosCoincidentes = lista.filter(p => {
+          const pId = (p.id || p.ID || "").toString().trim().toUpperCase();
+          const digitosP = pId.replace(/[^0-9]/g, '');
+          return (pId === pedidoInput) || (pId.includes(pedidoInput)) || (soloDigitosBuscados && digitosP === soloDigitosBuscados);
+        });
+
+        if (pedidosCoincidentes.length > 0) {
+          if (pedidosCoincidentes[0].nombre) {
+            nombreExtraido = pedidosCoincidentes[0].nombre.trim();
+          }
+
+          const selectArt = document.getElementById('selectArticuloPedidoResena');
+          if (selectArt && selectArt.value) {
+            productoExtraido = selectArt.value.trim();
+          } else {
+            productoExtraido = (pedidosCoincidentes[0].producto || "Partitura personalizada").replace(/\s*\(x\d+\)/gi, '').trim();
+          }
         }
       } catch (err) {
-        console.warn("Consulta pedido offline o sin endpoint específico:", err);
+        console.warn("Consulta pedido offline:", err);
       }
 
       const hoy = new Date();
       const mesTexto = t.meses[hoy.getMonth()];
       const fechaTexto = `${hoy.getDate()} de ${mesTexto}, ${hoy.getFullYear()}`;
-
-      const nueva = { 
-        pedidoId: pedidoInput,
-        autor: nombreExtraido, 
-        articulo: productoExtraido, 
-        texto: texto, 
-        puntuacion: puntuacion,
-        fecha: fechaTexto, 
-        timestamp: hoy.getTime() 
-      };
 
       try {
         await fetch(APPS_SCRIPT_URL, {
@@ -5189,10 +5271,6 @@
         console.warn("No se pudo persistir en backend:", err);
       }
 
-      const guardadas = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
-      guardadas.unshift(nueva);
-      localStorage.setItem('zeronte_nuevas_resenas', JSON.stringify(guardadas));
-
       // Recargar desde el servidor para sincronizar
       await cargarResenasDesdeServidor();
 
@@ -5204,6 +5282,8 @@
       btn.innerText = t.btnPublicarResena;
       e.target.reset();
       fijarPuntuacion(5);
+      const boxInfo = document.getElementById('infoCompradorResenaBox');
+      if (boxInfo) boxInfo.classList.add('hidden');
       document.getElementById('formNuevaResena').classList.add('hidden');
       alert("¡Muchas gracias! Tu reseña verificada ha sido publicada.");
     }
