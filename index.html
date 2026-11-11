@@ -4737,6 +4737,7 @@
           puntuacion: parseFloat(r.puntuacion) || 5,
           fecha: formatearFechaLegible(r.fecha),
           fotos: fotosArr,
+          pais: (r.pais || "").toString().trim(),
           timestamp: r.timestamp || new Date(r.fecha).getTime() || Date.now()
         };
       }).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
