@@ -160,10 +160,15 @@
       <div class="flex items-center gap-1.5 sm:gap-2.5 w-full lg:w-auto justify-center lg:justify-end lg:self-center flex-nowrap">
         <!-- Buscador de tienda (oculto en móvil, activo en escritorio) -->
         <div class="relative w-48 sm:w-60 md:w-64 hidden lg:block">
-          <input type="text" id="buscadorTienda" oninput="buscarProductos(this.value)" placeholder="Buscar artículo..." class="notranslate w-full bg-white border border-gray-300 rounded-full py-1.5 pl-4 pr-8 text-xs text-gray-800 focus:outline-none focus:border-gray-500 transition shadow-sm">
-          <span class="absolute right-3 top-2 text-gray-400 text-xs pointer-events-none">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </span>
+          <input type="text" id="buscadorTienda" oninput="buscarProductos(this.value)" placeholder="Buscar artículo..." class="notranslate w-full bg-white border border-gray-300 rounded-full py-1.5 pl-4 pr-9 text-xs text-gray-800 focus:outline-none focus:border-gray-500 transition shadow-sm">
+          <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 text-xs">
+            <button id="btnLimpiarBuscadorWeb" type="button" onclick="limpiarBuscadorRapido()" class="hidden text-gray-400 hover:text-black text-xs font-bold leading-none transition cursor-pointer" title="Limpiar búsqueda">
+              ✕
+            </button>
+            <span id="iconoBuscadorLupaWeb" class="text-gray-400 pointer-events-none text-[11px]">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+          </div>
           <div id="desplegableSugerenciasBuscador" class="hidden absolute left-0 w-80 sm:w-96 top-full mt-1.5 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-72 overflow-y-auto divide-y divide-gray-100 p-1"></div>
         </div>
 
@@ -254,9 +259,14 @@
       <!-- Buscador estilo píldora Etsy con conteo dinámico -->
       <div class="relative w-full">
         <input type="text" id="buscadorTiendaMovil" oninput="buscarProductos(this.value)" placeholder="Buscar entre los artículos..." class="notranslate w-full bg-[#ebebeb]/70 border-0 rounded-full py-3 pl-5 pr-11 text-sm text-[#222222] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black transition shadow-inner">
-        <span class="absolute right-4 top-3.5 text-gray-700 pointer-events-none text-base">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </span>
+        <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5">
+          <button id="btnLimpiarBuscadorMovil" type="button" onclick="limpiarBuscadorRapido()" class="hidden text-gray-600 hover:text-black text-sm font-bold leading-none transition cursor-pointer" title="Limpiar búsqueda">
+            ✕
+          </button>
+          <span id="iconoBuscadorLupaMovil" class="text-gray-700 pointer-events-none text-sm">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+        </div>
         <div id="desplegableSugerenciasBuscadorMovil" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-72 overflow-y-auto divide-y divide-gray-100 p-1"></div>
       </div>
 
@@ -2253,13 +2263,31 @@
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
 
       try {
-        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerConteoVentas&_t=${Date.now()}`);
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
         const data = await res.json();
-        if (data && data.status === "success" && typeof data.totalPedidos === "number" && data.totalPedidos >= 1072) {
-          totalVentasGlobalSincronizado = data.totalPedidos;
+        const pedidos = (data && data.pedidos) ? data.pedidos : (Array.isArray(data) ? data : []);
+
+        // Lee el número de venta más alto registrado en la Columna A (Nº Venta) de la hoja Pedidos
+        let maxVenta = 0;
+        pedidos.forEach(p => {
+          const n = parseInt(p.numVenta, 10);
+          if (!isNaN(n) && n > maxVenta) {
+            maxVenta = n;
+          }
+        });
+
+        if (maxVenta > 0) {
+          totalVentasGlobalSincronizado = maxVenta;
+        } else {
+          // En caso de respaldo se conecta al endpoint de conteo
+          const resC = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerConteoVentas&_t=${Date.now()}`);
+          const dataC = await resC.json();
+          if (dataC && dataC.status === "success" && typeof dataC.totalPedidos === "number") {
+            totalVentasGlobalSincronizado = dataC.totalPedidos;
+          }
         }
       } catch (e) {
-        // En caso de fallo de red temporal mantiene el valor sincronizado
+        // En caso de fallo de red temporal mantiene el último valor registrado
       }
 
       const elVentas = document.getElementById('totalVentasEtsy');
@@ -4258,6 +4286,15 @@
         .trim();
     }
 
+    function limpiarBuscadorRapido() {
+      const bM = document.getElementById('buscadorTiendaMovil');
+      const bE = document.getElementById('buscadorTienda');
+      if (bM) bM.value = '';
+      if (bE) bE.value = '';
+      buscarProductos('');
+      if (bE) bE.focus();
+    }
+
     function buscarProductos(termino) {
       const qCrudo = termino.trim();
       const qNorm = quitarTildesTexto(termino);
@@ -4267,6 +4304,18 @@
       const bE = document.getElementById('buscadorTienda');
       if (bM && bM.value !== termino) bM.value = termino;
       if (bE && bE.value !== termino) bE.value = termino;
+
+      // Si hay texto: se muestra únicamente la "X" y se oculta la lupa. Si está vacío: se muestra únicamente la lupa.
+      const hayTexto = Boolean(termino && termino.length > 0);
+      const btnXWeb = document.getElementById('btnLimpiarBuscadorWeb');
+      const btnXMovil = document.getElementById('btnLimpiarBuscadorMovil');
+      const lupaWeb = document.getElementById('iconoBuscadorLupaWeb');
+      const lupaMovil = document.getElementById('iconoBuscadorLupaMovil');
+
+      if (btnXWeb) btnXWeb.classList.toggle('hidden', !hayTexto);
+      if (btnXMovil) btnXMovil.classList.toggle('hidden', !hayTexto);
+      if (lupaWeb) lupaWeb.classList.toggle('hidden', hayTexto);
+      if (lupaMovil) lupaMovil.classList.toggle('hidden', hayTexto);
 
       let base = catalogoCompleto;
       if (categoriaSeleccionada !== 'todos') {
