@@ -502,6 +502,14 @@
                 <div class="text-xs sm:text-[13px] text-gray-800 leading-relaxed max-h-48 overflow-y-auto pr-1">
                   <p id="textoResenaAmazon" class="whitespace-pre-line"></p>
                 </div>
+
+                <!-- Botón de traducir en Modal Amazon -->
+                <div id="wrapperBotonTraducirAmazon" class="hidden pt-1">
+                  <button type="button" id="btnTraducirResenaAmazon" onclick="alternarTraduccionResenaAmazon(this)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 underline underline-offset-2 transition active:scale-95">
+                    <i class="fa-solid fa-language text-xs"></i>
+                    <span id="textoBtnTraducirAmazon">Traducir reseña</span>
+                  </button>
+                </div>
               </div>
 
               <!-- Miniaturas de fotos pertenecientes a esta misma reseña -->
@@ -4993,9 +5001,11 @@
         const idTextoUnico = `texto-resena-${paginaResenasActual}-${index}`;
         const textoCodificado = encodeURIComponent(r.texto || "");
 
-        // Solo mostrar botón de traducir si el idioma de la reseña es DISTINTO al idioma seleccionado en la web
-        const idiomaOrigen = r.idiomaOrigen || 'es';
-        const necesitaTraduccion = (idiomaOrigen !== idiomaActual);
+        // Detección automática: si tiene país extranjero (o palabras en inglés/francés/alemán) se activa traducir
+        const esPaisExtranjero = r.pais && !['españa', 'spain', ''].includes(r.pais.toLowerCase().trim());
+        const palabrasExtranjeras = /\b(the|and|is|this|was|very|great|good|beautiful|for|with|cette|tres|merci|und|sehr|gut|schon|super)\b/i;
+        const textoTienePalabrasExtranjeras = palabrasExtranjeras.test(r.texto || "");
+        const necesitaTraduccion = esPaisExtranjero || textoTienePalabrasExtranjeras || (r.idiomaOrigen && r.idiomaOrigen !== idiomaActual);
 
         return `
         <div class="py-4 space-y-2">
@@ -5361,6 +5371,35 @@
       const txtEl = document.getElementById('textoResenaAmazon');
       if (txtEl) txtEl.innerText = resenaActivaAmazon.texto || '';
 
+      // Botón Traducir dentro del Modal Amazon
+      const wrapTradAmazon = document.getElementById('wrapperBotonTraducirAmazon');
+      const btnTradAmazon = document.getElementById('btnTraducirResenaAmazon');
+      const txtBtnAmazon = document.getElementById('textoBtnTraducirAmazon');
+
+      if (wrapTradAmazon && btnTradAmazon) {
+        const esPaisExt = resenaActivaAmazon.pais && !['españa', 'spain', ''].includes(resenaActivaAmazon.pais.toLowerCase().trim());
+        const tienePalabrasExt = /\b(the|and|is|this|was|very|great|good|beautiful|for|with|cette|tres|merci|und|sehr|gut|schon|super)\b/i.test(resenaActivaAmazon.texto || "");
+        const necesitaTrad = esPaisExt || tienePalabrasExt;
+
+        if (necesitaTrad) {
+          wrapTradAmazon.classList.remove('hidden');
+          btnTradAmazon.setAttribute('data-traducido', 'false');
+          btnTradAmazon.disabled = false;
+          const labelsTraducir = {
+            es: "Traducir reseña",
+            en: "Translate review",
+            fr: "Traduire le commentaire",
+            de: "Bewertung übersetzen",
+            it: "Traduci recensione",
+            pt: "Traduzir avaliação",
+            zh: "翻译评价"
+          };
+          if (txtBtnAmazon) txtBtnAmazon.innerText = labelsTraducir[idiomaActual] || "Traducir reseña";
+        } else {
+          wrapTradAmazon.classList.add('hidden');
+        }
+      }
+
       // Miniaturas subfotos
       const subTrack = document.getElementById('gridSubFotosAmazon');
       const subWrapper = document.getElementById('carruselSubFotosAmazonWrapper');
@@ -5382,6 +5421,54 @@
       if (!resenaActivaAmazon || !resenaActivaAmazon.fotos || resenaActivaAmazon.fotos.length <= 1) return;
       indiceFotoActualEnResena += delta;
       actualizarVistaModalAmazon();
+    }
+
+    async function alternarTraduccionResenaAmazon(btnElement) {
+      if (!resenaActivaAmazon) return;
+      const txtEl = document.getElementById('textoResenaAmazon');
+      const labelBtn = document.getElementById('textoBtnTraducirAmazon');
+      if (!txtEl) return;
+
+      const textoOriginal = resenaActivaAmazon.texto || "";
+      const estaTraducido = btnElement.getAttribute('data-traducido') === 'true';
+
+      if (estaTraducido) {
+        txtEl.innerText = textoOriginal;
+        btnElement.setAttribute('data-traducido', 'false');
+        if (labelBtn) labelBtn.innerText = "Traducir reseña";
+        btnElement.querySelector('i').className = "fa-solid fa-language text-xs";
+        return;
+      }
+
+      btnElement.disabled = true;
+      if (labelBtn) labelBtn.innerText = "Traduciendo...";
+      btnElement.querySelector('i').className = "fa-solid fa-circle-notch fa-spin text-xs";
+
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(idiomaActual)}&dt=t&q=${encodeURIComponent(textoOriginal)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        let textoTraducido = "";
+        if (data && data[0]) {
+          data[0].forEach(p => {
+            if (p[0]) textoTraducido += p[0];
+          });
+        }
+
+        if (textoTraducido) {
+          txtEl.innerText = textoTraducido;
+          btnElement.setAttribute('data-traducido', 'true');
+          if (labelBtn) labelBtn.innerText = "Ver original";
+          btnElement.querySelector('i').className = "fa-solid fa-rotate-left text-xs";
+        }
+      } catch (err) {
+        console.warn("Error traduciendo reseña en modal Amazon:", err);
+        if (labelBtn) labelBtn.innerText = "Traducir reseña";
+        btnElement.querySelector('i').className = "fa-solid fa-language text-xs";
+      }
+
+      btnElement.disabled = false;
     }
 
     function cerrarModalResenaAmazon() {
