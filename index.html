@@ -441,6 +441,22 @@
               <textarea id="textoResena" required rows="3" placeholder="¿Qué te pareció la melodía, la rapidez y el diseño del encargo?..." class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"></textarea>
             </div>
 
+            <!-- Subida de hasta 4 fotos del producto -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-[11px] font-semibold text-gray-600">Fotos del artículo recibido <span class="font-normal text-gray-400">(opcional, máx. 4 fotos)</span></label>
+                <span id="contadorFotosResena" class="text-[10px] font-bold text-gray-500 bg-gray-200/80 px-2 py-0.5 rounded-full">0/4 fotos</span>
+              </div>
+              <input type="file" id="inputFotosResena" accept="image/*" multiple onchange="manejarSeleccionFotosResena(this)" class="hidden">
+              <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="document.getElementById('inputFotosResena').click()" id="btnSubirFotosResena" class="flex items-center gap-1.5 px-3 py-2 border border-dashed border-gray-300 hover:border-black bg-white rounded-xl text-xs font-semibold text-gray-700 transition active:scale-95 shadow-xs">
+                  <i class="fa-solid fa-camera text-gray-500 text-sm"></i>
+                  <span>Añadir fotos</span>
+                </button>
+                <div id="previewMiniaturasFotosResena" class="flex items-center gap-2 flex-wrap"></div>
+              </div>
+            </div>
+
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
               <div class="flex items-center gap-1.5 text-sm">
                 <span id="txtPuntuacionForm" class="text-xs font-semibold text-gray-600 mr-1">Calificación:</span>
@@ -476,6 +492,14 @@
       <!-- Lista de reseñas con paginación -->
       <div id="contenedorListaResenas" class="divide-y divide-gray-100 mt-2">
         <!-- Render dinámico -->
+      </div>
+
+      <!-- Modal Visor en grande de foto de reseña -->
+      <div id="modalVisorFotoResena" class="fixed inset-0 z-[110] bg-black/85 backdrop-blur-xs hidden items-center justify-center p-4 select-none" onclick="if(event.target===this) cerrarVisorFotoResena()">
+        <button type="button" onclick="cerrarVisorFotoResena()" class="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-900 flex items-center justify-center text-lg font-bold shadow-lg transition active:scale-95 z-20">✕</button>
+        <div class="max-w-2xl max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl bg-black flex items-center justify-center">
+          <img id="imgVisorFotoResenaGrande" src="" alt="Foto de reseña" class="w-auto h-auto max-w-full max-h-[85vh] object-contain">
+        </div>
       </div>
 
       <!-- Paginación de reseñas -->
@@ -4673,6 +4697,17 @@
     function actualizarTextosResenasIdioma() {
       listaResenasTotales = resenasServidorPublicas.map(r => {
         const nombreLimpio = (r.autor || "Cliente").replace(/\s*\(Compra verificada\)/gi, '').trim();
+        let fotosArr = [];
+        try {
+          if (Array.isArray(r.fotos)) {
+            fotosArr = r.fotos;
+          } else if (typeof r.fotos === 'string' && r.fotos.trim().startsWith('[')) {
+            fotosArr = JSON.parse(r.fotos);
+          } else if (r.fotos && typeof r.fotos === 'string' && r.fotos.trim() !== '') {
+            fotosArr = r.fotos.split(',').map(u => u.trim()).filter(Boolean);
+          }
+        } catch(e) { fotosArr = []; }
+
         return {
           autor: nombreLimpio,
           articulo: traducirTituloProducto(r.articulo, idiomaActual),
@@ -4680,6 +4715,7 @@
           texto: r.texto,
           puntuacion: parseFloat(r.puntuacion) || 5,
           fecha: formatearFechaLegible(r.fecha),
+          fotos: fotosArr,
           timestamp: r.timestamp || new Date(r.fecha).getTime() || Date.now()
         };
       }).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -4837,6 +4873,16 @@
 
           <p id="${idTextoUnico}" class="text-xs text-gray-700 leading-relaxed">${r.texto}</p>
 
+          ${(r.fotos && r.fotos.length > 0) ? `
+            <div class="flex items-center gap-2 pt-1 flex-wrap">
+              ${r.fotos.slice(0, 4).map(fUrl => `
+                <div onclick="abrirVisorFotoResena('${fUrl.replace(/'/g, "\\'")}')" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 cursor-pointer hover:opacity-90 hover:scale-105 transition shadow-2xs aspect-square">
+                  <img src="${fUrl}" alt="Foto de cliente" class="w-full h-full object-cover">
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
           ${necesitaTraduccion ? `
             <div>
               <button onclick="traducirTextoResena('${idTextoUnico}', '${textoCodificado}', this)" data-traducido="false" class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-gray-500 hover:text-black underline underline-offset-2 transition active:scale-95">
@@ -4915,6 +4961,106 @@
     function ocultarProgresoPublicacionResena() {
       const wrapper = document.getElementById('progresoPublicarResenaWrapper');
       if (wrapper) wrapper.classList.add('hidden');
+    }
+
+    // ================= GESTIÓN DE HASTA 4 FOTOS EN RESEÑA =================
+    let fotosResenaBase64 = [];
+
+    async function manejarSeleccionFotosResena(input) {
+      const archivos = Array.from(input.files || []);
+      if (!archivos.length) return;
+
+      const espacioDisponible = 4 - fotosResenaBase64.length;
+      if (espacioDisponible <= 0) {
+        alert("Ya has alcanzado el límite máximo de 4 fotos.");
+        input.value = '';
+        return;
+      }
+
+      const archivosAProcesar = archivos.slice(0, espacioDisponible);
+
+      for (const archivo of archivosAProcesar) {
+        if (!archivo.type.startsWith('image/')) continue;
+        try {
+          const b64 = await comprimirImagenCliente(archivo, 1200, 0.82);
+          fotosResenaBase64.push(b64);
+        } catch(err) {
+          console.warn("Error al procesar foto:", err);
+        }
+      }
+
+      input.value = '';
+      actualizarPreviewFotosResena();
+    }
+
+    function comprimirImagenCliente(file, maxWidth, quality) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth) {
+              h = Math.round((h * maxWidth) / w);
+              w = maxWidth;
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+        };
+        reader.onerror = reject;
+      });
+    }
+
+    function eliminarFotoResena(idx) {
+      fotosResenaBase64.splice(idx, 1);
+      actualizarPreviewFotosResena();
+    }
+
+    function actualizarPreviewFotosResena() {
+      const preview = document.getElementById('previewMiniaturasFotosResena');
+      const contador = document.getElementById('contadorFotosResena');
+      const btn = document.getElementById('btnSubirFotosResena');
+
+      if (contador) contador.innerText = `${fotosResenaBase64.length}/4 fotos`;
+      if (btn) btn.classList.toggle('hidden', fotosResenaBase64.length >= 4);
+
+      if (preview) {
+        preview.innerHTML = fotosResenaBase64.map((b64, i) => `
+          <div class="relative w-12 h-12 rounded-xl overflow-hidden border border-gray-300 shadow-2xs group aspect-square">
+            <img src="${b64}" class="w-full h-full object-cover">
+            <button type="button" onclick="eliminarFotoResena(${i})" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/75 hover:bg-rose-600 text-white flex items-center justify-center text-[9px] transition" title="Eliminar">✕</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function abrirVisorFotoResena(url) {
+      const modal = document.getElementById('modalVisorFotoResena');
+      const img = document.getElementById('imgVisorFotoResenaGrande');
+      if (modal && img) {
+        img.src = url;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function cerrarVisorFotoResena() {
+      const modal = document.getElementById('modalVisorFotoResena');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+      }
     }
 
     function verificarArticuloSeleccionadoResena() {
@@ -5116,7 +5262,7 @@
         return;
       }
 
-      actualizarProgresoPublicacionResena(45, "Guardando reseña en Google Sheets...");
+      actualizarProgresoPublicacionResena(45, "Guardando reseña y fotos en Google Sheets...");
 
       const hoy = new Date();
       const mesTexto = t.meses[hoy.getMonth()];
@@ -5133,6 +5279,7 @@
             articulo: productoExtraido,
             puntuacion: puntuacion,
             texto: texto,
+            fotos: fotosResenaBase64,
             fecha: fechaTexto,
             timestamp: hoy.getTime()
           })
@@ -5156,6 +5303,8 @@
         btn.disabled = false;
         ocultarProgresoPublicacionResena();
         e.target.reset();
+        fotosResenaBase64 = [];
+        actualizarPreviewFotosResena();
         fijarPuntuacion(5);
         const boxInfo = document.getElementById('infoCompradorResenaBox');
         if (boxInfo) boxInfo.classList.add('hidden');
