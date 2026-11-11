@@ -573,6 +573,11 @@
               <i class="fa-solid fa-circle-exclamation text-rose-600 text-sm shrink-0"></i>
               <span id="textoAvisoYaResenado">La reseña de este artículo ya ha sido publicada.</span>
             </div>
+            <!-- Mensaje de aviso cuando el pedido aún no está Enviado / Completado -->
+            <div id="avisoPedidoNoEntregado" class="hidden p-2.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-800 text-xs font-bold flex items-center gap-2">
+              <i class="fa-solid fa-clock text-amber-600 text-sm shrink-0"></i>
+              <span id="textoAvisoNoEntregado">Tu pedido está en preparación o pendiente de pago. Podrás dejar tu reseña una vez haya sido enviado/completado.</span>
+            </div>
             <div id="selectorArticuloResenaWrapper" class="hidden space-y-1">
               <label class="block text-[11px] font-bold text-gray-700">Selecciona el artículo a reseñar:</label>
               <select id="selectArticuloPedidoResena" onchange="verificarArticuloSeleccionadoResena()" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-2 text-xs text-gray-800 font-medium focus:outline-none focus:border-black cursor-pointer">
@@ -5847,11 +5852,13 @@ function cargarFAQs() {
       const textarea = document.getElementById('textoResena');
       const avisoRojo = document.getElementById('avisoArticuloYaResenado');
       const txtAviso = document.getElementById('textoAvisoYaResenado');
+      const avisoPendiente = document.getElementById('avisoPedidoNoEntregado');
 
       if (!limpio || !pedidosEncontradosFormResena || pedidosEncontradosFormResena.length === 0) {
         if (contenedorCampos) contenedorCampos.classList.remove('hidden');
         if (textarea) textarea.required = true;
         if (avisoRojo) avisoRojo.classList.add('hidden');
+        if (avisoPendiente) avisoPendiente.classList.add('hidden');
         return;
       }
 
@@ -5860,6 +5867,25 @@ function cargarFAQs() {
         productoSeleccionado = selectArt.value.trim();
       } else if (pedidosEncontradosFormResena[0]) {
         productoSeleccionado = (pedidosEncontradosFormResena[0].producto || "Partitura personalizada").replace(/\s*\(x\d+\)/gi, '').trim();
+      }
+
+      // Validar si el pedido se encuentra en estado Enviado / Completado / Pagado
+      const pedidoObj = pedidosEncontradosFormResena.find(p => {
+        const nomP = (p.producto || p.Producto || "").replace(/\s*\(x\d+\)/gi, '').trim();
+        return nomP.toLowerCase() === productoSeleccionado.toLowerCase();
+      }) || pedidosEncontradosFormResena[0];
+
+      const estadoPedido = (pedidoObj?.estado || pedidoObj?.Estado || "").toString().toLowerCase();
+      const estaEntregadoOEnviado = estadoPedido.includes("enviado") || estadoPedido.includes("completado") || estadoPedido.includes("pagado");
+
+      if (!estaEntregadoOEnviado) {
+        if (avisoPendiente) avisoPendiente.classList.remove('hidden');
+        if (avisoRojo) avisoRojo.classList.add('hidden');
+        if (contenedorCampos) contenedorCampos.classList.add('hidden');
+        if (textarea) textarea.required = false;
+        return;
+      } else {
+        if (avisoPendiente) avisoPendiente.classList.add('hidden');
       }
 
       const normalizar = s => (s || '').toString().toLowerCase().trim();
@@ -5891,12 +5917,14 @@ function cargarFAQs() {
       const wrapperSelect = document.getElementById('selectorArticuloResenaWrapper');
       const selectArt = document.getElementById('selectArticuloPedidoResena');
       const avisoRojo = document.getElementById('avisoArticuloYaResenado');
+      const avisoPendiente = document.getElementById('avisoPedidoNoEntregado');
       const contenedorCampos = document.getElementById('camposOpinionYVotoResena');
       const textarea = document.getElementById('textoResena');
 
       if (!limpio || (limpio.length < 4 && soloDigitos.length < 3)) {
         if (boxInfo) boxInfo.classList.add('hidden');
         if (avisoRojo) avisoRojo.classList.add('hidden');
+        if (avisoPendiente) avisoPendiente.classList.add('hidden');
         if (contenedorCampos) contenedorCampos.classList.remove('hidden');
         if (textarea) textarea.required = true;
         pedidosEncontradosFormResena = [];
@@ -5961,6 +5989,7 @@ function cargarFAQs() {
         } else {
           if (boxInfo) boxInfo.classList.add('hidden');
           if (avisoRojo) avisoRojo.classList.add('hidden');
+          if (avisoPendiente) avisoPendiente.classList.add('hidden');
           if (contenedorCampos) contenedorCampos.classList.remove('hidden');
           if (textarea) textarea.required = true;
         }
@@ -5991,6 +6020,7 @@ function cargarFAQs() {
       let nombreExtraido = "Cliente Verificado";
       let productoExtraido = "Partitura personalizada";
       let paisDetectado = "España";
+      let estadoPedidoDetectado = "";
 
       // Diccionario de países por prefijo telefónico
       const prefijosPaises = {
@@ -6023,6 +6053,13 @@ function cargarFAQs() {
             productoExtraido = (pedidosCoincidentes[0].producto || "Partitura personalizada").replace(/\s*\(x\d+\)/gi, '').trim();
           }
 
+          const pedCoincidenteArt = pedidosCoincidentes.find(p => {
+            const nomP = (p.producto || p.Producto || "").replace(/\s*\(x\d+\)/gi, '').trim();
+            return nomP.toLowerCase() === productoExtraido.toLowerCase();
+          }) || pedidosCoincidentes[0];
+
+          estadoPedidoDetectado = (pedCoincidenteArt?.estado || pedCoincidenteArt?.Estado || "").toString().toLowerCase();
+
           // Detectar país por prefijo telefónico del pedido
           const telPed = (pedidosCoincidentes[0].telefono || "").toString();
           for (const [pref, paisNom] of Object.entries(prefijosPaises)) {
@@ -6034,6 +6071,15 @@ function cargarFAQs() {
         }
       } catch (err) {
         console.warn("Consulta pedido offline:", err);
+      }
+
+      // Validar si el pedido está en estado Enviado / Completado / Pagado
+      const estaEntregadoOEnviado = estadoPedidoDetectado.includes("enviado") || estadoPedidoDetectado.includes("completado") || estadoPedidoDetectado.includes("pagado");
+      if (!estaEntregadoOEnviado) {
+        btn.disabled = false;
+        ocultarProgresoPublicacionResena();
+        verificarArticuloSeleccionadoResena();
+        return;
       }
 
       // -------------------------------------------------------------
@@ -6104,6 +6150,8 @@ function cargarFAQs() {
         if (boxInfo) boxInfo.classList.add('hidden');
         const avisoRojo = document.getElementById('avisoArticuloYaResenado');
         if (avisoRojo) avisoRojo.classList.add('hidden');
+        const avisoPendiente = document.getElementById('avisoPedidoNoEntregado');
+        if (avisoPendiente) avisoPendiente.classList.add('hidden');
         const contenedorCampos = document.getElementById('camposOpinionYVotoResena');
         if (contenedorCampos) contenedorCampos.classList.remove('hidden');
         document.getElementById('formNuevaResena').classList.add('hidden');
