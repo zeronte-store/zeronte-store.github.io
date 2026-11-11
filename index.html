@@ -1622,13 +1622,10 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL DE COMPRA (BOTTOM-SHEET EN MÓVIL) ==================== -->
-  <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-end sm:items-center justify-center z-[80] backdrop-blur-md">
+  <!-- ==================== MODAL DE COMPRA (CENTRADO EN MÓVIL Y ESCRITORIO) ==================== -->
+  <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[80] backdrop-blur-md p-4">
     
-    <div class="bg-[#f5f5f1] border border-gray-200 rounded-t-3xl sm:rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto text-[#222222]">
-      
-      <!-- Indicador táctil para móviles (drag bar visual) -->
-      <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4 sm:hidden"></div>
+    <div class="bg-[#f5f5f1] border border-gray-200 rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto text-[#222222]">
 
       <!-- Botón Cerrar -->
       <button onclick="cerrarModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-white hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-black transition shadow-xs">✕</button>
