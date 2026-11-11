@@ -422,34 +422,53 @@
               <i class="fa-solid fa-circle-check text-blue-600"></i>
               <span>Comprador/a: <strong id="nombreCompradorDetectado" class="font-bold text-gray-900"></strong></span>
             </div>
+            <!-- Mensaje de aviso en rojo cuando el artículo ya fue reseñado -->
+            <div id="avisoArticuloYaResenado" class="hidden p-2.5 rounded-lg bg-rose-50 border border-rose-300 text-rose-700 text-xs font-bold flex items-center gap-2">
+              <i class="fa-solid fa-circle-exclamation text-rose-600 text-sm shrink-0"></i>
+              <span id="textoAvisoYaResenado">La reseña de este artículo ya ha sido publicada.</span>
+            </div>
             <div id="selectorArticuloResenaWrapper" class="hidden space-y-1">
               <label class="block text-[11px] font-bold text-gray-700">Selecciona el artículo a reseñar:</label>
-              <select id="selectArticuloPedidoResena" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-2 text-xs text-gray-800 font-medium focus:outline-none focus:border-black cursor-pointer">
+              <select id="selectArticuloPedidoResena" onchange="verificarArticuloSeleccionadoResena()" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-2 text-xs text-gray-800 font-medium focus:outline-none focus:border-black cursor-pointer">
               </select>
             </div>
           </div>
 
-          <div>
-            <label class="block text-[11px] font-semibold text-gray-600 mb-1">Tu opinión sobre el artículo *</label>
-            <textarea id="textoResena" required rows="3" placeholder="¿Qué te pareció la melodía, la rapidez y el diseño del encargo?..." class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"></textarea>
+          <!-- Contenedor de campos que se oculta si ya fue reseñado -->
+          <div id="camposOpinionYVotoResena" class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-600 mb-1">Tu opinión sobre el artículo *</label>
+              <textarea id="textoResena" required rows="3" placeholder="¿Qué te pareció la melodía, la rapidez y el diseño del encargo?..." class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 focus:outline-none focus:border-black transition"></textarea>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+              <div class="flex items-center gap-1.5 text-sm">
+                <span id="txtPuntuacionForm" class="text-xs font-semibold text-gray-600 mr-1">Calificación:</span>
+                <input type="hidden" id="puntuacionValor" value="5">
+                <div id="selectorEstrellas" class="flex text-amber-500 cursor-pointer text-base select-none touch-manipulation">
+                  <i class="fa-solid fa-star estrella-voto p-1" data-valor="1" onclick="fijarPuntuacion(1)" ontouchstart="fijarPuntuacion(1)" onmouseover="hoverEstrellas(1)" onmouseleave="restaurarEstrellas()"></i>
+                  <i class="fa-solid fa-star estrella-voto p-1" data-valor="2" onclick="fijarPuntuacion(2)" ontouchstart="fijarPuntuacion(2)" onmouseover="hoverEstrellas(2)" onmouseleave="restaurarEstrellas()"></i>
+                  <i class="fa-solid fa-star estrella-voto p-1" data-valor="3" onclick="fijarPuntuacion(3)" ontouchstart="fijarPuntuacion(3)" onmouseover="hoverEstrellas(3)" onmouseleave="restaurarEstrellas()"></i>
+                  <i class="fa-solid fa-star estrella-voto p-1" data-valor="4" onclick="fijarPuntuacion(4)" ontouchstart="fijarPuntuacion(4)" onmouseover="hoverEstrellas(4)" onmouseleave="restaurarEstrellas()"></i>
+                  <i class="fa-solid fa-star estrella-voto p-1" data-valor="5" onclick="fijarPuntuacion(5)" ontouchstart="fijarPuntuacion(5)" onmouseover="hoverEstrellas(5)" onmouseleave="restaurarEstrellas()"></i>
+                </div>
+                <span id="puntuacionNumero" class="text-xs font-bold text-gray-700 ml-1">5.0</span>
+              </div>
+              <button type="submit" id="btnPublicarResena" class="bg-black hover:bg-gray-800 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
+                Publicar reseña
+              </button>
+            </div>
           </div>
 
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-            <div class="flex items-center gap-1.5 text-sm">
-              <span id="txtPuntuacionForm" class="text-xs font-semibold text-gray-600 mr-1">Calificación:</span>
-              <input type="hidden" id="puntuacionValor" value="5">
-              <div id="selectorEstrellas" class="flex text-amber-500 cursor-pointer text-base select-none touch-manipulation">
-                <i class="fa-solid fa-star estrella-voto p-1" data-valor="1" onclick="fijarPuntuacion(1)" ontouchstart="fijarPuntuacion(1)" onmouseover="hoverEstrellas(1)" onmouseleave="restaurarEstrellas()"></i>
-                <i class="fa-solid fa-star estrella-voto p-1" data-valor="2" onclick="fijarPuntuacion(2)" ontouchstart="fijarPuntuacion(2)" onmouseover="hoverEstrellas(2)" onmouseleave="restaurarEstrellas()"></i>
-                <i class="fa-solid fa-star estrella-voto p-1" data-valor="3" onclick="fijarPuntuacion(3)" ontouchstart="fijarPuntuacion(3)" onmouseover="hoverEstrellas(3)" onmouseleave="restaurarEstrellas()"></i>
-                <i class="fa-solid fa-star estrella-voto p-1" data-valor="4" onclick="fijarPuntuacion(4)" ontouchstart="fijarPuntuacion(4)" onmouseover="hoverEstrellas(4)" onmouseleave="restaurarEstrellas()"></i>
-                <i class="fa-solid fa-star estrella-voto p-1" data-valor="5" onclick="fijarPuntuacion(5)" ontouchstart="fijarPuntuacion(5)" onmouseover="hoverEstrellas(5)" onmouseleave="restaurarEstrellas()"></i>
-              </div>
-              <span id="puntuacionNumero" class="text-xs font-bold text-gray-700 ml-1">5.0</span>
+          <!-- Barra de progreso dinámica al sincronizar reseña con Google Sheets -->
+          <div id="progresoPublicarResenaWrapper" class="hidden pt-2 space-y-1.5">
+            <div class="flex items-center justify-between text-[11px] font-bold text-gray-700">
+              <span id="textoEstadoSyncResena">Sincronizando con la base de datos...</span>
+              <span id="porcentajeProgresoResena" class="font-mono text-black">15%</span>
             </div>
-            <button type="submit" id="btnPublicarResena" class="bg-black hover:bg-gray-800 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
-              Publicar reseña
-            </button>
+            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden border border-gray-300">
+              <div id="barraProgresoPublicarResena" class="h-full bg-emerald-600 rounded-full transition-all duration-300 ease-out" style="width: 15%;"></div>
+            </div>
           </div>
         </form>
       </div>
@@ -4613,9 +4632,7 @@
       listaCoincidentesClienteGlobal = [];
     }
 
-    // ================= RESEÑAS TOTALES Y TRADUCIDAS =================
-    let baseEstructuraResenas = [];
-
+    // ================= RESEÑAS DIRECTAS DESDE GOOGLE SHEETS =================
     function formatearFechaLegible(fechaEntrada) {
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       if (!fechaEntrada) return "";
@@ -4640,15 +4657,7 @@
 
     async function cargarResenasDesdeServidor() {
       try {
-        // 1. Cargar clientes reales directamente de tu hoja "Ventas ETSY 23-26"
-        const resClientes = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerClientesEtsy`);
-        const dataClientes = await resClientes.json();
-        if (dataClientes && dataClientes.status === "success" && Array.isArray(dataClientes.clientes) && dataClientes.clientes.length > 0) {
-          inicializarResenasConClientesReales(dataClientes.clientes);
-        }
-
-        // 2. Cargar reseñas verificadas adicionales si las hubiera
-        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerResenas`);
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerResenas&_nocache=${Date.now()}`);
         const data = await res.json();
         if (data && data.status === "success" && Array.isArray(data.resenas)) {
           resenasServidorPublicas = data.resenas;
@@ -4661,267 +4670,19 @@
       }
     }
 
-    function inicializarResenasConClientesReales(listaClientes) {
-      const bancoOpiniones = {
-        es: {
-          natalicio: [
-            "La lámina del natalicio para mi sobrina quedó preciosa. Muy recomendable para nacimientos.",
-            "Un detalle de nacimiento entrañable y emotivo. El diseño impreso luce perfecto.",
-            "Hermoso recuerdo para el bebé. La composición y los datos quedaron plasmados de 10."
-          ],
-          audio: [
-            "Un regalo maravilloso y emocionante. Lloramos al escuchar la melodía al escanear el código QR.",
-            "La calidad de la partitura y el audio MP3 para piano suena impecable. Entrega rapidísima.",
-            "Súper original. El cifrado del nombre en notas y la pista de piano nos ha encantado.",
-            "Una joya de recuerdo. La dedicatoria, el QR y la melodía son un acierto total."
-          ],
-          poster: [
-            "La calidad del diseño y la definición para imprimir son excelentes. Luce genial enmarcado.",
-            "Excelente lámina de gran resolución. Un material visual muy bien elaborado y elegante.",
-            "Diseño muy cuidado y entrega digital inmediata. Ha quedado genial en mi estudio."
-          ],
-          general: [
-            "Un encargo muy especial y profesional. El trabajo de Adrián es 100% recomendable.",
-            "Atención impecable y rapidez insuperable. Un regalo único que ha sorprendido a todos.",
-            "Excelente trabajo artesanal. La personalización quedó perfecta y con un gusto exquisito."
-          ]
-        },
-        en: {
-          natalicio: [
-            "The birth milestone sheet music for my niece turned out gorgeous. Highly recommended!",
-            "Such a heartwarming baby keepsake. Printed beautifully and the family truly loved it.",
-            "A wonderful and unique birth gift. The details and design are absolutely precious."
-          ],
-          audio: [
-            "A wonderful and emotional gift. We cried hearing the custom piano melody from the QR code.",
-            "Top quality printable sheet music and the piano MP3 track sounds absolutely pristine.",
-            "So original! Ciphering our names into musical notes and having the audio was a 10/10 idea.",
-            "Outstanding service. Delivered fast with crystal clear piano audio quality."
-          ],
-          poster: [
-            "Great printable design quality. The high resolution looks stunning framed on my wall.",
-            "Clean, elegant and informative poster. Super fast delivery and great presentation.",
-            "Fantastic layout and print sharpness. It looks awesome in my music studio room."
-          ],
-          general: [
-            "This is the second order I place for an anniversary and it was a huge success again.",
-            "A treasure keepsake. Adrian's musical talent and customer attention are simply the best.",
-            "Unique, handcrafted and delivered very promptly. Wonderful experience overall."
-          ]
-        },
-        de: {
-          natalicio: [
-            "Das Geburtsposter für meine Nichte ist wunderschön geworden. Eine ganz tolle Erinnerung!",
-            "Ein herzerwärmendes Geschenk zur Geburt. Das Notenblatt sieht gerahmt bezaubernd aus.",
-            "Wundervolles Andenken zur Geburt mit liebevollen Details. Sehr zu empfehlen!"
-          ],
-          audio: [
-            "Ein wundervolles und emotionales Geschenk. Die Klaviermelodie per QR-Code ist genial.",
-            "Erstklassige Notenqualität zum Ausdrucken. Das Klavierstück klingt einfach traumhaft.",
-            "Unglaublich originell! Den Namen in Noten zu verschlüsseln und anzuhören ist fantastisch.",
-            "Hervorragender Service, schnelle Lieferung und makelloser Klavierklang."
-          ],
-          poster: [
-            "Hervorragende Druckauflösung und klares Design. Sieht an der Wand fantastisch aus.",
-            "Sehr hochwertig gestaltetes Poster. Schnelle Bereitstellung und exzellente Schärfe.",
-            "Tolles Design für Musikliebhaber. Gerahmt ist es ein echter Blickfang."
-          ],
-          general: [
-            "Bereits meine zweite Bestellung für ein Jubiläum und wieder ein voller Erfolg.",
-            "Sehr zuvorkommender Kundenservice und schnelle Lieferung. Ein ganz besonderes Geschenk.",
-            "Fantastische Handarbeit ohne KI. Adrian steckt spürbar viel Liebe in jedes Detail."
-          ]
-        },
-        fr: {
-          natalicio: [
-            "L'affiche de naissance pour ma nièce est ravissante. Un souvenir très émouvant !",
-            "Magnifique cadeau pour la naissance. L'impression et la mise en page sont impeccables.",
-            "Un souvenir précieux et délicat pour bébé. Toute la famille a été conquise."
-          ],
-          audio: [
-            "Un cadeau magnifique et très émouvant. Nous avons adoré la mélodie au piano du QR code.",
-            "Superbe qualité de partition et le fichier audio au piano sonne à la perfection.",
-            "Très original ! Coder les lettres du prénom en notes musicales avec le son est une idée géniale.",
-            "Service impeccable, reçu rapidement avec une piste audio d'une grande clarté."
-          ],
-          poster: [
-            "Très belle affiche avec une résolution d'impression parfaite. Rendu très élégant.",
-            "Design très soigné et prêt à encadrer. Parfait pour décorer un coin musique.",
-            "Qualité graphique remarquable et livraison numérique ultra rapide."
-          ],
-          general: [
-            "Deuxième commande passée pour un anniversaire, toujours autant de succès.",
-            "Service client très attentionné et travail d'artiste remarquable. Bravo Adrián !",
-            "Un travail artisanal exceptionnel. La personnalisation est soignée au millimètre."
-          ]
-        },
-        it: {
-          natalicio: [
-            "Il quadretto per la nascita di mia nipote è venuto bellissimo. Emozionante e consigliatissimo!",
-            "Un ricordo meraviglioso per il neonato. La stampa è nitida e piena di sentimento.",
-            "Regalo di nascita originale e delicato. È piaciuto tantissimo ai neo genitori!"
-          ],
-          audio: [
-            "Un regalo meraviglioso ed emozionante. Abbiamo pianto ascoltando la melodia con il codice QR.",
-            "Qualità dello spartito eccellente e il brano per pianoforte è stupendo.",
-            "Super originale! La trasposizione del nome in note con l'audio è un'idea da 10 e lode.",
-            "Servizio rapido e impeccabile con un audio di altissima qualità."
-          ],
-          poster: [
-            "Risoluzione fantastica per la stampa. Fa un figurone nella cornice che abbiamo comprato.",
-            "Design elegante e curato nei dettagli. Perfetto per lo studio musicale.",
-            "Lámina ad alta definizione, spedizione digitale istantanea e grande professionalità."
-          ],
-          general: [
-            "È il secondo ordine che faccio per un anniversario ed è stato un successo strepitoso.",
-            "Servizio attento, veloce e artigianale. Un regalo davvero unico e memorabile.",
-            "Lavoro impeccabile di Adrián. Grande gusto musicale e precisione."
-          ]
-        }
-      };
-
-      baseEstructuraResenas = [];
-      const fechaBaseReciente = new Date(2026, 3, 20);
-      const totalResenas = 231;
-
-      for (let i = 0; i < totalResenas; i++) {
-        const clienteReal = listaClientes[i % listaClientes.length];
-        const paisRaw = (clienteReal.pais || "España").trim();
-        const paisNorm = paisRaw.toLowerCase();
-        const prodNorm = (clienteReal.producto || "My Name in Music").toLowerCase();
-
-        let lang = 'es';
-        if (
-          paisNorm.includes('germany') || paisNorm.includes('alemania') || 
-          paisNorm.includes('austria') || paisNorm.includes('schweiz')
-        ) {
-          lang = 'de';
-        } else if (
-          paisNorm.includes('france') || paisNorm.includes('francia') || 
-          paisNorm.includes('belgium') || paisNorm.includes('belgique')
-        ) {
-          lang = 'fr';
-        } else if (
-          paisNorm.includes('italy') || paisNorm.includes('italia')
-        ) {
-          lang = 'it';
-        } else if (
-          paisNorm.includes('united states') || paisNorm.includes('usa') || 
-          paisNorm.includes('united kingdom') || paisNorm.includes('uk') || 
-          paisNorm.includes('canada') || paisNorm.includes('australia') || 
-          paisNorm.includes('netherlands') || paisNorm.includes('sweden') || 
-          paisNorm.includes('norway') || paisNorm.includes('finland') || 
-          paisNorm.includes('denmark') || paisNorm.includes('ireland')
-        ) {
-          lang = 'en';
-        } else if (
-          paisNorm.includes('spain') || paisNorm.includes('españa') || 
-          paisNorm.includes('mexico') || paisNorm.includes('méxico') || 
-          paisNorm.includes('colombia') || paisNorm.includes('argentina') || 
-          paisNorm.includes('chile') || paisNorm.includes('peru') || paisNorm.includes('perú')
-        ) {
-          lang = 'es';
-        } else {
-          lang = 'en';
-        }
-
-        let categoriaProd = 'general';
-        if (prodNorm.includes('natalicio') || prodNorm.includes('nacimiento') || prodNorm.includes('baby') || prodNorm.includes('birth')) {
-          categoriaProd = 'natalicio';
-        } else if (prodNorm.includes('poster') || prodNorm.includes('póster') || prodNorm.includes('lámina') || prodNorm.includes('quintas') || prodNorm.includes('circle') || prodNorm.includes('lienzo')) {
-          categoriaProd = 'poster';
-        } else if (prodNorm.includes('mp3') || prodNorm.includes('audio') || prodNorm.includes('melody') || prodNorm.includes('melodia') || prodNorm.includes('melodía') || prodNorm.includes('qr')) {
-          categoriaProd = 'audio';
-        } else {
-          categoriaProd = 'general';
-        }
-
-        const grupoIdioma = bancoOpiniones[lang] || bancoOpiniones.es;
-        const listaOpciones = grupoIdioma[categoriaProd] || grupoIdioma.general;
-        const textoSeleccionado = listaOpciones[i % listaOpciones.length];
-
-        const puntuacion = (i % 15 === 0) ? 4 : 5;
-
-        const fechaObj = new Date(fechaBaseReciente);
-        fechaObj.setDate(fechaObj.getDate() - Math.floor(i * 4.8));
-
-        baseEstructuraResenas.push({
-          autor: clienteReal.nombre,
-          pais: paisRaw,
-          idiomaOrigen: lang,
-          articuloOriginal: clienteReal.producto || "My Name in Music",
-          textoOriginalNativo: textoSeleccionado,
-          dia: fechaObj.getDate(),
-          mesIndice: fechaObj.getMonth(),
-          anio: fechaObj.getFullYear(),
-          timestamp: fechaObj.getTime(),
-          puntuacion: puntuacion
-        });
-      }
-    }
-
     function actualizarTextosResenasIdioma() {
-      const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
-      const resenasMapeadas = baseEstructuraResenas.map(r => {
-        const mesTexto = t.meses[r.mesIndice];
-        let fechaTexto = `${r.dia} de ${mesTexto}, ${r.anio}`;
-        if (idiomaActual === 'en') fechaTexto = `${mesTexto} ${r.dia}, ${r.anio}`;
-        if (idiomaActual === 'zh') fechaTexto = `${r.anio}年${mesTexto}${r.dia}日`;
-        if (idiomaActual === 'de') fechaTexto = `${r.dia}. ${mesTexto} ${r.anio}`;
-        if (idiomaActual === 'fr') fechaTexto = `${r.dia} ${mesTexto} ${r.anio}`;
-
-        return {
-          autor: r.autor,
-          pais: r.pais || "",
-          idiomaOrigen: r.idiomaOrigen || 'es',
-          fecha: fechaTexto,
-          articulo: traducirTituloProducto(r.articuloOriginal, idiomaActual),
-          articuloOriginal: r.articuloOriginal,
-          texto: r.textoOriginalNativo,
-          timestamp: r.timestamp,
-          puntuacion: r.puntuacion || 5
-        };
-      });
-
-      const guardadasLocales = JSON.parse(localStorage.getItem('zeronte_nuevas_resenas') || '[]');
-      const mapaResenas = new Map();
-
-      // 1. Reseñas descargadas de Google Sheets
-      resenasServidorPublicas.forEach(r => {
-        const clave = `${r.pedidoId || ''}-${r.texto}`;
+      listaResenasTotales = resenasServidorPublicas.map(r => {
         const nombreLimpio = (r.autor || "Cliente").replace(/\s*\(Compra verificada\)/gi, '').trim();
-
-        mapaResenas.set(clave, {
+        return {
           autor: nombreLimpio,
-          idiomaOrigen: r.idiomaOrigen || 'es',
           articulo: traducirTituloProducto(r.articulo, idiomaActual),
           articuloOriginal: r.articulo,
           texto: r.texto,
           puntuacion: parseFloat(r.puntuacion) || 5,
           fecha: formatearFechaLegible(r.fecha),
           timestamp: r.timestamp || new Date(r.fecha).getTime() || Date.now()
-        });
-      });
-
-      // 2. Reseñas locales (desactivadas para evitar residuos de pruebas en navegador)
-      /*
-      guardadasLocales.forEach(r => {
-        const clave = `${r.pedidoId || ''}-${r.texto}`;
-        if (!mapaResenas.has(clave)) {
-          const nombreLimpio = (r.autor || "Cliente").replace(/\s*\(Compra verificada\)/gi, '').trim();
-          mapaResenas.set(clave, {
-            ...r,
-            autor: nombreLimpio,
-            idiomaOrigen: r.idiomaOrigen || 'es',
-            fecha: formatearFechaLegible(r.fecha)
-          });
-        }
-      });
-      */
-
-      const arrayNuevas = Array.from(mapaResenas.values());
-
-      listaResenasTotales = [...arrayNuevas, ...resenasMapeadas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        };
+      }).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
       actualizarContadoresResenas();
     }
@@ -5139,6 +4900,68 @@
 
     let pedidosEncontradosFormResena = [];
 
+    function actualizarProgresoPublicacionResena(porcentaje, texto) {
+      const wrapper = document.getElementById('progresoPublicarResenaWrapper');
+      const barra = document.getElementById('barraProgresoPublicarResena');
+      const txtPct = document.getElementById('porcentajeProgresoResena');
+      const txtEstado = document.getElementById('textoEstadoSyncResena');
+
+      if (wrapper) wrapper.classList.remove('hidden');
+      if (barra) barra.style.width = porcentaje + '%';
+      if (txtPct) txtPct.innerText = porcentaje + '%';
+      if (txtEstado && texto) txtEstado.innerText = texto;
+    }
+
+    function ocultarProgresoPublicacionResena() {
+      const wrapper = document.getElementById('progresoPublicarResenaWrapper');
+      if (wrapper) wrapper.classList.add('hidden');
+    }
+
+    function verificarArticuloSeleccionadoResena() {
+      const inputPed = document.getElementById('pedidoIdResena');
+      const limpio = (inputPed ? inputPed.value : '').trim().toUpperCase();
+      const soloDigitos = limpio.replace(/[^0-9]/g, '');
+      const selectArt = document.getElementById('selectArticuloPedidoResena');
+      const contenedorCampos = document.getElementById('camposOpinionYVotoResena');
+      const textarea = document.getElementById('textoResena');
+      const avisoRojo = document.getElementById('avisoArticuloYaResenado');
+      const txtAviso = document.getElementById('textoAvisoYaResenado');
+
+      if (!limpio || !pedidosEncontradosFormResena || pedidosEncontradosFormResena.length === 0) {
+        if (contenedorCampos) contenedorCampos.classList.remove('hidden');
+        if (textarea) textarea.required = true;
+        if (avisoRojo) avisoRojo.classList.add('hidden');
+        return;
+      }
+
+      let productoSeleccionado = "";
+      if (selectArt && selectArt.value) {
+        productoSeleccionado = selectArt.value.trim();
+      } else if (pedidosEncontradosFormResena[0]) {
+        productoSeleccionado = (pedidosEncontradosFormResena[0].producto || "Partitura personalizada").replace(/\s*\(x\d+\)/gi, '').trim();
+      }
+
+      const normalizar = s => (s || '').toString().toLowerCase().trim();
+      const yaResenado = resenasServidorPublicas.some(r => {
+        const rId = (r.pedidoId || '').toString().trim().toUpperCase();
+        const rDigitos = rId.replace(/[^0-9]/g, '');
+        const coincidePedido = (rId === limpio) || (rId.includes(limpio)) || (soloDigitos && rDigitos === soloDigitos);
+        const coincideArticulo = normalizar(r.articuloOriginal || r.articulo) === normalizar(productoSeleccionado);
+        return coincidePedido && coincideArticulo;
+      });
+
+      if (yaResenado) {
+        if (txtAviso) txtAviso.innerText = `La reseña de "${productoSeleccionado}" ya ha sido publicada.`;
+        if (avisoRojo) avisoRojo.classList.remove('hidden');
+        if (contenedorCampos) contenedorCampos.classList.add('hidden');
+        if (textarea) textarea.required = false; // Evita bloqueo por validación de formulario
+      } else {
+        if (avisoRojo) avisoRojo.classList.add('hidden');
+        if (contenedorCampos) contenedorCampos.classList.remove('hidden');
+        if (textarea) textarea.required = true;
+      }
+    }
+
     async function comprobarPedidoEnFormResena(valor) {
       const limpio = (valor || '').trim().toUpperCase();
       const soloDigitos = limpio.replace(/[^0-9]/g, '');
@@ -5146,9 +4969,15 @@
       const nombreLabel = document.getElementById('nombreCompradorDetectado');
       const wrapperSelect = document.getElementById('selectorArticuloResenaWrapper');
       const selectArt = document.getElementById('selectArticuloPedidoResena');
+      const avisoRojo = document.getElementById('avisoArticuloYaResenado');
+      const contenedorCampos = document.getElementById('camposOpinionYVotoResena');
+      const textarea = document.getElementById('textoResena');
 
       if (!limpio || (limpio.length < 4 && soloDigitos.length < 3)) {
         if (boxInfo) boxInfo.classList.add('hidden');
+        if (avisoRojo) avisoRojo.classList.add('hidden');
+        if (contenedorCampos) contenedorCampos.classList.remove('hidden');
+        if (textarea) textarea.required = true;
         pedidosEncontradosFormResena = [];
         return;
       }
@@ -5170,6 +4999,14 @@
           if (nombreLabel) nombreLabel.innerText = nombreReal;
           if (boxInfo) boxInfo.classList.remove('hidden');
 
+          // Comprobar qué artículos de este pedido ya tienen reseña registrada
+          const normalizarStr = s => (s || '').toString().toLowerCase().trim();
+          const articulosYaResenados = resenasServidorPublicas.filter(r => {
+            const rId = (r.pedidoId || '').toString().trim().toUpperCase();
+            const rDigitos = rId.replace(/[^0-9]/g, '');
+            return (rId === limpio) || (rId.includes(limpio)) || (soloDigitos && rDigitos === soloDigitos);
+          }).map(r => normalizarStr(r.articuloOriginal || r.articulo));
+
           // Extraer productos únicos del pedido
           const listaProductos = [];
           pedidosEncontradosFormResena.forEach(p => {
@@ -5181,17 +5018,30 @@
 
           if (listaProductos.length > 1) {
             if (selectArt) {
-              selectArt.innerHTML = listaProductos.map(prod => `<option value="${prod.replace(/"/g, '&quot;')}">${prod}</option>`).join('');
+              selectArt.innerHTML = listaProductos.map(prod => {
+                const ya = articulosYaResenados.includes(normalizarStr(prod));
+                return `<option value="${prod.replace(/"/g, '&quot;')}">${prod}${ya ? ' (Ya reseñado)' : ''}</option>`;
+              }).join('');
+
+              // Preferir seleccionar el primer artículo que aún no esté reseñado
+              const primerDisponible = listaProductos.find(prod => !articulosYaResenados.includes(normalizarStr(prod)));
+              if (primerDisponible) selectArt.value = primerDisponible;
             }
             if (wrapperSelect) wrapperSelect.classList.remove('hidden');
           } else {
+            const unicoProd = listaProductos[0] || 'Partitura personalizada';
             if (selectArt) {
-              selectArt.innerHTML = `<option value="${(listaProductos[0] || 'Partitura personalizada').replace(/"/g, '&quot;')}">${listaProductos[0] || 'Partitura personalizada'}</option>`;
+              selectArt.innerHTML = `<option value="${unicoProd.replace(/"/g, '&quot;')}">${unicoProd}</option>`;
             }
             if (wrapperSelect) wrapperSelect.classList.add('hidden');
           }
+
+          verificarArticuloSeleccionadoResena();
         } else {
           if (boxInfo) boxInfo.classList.add('hidden');
+          if (avisoRojo) avisoRojo.classList.add('hidden');
+          if (contenedorCampos) contenedorCampos.classList.remove('hidden');
+          if (textarea) textarea.required = true;
         }
       } catch (err) {
         console.warn("Error al comprobar pedido en vivo:", err);
@@ -5215,13 +5065,12 @@
       }
 
       btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Verificando...`;
+      actualizarProgresoPublicacionResena(15, "Verificando pedido en el sistema...");
 
       let nombreExtraido = "Cliente Verificado";
       let productoExtraido = "Partitura personalizada";
 
       try {
-        // Consultar la lista completa de pedidos para encontrar nombre y producto exacto
         const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
         const data = await res.json();
         const lista = (data && data.pedidos) ? data.pedidos : (Array.isArray(data) ? data : []);
@@ -5248,6 +5097,27 @@
         console.warn("Consulta pedido offline:", err);
       }
 
+      // -------------------------------------------------------------
+      // CONTROL ESTRICTO: COMPROBACIÓN VISUAL SIN ALERTAS DEL NAVEGADOR
+      // -------------------------------------------------------------
+      const normalizar = s => (s || '').toString().toLowerCase().trim();
+      const yaResenado = resenasServidorPublicas.some(r => {
+        const rId = (r.pedidoId || '').toString().trim().toUpperCase();
+        const rDigitos = rId.replace(/[^0-9]/g, '');
+        const coincidePedido = (rId === pedidoInput) || (rId.includes(pedidoInput)) || (soloDigitosBuscados && rDigitos === soloDigitosBuscados);
+        const coincideArticulo = normalizar(r.articuloOriginal || r.articulo) === normalizar(productoExtraido);
+        return coincidePedido && coincideArticulo;
+      });
+
+      if (yaResenado) {
+        btn.disabled = false;
+        ocultarProgresoPublicacionResena();
+        verificarArticuloSeleccionadoResena();
+        return;
+      }
+
+      actualizarProgresoPublicacionResena(45, "Guardando reseña en Google Sheets...");
+
       const hoy = new Date();
       const mesTexto = t.meses[hoy.getMonth()];
       const fechaTexto = `${hoy.getDate()} de ${mesTexto}, ${hoy.getFullYear()}`;
@@ -5271,6 +5141,8 @@
         console.warn("No se pudo persistir en backend:", err);
       }
 
+      actualizarProgresoPublicacionResena(75, "Sincronizando catálogo de reseñas...");
+
       // Recargar desde el servidor para sincronizar
       await cargarResenasDesdeServidor();
 
@@ -5278,14 +5150,21 @@
       paginaResenasActual = 1;
       renderizarResenasPagina();
 
-      btn.disabled = false;
-      btn.innerText = t.btnPublicarResena;
-      e.target.reset();
-      fijarPuntuacion(5);
-      const boxInfo = document.getElementById('infoCompradorResenaBox');
-      if (boxInfo) boxInfo.classList.add('hidden');
-      document.getElementById('formNuevaResena').classList.add('hidden');
-      alert("¡Muchas gracias! Tu reseña verificada ha sido publicada.");
+      actualizarProgresoPublicacionResena(100, "¡Reseña publicada con éxito!");
+
+      setTimeout(() => {
+        btn.disabled = false;
+        ocultarProgresoPublicacionResena();
+        e.target.reset();
+        fijarPuntuacion(5);
+        const boxInfo = document.getElementById('infoCompradorResenaBox');
+        if (boxInfo) boxInfo.classList.add('hidden');
+        const avisoRojo = document.getElementById('avisoArticuloYaResenado');
+        if (avisoRojo) avisoRojo.classList.add('hidden');
+        const contenedorCampos = document.getElementById('camposOpinionYVotoResena');
+        if (contenedorCampos) contenedorCampos.classList.remove('hidden');
+        document.getElementById('formNuevaResena').classList.add('hidden');
+      }, 700);
     }
 
     function formatearTelefonoRecibo(prefijo, numTel) {
