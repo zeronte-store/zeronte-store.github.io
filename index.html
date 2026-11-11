@@ -1204,19 +1204,36 @@
               </button>
 
               <!-- Flechas de navegación -->
-              <button onclick="navegarMediaFicha(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95 z-10">
-                <i class="fa-solid fa-chevron-left text-xs"></i>
-              </button>
-              <button onclick="navegarMediaFicha(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95 z-10">
-                <i class="fa-solid fa-chevron-right text-xs"></i>
-              </button>
-            </div>
+            <button onclick="navegarMediaFicha(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95 z-10">
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <button onclick="navegarMediaFicha(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md flex items-center justify-center transition active:scale-95 z-10">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
           </div>
+        </div>
 
-          <!-- BLOQUE DEBAJO DE LA IMAGEN: Título, Precios y Sellos -->
-          <div class="space-y-3 pt-2">
-            <!-- Título -->
-            <h1 id="tituloFichaArticulo" class="text-xl sm:text-2xl font-semibold uppercase tracking-wide text-[#111111] leading-snug"></h1>
+        <!-- BLOQUE CENTRADO DEBAJO DE LA FOTO PRINCIPAL: Estrellas y Ventas Reales -->
+        <div id="bloqueAmazonProofFicha" class="w-full flex flex-col items-center justify-center text-center -mt-2 pb-1">
+          <div id="filaEstrellasFicha" class="flex items-center justify-center gap-1.5 text-xs select-none">
+            <span id="puntuacionAmazonFicha" class="font-bold text-gray-900 text-sm">5,0</span>
+            <span id="estrellasIconosFicha" class="flex text-amber-500 text-xs gap-0.5">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </span>
+          </div>
+          <div id="compradosAmazonFicha" class="text-xs text-gray-800 font-semibold tracking-tight mt-0.5">
+            <!-- Se rellena dinámicamente con las ventas reales -->
+          </div>
+        </div>
+
+        <!-- BLOQUE INFERIOR: Título, Precios y Sellos -->
+        <div class="space-y-3 pt-2">
+          <!-- Título -->
+          <h1 id="tituloFichaArticulo" class="text-xl sm:text-2xl font-semibold uppercase tracking-wide text-[#111111] leading-snug"></h1>
 
             <!-- Precios y distintivos dinámicos a su derecha -->
             <div>
@@ -2666,6 +2683,22 @@
 
       const ahora = Date.now();
 
+      // Función auxiliar para obtener valoración real unificada
+      const obtenerInfoResenasProducto = (tituloProd) => {
+        const norm = s => (s || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const tNorm = norm(tituloProd);
+        const coincidencias = listaResenasTotales.filter(r => {
+          const rTit = norm(r.articuloOriginal || r.articulo);
+          return rTit === tNorm || rTit.includes(tNorm) || tNorm.includes(rTit);
+        });
+        if (coincidencias.length === 0) return null;
+        const suma = coincidencias.reduce((acc, r) => acc + (parseFloat(r.puntuacion) || 5), 0);
+        return {
+          media: (suma / coincidencias.length).toFixed(1),
+          total: coincidencias.length
+        };
+      };
+
       // Renderizar bloque de Artículos Destacados (máximo 6 y visible solo en la pestaña "Todos" sin búsqueda activa)
       const seccionDest = document.getElementById("seccionDestacadosEtsy");
       const gridDest = document.getElementById("gridProductosDestacados");
@@ -2714,15 +2747,32 @@
                     <h3 data-titulo-orig="${encodeURIComponent(p.titulo)}" class="text-sm sm:text-base font-semibold uppercase tracking-wide text-[#111111] line-clamp-2 leading-snug group-hover:underline">
                       ${tituloTraducido}
                     </h3>
-                    <div class="flex items-center gap-1.5 mt-1.5 text-xs text-amber-500">
-                      <div class="flex items-center gap-1">
-                        <i class="fa-solid fa-star"></i>
-                        <span class="text-gray-700 font-bold text-xs">5.0</span>
-                      </div>
-                      <span class="text-gray-300">|</span>
-                      <span class="text-gray-600 font-semibold text-xs">
-                        ${(p.totalVentas || 0).toLocaleString('es-ES')} ${(p.totalVentas === 1) ? 'venta' : 'ventas'}
-                      </span>
+                    <div class="flex items-center gap-1.5 mt-1.5 text-xs">
+                      ${(() => {
+                        const infoR = obtenerInfoResenasProducto(p.titulo);
+                        const vNum = p.totalVentas || 0;
+                        if (infoR) {
+                          return `
+                            <div class="flex items-center gap-1 text-amber-500">
+                              <i class="fa-solid fa-star"></i>
+                              <span class="text-gray-800 font-bold text-xs">${infoR.media}</span>
+                            </div>
+                            <span class="text-gray-300">|</span>
+                            <span class="text-gray-600 font-semibold text-xs">${vNum.toLocaleString('es-ES')} ${vNum === 1 ? 'venta' : 'ventas'}</span>
+                          `;
+                        } else if (vNum > 0) {
+                          return `
+                            <div class="flex items-center gap-1 text-amber-500">
+                              <i class="fa-solid fa-star"></i>
+                              <span class="text-gray-800 font-bold text-xs">5.0</span>
+                            </div>
+                            <span class="text-gray-300">|</span>
+                            <span class="text-gray-600 font-semibold text-xs">${vNum.toLocaleString('es-ES')} ${vNum === 1 ? 'venta' : 'ventas'}</span>
+                          `;
+                        } else {
+                          return `<span class="text-gray-400 font-medium text-xs">0 ventas</span>`;
+                        }
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -2815,15 +2865,32 @@
                   ${tituloTraducido}
                 </h3>
                 
-                <div class="flex items-center gap-1.5 mt-1.5 text-xs text-amber-500">
-                  <div class="flex items-center gap-1">
-                    <i class="fa-solid fa-star"></i>
-                    <span class="text-gray-700 font-bold text-xs">5.0</span>
-                  </div>
-                  <span class="text-gray-300">|</span>
-                  <span class="text-gray-600 font-semibold text-xs">
-                    ${(p.totalVentas || 0).toLocaleString('es-ES')} ${(p.totalVentas === 1) ? 'venta' : 'ventas'}
-                  </span>
+                <div class="flex items-center gap-1.5 mt-1.5 text-xs">
+                  ${(() => {
+                    const infoR = obtenerInfoResenasProducto(p.titulo);
+                    const vNum = p.totalVentas || 0;
+                    if (infoR) {
+                      return `
+                        <div class="flex items-center gap-1 text-amber-500">
+                          <i class="fa-solid fa-star"></i>
+                          <span class="text-gray-800 font-bold text-xs">${infoR.media}</span>
+                        </div>
+                        <span class="text-gray-300">|</span>
+                        <span class="text-gray-600 font-semibold text-xs">${vNum.toLocaleString('es-ES')} ${vNum === 1 ? 'venta' : 'ventas'}</span>
+                      `;
+                    } else if (vNum > 0) {
+                      return `
+                        <div class="flex items-center gap-1 text-amber-500">
+                          <i class="fa-solid fa-star"></i>
+                          <span class="text-gray-800 font-bold text-xs">5.0</span>
+                        </div>
+                        <span class="text-gray-300">|</span>
+                        <span class="text-gray-600 font-semibold text-xs">${vNum.toLocaleString('es-ES')} ${vNum === 1 ? 'venta' : 'ventas'}</span>
+                      `;
+                    } else {
+                      return `<span class="text-gray-400 font-medium text-xs">0 ventas</span>`;
+                    }
+                  })()}
                 </div>
               </div>
             </div>
@@ -3058,6 +3125,44 @@
 
       articuloFichaActual = p;
       const tituloTrad = traducirTituloProducto(p.titulo, idiomaActual);
+
+      // Valoración real y ventas exactas bajo la foto principal
+      const normalizarTitulo = s => (s || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+      const titNormP = normalizarTitulo(p.titulo);
+
+      const resenasProd = listaResenasTotales.filter(r => {
+        const rTit = normalizarTitulo(r.articuloOriginal || r.articulo);
+        return rTit === titNormP || rTit.includes(titNormP) || titNormP.includes(rTit);
+      });
+
+      const numResenasProd = resenasProd.length;
+      const ventasTotalProd = parseInt(p.totalVentas || 0, 10);
+
+      const elFilaEstrellas = document.getElementById('filaEstrellasFicha');
+      const elPuntAmazon = document.getElementById('puntuacionAmazonFicha');
+      const elCompradosAmazon = document.getElementById('compradosAmazonFicha');
+
+      // Si tiene reseñas o ventas, calcula la media y dibuja estrellas
+      if (numResenasProd > 0 || ventasTotalProd > 0) {
+        let mediaProd = 5.0;
+        if (numResenasProd > 0) {
+          const sumaPuntos = resenasProd.reduce((acc, r) => acc + (parseFloat(r.puntuacion) || 5), 0);
+          mediaProd = (sumaPuntos / numResenasProd);
+        }
+
+        if (elPuntAmazon) elPuntAmazon.innerText = mediaProd.toFixed(1).replace('.', ',');
+        if (elFilaEstrellas) elFilaEstrellas.classList.remove('hidden');
+
+        if (elCompradosAmazon) {
+          elCompradosAmazon.innerHTML = `<span class="text-gray-700 font-semibold"><strong class="text-black font-bold">${ventasTotalProd.toLocaleString('es-ES')}</strong> ${ventasTotalProd === 1 ? 'venta realizada' : 'ventas realizadas'}</span>`;
+        }
+      } else {
+        // Producto sin ventas ni reseñas: ocultamos estrellas para no engañar
+        if (elFilaEstrellas) elFilaEstrellas.classList.add('hidden');
+        if (elCompradosAmazon) {
+          elCompradosAmazon.innerHTML = `<span class="text-gray-400 font-medium">Sin valoraciones · 0 ventas</span>`;
+        }
+      }
       
       const elTit = document.getElementById('tituloFichaArticulo');
       if (elTit) elTit.innerText = tituloTrad;
