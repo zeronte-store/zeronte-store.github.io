@@ -2046,10 +2046,20 @@ function extraerUrlArchivoPedido(pedido) {
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      inicializarBotonGoogle();
-      if (sessionStorage.getItem('zeronte_google_auth') === 'true') {
+      const dominiosOficiales = [
+        "www.zerontemusic.com",
+        "zerontemusic.com",
+        "zeronte-store.github.io"
+      ];
+      
+      // Si NO estás en ninguno de tus dominios oficiales, entra directo (OneCompiler / local)
+      const esEntornoPruebas = !dominiosOficiales.includes(window.location.hostname);
+
+      if (esEntornoPruebas || sessionStorage.getItem('zeronte_google_auth') === 'true') {
         tokenClave = "zeronte2026";
         cargarDatos(true);
+      } else {
+        inicializarBotonGoogle();
       }
     });
 
