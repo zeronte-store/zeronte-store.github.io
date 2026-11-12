@@ -1634,9 +1634,9 @@
   </div>
 
   <!-- ==================== MODAL DE COMPRA (CENTRADO EN MÓVIL Y ESCRITORIO) ==================== -->
-  <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[80] backdrop-blur-md p-4">
+  <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[80] backdrop-blur-md p-4 overflow-y-auto sm:overflow-hidden" onwheel="if(window.innerWidth >= 640) event.preventDefault();">
     
-    <div class="bg-[#f5f5f1] border border-gray-200 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl relative max-h-[95vh] overflow-y-auto no-scrollbar text-[#222222]">
+    <div class="bg-[#f5f5f1] border border-gray-200 rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl relative max-h-[92vh] sm:max-h-none overflow-y-auto sm:overflow-hidden text-[#222222]">
 
       <!-- Botón Cerrar -->
       <button onclick="cerrarModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-white hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-black transition shadow-xs">✕</button>
@@ -1785,73 +1785,81 @@
           </p>
         </div>
 
-        <!-- Instrucciones Bizum -->
-        <div id="instruccionesBizum" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-4 space-y-2.5 shadow-xs">
-          <div class="flex items-center gap-2 pb-1 border-b border-gray-100">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <p id="txtBizumPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Pasos para el pago por Bizum</p>
+        <!-- Instrucciones Bizum con Logo -->
+        <div id="instruccionesBizum" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-5 space-y-2 shadow-xs">
+          <div class="flex items-center justify-between gap-2 mb-1 pb-1 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <p id="txtBizumPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Pago por Bizum</p>
+            </div>
+            <!-- Logo Oficial Bizum -->
+            <svg class="h-5 w-auto" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12.5 7.5C12.5 6.1 13.6 5 15 5H21C22.4 5 23.5 6.1 23.5 7.5V11H12.5V7.5Z" fill="#00AAAC"/>
+              <path d="M12.5 14H23.5V26C23.5 27.4 22.4 28.5 21 28.5H15C13.6 28.5 12.5 27.4 12.5 26V14Z" fill="#00AAAC"/>
+              <circle cx="29" cy="8" r="3.5" fill="#00AAAC"/>
+              <text x="38" y="24" fill="#00AAAC" font-family="Arial, sans-serif" font-weight="bold" font-size="20" letter-spacing="-0.5">bizum</text>
+            </svg>
           </div>
-          
-          <p class="text-xs text-gray-700">
-            <span id="txtBizumPaso1">1. Envía el importe exacto de</span> <strong id="totalBizum" class="text-gray-900 text-sm font-extrabold"></strong> <span id="txtBizumPaso1b">al número:</span>
-          </p>
-          
+          <p class="text-xs text-gray-600"><span id="txtBizumPaso1">1. Envía</span> <strong id="totalBizum" class="text-gray-900 text-sm"></strong> <span id="txtBizumPaso1b">al número de teléfono:</span></p>
           <div class="bg-[#f0f0eb] p-3 rounded-xl flex items-center justify-between border border-gray-300">
-            <span class="font-mono font-bold text-gray-900 text-base">(+34) 641 851 073</span>
-            <button type="button" onclick="copiarTexto('641851073')" id="btnCopiarBizum" class="text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-2.5 py-1 rounded-lg transition active:scale-95 shadow-2xs">Copiar</button>
+            <div>
+              <span class="font-mono font-bold text-gray-900 text-base tracking-wide">641 851 073</span>
+              <span class="block text-[10px] text-gray-500 font-medium">(Escribe el prefijo de España (+34) si pagas desde Portugal con MB WAY o Italia con BANCOMAT a través de la alianza europea EuroPA)</span>
+            </div>
+            <button onclick="copiarTexto('641851073')" id="btnCopiarBizum" class="text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-2.5 py-1 rounded-lg">Copiar</button>
           </div>
-
-          <div class="bg-blue-50/80 p-2.5 rounded-xl border border-blue-200 text-xs text-blue-900 leading-relaxed">
-            <span id="txtBizumPaso2" class="font-semibold">2. Concepto imprescindible:</span> <strong id="conceptoBizum" class="text-black font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-blue-300"></strong> Escribe únicamente el número de pedido. Con esto identificaremos tu encargo automáticamente en cuanto ingresemos el abono.
+          <div class="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-slate-800 leading-relaxed">
+            <span id="txtBizumPaso2">2. Concepto:</span> <strong id="conceptoBizum" class="text-gray-900 font-mono bg-white px-2 py-0.5 rounded border border-blue-200"></strong> 
+            <span class="text-[11px] text-gray-500 block mt-1">Escribe únicamente el número de pedido en el concepto para identificarlo al instante.</span>
           </div>
         </div>
 
-        <!-- Instrucciones PayPal -->
-        <div id="instruccionesPaypal" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-4 space-y-3 hidden shadow-xs">
-          <div class="flex items-center gap-2 pb-1 border-b border-gray-100">
-            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-            <p id="txtPaypalPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Pasos para el pago por PayPal</p>
+        <!-- Instrucciones PayPal con Logo -->
+        <div id="instruccionesPaypal" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-5 space-y-3 hidden shadow-xs">
+          <div class="flex items-center justify-between gap-2 mb-1 pb-1 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <p id="txtPaypalPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Pago por PayPal</p>
+            </div>
+            <!-- Logo Oficial PayPal -->
+            <svg class="h-5 w-auto" viewBox="0 0 100 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4H21C25 4 28 6.5 27 11.5C26 16.5 22.5 19 18.5 19H14.5L12 30H7L12 4Z" fill="#003087"/>
+              <path d="M16 9H23C26.5 9 29.5 11 28.5 15.5C27.5 20.5 24 23 20 23H17L15.5 30H11L16 9Z" fill="#0079C1"/>
+              <text x="33" y="23" fill="#003087" font-family="Arial, sans-serif" font-weight="bold" font-size="19" font-style="italic">PayPal</text>
+            </svg>
           </div>
-          
-          <p class="text-xs text-gray-700">
-            <span id="txtPaypalPaso1">Pulsa a continuación para abonar</span> <strong id="totalPaypal" class="text-gray-900 font-extrabold"></strong> <span id="txtPaypalPaso1b">mediante PayPal o Tarjeta:</span>
-          </p>
-          
-          <a id="enlacePaypal" href="#" target="_blank" class="block text-center bg-[#0070BA] hover:bg-[#003087] text-white font-bold py-3 rounded-xl transition text-xs uppercase tracking-wider shadow-sm active:scale-98">
-            Abrir pasarela de PayPal
+          <p class="text-xs text-gray-600"><span id="txtPaypalPaso1">Pulsa para abonar</span> <strong id="totalPaypal" class="text-gray-900"></strong> <span id="txtPaypalPaso1b">con PayPal:</span></p>
+          <a id="enlacePaypal" href="#" target="_blank" class="block text-center bg-[#0070BA] hover:bg-[#003087] text-white font-bold py-3 rounded-xl transition text-xs uppercase tracking-wider">
+            Abrir PayPal
           </a>
-
-          <div class="bg-blue-50/80 p-2.5 rounded-xl border border-blue-200 text-xs text-blue-900 leading-relaxed">
-            <strong>Nota en PayPal:</strong> Recuerda indicar tu número de pedido o nombre en la nota de pago para vincularlo a tu encargo al instante.
-          </div>
         </div>
 
-        <!-- BLOQUE EXPLICATIVO SOBRE JUSTIFICANTES (VOLUNTARIO) -->
-        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-3.5 text-left mb-4 space-y-2">
-          <p class="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
-            <strong class="text-gray-800">¿Vas a realizar el pago más tarde?</strong> No te preocupes. Puedes cerrar esta ventana; cuando hagas el abono desde tu app bancaria o PayPal con tu número de pedido en el concepto, lo localizaremos sin problema.
-          </p>
-          <p class="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
-            <strong>Envío de justificante (Opcional):</strong> No es obligatorio, pero si realizas el abono ahora y quieres agilizar más rápidamente la comprobación, puedes enviárnoslo por cualquiera de estas dos vías:
-          </p>
-        </div>
-
-        <!-- Botones opcionales para enviar justificante (WhatsApp o Email) -->
-        <div class="space-y-2">
-          <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
-            <i class="fa-brands fa-whatsapp text-lg"></i>
+        <!-- Botones de Acción (Ancho completo en móvil y tamaño reducido centrado en PC) -->
+        <div class="space-y-2 flex flex-col items-center w-full">
+          <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full sm:w-auto sm:min-w-[320px] sm:max-w-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-5 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
+            <i class="fa-brands fa-whatsapp text-base"></i>
             <span id="btnWpConfirmarTxt">Enviar justificante por WhatsApp</span>
           </a>
           
-          <a id="btnEmailConfirmar" href="#" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
+          <a id="btnEmailConfirmar" href="#" class="w-full sm:w-auto sm:min-w-[320px] sm:max-w-md bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-5 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
             <i class="fa-solid fa-envelope text-sm text-blue-400"></i>
             <span id="btnEmailConfirmarTxt">Enviar justificante por Email</span>
           </a>
 
-          <!-- Botón Cerrar / Finalizar -->
-          <button type="button" onclick="cerrarModal()" class="w-full py-2.5 mt-1 border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-bold uppercase tracking-wider rounded-xl transition active:scale-98">
-            Entendido, cerrar ventana
+          <button type="button" onclick="cerrarModal()" class="w-full sm:w-auto sm:min-w-[320px] sm:max-w-md bg-white hover:bg-gray-100 text-gray-700 font-bold py-2.5 px-5 rounded-xl border border-gray-300 shadow-2xs transition flex items-center justify-center text-xs uppercase tracking-wider active:scale-98">
+            <span>Entendido, cerrar ventana</span>
           </button>
+        </div>
+      </div>
+
+      <!-- Notificación flotante centrada al copiar teléfono -->
+      <div id="toastCopiadoTelefono" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85vw] sm:w-auto max-w-sm bg-black/95 text-white border border-gray-700 px-5 py-4 rounded-2xl shadow-2xl backdrop-blur-md hidden z-[100] flex items-center gap-3 transition-opacity duration-300 pointer-events-none select-none">
+        <span class="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold shadow-sm shrink-0">
+          <i class="fa-solid fa-check"></i>
+        </span>
+        <div class="text-left min-w-0 flex-1">
+          <p class="text-xs sm:text-sm font-bold text-white tracking-wide">¡Teléfono copiado!</p>
+          <p id="txtNumeroCopiadoToast" class="text-xs font-mono font-semibold text-emerald-300 mt-0.5 tracking-wider">641851073</p>
         </div>
       </div>
 
@@ -6751,8 +6759,61 @@ function cargarFAQs() {
     }
 
     function copiarTexto(texto) {
-      navigator.clipboard.writeText(texto);
-      alert(texto);
+      // Método seguro y universal compatible con permisos restrictivos
+      let copiadoConExito = false;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(texto).then(() => {
+          mostrarAvisoCopiado(texto);
+        }).catch(() => {
+          copiarConFallback(texto);
+        });
+      } else {
+        copiarConFallback(texto);
+      }
+    }
+
+    function copiarConFallback(texto) {
+      const inputTemp = document.createElement("textarea");
+      inputTemp.value = texto;
+      inputTemp.style.position = "fixed";
+      inputTemp.style.left = "-9999px";
+      inputTemp.style.top = "0";
+      document.body.appendChild(inputTemp);
+      inputTemp.focus();
+      inputTemp.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {}
+      document.body.removeChild(inputTemp);
+      mostrarAvisoCopiado(texto);
+    }
+
+    function mostrarAvisoCopiado(texto) {
+      // Efecto en el propio botón
+      const btn = document.getElementById('btnCopiarBizum');
+      if (btn) {
+        btn.innerText = "¡Copiado!";
+        btn.className = "text-[11px] text-white uppercase font-bold bg-emerald-600 border border-emerald-600 px-2.5 py-1 rounded-lg transition";
+        setTimeout(() => {
+          btn.innerText = "Copiar";
+          btn.className = "text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-2.5 py-1 rounded-lg transition";
+        }, 1800);
+      }
+
+      // Ventana emergente centrada elegante sin alertas feas del navegador
+      const toast = document.getElementById('toastCopiadoTelefono');
+      const numLabel = document.getElementById('txtNumeroCopiadoToast');
+      if (numLabel) numLabel.innerText = texto.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+      if (toast) {
+        toast.classList.remove('hidden');
+        toast.style.opacity = '1';
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => {
+            toast.classList.add('hidden');
+          }, 300);
+        }, 1800);
+      }
     }
 
     // ================= FUNCIONES DE ENVÍO DE MENSAJE A DASHBOARD Y EMAIL =================
