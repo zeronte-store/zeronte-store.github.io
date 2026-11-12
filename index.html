@@ -1634,9 +1634,9 @@
   </div>
 
   <!-- ==================== MODAL DE COMPRA (CENTRADO EN MÓVIL Y ESCRITORIO) ==================== -->
-  <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[80] backdrop-blur-md p-4 overflow-y-auto sm:overflow-hidden" onwheel="if(window.innerWidth >= 640) event.preventDefault();">
+  <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[80] backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
     
-    <div class="bg-[#f5f5f1] border border-gray-200 rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl relative max-h-[92vh] sm:max-h-none overflow-y-auto sm:overflow-hidden text-[#222222]">
+    <div class="bg-[#f5f5f1] border border-gray-200 rounded-3xl max-w-3xl w-full p-5 sm:p-8 shadow-2xl relative max-h-[92vh] overflow-y-auto text-[#222222]">
 
       <!-- Botón Cerrar -->
       <button onclick="cerrarModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-white hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-black transition shadow-xs">✕</button>
@@ -1770,15 +1770,15 @@
       </div>
 
       <!-- Pantalla Éxito -->
-      <div id="pantallaExito" class="hidden text-center py-2">
-        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 border border-emerald-300 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+      <div id="pantallaExito" class="hidden text-center py-1">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 text-emerald-600 border border-emerald-300 rounded-full flex items-center justify-center mx-auto mb-2 text-lg sm:text-xl font-bold">
           ✓
         </div>
-        <h3 id="txtExitoTitulo" class="text-xl font-bold text-gray-900 brand-font mb-1">¡Pedido Registrado!</h3>
+        <h3 id="txtExitoTitulo" class="text-lg sm:text-2xl font-bold text-gray-900 brand-font mb-0.5">¡Pedido Registrado!</h3>
         <p class="text-xs text-gray-500 mb-3"><span id="txtIdPedidoLabel">Identificador de pedido:</span> <strong id="codigoPedido" class="text-amber-700 font-mono text-sm"></strong></p>
 
         <!-- AVISO IMPORTANTE: INICIO DE ELABORACIÓN TRAS EL PAGO -->
-        <div class="p-3 bg-amber-50 border border-amber-300 rounded-2xl text-left mb-4 flex items-start gap-2.5">
+        <div class="p-3 bg-amber-50 border border-amber-300 rounded-2xl text-left mb-3.5 flex items-start gap-2.5">
           <i class="fa-solid fa-circle-exclamation text-amber-600 text-sm mt-0.5 shrink-0"></i>
           <p class="text-[11px] sm:text-xs text-amber-900 leading-relaxed font-medium">
             <strong>Información importante:</strong> Tu encargo queda en cola en estado <span class="text-rose-600 font-bold">Pendiente</span>. Al ser una obra personalizada hecha a medida, <strong>la composición y elaboración comenzará una vez recibido y verificado el pago</strong>.
@@ -1786,8 +1786,8 @@
         </div>
 
         <!-- Instrucciones Bizum con Logo -->
-        <div id="instruccionesBizum" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-5 space-y-2 shadow-xs">
-          <div class="flex items-center justify-between gap-2 mb-1 pb-1 border-b border-gray-100">
+        <div id="instruccionesBizum" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-3.5 space-y-2.5 shadow-xs">
+          <div class="flex items-center justify-between gap-2 pb-1 border-b border-gray-100">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
               <p id="txtBizumPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Pago por Bizum</p>
@@ -1800,23 +1800,33 @@
               <text x="38" y="24" fill="#00AAAC" font-family="Arial, sans-serif" font-weight="bold" font-size="20" letter-spacing="-0.5">bizum</text>
             </svg>
           </div>
-          <p class="text-xs text-gray-600"><span id="txtBizumPaso1">1. Envía</span> <strong id="totalBizum" class="text-gray-900 text-sm"></strong> <span id="txtBizumPaso1b">al número de teléfono:</span></p>
-          <div class="bg-[#f0f0eb] p-3 rounded-xl flex items-center justify-between border border-gray-300">
-            <div>
-              <span class="font-mono font-bold text-gray-900 text-base tracking-wide">641 851 073</span>
-              <span class="block text-[10px] text-gray-500 font-medium">(Escribe el prefijo de España (+34) si pagas desde Portugal con MB WAY o Italia con BANCOMAT a través de la alianza europea EuroPA)</span>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
+            <div class="bg-[#f0f0eb] p-3 rounded-xl flex items-center justify-between border border-gray-300">
+              <div class="pr-2">
+                <span class="text-[11px] text-gray-600 block"><span id="txtBizumPaso1">1. Envía</span> <strong id="totalBizum" class="text-gray-900 text-xs sm:text-sm"></strong></span>
+                <span class="font-mono font-bold text-gray-900 text-base tracking-wide">641 851 073</span>
+                <span class="block text-[9px] text-gray-500 font-medium leading-tight mt-0.5">(+34) si pagas desde Portugal con MB WAY o Italia con BANCOMAT.</span>
+              </div>
+              <button onclick="copiarTexto('641851073')" id="btnCopiarBizum" class="text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-3 py-1.5 rounded-lg shrink-0">Copiar</button>
             </div>
-            <button onclick="copiarTexto('641851073')" id="btnCopiarBizum" class="text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-2.5 py-1 rounded-lg">Copiar</button>
-          </div>
-          <div class="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-slate-800 leading-relaxed">
-            <span id="txtBizumPaso2">2. Concepto:</span> <strong id="conceptoBizum" class="text-gray-900 font-mono bg-white px-2 py-0.5 rounded border border-blue-200"></strong> 
-            <span class="text-[11px] text-gray-500 block mt-1">Escribe únicamente el número de pedido en el concepto para identificarlo al instante.</span>
+
+            <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-slate-800 flex items-center justify-between gap-2">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span id="txtBizumPaso2" class="font-medium">2. Concepto:</span>
+                  <strong id="conceptoBizum" class="text-gray-900 font-mono font-bold bg-white px-2 py-0.5 rounded border border-blue-200 text-xs sm:text-sm"></strong> 
+                </div>
+                <span class="text-[10px] text-gray-500 mt-1 block leading-tight">Escribe únicamente el número de pedido en el concepto para identificar tu encargo automáticamente.</span>
+              </div>
+              <button type="button" onclick="copiarConceptoBizum()" id="btnCopiarConceptoBizum" class="text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-3 py-1.5 rounded-lg shrink-0 transition active:scale-95 shadow-2xs">Copiar</button>
+            </div>
           </div>
         </div>
 
         <!-- Instrucciones PayPal con Logo -->
-        <div id="instruccionesPaypal" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-5 space-y-3 hidden shadow-xs">
-          <div class="flex items-center justify-between gap-2 mb-1 pb-1 border-b border-gray-100">
+        <div id="instruccionesPaypal" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-3.5 space-y-2.5 hidden shadow-xs">
+          <div class="flex items-center justify-between gap-2 pb-1 border-b border-gray-100">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
               <p id="txtPaypalPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Pago por PayPal</p>
@@ -1834,20 +1844,30 @@
           </a>
         </div>
 
-        <!-- Botones de Acción (Ancho completo en móvil y tamaño reducido centrado en PC) -->
-        <div class="space-y-2 flex flex-col items-center w-full">
-          <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full sm:w-auto sm:min-w-[320px] sm:max-w-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-5 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
-            <i class="fa-brands fa-whatsapp text-base"></i>
+        <!-- TEXTO INFORMATIVO RECUPERADO (PAGO MÁS TARDE Y JUSTIFICANTE OPCIONAL) -->
+        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-3.5 text-left mb-3.5 grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] sm:text-xs text-gray-600 leading-relaxed shadow-2xs">
+          <p>
+            <strong>¿Vas a realizar el pago más tarde?</strong> No te preocupes. Puedes cerrar esta ventana; cuando hagas el abono desde tu app bancaria o PayPal con tu número de pedido en el concepto, lo localizaremos sin problema.
+          </p>
+          <p>
+            <strong>Envío de justificante (Opcional):</strong> No es obligatorio, pero si realizas el abono ahora y quieres agilizar más rápidamente la comprobación, puedes enviárnoslo por WhatsApp o Email de manera opcional.
+          </p>
+        </div>
+
+        <!-- Botones de Acción (En fila horizontal de 3 en pantalla ancha y apilados en móvil) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full pt-1">
+          <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-3 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 text-[11px] sm:text-xs uppercase tracking-wider active:scale-98">
+            <i class="fa-brands fa-whatsapp text-sm sm:text-base"></i>
             <span id="btnWpConfirmarTxt">Enviar justificante por WhatsApp</span>
           </a>
           
-          <a id="btnEmailConfirmar" href="#" class="w-full sm:w-auto sm:min-w-[320px] sm:max-w-md bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-5 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
-            <i class="fa-solid fa-envelope text-sm text-blue-400"></i>
+          <a id="btnEmailConfirmar" href="#" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-3 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 text-[11px] sm:text-xs uppercase tracking-wider active:scale-98">
+            <i class="fa-solid fa-envelope text-xs sm:text-sm text-blue-400"></i>
             <span id="btnEmailConfirmarTxt">Enviar justificante por Email</span>
           </a>
 
-          <button type="button" onclick="cerrarModal()" class="w-full sm:w-auto sm:min-w-[320px] sm:max-w-md bg-white hover:bg-gray-100 text-gray-700 font-bold py-2.5 px-5 rounded-xl border border-gray-300 shadow-2xs transition flex items-center justify-center text-xs uppercase tracking-wider active:scale-98">
-            <span>Entendido, cerrar ventana</span>
+          <button type="button" onclick="cerrarModal()" class="w-full bg-white hover:bg-gray-100 text-gray-800 font-bold py-3 px-3 rounded-xl border border-gray-300 shadow-2xs transition flex items-center justify-center text-[11px] sm:text-xs uppercase tracking-wider active:scale-98">
+            <span>Entendido, cerrar</span>
           </button>
         </div>
       </div>
@@ -6769,6 +6789,82 @@ function cargarFAQs() {
         });
       } else {
         copiarConFallback(texto);
+      }
+    }
+
+    function copiarConceptoBizum() {
+      const elConcepto = document.getElementById('conceptoBizum');
+      const texto = elConcepto ? elConcepto.innerText.trim() : '';
+      if (!texto) return;
+
+      copiarTextoUniversal(texto, 'concepto');
+    }
+
+    function copiarTexto(texto) {
+      copiarTextoUniversal(texto, 'telefono');
+    }
+
+    function copiarTextoUniversal(texto, tipo = 'telefono') {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(texto).then(() => {
+          mostrarAvisoCopiadoUniversal(texto, tipo);
+        }).catch(() => {
+          copiarConFallbackUniversal(texto, tipo);
+        });
+      } else {
+        copiarConFallbackUniversal(texto, tipo);
+      }
+    }
+
+    function copiarConFallbackUniversal(texto, tipo) {
+      const inputTemp = document.createElement("textarea");
+      inputTemp.value = texto;
+      inputTemp.style.position = "fixed";
+      inputTemp.style.left = "-9999px";
+      inputTemp.style.top = "0";
+      document.body.appendChild(inputTemp);
+      inputTemp.focus();
+      inputTemp.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {}
+      document.body.removeChild(inputTemp);
+      mostrarAvisoCopiadoUniversal(texto, tipo);
+    }
+
+    function mostrarAvisoCopiadoUniversal(texto, tipo) {
+      // Efecto visual en el botón pulsado
+      const btnId = (tipo === 'concepto') ? 'btnCopiarConceptoBizum' : 'btnCopiarBizum';
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.innerText = "¡Copiado!";
+        btn.className = "text-[11px] text-white uppercase font-bold bg-emerald-600 border border-emerald-600 px-3 py-1.5 rounded-lg transition shrink-0";
+        setTimeout(() => {
+          btn.innerText = "Copiar";
+          btn.className = "text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-3 py-1.5 rounded-lg shrink-0 transition active:scale-95 shadow-2xs";
+        }, 1800);
+      }
+
+      // Notificación flotante centrada
+      const toast = document.getElementById('toastCopiadoTelefono');
+      const tituloToast = toast ? toast.querySelector('p.font-bold') : null;
+      const numLabel = document.getElementById('txtNumeroCopiadoToast');
+
+      if (tituloToast) {
+        tituloToast.innerText = (tipo === 'concepto') ? "¡Concepto copiado!" : "¡Teléfono copiado!";
+      }
+      if (numLabel) {
+        numLabel.innerText = (tipo === 'concepto') ? texto : texto.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+      }
+      if (toast) {
+        toast.classList.remove('hidden');
+        toast.style.opacity = '1';
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => {
+            toast.classList.add('hidden');
+          }, 300);
+        }, 1800);
       }
     }
 
