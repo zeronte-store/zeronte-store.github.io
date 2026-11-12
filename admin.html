@@ -10,6 +10,8 @@
   <!-- Motor PDF Vectorial con texto nativo -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
     body { 
@@ -34,26 +36,14 @@
       </div>
       <h1 class="text-xl font-bold text-white mb-1">Zeronte Dashboard</h1>
       <p class="text-xs text-zinc-500 mb-6">Acceso exclusivo de administrador</p>
-      <form onsubmit="autenticar(event)" method="post" action="#" class="space-y-4">
-        <!-- Campo de usuario oculto imprescindible para que el Llavero de iCloud / Safari en iPhone active autoguardado -->
-        <input type="text" name="username" value="admin" autocomplete="username" class="hidden" tabindex="-1" aria-hidden="true">
-        
-        <div class="relative flex items-center">
-          <input type="password" id="inputClave" name="password" autocomplete="current-password" placeholder="Contraseña" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-4 pr-11 py-3.5 text-center text-sm text-white focus:outline-none focus:border-gold transition">
-          <button type="button" onclick="alternarVisibilidadClave()" aria-label="Mostrar u ocultar contraseña" class="absolute right-3.5 text-zinc-400 hover:text-white p-1 transition active:scale-90">
-            <i id="iconoOjoClave" class="fa-regular fa-eye text-sm"></i>
-          </button>
+      <div class="space-y-4">
+        <!-- Contenedor del Botón Oficial de Google -->
+        <div class="flex justify-center w-full min-h-[44px]">
+          <div id="contenedorBotonGoogle"></div>
         </div>
         
-        <div class="flex items-center justify-between px-1 text-[11px] text-zinc-400">
-          <label class="flex items-center gap-2 cursor-pointer select-none">
-            <input type="checkbox" id="checkRecordarClave" class="rounded border-zinc-700 bg-zinc-900 text-gold focus:ring-0">
-            <span>Recordar clave</span>
-          </label>
-        </div>
+        <p id="msgErrorGoogle" class="hidden text-xs text-rose-400 font-semibold mt-2">Acceso denegado: cuenta no autorizada.</p>
 
-        <button type="submit" id="btnEntrar" class="w-full bg-white hover:bg-gold text-black font-bold py-3.5 rounded-xl uppercase text-xs tracking-wider transition active:scale-98">Acceder</button>
-        
         <!-- Barra de Progreso con Porcentaje al Acceder -->
         <div id="progresoLoginBox" class="hidden space-y-2 pt-2 text-left">
           <div class="flex items-center justify-between text-[11px] font-bold text-zinc-400">
@@ -66,8 +56,7 @@
             <div id="barraProgresoLogin" class="bg-gold h-2 rounded-full transition-all duration-200" style="width: 0%;"></div>
           </div>
         </div>
-        
-        </form>
+      </div>
     </div>
   </div>
 
@@ -1997,44 +1986,65 @@ function extraerUrlArchivoPedido(pedido) {
       return url;
     }
 
-    function autenticar(e) {
-      if (e) e.preventDefault();
-      tokenClave = document.getElementById('inputClave').value;
-      
-      const recordar = document.getElementById('checkRecordarClave')?.checked;
-      if (recordar && tokenClave) {
-        localStorage.setItem('zeronte_admin_token', tokenClave);
-      } else if (!recordar) {
-        localStorage.removeItem('zeronte_admin_token');
-      }
+    const GOOGLE_CLIENT_ID = "476261733316-2frgb7jnrq3r5qaan1900ikqd8os42f5.apps.googleusercontent.com";
+    const EMAIL_AUTORIZADO = "zeronte.store@gmail.com";
 
-      cargarDatos();
+    // Decodifica el token JWT de Google de forma segura
+    function decodificarTokenJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
     }
 
-    // Alternar ver/ocultar contraseña en pantalla de login
-    function alternarVisibilidadClave() {
-      const input = document.getElementById('inputClave');
-      const icono = document.getElementById('iconoOjoClave');
-      if (!input || !icono) return;
+    // Callback al autenticarse con Google
+    function manejarRespuestaGoogle(response) {
+      const datosUsuario = decodificarTokenJwt(response.credential);
+      const msgError = document.getElementById('msgErrorGoogle');
 
-      if (input.type === 'password') {
-        input.type = 'text';
-        icono.className = 'fa-regular fa-eye-slash text-sm';
+      if (datosUsuario && datosUsuario.email && datosUsuario.email.toLowerCase() === EMAIL_AUTORIZADO.toLowerCase()) {
+        if (msgError) msgError.classList.add('hidden');
+        tokenClave = "zeronte2026";
+        sessionStorage.setItem('zeronte_google_auth', 'true');
+        cargarDatos();
       } else {
-        input.type = 'password';
-        icono.className = 'fa-regular fa-eye text-sm';
+        if (msgError) {
+          msgError.innerText = `Acceso denegado: ${datosUsuario?.email || 'Cuenta'} no autorizada.`;
+          msgError.classList.remove('hidden');
+        }
       }
     }
 
-    // Inicializar comprobación de clave recordada al cargar la página
-    document.addEventListener("DOMContentLoaded", () => {
-      const claveGuardada = localStorage.getItem('zeronte_admin_token');
-      const inputClave = document.getElementById('inputClave');
-      const checkRecordar = document.getElementById('checkRecordarClave');
+    // Inicializar botón oficial de Google
+    function inicializarBotonGoogle() {
+      if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: manejarRespuestaGoogle
+        });
+        const contenedor = document.getElementById('contenedorBotonGoogle');
+        if (contenedor) {
+          google.accounts.id.renderButton(
+            contenedor,
+            { theme: "outline", size: "large", type: "standard", shape: "pill", width: 280, text: "signin_with" }
+          );
+        }
+      } else {
+        setTimeout(inicializarBotonGoogle, 200);
+      }
+    }
 
-      if (claveGuardada) {
-        if (inputClave) inputClave.value = claveGuardada;
-        if (checkRecordar) checkRecordar.checked = true;
+    document.addEventListener("DOMContentLoaded", () => {
+      inicializarBotonGoogle();
+      if (sessionStorage.getItem('zeronte_google_auth') === 'true') {
+        tokenClave = "zeronte2026";
+        cargarDatos(true);
       }
     });
 
