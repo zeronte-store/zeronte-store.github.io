@@ -7166,11 +7166,10 @@ function extraerUrlArchivoPedido(pedido) {
       if (iconoOfertas) {
         const btnOfertas = iconoOfertas.closest('.nav-item-btn');
         const estaSeleccionado = btnOfertas && btnOfertas.classList.contains('bg-slate-900');
+        iconoOfertas.classList.remove('text-rose-500', 'text-slate-600', 'text-white');
         if (activasOfertas > 0) {
-          iconoOfertas.classList.remove('text-slate-600', 'text-white');
           iconoOfertas.classList.add('text-rose-500');
         } else {
-          iconoOfertas.classList.remove('text-rose-500');
           iconoOfertas.classList.add(estaSeleccionado ? 'text-white' : 'text-slate-600');
         }
       }
