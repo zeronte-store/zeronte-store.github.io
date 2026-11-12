@@ -6565,6 +6565,10 @@ function cargarFAQs() {
       // Teléfono formateado limpio para el PDF: "(+34) 626 582 608"
       const telefonoLimpioPDF = formatearTelefonoRecibo(prefijo, numTel);
 
+      // Formateo estricto del precio a exactamente 2 decimales limpios
+      const precioNumLimpio = parseFloat((inputPrecio ? inputPrecio.value : '0').toString().replace('€', '').trim().replace(',', '.')) || 0;
+      const precioTextoFormateado = `${precioNumLimpio.toFixed(2)} €`;
+
       const datos = {
         accion: "nuevoPedido",
         notificarEmail: true,
@@ -6578,7 +6582,7 @@ function cargarFAQs() {
         producto: inputProd ? inputProd.value : 'Partitura personalizada',
         cantidad: cantidadReal,
         desgloseFracciones: Array.from({ length: cantidadReal }, (_, i) => `${i + 1}/${cantidadReal}`),
-        precio: (inputPrecio ? inputPrecio.value : '0.00') + " €",
+        precio: precioTextoFormateado,
         metodoPago: radioPago ? radioPago.value : 'Bizum'
       };
 
