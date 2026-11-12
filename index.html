@@ -1636,7 +1636,7 @@
   <!-- ==================== MODAL DE COMPRA (CENTRADO EN MÓVIL Y ESCRITORIO) ==================== -->
   <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[80] backdrop-blur-md p-4">
     
-    <div class="bg-[#f5f5f1] border border-gray-200 rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto text-[#222222]">
+    <div class="bg-[#f5f5f1] border border-gray-200 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl relative max-h-[95vh] overflow-y-auto no-scrollbar text-[#222222]">
 
       <!-- Botón Cerrar -->
       <button onclick="cerrarModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-white hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-black transition shadow-xs">✕</button>
@@ -1775,45 +1775,83 @@
           ✓
         </div>
         <h3 id="txtExitoTitulo" class="text-xl font-bold text-gray-900 brand-font mb-1">¡Pedido Registrado!</h3>
-        <p class="text-xs text-gray-500 mb-5"><span id="txtIdPedidoLabel">Identificador de pedido:</span> <strong id="codigoPedido" class="text-amber-700 font-mono text-sm"></strong></p>
+        <p class="text-xs text-gray-500 mb-3"><span id="txtIdPedidoLabel">Identificador de pedido:</span> <strong id="codigoPedido" class="text-amber-700 font-mono text-sm"></strong></p>
+
+        <!-- AVISO IMPORTANTE: INICIO DE ELABORACIÓN TRAS EL PAGO -->
+        <div class="p-3 bg-amber-50 border border-amber-300 rounded-2xl text-left mb-4 flex items-start gap-2.5">
+          <i class="fa-solid fa-circle-exclamation text-amber-600 text-sm mt-0.5 shrink-0"></i>
+          <p class="text-[11px] sm:text-xs text-amber-900 leading-relaxed font-medium">
+            <strong>Información importante:</strong> Tu encargo queda en cola en estado <span class="text-rose-600 font-bold">Pendiente</span>. Al ser una obra personalizada hecha a medida, <strong>la composición y elaboración comenzará una vez recibido y verificado el pago</strong>.
+          </p>
+        </div>
 
         <!-- Instrucciones Bizum -->
-        <div id="instruccionesBizum" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-5 space-y-2 shadow-xs">
-          <div class="flex items-center gap-2 mb-1">
+        <div id="instruccionesBizum" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-4 space-y-2.5 shadow-xs">
+          <div class="flex items-center gap-2 pb-1 border-b border-gray-100">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <p id="txtBizumPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Realiza el pago por Bizum</p>
+            <p id="txtBizumPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Pasos para el pago por Bizum</p>
           </div>
-          <p class="text-xs text-gray-600"><span id="txtBizumPaso1">1. Envía</span> <strong id="totalBizum" class="text-gray-900 text-sm"></strong> <span id="txtBizumPaso1b">al número de teléfono:</span></p>
+          
+          <p class="text-xs text-gray-700">
+            <span id="txtBizumPaso1">1. Envía el importe exacto de</span> <strong id="totalBizum" class="text-gray-900 text-sm font-extrabold"></strong> <span id="txtBizumPaso1b">al número:</span>
+          </p>
+          
           <div class="bg-[#f0f0eb] p-3 rounded-xl flex items-center justify-between border border-gray-300">
             <span class="font-mono font-bold text-gray-900 text-base">(+34) 641 851 073</span>
-            <button onclick="copiarTexto('641851073')" id="btnCopiarBizum" class="text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-2.5 py-1 rounded-lg">Copiar</button>
+            <button type="button" onclick="copiarTexto('641851073')" id="btnCopiarBizum" class="text-[11px] text-gray-700 hover:text-black uppercase font-bold bg-white border border-gray-300 px-2.5 py-1 rounded-lg transition active:scale-95 shadow-2xs">Copiar</button>
           </div>
-          <p class="text-xs text-gray-500"><span id="txtBizumPaso2">2. Escribe en el concepto:</span> <strong id="conceptoBizum" class="text-gray-900 font-mono"></strong></p>
+
+          <div class="bg-blue-50/80 p-2.5 rounded-xl border border-blue-200 text-xs text-blue-900 leading-relaxed">
+            <span id="txtBizumPaso2" class="font-semibold">2. Concepto imprescindible:</span> <strong id="conceptoBizum" class="text-black font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-blue-300"></strong> Escribe únicamente el número de pedido. Con esto identificaremos tu encargo automáticamente en cuanto ingresemos el abono.
+          </div>
         </div>
 
         <!-- Instrucciones PayPal -->
-        <div id="instruccionesPaypal" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-5 space-y-3 hidden shadow-xs">
-          <div class="flex items-center gap-2">
+        <div id="instruccionesPaypal" class="bg-white border border-gray-300 rounded-2xl p-4 text-left mb-4 space-y-3 hidden shadow-xs">
+          <div class="flex items-center gap-2 pb-1 border-b border-gray-100">
             <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-            <p id="txtPaypalPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Realiza el pago por PayPal</p>
+            <p id="txtPaypalPaso0" class="font-bold text-gray-900 text-xs uppercase tracking-wider">Pasos para el pago por PayPal</p>
           </div>
-          <p class="text-xs text-gray-600"><span id="txtPaypalPaso1">Pulsa para abonar</span> <strong id="totalPaypal" class="text-gray-900"></strong> <span id="txtPaypalPaso1b">con PayPal:</span></p>
-          <a id="enlacePaypal" href="#" target="_blank" class="block text-center bg-[#0070BA] hover:bg-[#003087] text-white font-bold py-3 rounded-xl transition text-xs uppercase tracking-wider">
-            Abrir PayPal
+          
+          <p class="text-xs text-gray-700">
+            <span id="txtPaypalPaso1">Pulsa a continuación para abonar</span> <strong id="totalPaypal" class="text-gray-900 font-extrabold"></strong> <span id="txtPaypalPaso1b">mediante PayPal o Tarjeta:</span>
+          </p>
+          
+          <a id="enlacePaypal" href="#" target="_blank" class="block text-center bg-[#0070BA] hover:bg-[#003087] text-white font-bold py-3 rounded-xl transition text-xs uppercase tracking-wider shadow-sm active:scale-98">
+            Abrir pasarela de PayPal
           </a>
+
+          <div class="bg-blue-50/80 p-2.5 rounded-xl border border-blue-200 text-xs text-blue-900 leading-relaxed">
+            <strong>Nota en PayPal:</strong> Recuerda indicar tu número de pedido o nombre en la nota de pago para vincularlo a tu encargo al instante.
+          </div>
         </div>
 
-        <!-- Botones para enviar justificante (WhatsApp o Email) -->
-        <div class="space-y-2.5">
-          <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
+        <!-- BLOQUE EXPLICATIVO SOBRE JUSTIFICANTES (VOLUNTARIO) -->
+        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-3.5 text-left mb-4 space-y-2">
+          <p class="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
+            <strong class="text-gray-800">¿Vas a realizar el pago más tarde?</strong> No te preocupes. Puedes cerrar esta ventana; cuando hagas el abono desde tu app bancaria o PayPal con tu número de pedido en el concepto, lo localizaremos sin problema.
+          </p>
+          <p class="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
+            <strong>Envío de justificante (Opcional):</strong> No es obligatorio, pero si realizas el abono ahora y quieres agilizar más rápidamente la comprobación, puedes enviárnoslo por cualquiera de estas dos vías:
+          </p>
+        </div>
+
+        <!-- Botones opcionales para enviar justificante (WhatsApp o Email) -->
+        <div class="space-y-2">
+          <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
             <i class="fa-brands fa-whatsapp text-lg"></i>
             <span id="btnWpConfirmarTxt">Enviar justificante por WhatsApp</span>
           </a>
           
-          <a id="btnEmailConfirmar" href="#" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
-            <i class="fa-solid fa-envelope text-base text-blue-400"></i>
+          <a id="btnEmailConfirmar" href="#" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider active:scale-98">
+            <i class="fa-solid fa-envelope text-sm text-blue-400"></i>
             <span id="btnEmailConfirmarTxt">Enviar justificante por Email</span>
           </a>
+
+          <!-- Botón Cerrar / Finalizar -->
+          <button type="button" onclick="cerrarModal()" class="w-full py-2.5 mt-1 border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-bold uppercase tracking-wider rounded-xl transition active:scale-98">
+            Entendido, cerrar ventana
+          </button>
         </div>
       </div>
 
