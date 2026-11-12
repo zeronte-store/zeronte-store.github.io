@@ -458,7 +458,18 @@
 
       <!-- MODAL ESTILO AMAZON: VISTA DETALLADA DE RESEÑA CON FOTOS -->
       <div id="modalDetalleResenaAmazon" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-xs hidden items-center justify-center p-2 sm:p-6 select-none" onclick="if(event.target===this) cerrarModalResenaAmazon()">
-        <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-gray-200 max-w-4xl w-full max-h-[92vh] flex flex-col relative" onclick="event.stopPropagation()">
+        
+        <!-- Pestaña lateral izquierda para foto anterior -->
+        <button id="btnAmazonGlobalFotoAnt" type="button" onclick="navegarEntreTodasLasFotosAmazon(-1)" class="fixed left-2 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/95 hover:bg-white text-gray-900 shadow-2xl flex items-center justify-center text-base sm:text-lg transition hover:scale-110 active:scale-95 z-[130] border border-gray-200 cursor-pointer" title="Foto anterior (←)">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <!-- Pestaña lateral derecha para foto siguiente -->
+        <button id="btnAmazonGlobalFotoSig" type="button" onclick="navegarEntreTodasLasFotosAmazon(1)" class="fixed right-2 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/95 hover:bg-white text-gray-900 shadow-2xl flex items-center justify-center text-base sm:text-lg transition hover:scale-110 active:scale-95 z-[130] border border-gray-200 cursor-pointer" title="Foto siguiente (→)">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-gray-200 max-w-4xl w-full max-h-[92vh] flex flex-col relative z-20" onclick="event.stopPropagation()">
           <!-- Boton superior de cierre estilo Amazon -->
           <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white z-20">
             <button type="button" onclick="volverACuadriculaDesdeDetalleAmazon()" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-gray-700 hover:text-black transition active:scale-95">
@@ -1360,13 +1371,13 @@
           </button>
 
           <!-- Notificación temporal en medio de la pantalla -->
-          <div id="toastAnadidoCarrito" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/90 text-white border border-gray-700 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md hidden z-[90] flex items-center gap-3 transition-opacity duration-300 pointer-events-none select-none">
-            <span class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold shadow-sm">
+          <div id="toastAnadidoCarrito" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[88vw] sm:w-auto max-w-md bg-black/90 text-white border border-gray-700 px-5 sm:px-7 py-4 rounded-2xl shadow-2xl backdrop-blur-md hidden z-[90] flex items-center gap-3.5 transition-opacity duration-300 pointer-events-none select-none">
+            <span class="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold shadow-sm shrink-0">
               <i class="fa-solid fa-check"></i>
             </span>
-            <div class="text-left">
-              <p class="text-xs font-bold text-white tracking-wide">¡Artículo añadido a tu cesta!</p>
-              <p class="text-[11px] text-gray-400 font-medium">Puedes continuar personalizando o explorando.</p>
+            <div class="text-left min-w-0 flex-1">
+              <p class="text-xs sm:text-sm font-bold text-white tracking-wide leading-tight">¡Artículo añadido a tu cesta!</p>
+              <p class="text-[11px] sm:text-xs text-gray-300 font-medium mt-0.5 leading-snug">Puedes continuar personalizando o explorando.</p>
             </div>
           </div>
 
@@ -4858,20 +4869,14 @@ function cargarFAQs() {
       })();
       document.getElementById('metodoSeguimientoProducto').innerText = p.metodoPago || "Bizum";
 
-      // FORMATEO DE PERSONALIZACIÓN IDÉNTICO AL PANEL ADMIN
+      // FORMATEO DE PERSONALIZACIÓN SIN INCLUIR EL PRODUCTO
       const formatearPersonalizacionVisual = (textoRaw) => {
         if (!textoRaw || textoRaw.trim() === "") return '<span class="italic text-gray-400">Sin dedicatoria</span>';
 
         let limpio = textoRaw.replace(/["“”«»]/g, '')
                              .replace(/\[\s*UNIDAD\s*\d+\/\d+\s*\]\s*\|?/gi, '')
+                             .replace(/\[\s*PROD:[^\]]+\]\s*\|?/gi, '')
                              .trim();
-
-        let bloqueProdHtml = '';
-        const matchProd = limpio.match(/\[PROD:\s*([^\]]+)\]/i);
-        if (matchProd) {
-          bloqueProdHtml = `<div class="leading-relaxed pb-1 mb-1 border-b border-blue-200/60 font-semibold text-slate-800">[PROD: <strong class="font-bold text-black">${matchProd[1].trim()}</strong>]</div>`;
-          limpio = limpio.replace(/\[PROD:\s*[^\]]+\]\s*\|?/gi, '').trim();
-        }
 
         if (limpio.includes('|')) {
           const partes = limpio.split('|').map(x => x.trim()).filter(Boolean);
@@ -4884,7 +4889,7 @@ function cargarFAQs() {
             }
             return `<div class="leading-relaxed font-bold text-slate-900">${parte}</div>`;
           }).join('');
-          return bloqueProdHtml + lineasHtml;
+          return lineasHtml;
         }
 
         const regexCampos = /(\d+\.\s*[^:]+:)/g;
@@ -4898,10 +4903,10 @@ function cargarFAQs() {
               html += `<div class="leading-relaxed"><span class="font-normal text-black">${label}</span> <strong class="font-bold text-slate-900">${val}</strong></div>`;
             }
           }
-          if (html) return bloqueProdHtml + html;
+          if (html) return html;
         }
 
-        return bloqueProdHtml + `<div class="leading-relaxed font-bold text-slate-900">${limpio}</div>`;
+        return `<div class="leading-relaxed font-bold text-slate-900">${limpio}</div>`;
       };
 
       document.getElementById('cajaPersonalizacionSeguimiento').innerHTML = formatearPersonalizacionVisual(p.personalizacion || "");
@@ -5587,8 +5592,20 @@ function cargarFAQs() {
       cerrarCuadriculaFotosAmazon();
     }
 
+    let indiceFotoAmazonGlobalActivo = 0;
+
     function abrirModalResenaAmazonPorIndexGlobal(idxGlobal) {
-      const item = todasLasFotosAmazon[idxGlobal];
+      if (!todasLasFotosAmazon || !todasLasFotosAmazon.length) return;
+      indiceFotoAmazonGlobalActivo = (idxGlobal + todasLasFotosAmazon.length) % todasLasFotosAmazon.length;
+      const item = todasLasFotosAmazon[indiceFotoAmazonGlobalActivo];
+      if (!item) return;
+      abrirModalDetalleResenaAmazon(item.resena, item.indiceFoto);
+    }
+
+    function navegarEntreTodasLasFotosAmazon(delta) {
+      if (!todasLasFotosAmazon || todasLasFotosAmazon.length <= 1) return;
+      indiceFotoAmazonGlobalActivo = (indiceFotoAmazonGlobalActivo + delta + todasLasFotosAmazon.length) % todasLasFotosAmazon.length;
+      const item = todasLasFotosAmazon[indiceFotoAmazonGlobalActivo];
       if (!item) return;
       abrirModalDetalleResenaAmazon(item.resena, item.indiceFoto);
     }
@@ -5596,6 +5613,16 @@ function cargarFAQs() {
     function abrirModalDetalleResenaAmazon(resena, indiceFoto = 0) {
       resenaActivaAmazon = resena;
       indiceFotoActualEnResena = indiceFoto;
+
+      // Sincronizar índice global si se abrió directamente desde una reseña
+      if (todasLasFotosAmazon && todasLasFotosAmazon.length > 0) {
+        const fotoBuscada = (resena.fotos && resena.fotos[indiceFoto]) ? resena.fotos[indiceFoto] : null;
+        if (fotoBuscada) {
+          const idxEncontrado = todasLasFotosAmazon.findIndex(it => it.url === fotoBuscada);
+          if (idxEncontrado !== -1) indiceFotoAmazonGlobalActivo = idxEncontrado;
+        }
+      }
+
       actualizarVistaModalAmazon();
 
       const modal = document.getElementById('modalDetalleResenaAmazon');
@@ -5619,12 +5646,18 @@ function cargarFAQs() {
         imgPrincipal.src = fotos[indiceFotoActualEnResena];
       }
 
-      // Flechas
+      // Flechas internas del visor (se ocultan ya que ahora existen las pestañas laterales globales)
       const btnAnt = document.getElementById('btnAmazonFotoAnt');
       const btnSig = document.getElementById('btnAmazonFotoSig');
-      const tieneVarias = fotos.length > 1;
-      if (btnAnt) btnAnt.classList.toggle('hidden', !tieneVarias);
-      if (btnSig) btnSig.classList.toggle('hidden', !tieneVarias);
+      if (btnAnt) btnAnt.classList.add('hidden');
+      if (btnSig) btnSig.classList.add('hidden');
+
+      // Visibilidad pestañas laterales según haya más de 1 foto en toda la tienda
+      const hayMasDeUnaFotoGlobal = Boolean(todasLasFotosAmazon && todasLasFotosAmazon.length > 1);
+      const btnGlobAnt = document.getElementById('btnAmazonGlobalFotoAnt');
+      const btnGlobSig = document.getElementById('btnAmazonGlobalFotoSig');
+      if (btnGlobAnt) btnGlobAnt.classList.toggle('hidden', !hayMasDeUnaFotoGlobal);
+      if (btnGlobSig) btnGlobSig.classList.toggle('hidden', !hayMasDeUnaFotoGlobal);
 
       // Datos del autor
       const nombreEl = document.getElementById('nombreAutorAmazon');
@@ -5704,9 +5737,7 @@ function cargarFAQs() {
     }
 
     function navegarFotoDetalleAmazon(delta) {
-      if (!resenaActivaAmazon || !resenaActivaAmazon.fotos || resenaActivaAmazon.fotos.length <= 1) return;
-      indiceFotoActualEnResena += delta;
-      actualizarVistaModalAmazon();
+      navegarEntreTodasLasFotosAmazon(delta);
     }
 
     async function alternarTraduccionResenaAmazon(btnElement) {
@@ -5835,11 +5866,11 @@ function cargarFAQs() {
 
       if (modalAmazon && !modalAmazon.classList.contains('hidden')) {
         if (e.key === 'ArrowLeft') {
-          navegarFotoDetalleAmazon(-1);
+          navegarEntreTodasLasFotosAmazon(-1);
         } else if (e.key === 'ArrowRight') {
-          navegarFotoDetalleAmazon(1);
+          navegarEntreTodasLasFotosAmazon(1);
         } else if (e.key === 'Escape') {
-          cerrarModalResenaAmazon();
+          cerrarModalResenaAmazonTotal();
         }
         return;
       }
