@@ -2051,7 +2051,7 @@ function cargarFAQs() {
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-hlCFkngwGxqTIsrr-YvMoOpyFH0tRnbzsYxgrHbosz1ObyxPjnVu-1Wn4EvRd-KwYA/exec";
     const MI_TELEFONO_WHATSAPP = "34641851073";
-    const MI_PAYPAL_USER = "paypal.me/adriandiazgiraldez";
+    const MI_PAYPAL_EMAIL = "adriandiazgiraldez@gmail.com";
 
     // Base de ventas inicial
     let totalVentasGlobalSincronizado = 1093;
@@ -6750,7 +6750,35 @@ function cargarFAQs() {
       if (datos.metodoPago === 'PayPal') {
         document.getElementById('instruccionesBizum').classList.add('hidden');
         document.getElementById('instruccionesPaypal').classList.remove('hidden');
-        document.getElementById('enlacePaypal').href = `https://paypal.me/${MI_PAYPAL_USER}/${datos.precio.replace(' €', '')}`;
+
+        // 1. Limpiamos el importe (ej. de "7.99 €" a "7.99")
+        const importeLimpio = datos.precio.replace(' €', '').replace(',', '.').trim();
+
+        // 2. Concepto con ID de pedido y producto
+        const conceptoPago = `Pedido ${orderId} - ${datos.producto}`.substring(0, 127);
+
+        // 3. Pasarela oficial con concepto bloqueado a tu cuenta
+        const paramsPaypal = new URLSearchParams({
+          cmd: '_xclick',
+          business: 'adriandiazgiraldez@gmail.com',
+          item_name: conceptoPago,
+          item_number: orderId,
+          amount: importeLimpio,
+          currency_code: 'EUR',
+          no_shipping: '1',
+          no_note: '1'
+        });
+
+        const urlPasarelaPaypal = `https://www.paypal.com/cgi-bin/webscr?${paramsPaypal.toString()}`;
+
+        // Asignamos la URL al botón azul visible de la pantalla
+        const btnPaypal = document.getElementById('enlacePaypal');
+        if (btnPaypal) {
+          btnPaypal.href = urlPasarelaPaypal;
+        }
+
+        // 4. Apertura automática de PayPal al confirmar
+        window.open(urlPasarelaPaypal, '_blank');
       } else {
         document.getElementById('instruccionesBizum').classList.remove('hidden');
         document.getElementById('instruccionesPaypal').classList.add('hidden');
