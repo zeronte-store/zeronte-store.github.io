@@ -3205,6 +3205,7 @@ function extraerUrlArchivoPedido(pedido) {
 
         let limpio = textoRaw.replace(/["“”«»]/g, '')
                              .replace(/\[\s*UNIDAD\s*\d+\/\d+\s*\]\s*\|?/gi, '')
+                             .replace(/\[\s*PROD\s*:[^\]]+\]\s*/gi, '')
                              .trim();
 
         const generarFilaConBotonCopiar = (etiqueta, contenido) => {
