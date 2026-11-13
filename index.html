@@ -3024,7 +3024,7 @@ function cargarFAQs() {
       const textoBuscadoActivo = ((inWeb ? inWeb.value : '') || (inMov ? inMov.value : '')).trim();
 
       if (seccionDest && gridDest) {
-        if (destacados.length > 0 && categoriaSeleccionada === 'todos' && !textoBuscadoActivo) {
+        if (destacados.length > 0 && categoriaSeleccionada === 'todos' && !textoBuscadoActivo && paginaCatalogoActual === 1) {
           seccionDest.classList.remove('hidden');
           gridDest.innerHTML = destacados.map((p) => {
             let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
