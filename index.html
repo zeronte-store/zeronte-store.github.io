@@ -4750,13 +4750,29 @@ function cargarFAQs() {
       if (tituloEl) {
         if (cat === 'todos') {
           tituloEl.innerText = t.catTodos;
+        } else if (cat === '__ofertas__') {
+          tituloEl.innerText = 'Ofertas';
         } else {
           tituloEl.innerText = cat.charAt(0).toUpperCase() + cat.slice(1);
         }
       }
 
       let filtrados = catalogoCompleto;
-      if (cat !== 'todos') {
+      if (cat === '__ofertas__') {
+        const ahoraF = Date.now();
+        const idsOfertasF = new Set();
+        (campanasOfertasRemotas || []).forEach(c => {
+          if (c.activa && c.alcance !== 'todos' && c.mostrarEnMenuOfertas && ahoraF >= c.fechaInicio && (c.sinFin || !c.fechaFin || ahoraF <= c.fechaFin)) {
+            (c.idsObjetivo || []).forEach(id => idsOfertasF.add((id || '').toString().trim().toLowerCase()));
+          }
+        });
+        filtrados = catalogoCompleto
+          .filter(p => idsOfertasF.has((p.id || '').toString().trim().toLowerCase()))
+          .sort((a, b) => (b.totalVentas || 0) - (a.totalVentas || 0));
+        paginaCatalogoActual = 1;
+        renderizarCatalogo(filtrados);
+        return;
+      } else if (cat !== 'todos') {
         filtrados = catalogoCompleto.filter(p => (p.categoria || '').trim().toLowerCase() === cat.trim().toLowerCase());
       }
 
@@ -4940,6 +4956,28 @@ function cargarFAQs() {
           `;
         });
 
+        // Calcular productos en oferta destacados para el menú
+        const ahoraMenu = Date.now();
+        const idsOfertasMenu = new Set();
+        (campanasOfertasRemotas || []).forEach(c => {
+          if (c.activa && c.alcance !== 'todos' && c.mostrarEnMenuOfertas && ahoraMenu >= c.fechaInicio && (c.sinFin || !c.fechaFin || ahoraMenu <= c.fechaFin)) {
+            (c.idsObjetivo || []).forEach(id => idsOfertasMenu.add((id || '').toString().trim().toLowerCase()));
+          }
+        });
+        const totalOfertasMenu = catalogoCompleto.filter(p => idsOfertasMenu.has((p.id || '').toString().trim().toLowerCase())).length;
+
+        if (totalOfertasMenu > 0) {
+          const esActivoOf = categoriaSeleccionada === '__ofertas__';
+          htmlCats += `
+            <li class="pt-1 mt-1 border-t border-gray-200">
+              <button onclick="filtrarCategoria('__ofertas__', this)" data-cat="__ofertas__" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg ${esActivoOf ? 'bg-rose-100 text-rose-800 font-bold' : 'bg-rose-50/70 hover:bg-rose-100 text-rose-700 font-semibold'} transition text-left whitespace-nowrap">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-tag text-xs"></i> Ofertas</span>
+                <span class="text-xs text-rose-700 font-bold ml-2">${totalOfertasMenu}</span>
+              </button>
+            </li>
+          `;
+        }
+
         listaUl.innerHTML = htmlCats;
       }
 
@@ -4952,6 +4990,17 @@ function cargarFAQs() {
           const nombreVisible = item.nombre.charAt(0).toUpperCase() + item.nombre.slice(1);
           opcionesMovil += `<option value="${item.nombre.replace(/"/g, '&quot;')}">${nombreVisible} (${item.total})</option>`;
         });
+        const ahoraMenuM = Date.now();
+        const idsOfertasMenuM = new Set();
+        (campanasOfertasRemotas || []).forEach(c => {
+          if (c.activa && c.alcance !== 'todos' && c.mostrarEnMenuOfertas && ahoraMenuM >= c.fechaInicio && (c.sinFin || !c.fechaFin || ahoraMenuM <= c.fechaFin)) {
+            (c.idsObjetivo || []).forEach(id => idsOfertasMenuM.add((id || '').toString().trim().toLowerCase()));
+          }
+        });
+        const totalOfertasMenuM = catalogoCompleto.filter(p => idsOfertasMenuM.has((p.id || '').toString().trim().toLowerCase())).length;
+        if (totalOfertasMenuM > 0) {
+          opcionesMovil += `<option value="__ofertas__">Ofertas (${totalOfertasMenuM})</option>`;
+        }
         selectMovil.innerHTML = opcionesMovil;
         selectMovil.value = categoriaSeleccionada || 'todos';
       }
