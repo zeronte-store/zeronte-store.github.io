@@ -7013,6 +7013,11 @@ try {
       }
 
       const campanas = obtenerCampanasOfertas();
+      
+      // Si se estaba editando una campaña previa, limpiamos los productos que antes estaban y ahora ya no están
+      const campanaAnterior = idEditando ? campanas.find(c => c.id === idEditando) : null;
+      const idsAnteriores = (campanaAnterior && Array.isArray(campanaAnterior.idsObjetivo)) ? campanaAnterior.idsObjetivo : [];
+
       const nuevaCampana = {
         id: idEditando || ("OFERTA-" + Date.now()),
         nombre: nombre,
@@ -7038,23 +7043,18 @@ try {
       guardarCampanasOfertas(campanas);
       cerrarModalCrearOferta();
 
-      // Guardar la campaña en la hoja Ofertas de Google Sheets
-      try {
-        await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            accion: "guardarCampanaOferta",
-            clave: tokenClave || "zeronte2026",
-            campana: nuevaCampana
-          })
-        });
-      } catch (errCamp) {
-        console.error("Error al sincronizar campana con Google Sheets:", errCamp);
-      }
-
-      // Aplicar ofertas a los productos seleccionados y enviar DIRECTAMENTE a Sheets
+      // Recalcular productos: primero limpiar los que ya no pertenecen a esta oferta
       const cambiosParaServidor = {};
+      idsAnteriores.forEach(oldId => {
+        const pIdLower = oldId.toString().trim().toLowerCase();
+        if (!idsObjetivo.some(targetId => targetId.toString().trim().toLowerCase() === pIdLower)) {
+          cambiosParaServidor[pIdLower] = "";
+          const pObj = listaProductosGlobal.find(p => (p.id || '').toString().trim().toLowerCase() === pIdLower);
+          if (pObj) pObj.precioOferta = "";
+        }
+      });
+
+      // Aplicar ofertas a los productos actualmente seleccionados
       listaProductosGlobal.forEach(prod => {
         const pIdLower = (prod.id || '').toString().trim().toLowerCase();
         const coincide = idsObjetivo.some(targetId => targetId.toString().trim().toLowerCase() === pIdLower);
@@ -7072,8 +7072,35 @@ try {
         }
       });
 
+      // Sincronizar de inmediato la caché local persistente
+      try {
+        const cacheRaw = localStorage.getItem('zeronte_admin_cache');
+        if (cacheRaw) {
+          const cacheData = JSON.parse(cacheRaw);
+          cacheData.ofertas = campanas;
+          cacheData.productos = listaProductosGlobal;
+          localStorage.setItem('zeronte_admin_cache', JSON.stringify(cacheData));
+        }
+      } catch(e) {}
+
+      // Actualizar vista inmediatamente
       renderizarProductos();
       renderizarModuloOfertas();
+
+      // Guardar la campaña en la hoja Ofertas de Google Sheets
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "guardarCampanaOferta",
+            clave: tokenClave || "zeronte2026",
+            campana: nuevaCampana
+          })
+        });
+      } catch (errCamp) {
+        console.error("Error al sincronizar campana con Google Sheets:", errCamp);
+      }
 
       if (Object.keys(cambiosParaServidor).length > 0) {
         try {
@@ -7099,6 +7126,31 @@ try {
       campanas = campanas.filter(c => c.id !== campanaId);
       guardarCampanasOfertas(campanas);
 
+      const cambiosParaServidor = {};
+      if (campanaEliminar && Array.isArray(campanaEliminar.idsObjetivo)) {
+        campanaEliminar.idsObjetivo.forEach(idProd => {
+          const pIdLower = idProd.toString().trim().toLowerCase();
+          cambiosParaServidor[pIdLower] = "";
+          const prod = listaProductosGlobal.find(p => (p.id || '').toString().trim().toLowerCase() === pIdLower);
+          if (prod) prod.precioOferta = "";
+        });
+      }
+
+      // Sincronizar de inmediato la caché local persistente
+      try {
+        const cacheRaw = localStorage.getItem('zeronte_admin_cache');
+        if (cacheRaw) {
+          const cacheData = JSON.parse(cacheRaw);
+          cacheData.ofertas = campanas;
+          cacheData.productos = listaProductosGlobal;
+          localStorage.setItem('zeronte_admin_cache', JSON.stringify(cacheData));
+        }
+      } catch(e) {}
+
+      // Actualizar vista inmediatamente: limpia la tarjeta y actualiza los 4 contadores en el acto
+      renderizarProductos();
+      renderizarModuloOfertas();
+
       // Eliminar de la hoja Ofertas en Google Sheets
       try {
         await fetch(APPS_SCRIPT_URL, {
@@ -7113,19 +7165,6 @@ try {
       } catch (errDelCamp) {
         console.error("Error al eliminar campana de Google Sheets:", errDelCamp);
       }
-
-      const cambiosParaServidor = {};
-      if (campanaEliminar && Array.isArray(campanaEliminar.idsObjetivo)) {
-        campanaEliminar.idsObjetivo.forEach(idProd => {
-          const pIdLower = idProd.toString().trim().toLowerCase();
-          cambiosParaServidor[pIdLower] = "";
-          const prod = listaProductosGlobal.find(p => (p.id || '').toString().trim().toLowerCase() === pIdLower);
-          if (prod) prod.precioOferta = "";
-        });
-      }
-
-      renderizarProductos();
-      renderizarModuloOfertas();
 
       if (Object.keys(cambiosParaServidor).length > 0) {
         try {
@@ -7189,13 +7228,28 @@ try {
 
       let activasCount = 0;
       let programadasCount = 0;
+      const setIdsRebajadosActivos = new Set();
 
       campanas.forEach(c => {
-        if (ahora < c.fechaInicio) programadasCount++;
-        else if (c.sinFin || (c.fechaFin && ahora <= c.fechaFin)) activasCount++;
+        const inicioAlcanzado = ahora >= c.fechaInicio;
+        const noExpirada = c.sinFin || (c.fechaFin && ahora <= c.fechaFin);
+
+        if (ahora < c.fechaInicio) {
+          programadasCount++;
+        } else if (noExpirada) {
+          activasCount++;
+          if (Array.isArray(c.idsObjetivo)) {
+            c.idsObjetivo.forEach(id => setIdsRebajadosActivos.add(id.toString().trim().toLowerCase()));
+          }
+        }
       });
 
-      const prodsRebajados = listaProductosGlobal.filter(p => p.precioOferta && parseFloat(p.precioOferta) > 0).length;
+      // El conteo de artículos rebajados ahora se calcula fielmente sobre las campañas activas o productos con precioOferta real
+      const prodsRebajados = listaProductosGlobal.filter(p => {
+        const pIdLower = (p.id || '').toString().trim().toLowerCase();
+        const tieneOfertaDirecta = p.precioOferta && parseFloat(p.precioOferta) > 0;
+        return setIdsRebajadosActivos.has(pIdLower) || tieneOfertaDirecta;
+      }).length;
 
       document.getElementById('statOfertasTotales').innerText = campanas.length;
       document.getElementById('statOfertasActivas').innerText = activasCount;
