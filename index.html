@@ -466,19 +466,19 @@
           <!-- Cuerpo a 2 columnas (Foto a la izquierda y Datos de la reseña a la derecha) -->
           <div class="grid grid-cols-1 md:grid-cols-12 flex-1 overflow-y-auto">
             <!-- COLUMNA IZQUIERDA: Visor de foto con flechas -->
-            <div class="md:col-span-7 bg-neutral-900 flex items-center justify-center relative min-h-[300px] sm:min-h-[460px] p-4">
-              <!-- Flecha foto anterior -->
-              <button id="btnAmazonFotoAnt" type="button" onclick="navegarFotoDetalleAmazon(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center text-sm transition active:scale-90 z-20 shadow-md">
-                <i class="fa-solid fa-chevron-left"></i>
-              </button>
-              
-              <img id="imgDetalleAmazonGrande" src="" alt="Foto reseña" class="max-h-[68vh] w-auto max-w-full object-contain rounded-xl shadow-lg">
+<div class="md:col-span-7 bg-neutral-900 flex items-center justify-center relative min-h-[240px] max-h-[48vh] md:min-h-[460px] md:max-h-none overflow-hidden p-3 sm:p-4">
+  <!-- Flecha foto anterior -->
+  <button id="btnAmazonFotoAnt" type="button" onclick="navegarFotoDetalleAmazon(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center text-sm transition active:scale-90 z-20 shadow-md">
+    <i class="fa-solid fa-chevron-left"></i>
+  </button>
+  
+  <img id="imgDetalleAmazonGrande" src="" alt="Foto reseña" class="max-h-[44vh] md:max-h-[68vh] w-auto max-w-full object-contain rounded-xl shadow-lg">
 
-              <!-- Flecha foto siguiente -->
-              <button id="btnAmazonFotoSig" type="button" onclick="navegarFotoDetalleAmazon(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center text-sm transition active:scale-90 z-20 shadow-md">
-                <i class="fa-solid fa-chevron-right"></i>
-              </button>
-            </div>
+  <!-- Flecha foto siguiente -->
+  <button id="btnAmazonFotoSig" type="button" onclick="navegarFotoDetalleAmazon(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center text-sm transition active:scale-90 z-20 shadow-md">
+    <i class="fa-solid fa-chevron-right"></i>
+  </button>
+</div>
 
             <!-- COLUMNA DERECHA: Datos del autor, estrellas, opinión y miniaturas del cliente -->
             <div class="md:col-span-5 p-5 sm:p-7 flex flex-col justify-between bg-white text-left space-y-4 overflow-y-auto">
