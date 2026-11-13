@@ -355,6 +355,9 @@
           <!-- Renderizado dinámico vía JavaScript -->
         </div>
 
+        <!-- Paginación del catálogo -->
+        <div id="paginacionCatalogo" class="hidden flex items-center justify-center gap-1.5 sm:gap-2 mt-8 pt-4 select-none flex-wrap"></div>
+
         <!-- Enlaces a Información básica y Políticas de la tienda al final de los artículos en móvil -->
         <div class="sm:hidden mt-8 pt-6 border-t border-gray-200 space-y-2.5">
           <button onclick="cambiarPestana('informacion')" class="w-full py-3 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-800 shadow-sm flex items-center justify-between px-4 hover:border-black transition">
@@ -1871,8 +1874,8 @@
   </div>
 
   <!-- ==================== MODAL DE ENVIAR MENSAJE ==================== -->
-  <div id="modalContactoDirecto" class="fixed inset-0 bg-black/80 hidden items-end sm:items-center justify-center z-50 backdrop-blur-sm">
-    <div class="bg-white border border-gray-200 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto text-left">
+  <div id="modalContactoDirecto" class="fixed inset-0 bg-black/80 hidden items-end sm:items-center justify-center z-50 backdrop-blur-sm overscroll-none touch-none">
+    <div class="bg-white border border-gray-200 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto overscroll-contain touch-auto text-left">
       <!-- Drag bar móvil -->
       <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3 sm:hidden"></div>
       
@@ -2844,6 +2847,65 @@ function cargarFAQs() {
     }
 
     let catalogoFiltradoActual = [];
+    let paginaCatalogoActual = 1;
+    const PRODUCTOS_POR_PAGINA = 24;
+
+    function cambiarPaginaCatalogo(nuevaPagina) {
+      const totalPaginas = Math.ceil(catalogoFiltradoActual.length / PRODUCTOS_POR_PAGINA);
+      if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
+      paginaCatalogoActual = nuevaPagina;
+      renderizarCatalogo(catalogoFiltradoActual);
+      const catEl = document.getElementById('catalogo');
+      if (catEl) catEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderizarPaginacionCatalogo(totalPaginas) {
+      const cont = document.getElementById('paginacionCatalogo');
+      if (!cont) return;
+      if (totalPaginas <= 1) {
+        cont.classList.add('hidden');
+        cont.innerHTML = '';
+        return;
+      }
+
+      cont.classList.remove('hidden');
+      let paginas = [];
+      if (totalPaginas <= 7) {
+        for (let i = 1; i <= totalPaginas; i++) paginas.push(i);
+      } else {
+        paginas.push(1);
+        if (paginaCatalogoActual > 3) paginas.push('...');
+        const start = Math.max(2, paginaCatalogoActual - 1);
+        const end = Math.min(totalPaginas - 1, paginaCatalogoActual + 1);
+        for (let i = start; i <= end; i++) paginas.push(i);
+        if (paginaCatalogoActual < totalPaginas - 2) paginas.push('...');
+        paginas.push(totalPaginas);
+      }
+
+      let html = `
+        <button type="button" onclick="cambiarPaginaCatalogo(${paginaCatalogoActual - 1})" ${paginaCatalogoActual === 1 ? 'disabled' : ''} class="w-9 h-9 rounded-full border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 flex items-center justify-center text-xs transition disabled:opacity-30 disabled:pointer-events-none shadow-2xs">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      `;
+
+      paginas.forEach(p => {
+        if (p === '...') {
+          html += `<span class="px-1.5 text-xs font-bold text-gray-400">...</span>`;
+        } else if (p === paginaCatalogoActual) {
+          html += `<button type="button" class="w-9 h-9 rounded-full bg-black text-white font-bold text-xs flex items-center justify-center shadow-sm">${p}</button>`;
+        } else {
+          html += `<button type="button" onclick="cambiarPaginaCatalogo(${p})" class="w-9 h-9 rounded-full border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-semibold text-xs flex items-center justify-center transition shadow-2xs">${p}</button>`;
+        }
+      });
+
+      html += `
+        <button type="button" onclick="cambiarPaginaCatalogo(${paginaCatalogoActual + 1})" ${paginaCatalogoActual === totalPaginas ? 'disabled' : ''} class="w-9 h-9 rounded-full border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 flex items-center justify-center text-xs transition disabled:opacity-30 disabled:pointer-events-none shadow-2xs">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      `;
+
+      cont.innerHTML = html;
+    }
 
     let temporizadorCuentaAtrasEtsy = null;
 
@@ -3051,10 +3113,16 @@ function cargarFAQs() {
 
       if (lista.length === 0) {
         contenedor.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500 text-sm">${t.noArticulos}</div>`;
+        renderizarPaginacionCatalogo(0);
         return;
       }
 
-      contenedor.innerHTML = lista.map((p, idxLista) => {
+      const totalPaginas = Math.ceil(lista.length / PRODUCTOS_POR_PAGINA);
+      if (paginaCatalogoActual > totalPaginas) paginaCatalogoActual = 1;
+      const inicioPag = (paginaCatalogoActual - 1) * PRODUCTOS_POR_PAGINA;
+      const listaPaginada = lista.slice(inicioPag, inicioPag + PRODUCTOS_POR_PAGINA);
+
+      contenedor.innerHTML = listaPaginada.map((p, idxLista) => {
         let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
         try {
           if (Array.isArray(p.imagen)) {
@@ -3080,7 +3148,7 @@ function cargarFAQs() {
         let fechaFinOferta = tieneOferta ? obtenerFechaFinOfertaSincronizada(p, ahora) : null;
 
         return `
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(catalogoFiltradoActual[${idxLista}])">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(catalogoFiltradoActual[${inicioPag + idxLista}])">
             <div>
               <div class="aspect-square bg-gray-100 relative overflow-hidden">
                 <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
@@ -3167,6 +3235,8 @@ function cargarFAQs() {
           </div>
         `;
       }).join('');
+
+      renderizarPaginacionCatalogo(totalPaginas);
 
       // Iniciar intervalo en vivo de segundo a segundo para la cuenta atrás
       if (!temporizadorCuentaAtrasEtsy) {
@@ -4634,6 +4704,7 @@ function cargarFAQs() {
         filtrados = catalogoCompleto.filter(p => (p.categoria || '').trim().toLowerCase() === cat.trim().toLowerCase());
       }
 
+      paginaCatalogoActual = 1;
       renderizarCatalogo(aplicarOrden(filtrados));
     }
 
@@ -4706,6 +4777,7 @@ function cargarFAQs() {
       // Renderizar sugerencias en los menús desplegables en vivo
       actualizarDesplegablesSugerencias(qNorm, resultados);
 
+      paginaCatalogoActual = 1;
       renderizarCatalogo(aplicarOrden(resultados));
     }
 
@@ -7003,11 +7075,15 @@ function cargarFAQs() {
       document.getElementById('contactoExitoAviso').classList.add('hidden');
       document.getElementById('modalContactoDirecto').classList.remove('hidden');
       document.getElementById('modalContactoDirecto').classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     }
 
     function cerrarModalContacto() {
       document.getElementById('modalContactoDirecto').classList.add('hidden');
       document.getElementById('modalContactoDirecto').classList.remove('flex');
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     }
 
     async function enviarMensajeCliente(e) {
