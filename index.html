@@ -3279,6 +3279,16 @@ function cargarFAQs() {
           </div>
         `;
       }).join('');
+
+      const esNatalicio = camposOrdenados.some(c => ['fecha_nacimiento', 'hora', 'peso', 'medida', 'padres'].includes(c));
+      if (esNatalicio) {
+        contenedor.innerHTML += `
+          <p class="text-[11px] text-gray-500 leading-relaxed px-1 pt-0.5 flex items-start gap-1.5">
+            <i class="fa-solid fa-circle-info text-gray-400 mt-0.5 shrink-0"></i>
+            <span>Puedes escribir la fecha, hora (24h o AM/PM), peso (kg, lb, oz) y medida (cm, in) en el formato que uses en tu país.</span>
+          </p>
+        `;
+      }
     }
 
     function actualizarDatoPers(idx, campo, valor) {
