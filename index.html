@@ -4739,6 +4739,12 @@ function cargarFAQs() {
       // Sincronizar botones de escritorio
       document.querySelectorAll('.cat-btn').forEach(b => {
         const catBtnAttr = b.getAttribute('data-cat');
+        if (catBtnAttr === '__ofertas__') {
+          const esActivoOf = (cat === '__ofertas__');
+          b.style.borderColor = esActivoOf ? '#f87171' : '#fca5a5';
+          b.style.background = esActivoOf ? '#fee2e2' : 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)';
+          return;
+        }
         if (catBtnAttr === cat) {
           b.className = 'cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg bg-gray-200/80 text-black font-semibold transition text-left whitespace-nowrap';
         } else {
@@ -4941,22 +4947,7 @@ function cargarFAQs() {
           </li>
         `;
 
-        Object.keys(mapaCategorias).forEach(key => {
-          const item = mapaCategorias[key];
-          const nombreVisible = item.nombre.charAt(0).toUpperCase() + item.nombre.slice(1);
-          const esActivo = categoriaSeleccionada.toLowerCase() === key;
-
-          htmlCats += `
-            <li>
-              <button onclick="filtrarCategoria('${item.nombre.replace(/'/g, "\\'")}', this)" data-cat="${item.nombre.replace(/"/g, '&quot;')}" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg ${esActivo ? 'bg-gray-200/80 text-black font-semibold' : 'hover:bg-gray-200/50 text-gray-700'} transition text-left whitespace-nowrap">
-                <span>${nombreVisible}</span>
-                <span class="text-xs text-gray-500 ml-2">${item.total}</span>
-              </button>
-            </li>
-          `;
-        });
-
-        // Calcular productos en oferta destacados para el menú
+        // Calcular productos en oferta destacados para el menú e insertarlo justo debajo de "Todos los artículos"
         const ahoraMenu = Date.now();
         const idsOfertasMenu = new Set();
         const listaCampMenu = (Array.isArray(campanasOfertasRemotas) && campanasOfertasRemotas.length > 0)
@@ -4973,14 +4964,32 @@ function cargarFAQs() {
         if (totalOfertasMenu > 0) {
           const esActivoOf = categoriaSeleccionada === '__ofertas__';
           htmlCats += `
-            <li class="pt-1 mt-1 border-t border-gray-200">
-              <button onclick="filtrarCategoria('__ofertas__', this)" data-cat="__ofertas__" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg ${esActivoOf ? 'bg-rose-100 text-rose-800 font-bold' : 'bg-rose-50/70 hover:bg-rose-100 text-rose-700 font-semibold'} transition text-left whitespace-nowrap">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-tag text-xs"></i> Ofertas</span>
-                <span class="text-xs text-rose-700 font-bold ml-2">${totalOfertasMenu}</span>
+            <li class="my-1">
+              <button onclick="filtrarCategoria('__ofertas__', this)" data-cat="__ofertas__" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-left whitespace-nowrap transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs" style="background: ${esActivoOf ? '#fee2e2' : 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)'} !important; border: 1px solid ${esActivoOf ? '#f87171' : '#fca5a5'} !important;">
+                <span class="flex items-center gap-2">
+                  <i class="fa-solid fa-tag text-xs" style="color: #be123c !important;"></i>
+                  <span class="font-bold text-xs sm:text-sm tracking-wide" style="color: #9f1239 !important;">Ofertas</span>
+                </span>
+                <span class="text-xs font-bold ml-2" style="color: #9f1239 !important;">${totalOfertasMenu}</span>
               </button>
             </li>
           `;
         }
+
+        Object.keys(mapaCategorias).forEach(key => {
+          const item = mapaCategorias[key];
+          const nombreVisible = item.nombre.charAt(0).toUpperCase() + item.nombre.slice(1);
+          const esActivo = categoriaSeleccionada.toLowerCase() === key;
+
+          htmlCats += `
+            <li>
+              <button onclick="filtrarCategoria('${item.nombre.replace(/'/g, "\\'")}', this)" data-cat="${item.nombre.replace(/"/g, '&quot;')}" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-lg ${esActivo ? 'bg-gray-200/80 text-black font-semibold' : 'hover:bg-gray-200/50 text-gray-700'} transition text-left whitespace-nowrap">
+                <span>${nombreVisible}</span>
+                <span class="text-xs text-gray-500 ml-2">${item.total}</span>
+              </button>
+            </li>
+          `;
+        });
 
         listaUl.innerHTML = htmlCats;
       }
@@ -4989,11 +4998,8 @@ function cargarFAQs() {
       const selectMovil = document.getElementById('selectCategoriasMovil');
       if (selectMovil) {
         let opcionesMovil = `<option value="todos">${t.catTodos} (${cTodos})</option>`;
-        Object.keys(mapaCategorias).forEach(key => {
-          const item = mapaCategorias[key];
-          const nombreVisible = item.nombre.charAt(0).toUpperCase() + item.nombre.slice(1);
-          opcionesMovil += `<option value="${item.nombre.replace(/"/g, '&quot;')}">${nombreVisible} (${item.total})</option>`;
-        });
+
+        // Insertar "Ofertas" inmediatamente debajo de "Todos los artículos" en el menú móvil
         const ahoraMenuM = Date.now();
         const idsOfertasMenuM = new Set();
         (campanasOfertasRemotas || []).forEach(c => {
@@ -5005,6 +5011,13 @@ function cargarFAQs() {
         if (totalOfertasMenuM > 0) {
           opcionesMovil += `<option value="__ofertas__">Ofertas (${totalOfertasMenuM})</option>`;
         }
+
+        Object.keys(mapaCategorias).forEach(key => {
+          const item = mapaCategorias[key];
+          const nombreVisible = item.nombre.charAt(0).toUpperCase() + item.nombre.slice(1);
+          opcionesMovil += `<option value="${item.nombre.replace(/"/g, '&quot;')}">${nombreVisible} (${item.total})</option>`;
+        });
+
         selectMovil.innerHTML = opcionesMovil;
         selectMovil.value = categoriaSeleccionada || 'todos';
       }
