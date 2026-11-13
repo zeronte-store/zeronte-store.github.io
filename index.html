@@ -3650,7 +3650,9 @@ function cargarFAQs() {
         }
       }
 
-      // Resetear box de personalización, datos en memoria y cantidad
+      // Resetear box de personalización, datos en memoria, aviso de error y cantidad
+      const avisoErrPers = document.getElementById('avisoErrorPersonalizacion');
+      if (avisoErrPers) avisoErrPers.classList.add('hidden');
       datosPersonalizaciones = [{ titulo: '', nombre: '', dedicatoria: '', compositor: '' }];
       const chkMismaPers = document.getElementById('checkMismaPersonalizacion');
       if (chkMismaPers) chkMismaPers.checked = false;
@@ -3899,6 +3901,8 @@ function cargarFAQs() {
       if (vid) vid.pause();
       const iframeVid = document.getElementById('iframePrincipalFicha');
       if (iframeVid) iframeVid.remove();
+      const avisoErrPers = document.getElementById('avisoErrorPersonalizacion');
+      if (avisoErrPers) avisoErrPers.classList.add('hidden');
       articuloFichaActual = null;
       document.body.style.overflow = '';
       const mFicha = document.getElementById('modalFichaArticulo');
