@@ -4959,7 +4959,11 @@ function cargarFAQs() {
         // Calcular productos en oferta destacados para el menú
         const ahoraMenu = Date.now();
         const idsOfertasMenu = new Set();
-        (campanasOfertasRemotas || []).forEach(c => {
+        const listaCampMenu = (Array.isArray(campanasOfertasRemotas) && campanasOfertasRemotas.length > 0)
+          ? campanasOfertasRemotas
+          : (function(){ try { return JSON.parse(localStorage.getItem('zeronte_campanas_ofertas') || '[]'); } catch(e){ return []; } })();
+
+        listaCampMenu.forEach(c => {
           if (c.activa && c.alcance !== 'todos' && c.mostrarEnMenuOfertas && ahoraMenu >= c.fechaInicio && (c.sinFin || !c.fechaFin || ahoraMenu <= c.fechaFin)) {
             (c.idsObjetivo || []).forEach(id => idsOfertasMenu.add((id || '').toString().trim().toLowerCase()));
           }
