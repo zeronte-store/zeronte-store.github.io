@@ -2108,6 +2108,40 @@ function extraerUrlArchivoPedido(pedido) {
       const txt = document.getElementById('txtProgresoLogin');
       let intervaloProgresoLogin = null;
 
+      // CARGA INSTANTÁNEA DESDE CACHÉ LOCAL (0 segundos al iniciar sesión)
+      if (!esSilencioso) {
+        const cacheAdmin = localStorage.getItem('zeronte_admin_cache');
+        if (cacheAdmin) {
+          try {
+            const dataCache = JSON.parse(cacheAdmin);
+            if (dataCache && dataCache.status === "success") {
+              listaPedidosGlobal = (dataCache.pedidos || []).filter(p => !idsEliminadosLocalmente.has(p.id));
+              listaProductosGlobal = dataCache.productos || [];
+              mensajesClientes = (dataCache.mensajes || []).map(m => filasLeidasLocalmente.has(m.fila) ? { ...m, estado: "Leído" } : m);
+              if (Array.isArray(dataCache.ofertas)) listaCampanasOfertasGlobal = dataCache.ofertas;
+              if (Array.isArray(dataCache.ventasEtsy)) {
+                listaVentasEtsyGlobal = dataCache.ventasEtsy.map(v => {
+                  const matchAnio = (v.fecha || "").match(/\b(202[3-6])\b/);
+                  return { ...v, anio: matchAnio ? matchAnio[1] : "2024" };
+                });
+              }
+
+              document.getElementById('pantallaLogin').classList.add('hidden');
+              document.getElementById('panelDashboard').classList.remove('hidden');
+
+              actualizarMetricas();
+              filtrarPedidos();
+              renderizarProductos();
+              renderizarMensajesAdmin(mensajesClientes);
+              actualizarBadgesMenuLateral();
+
+              // Pasamos a modo silencioso para actualizar por detrás sin bloquear
+              esSilencioso = true;
+            }
+          } catch (e) {}
+        }
+      }
+
       if (!esSilencioso) {
         if (btn) {
           btn.classList.add('hidden');
@@ -2171,6 +2205,10 @@ function extraerUrlArchivoPedido(pedido) {
         // Comparar si hubo cambios antes de re-renderizar para evitar parpadeos
         const datosCambiaron = JSON.stringify(listaPedidosGlobal) !== JSON.stringify(data.pedidos || []) ||
                                JSON.stringify(listaProductosGlobal) !== JSON.stringify(data.productos || []);
+
+try {
+          localStorage.setItem('zeronte_admin_cache', JSON.stringify(data));
+        } catch (eCache) {}
 
         // Purgar claves antiguas residuales de pago en localStorage
         Object.keys(localStorage).forEach(k => {
