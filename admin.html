@@ -857,49 +857,84 @@
                 </div>
 
                 <!-- SUB-BLOQUE: CAMPOS CONFIGURABLES DE PERSONALIZACIÓN -->
-                <div id="bloqueCamposPersonalizacion" class="w-full bg-amber-50/50 border border-amber-200/80 rounded-2xl p-3.5 space-y-2">
-                  <div class="flex items-center justify-between">
+                <div id="bloqueCamposPersonalizacion" class="w-full bg-amber-50/50 border border-amber-200/80 rounded-2xl p-3.5 space-y-2.5">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <span class="text-[10px] uppercase font-bold text-amber-900 block leading-tight">Campos personalizables activos</span>
                       <p class="text-[10px] text-amber-700/80">Selecciona qué opciones verá el cliente al personalizar este artículo.</p>
                     </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <button type="button" onclick="aplicarPlantillaCamposPers('partitura')" class="px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-[10px] font-bold text-amber-900 hover:bg-amber-100 transition">
+                        🎵 Partitura
+                      </button>
+                      <button type="button" onclick="aplicarPlantillaCamposPers('natalicio')" class="px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-[10px] font-bold text-amber-900 hover:bg-amber-100 transition">
+                        👶 Natalicio
+                      </button>
+                    </div>
                   </div>
 
-                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
                     <!-- 1. Título -->
                     <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
-                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">1. Título</span>
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Título</span>
                       <input type="checkbox" id="checkPersCampoTitulo" checked class="switch-ios-input">
-                      <div class="switch-ios-track">
-                        <div class="switch-ios-thumb"></div>
-                      </div>
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
                     </label>
 
                     <!-- 2. Nombre -->
                     <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
-                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">2. Nombre</span>
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Nombre *</span>
                       <input type="checkbox" id="checkPersCampoNombre" checked class="switch-ios-input">
-                      <div class="switch-ios-track">
-                        <div class="switch-ios-thumb"></div>
-                      </div>
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
                     </label>
 
                     <!-- 3. Dedicatoria -->
                     <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
-                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">3. Dedicatoria</span>
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Dedicatoria</span>
                       <input type="checkbox" id="checkPersCampoDedicatoria" checked class="switch-ios-input">
-                      <div class="switch-ios-track">
-                        <div class="switch-ios-thumb"></div>
-                      </div>
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
                     </label>
 
                     <!-- 4. Compositor -->
                     <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
-                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">4. Compositor</span>
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Compositor</span>
                       <input type="checkbox" id="checkPersCampoCompositor" checked class="switch-ios-input">
-                      <div class="switch-ios-track">
-                        <div class="switch-ios-thumb"></div>
-                      </div>
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 5. Fecha de nacimiento -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Fecha nac.</span>
+                      <input type="checkbox" id="checkPersCampoFechaNacimiento" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 6. Hora -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Hora nac.</span>
+                      <input type="checkbox" id="checkPersCampoHora" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 7. Peso -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Peso</span>
+                      <input type="checkbox" id="checkPersCampoPeso" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 8. Medida -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Medida</span>
+                      <input type="checkbox" id="checkPersCampoMedida" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 9. Padres -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Padres</span>
+                      <input type="checkbox" id="checkPersCampoPadres" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
                     </label>
                   </div>
                 </div>
@@ -3814,6 +3849,44 @@ function extraerUrlArchivoPedido(pedido) {
       }
     }
 
+    function aplicarPlantillaCamposPers(tipo) {
+      const esNatalicio = (tipo === 'natalicio');
+      const mapa = {
+        checkPersCampoTitulo: !esNatalicio,
+        checkPersCampoNombre: true,
+        checkPersCampoDedicatoria: !esNatalicio,
+        checkPersCampoCompositor: !esNatalicio,
+        checkPersCampoFechaNacimiento: esNatalicio,
+        checkPersCampoHora: esNatalicio,
+        checkPersCampoPeso: esNatalicio,
+        checkPersCampoMedida: esNatalicio,
+        checkPersCampoPadres: esNatalicio
+      };
+      Object.entries(mapa).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = val;
+      });
+    }
+
+    function aplicarPlantillaCamposPers(tipo) {
+      const esNatalicio = (tipo === 'natalicio');
+      const mapa = {
+        checkPersCampoTitulo: !esNatalicio,
+        checkPersCampoNombre: true,
+        checkPersCampoDedicatoria: !esNatalicio,
+        checkPersCampoCompositor: !esNatalicio,
+        checkPersCampoFechaNacimiento: esNatalicio,
+        checkPersCampoHora: esNatalicio,
+        checkPersCampoPeso: esNatalicio,
+        checkPersCampoMedida: esNatalicio,
+        checkPersCampoPadres: esNatalicio
+      };
+      Object.entries(mapa).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = val;
+      });
+    }
+
     function alternarNuevaCategoria(val) {
       const inputOtra = document.getElementById('inputNuevaCategoriaTexto');
       if (!inputOtra) return;
@@ -4549,6 +4622,11 @@ function extraerUrlArchivoPedido(pedido) {
             if (document.getElementById('checkPersCampoNombre')) document.getElementById('checkPersCampoNombre').checked = camposPers.includes('nombre');
             if (document.getElementById('checkPersCampoDedicatoria')) document.getElementById('checkPersCampoDedicatoria').checked = camposPers.includes('dedicatoria');
             if (document.getElementById('checkPersCampoCompositor')) document.getElementById('checkPersCampoCompositor').checked = camposPers.includes('compositor');
+            if (document.getElementById('checkPersCampoFechaNacimiento')) document.getElementById('checkPersCampoFechaNacimiento').checked = camposPers.includes('fecha_nacimiento');
+            if (document.getElementById('checkPersCampoHora')) document.getElementById('checkPersCampoHora').checked = camposPers.includes('hora');
+            if (document.getElementById('checkPersCampoPeso')) document.getElementById('checkPersCampoPeso').checked = camposPers.includes('peso');
+            if (document.getElementById('checkPersCampoMedida')) document.getElementById('checkPersCampoMedida').checked = camposPers.includes('medida');
+            if (document.getElementById('checkPersCampoPadres')) document.getElementById('checkPersCampoPadres').checked = camposPers.includes('padres');
           }
 
           // Cargar badges/sellos guardados
@@ -4585,6 +4663,11 @@ function extraerUrlArchivoPedido(pedido) {
         if (document.getElementById('checkPersCampoNombre')) document.getElementById('checkPersCampoNombre').checked = true;
         if (document.getElementById('checkPersCampoDedicatoria')) document.getElementById('checkPersCampoDedicatoria').checked = true;
         if (document.getElementById('checkPersCampoCompositor')) document.getElementById('checkPersCampoCompositor').checked = true;
+        if (document.getElementById('checkPersCampoFechaNacimiento')) document.getElementById('checkPersCampoFechaNacimiento').checked = false;
+        if (document.getElementById('checkPersCampoHora')) document.getElementById('checkPersCampoHora').checked = false;
+        if (document.getElementById('checkPersCampoPeso')) document.getElementById('checkPersCampoPeso').checked = false;
+        if (document.getElementById('checkPersCampoMedida')) document.getElementById('checkPersCampoMedida').checked = false;
+        if (document.getElementById('checkPersCampoPadres')) document.getElementById('checkPersCampoPadres').checked = false;
 
         // Valores por defecto al crear: Descarga y PDF activados
         const chkDescarga = document.getElementById('checkBadgeDescarga');
@@ -4974,6 +5057,11 @@ function extraerUrlArchivoPedido(pedido) {
         if (document.getElementById('checkPersCampoNombre')?.checked) camposPersonalizacionSeleccionados.push('nombre');
         if (document.getElementById('checkPersCampoDedicatoria')?.checked) camposPersonalizacionSeleccionados.push('dedicatoria');
         if (document.getElementById('checkPersCampoCompositor')?.checked) camposPersonalizacionSeleccionados.push('compositor');
+        if (document.getElementById('checkPersCampoFechaNacimiento')?.checked) camposPersonalizacionSeleccionados.push('fecha_nacimiento');
+        if (document.getElementById('checkPersCampoHora')?.checked) camposPersonalizacionSeleccionados.push('hora');
+        if (document.getElementById('checkPersCampoPeso')?.checked) camposPersonalizacionSeleccionados.push('peso');
+        if (document.getElementById('checkPersCampoMedida')?.checked) camposPersonalizacionSeleccionados.push('medida');
+        if (document.getElementById('checkPersCampoPadres')?.checked) camposPersonalizacionSeleccionados.push('padres');
       }
 
       let filaReal = "";
