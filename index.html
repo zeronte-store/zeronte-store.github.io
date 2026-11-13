@@ -4741,7 +4741,7 @@ function cargarFAQs() {
         const catBtnAttr = b.getAttribute('data-cat');
         if (catBtnAttr === '__ofertas__') {
           const esActivoOf = (cat === '__ofertas__');
-          b.style.borderColor = esActivoOf ? '#f87171' : '#fca5a5';
+          b.style.border = 'none';
           b.style.background = esActivoOf ? '#fee2e2' : 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)';
           return;
         }
@@ -4965,7 +4965,7 @@ function cargarFAQs() {
           const esActivoOf = categoriaSeleccionada === '__ofertas__';
           htmlCats += `
             <li class="my-1">
-              <button onclick="filtrarCategoria('__ofertas__', this)" data-cat="__ofertas__" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-left whitespace-nowrap transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs" style="background: ${esActivoOf ? '#fee2e2' : 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)'} !important; border: 1px solid ${esActivoOf ? '#f87171' : '#fca5a5'} !important;">
+              <button onclick="filtrarCategoria('__ofertas__', this)" data-cat="__ofertas__" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-left whitespace-nowrap transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs" style="background: ${esActivoOf ? '#fee2e2' : 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)'} !important; border: none !important;">
                 <span class="flex items-center gap-2">
                   <i class="fa-solid fa-tag text-xs" style="color: #be123c !important;"></i>
                   <span class="font-bold text-xs sm:text-sm tracking-wide" style="color: #9f1239 !important;">Ofertas</span>
