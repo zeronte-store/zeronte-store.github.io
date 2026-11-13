@@ -3445,19 +3445,19 @@ function cargarFAQs() {
             </span>`;
         }
 
+        if (sellosLista.includes('jpg')) {
+          htmlSellos += `
+            <span class="text-xs font-semibold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 shadow-2xs">
+              <i class="fa-solid fa-file-image text-emerald-600 text-sm"></i>
+              <span>JPG</span>
+            </span>`;
+        }
+
         if (sellosLista.includes('audio')) {
           htmlSellos += `
             <span class="text-xs font-semibold text-slate-900 flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-300 shadow-2xs">
               <i class="fa-solid fa-headphones text-slate-900 text-sm"></i>
               <span>Audio</span>
-            </span>`;
-        }
-
-        if (sellosLista.includes('fisico')) {
-          htmlSellos += `
-            <span class="text-xs font-semibold text-orange-700 flex items-center gap-1.5 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200 shadow-2xs">
-              <i class="fa-solid fa-box text-orange-600 text-sm"></i>
-              <span>Soporte Físico</span>
             </span>`;
         }
 
