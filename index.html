@@ -93,27 +93,6 @@
 
   <!-- Contenedor requerido para el motor de traducción Google Translate -->
   <div id="google_translate_element" class="hidden"></div>
-
-  <!-- ==================== PANTALLA DE SINCRONIZACIÓN INICIAL CON BARRA DE PROGRESO ==================== -->
-  <div id="pantallaCargaInicial" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#f5f5f1]/85 backdrop-blur-md transition-opacity duration-500 ease-out p-6 text-center select-none">
-    <!-- Logo oficial subido en GitHub -->
-    <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-black p-1.5 mb-5 transition-transform duration-300 hover:scale-105">
-      <img src="img/logo-zeronte.png" alt="Zeronte" class="w-full h-full object-cover rounded-xl" onerror="this.onerror=null; this.src='https://zeronte-store.github.io/img/logo-zeronte.png';">
-    </div>
-
-    <!-- Textos de bienvenida -->
-    <h2 class="font-serif text-xl sm:text-2xl font-bold text-[#222222] mb-1.5 tracking-wide">Bienvenidos a Zeronte</h2>
-    <p class="text-xs sm:text-sm text-gray-600 max-w-xs sm:max-w-sm font-medium leading-relaxed mb-6">
-      Estamos sincronizando nuestro catálogo de productos musicales...
-    </p>
-
-    <!-- Barra de progreso dinámica -->
-    <div class="w-56 sm:w-64 h-2 bg-gray-200/90 rounded-full overflow-hidden border border-gray-300/70 p-0.5 shadow-inner">
-      <div id="barraProgresoCargaInicial" class="h-full bg-[#222222] rounded-full transition-all duration-300 ease-out" style="width: 15%;"></div>
-    </div>
-    <!-- Porcentaje dinámico en tiempo real -->
-    <span id="textoPorcentajeCarga" class="text-xs font-mono font-bold text-gray-700 mt-2 tracking-wider">15%</span>
-  </div>
  
   <!-- ==================== BANNER Y CABECERA DE TIENDA ETSY ==================== -->
   <section class="max-w-6xl mx-auto px-4 pt-4 sm:pt-6">
@@ -2147,7 +2126,6 @@ function cargarFAQs() {
       cargarResenasDesdeServidor();
       renderizarResenasPagina();
       cargarCatalogoDinamico();
-      actualizarContadorVentas();
       aplicarIdioma(idiomaActual);
 
       // Auto-refresco en segundo plano solo si el usuario está en español para evitar parpadeos de traducción
@@ -2538,71 +2516,112 @@ function cargarFAQs() {
     }
 
     async function cargarCatalogoDinamico() {
+      const overlayCarga = document.getElementById('pantallaCargaInicial');
       const barra = document.getElementById('barraProgresoCargaInicial');
       const txtPorcentaje = document.getElementById('textoPorcentajeCarga');
-      if (barra) barra.style.width = '35%';
-      if (txtPorcentaje) txtPorcentaje.innerText = '35%';
 
+      // 1. CARGA INSTANTÁNEA DESDE CACHÉ LOCAL (0 segundos si ya visitó la web)
+      const cacheGuardada = localStorage.getItem('zeronte_catalogo_cache');
+      if (cacheGuardada) {
+        try {
+          const datosCache = JSON.parse(cacheGuardada);
+          if (Array.isArray(datosCache.productos) && datosCache.productos.length > 0) {
+            catalogoCompleto = datosCache.productos;
+            if (Array.isArray(datosCache.ofertas)) campanasOfertasRemotas = datosCache.ofertas;
+
+            actualizarConteosCategorias();
+            const inW = document.getElementById('buscadorTienda');
+            const inM = document.getElementById('buscadorTiendaMovil');
+            const textoActivo = ((inW ? inW.value : '') || (inM ? inM.value : '')).trim();
+            if (textoActivo) {
+              buscarProductos(textoActivo);
+            } else {
+              filtrarCategoria(categoriaSeleccionada, null);
+            }
+            actualizarSelectProductosResena();
+            verificarAperturaProductoPorUrl();
+
+            if (overlayCarga) overlayCarga.style.display = 'none';
+          }
+        } catch (e) { /* Si falla la caché, sigue con la carga normal */ }
+      } else {
+        if (barra) barra.style.width = '40%';
+        if (txtPorcentaje) txtPorcentaje.innerText = '40%';
+      }
+
+      // 2. SINCRONIZACIÓN EN PARALELO CON GOOGLE SHEETS
       try {
-        // Petición con parámetro de tiempo para que GitHub Pages nunca sirva datos obsoletos
-        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos&t=${Date.now()}`);
-        if (barra) barra.style.width = '65%';
-        if (txtPorcentaje) txtPorcentaje.innerText = '65%';
-        if (!res.ok) return;
-        const data = await res.json();
-        
+        const t = Date.now();
+        const [resProd, resPed, resOf] = await Promise.all([
+          fetch(`${APPS_SCRIPT_URL}?accion=obtenerProductos&t=${t}`),
+          fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${t}`).catch(() => null),
+          fetch(`${APPS_SCRIPT_URL}?accion=obtenerOfertas&_t=${t}`).catch(() => null)
+        ]);
+
+        if (!resProd.ok) return;
+        const data = await resProd.json();
+
         if (data && data.status === "success" && Array.isArray(data.productos) && data.productos.length > 0) {
           let productos = data.productos;
-
-          // Obtener los pedidos reales registrados en la web
           let ventasPorProdMap = {};
           const normalizar = s => (s || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-          try {
-            const resPed = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerPedidos&_nocache=${Date.now()}`);
-            const dataPed = await resPed.json();
-            const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
-            const pedidosProcesadosId = new Set();
+          if (resPed && resPed.ok) {
+            try {
+              const dataPed = await resPed.json();
+              const pedidos = (dataPed && dataPed.pedidos) ? dataPed.pedidos : (Array.isArray(dataPed) ? dataPed : []);
+              const pedidosProcesadosId = new Set();
+              let maxVenta = 0;
 
-            pedidos.forEach(ped => {
-              const est = (ped.estado || ped.Estado || '').toString().toLowerCase();
-              if (est.includes('cancelado')) return;
+              pedidos.forEach(ped => {
+                const n = parseInt(ped.numVenta, 10);
+                if (!isNaN(n) && n > maxVenta) maxVenta = n;
 
-              // Obtener identificador base del pedido sin fracción (ej. "PED-9009" de "PED-9009 (1/2)")
-              const idRaw = (ped.id || ped.ID || '').toString().trim();
-              const idBase = idRaw.replace(/\s*\(\d+\/\d+\).*/, '').trim().toUpperCase();
+                const est = (ped.estado || ped.Estado || '').toString().toLowerCase();
+                if (est.includes('cancelado')) return;
 
-              // Si el pedido ya fue contabilizado en otra fila de fracción, se omite para evitar duplicarlo
-              if (idBase && pedidosProcesadosId.has(idBase)) return;
-              if (idBase) pedidosProcesadosId.add(idBase);
+                const idRaw = (ped.id || ped.ID || '').toString().trim();
+                const idBase = idRaw.replace(/\s*\(\d+\/\d+\).*/, '').trim().toUpperCase();
+                if (idBase && pedidosProcesadosId.has(idBase)) return;
+                if (idBase) pedidosProcesadosId.add(idBase);
 
-              const titPed = normalizar((ped.producto || ped.Producto || '').replace(/\s*\(x\d+\)/gi, ''));
-              let cant = parseInt(ped.cantidad || ped.Cantidad, 10);
-              if (isNaN(cant) || cant < 1) {
-                const mCant = (ped.producto || ped.Producto || '').match(/\(x(\d+)\)/);
-                cant = mCant ? parseInt(mCant[1], 10) : 1;
+                const titPed = normalizar((ped.producto || ped.Producto || '').replace(/\s*\(x\d+\)/gi, ''));
+                let cant = parseInt(ped.cantidad || ped.Cantidad, 10);
+                if (isNaN(cant) || cant < 1) {
+                  const mCant = (ped.producto || ped.Producto || '').match(/\(x(\d+)\)/);
+                  cant = mCant ? parseInt(mCant[1], 10) : 1;
+                }
+                if (titPed) {
+                  ventasPorProdMap[titPed] = (ventasPorProdMap[titPed] || 0) + cant;
+                }
+              });
+
+              if (maxVenta > 0) {
+                totalVentasGlobalSincronizado = maxVenta;
+                const elVentas = document.getElementById('totalVentasEtsy');
+                const tr = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
+                if (elVentas) elVentas.innerText = `${totalVentasGlobalSincronizado.toLocaleString('es-ES')} ${tr.ventasTexto}`;
               }
-              if (titPed) {
-                ventasPorProdMap[titPed] = (ventasPorProdMap[titPed] || 0) + cant;
-              }
-            });
-          } catch (ePed) {
-            console.warn("No se pudieron contabilizar pedidos remotos:", ePed);
+            } catch (ePed) {}
           }
 
-          // Asignar el total de ventas sumando las ventas de Etsy + los nuevos pedidos
+          if (resOf && resOf.ok) {
+            try {
+              const dataOf = await resOf.json();
+              if (dataOf && dataOf.status === "success" && Array.isArray(dataOf.ofertas)) {
+                campanasOfertasRemotas = dataOf.ofertas;
+                localStorage.setItem('zeronte_campanas_ofertas', JSON.stringify(dataOf.ofertas));
+              }
+            } catch (eOf) {}
+          }
+
           let maxVentas = -1;
           let idxMasVendido = -1;
 
           productos = productos.map((p, idx) => {
             const titNorm = normalizar(p.titulo);
-            // Coincidencia EXACTA para no fusionar productos distintos
-            let ventasPedidosWeb = ventasPorProdMap[titNorm] || 0;
-
-            // Ventas reales contabilizadas directamente de la hoja 'Ventas ETSY 23-26'
+            const ventasPedidosWeb = ventasPorProdMap[titNorm] || 0;
             const ventasEtsy = parseInt(p.ventasEtsy || 0, 10);
-
-            // Suma total: Ventas acumuladas de Etsy + Nuevas ventas en la web
             const v = ventasEtsy + ventasPedidosWeb;
 
             if (v > maxVentas) {
@@ -2612,31 +2631,23 @@ function cargarFAQs() {
             return { ...p, totalVentas: v };
           });
 
-          // Marcar la insignia del más vendido
           productos = productos.map((p, idx) => ({
             ...p,
             masVendido: (p.masVendido === true || (maxVentas > 0 && idx === idxMasVendido))
           }));
 
-          // Poner el más vendido al inicio si está definido
           productos.sort((a, b) => {
             if (b.masVendido !== a.masVendido) return (b.masVendido ? 1 : 0) - (a.masVendido ? 1 : 0);
             return (b.totalVentas || 0) - (a.totalVentas || 0);
           });
 
-          // Descargar ofertas sincronizadas desde Google Sheets
-          try {
-            const resOf = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerOfertas&_t=${Date.now()}`);
-            const dataOf = await resOf.json();
-            if (dataOf && dataOf.status === "success" && Array.isArray(dataOf.ofertas)) {
-              campanasOfertasRemotas = dataOf.ofertas;
-              localStorage.setItem('zeronte_campanas_ofertas', JSON.stringify(dataOf.ofertas));
-            }
-          } catch(errOf) {
-            console.warn("No se pudieron cargar ofertas remotas:", errOf);
-          }
-
           catalogoCompleto = productos;
+
+          localStorage.setItem('zeronte_catalogo_cache', JSON.stringify({
+            productos: catalogoCompleto,
+            ofertas: campanasOfertasRemotas,
+            fecha: Date.now()
+          }));
 
           actualizarConteosCategorias();
           const inW = document.getElementById('buscadorTienda');
@@ -2648,26 +2659,21 @@ function cargarFAQs() {
             filtrarCategoria(categoriaSeleccionada, null);
           }
           actualizarSelectProductosResena();
-
-          // Abrir automáticamente la ficha si la URL contiene el parámetro ?prod=...
           verificarAperturaProductoPorUrl();
         }
       } catch (e) {
         console.warn("Sincronización en segundo plano completada con respaldo local.");
       } finally {
-        const barra = document.getElementById('barraProgresoCargaInicial');
-        const txtPorcentaje = document.getElementById('textoPorcentajeCarga');
         if (barra) barra.style.width = '100%';
         if (txtPorcentaje) txtPorcentaje.innerText = '100%';
 
-        const overlayCarga = document.getElementById('pantallaCargaInicial');
-        if (overlayCarga) {
+        if (overlayCarga && overlayCarga.style.display !== 'none') {
           setTimeout(() => {
             overlayCarga.style.opacity = '0';
             setTimeout(() => {
               overlayCarga.style.display = 'none';
-            }, 500);
-          }, 250);
+            }, 350);
+          }, 150);
         }
       }
     }
