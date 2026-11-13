@@ -1332,7 +1332,7 @@
             <div id="wrapperCheckMismaPers" class="hidden pt-1.5 pb-1.5 border-b border-gray-200">
               <label class="flex items-start gap-2.5 cursor-pointer select-none">
                 <input type="checkbox" id="checkMismaPersonalizacion" onchange="toggleMismaPersonalizacion(this.checked)" class="mt-1 w-4 h-4 rounded border-gray-400 text-black focus:ring-0 cursor-pointer">
-                <span class="text-xs sm:text-sm font-semibold text-[#111111]">Usar la misma personalización en todas las casillas excepto el nombre (2. Nombre)</span>
+                <span id="textoCheckMismaPers" class="text-xs sm:text-sm font-semibold text-[#111111]">Usar la misma personalización en todas las casillas excepto el nombre (2. Nombre)</span>
               </label>
             </div>
 
@@ -3196,7 +3196,7 @@ function cargarFAQs() {
 
     const CONFIG_CAMPOS_PERS = {
       titulo:           { label: 'Título (Opcional)', placeholder: '' },
-      nombre:           { label: 'Nombre * (Obligatorio)', placeholder: '' },
+      nombre:           { label: 'Nombre', placeholder: 'Ej. Aitor' },
       fecha_nacimiento: { label: 'Fecha de nacimiento', placeholder: 'Ej. 30 de julio de 2023' },
       hora:             { label: 'Hora de nacimiento', placeholder: 'Ej. 13:25' },
       peso:             { label: 'Peso', placeholder: 'Ej. 3,820 kg' },
@@ -3238,6 +3238,13 @@ function cargarFAQs() {
 
       const camposOrdenados = ORDEN_CAMPOS_PERS.filter(c => camposActivos.includes(c));
 
+      const elTextoCheckMisma = document.getElementById('textoCheckMismaPers');
+      if (elTextoCheckMisma) {
+        const posNombre = camposOrdenados.indexOf('nombre');
+        const numNombre = posNombre !== -1 ? (posNombre + 1) : 1;
+        elTextoCheckMisma.innerText = `Usar la misma personalización en todas las casillas excepto el nombre (${numNombre}. Nombre)`;
+      }
+
       contenedor.innerHTML = datosPersonalizaciones.map((item, idx) => {
         const esSecundarioReplicado = replicarComunes && idx > 0;
 
@@ -3275,6 +3282,11 @@ function cargarFAQs() {
     }
 
     function actualizarDatoPers(idx, campo, valor) {
+      const cajaAvisoError = document.getElementById('avisoErrorPersonalizacion');
+      if (cajaAvisoError && !cajaAvisoError.classList.contains('hidden')) {
+        cajaAvisoError.classList.add('hidden');
+      }
+
       if (!datosPersonalizaciones[idx]) {
         datosPersonalizaciones[idx] = { titulo: '', nombre: '', dedicatoria: '', compositor: '' };
       }
@@ -4220,40 +4232,38 @@ function cargarFAQs() {
           }
         }
 
-        // Si el campo 'nombre' está activo en este producto, es obligatorio
-        if (camposActivosPed.includes('nombre')) {
+        // Campos obligatorios: Nombre y los 5 campos de Natalicio (si están activos en el producto)
+        const camposObligatorios = ['nombre', 'fecha_nacimiento', 'hora', 'peso', 'medida', 'padres'];
+        const obligatoriosActivos = camposObligatorios.filter(c => camposActivosPed.includes(c));
+
+        if (obligatoriosActivos.length > 0) {
           const cajaAvisoError = document.getElementById('avisoErrorPersonalizacion');
           const textoAvisoError = document.getElementById('textoErrorPersonalizacion');
 
           for (let i = 0; i < cant; i++) {
-            const datosItem = datosPersonalizaciones[i] || { nombre: '' };
-            const nombreVal = (datosItem.nombre || '').trim();
+            const datosItem = datosPersonalizaciones[i] || {};
 
-            if (!nombreVal) {
-              const msg = cant > 1 
-                ? `El campo "Nombre *" es obligatorio. Escribe el nombre para la unidad ${i + 1}.` 
-                : 'El campo "Nombre *" es obligatorio para poder personalizar tu obra.';
+            for (const clave of obligatoriosActivos) {
+              const val = (replicar && i > 0 && clave !== 'nombre')
+                ? (datosPersonalizaciones[0]?.[clave] || '').trim()
+                : (datosItem[clave] || '').trim();
 
-              if (textoAvisoError) textoAvisoError.innerText = msg;
-              if (cajaAvisoError) {
-                cajaAvisoError.classList.remove('hidden');
-                cajaAvisoError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              if (!val) {
+                const nombreCampo = CONFIG_CAMPOS_PERS[clave]?.label || clave;
+                const msg = cant > 1
+                  ? `El campo "${nombreCampo}" es obligatorio. Rellénalo para la unidad ${i + 1}.`
+                  : `El campo "${nombreCampo}" es obligatorio para poder personalizar tu obra.`;
+
+                if (textoAvisoError) textoAvisoError.innerText = msg;
+                if (cajaAvisoError) {
+                  cajaAvisoError.classList.remove('hidden');
+                  cajaAvisoError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                return; // Detiene la acción y no añade al carrito
               }
-
-              // Enfocar y resaltar el campo vacío
-              const inputsNombre = document.querySelectorAll('#contenedorPersonalizacionesDinamicas input[placeholder*="María"]');
-              if (inputsNombre[i]) {
-                inputsNombre[i].focus();
-                inputsNombre[i].classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
-                setTimeout(() => {
-                  inputsNombre[i].classList.remove('border-rose-500', 'ring-2', 'ring-rose-200');
-                }, 4000);
-              }
-              return; // Detiene la acción
             }
           }
 
-          // Si todos los nombres están completos, ocultar aviso si estuviera visible
           if (cajaAvisoError) cajaAvisoError.classList.add('hidden');
         }
       }
