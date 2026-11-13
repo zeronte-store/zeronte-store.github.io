@@ -172,7 +172,7 @@
           </button>
 
           <!-- ENLACE DIRECTO A LA TIENDA WEB -->
-          <a href="https://zeronte-store.github.io/index.html" target="_blank" rel="noopener noreferrer" title="Zeronte Web" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+          <a href="https://www.zerontemusic.com" target="_blank" rel="noopener noreferrer" title="Zeronte Web" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-store text-sm"></i>
             </div>
@@ -4847,7 +4847,7 @@ function extraerUrlArchivoPedido(pedido) {
           const bloquePrecioHtml = obtenerBloquePrecio(item);
           const fotosArray = extraerFotosProducto(item.imagen);
           const fotoPortada = fotosArray[0] || 'https://zeronte-store.github.io/img/logo-zeronte.png';
-          const enlaceFichaWeb = `https://zeronte-store.github.io/index.html?prod=${encodeURIComponent(idProd)}`;
+          const enlaceFichaWeb = `https://www.zerontemusic.com/index.html?prod=${encodeURIComponent(idProd)}`;
 
           const esDestacado = item.destacado === true || item.destacado === "SI";
 
@@ -4917,7 +4917,7 @@ function extraerUrlArchivoPedido(pedido) {
           const bloquePrecioHtml = obtenerBloquePrecio(item);
           const fotosArray = extraerFotosProducto(item.imagen);
           const fotoPortada = fotosArray[0] || 'https://zeronte-store.github.io/img/logo-zeronte.png';
-          const enlaceFichaWeb = `https://zeronte-store.github.io/index.html?prod=${encodeURIComponent(idProd)}`;
+          const enlaceFichaWeb = `https://www.zerontemusic.com/index.html?prod=${encodeURIComponent(idProd)}`;
 
           const esDestacadoLista = item.destacado === true || item.destacado === "SI";
 
@@ -7791,7 +7791,7 @@ function extraerUrlArchivoPedido(pedido) {
         const totalPedidosCliente = mapaTotalPedidosPorCliente[claveCl] || 1;
 
         const asuntoPromo = encodeURIComponent(`Hola ${v.nombre}! Novedades y catálogo oficial de Zeronte`);
-        const cuerpoPromo = encodeURIComponent(`Hola ${v.nombre},\n\nTe contacto porque en su día adquiriste "${v.producto}" conmigo a través de Etsy (Pedido Nº ${numPedidoRealEtsy}).\n\nHe inaugurado mi nueva tienda oficial independiente Zeronte (https://zeronte-store.github.io/index.html) donde dispondrás de mejores ofertas exclusivas y atención directa.\n\n¡Un cordial saludo!\nAdrián Díaz | Zeronte`);
+        const cuerpoPromo = encodeURIComponent(`Hola ${v.nombre},\n\nTe contacto porque en su día adquiriste "${v.producto}" conmigo a través de Etsy (Pedido Nº ${numPedidoRealEtsy}).\n\nHe inaugurado mi nueva tienda oficial independiente Zeronte (https://www.zerontemusic.com) donde dispondrás de mejores ofertas exclusivas y atención directa.\n\n¡Un cordial saludo!\nAdrián Díaz | Zeronte`);
         const mailtoUrl = tieneEmail ? `mailto:${v.email}?subject=${asuntoPromo}&body=${cuerpoPromo}` : '#';
 
         return `
