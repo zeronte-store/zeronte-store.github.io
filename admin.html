@@ -7043,6 +7043,22 @@ try {
       guardarCampanasOfertas(campanas);
       cerrarModalCrearOferta();
 
+      // Limpiar precioOferta de los productos que ya no pertenecen a ninguna campaña activa
+      const ahoraMomentoOfertas = Date.now();
+      const todosIdsActivos = new Set();
+      campanas.forEach(c => {
+        const noExpirada = c.sinFin || (c.fechaFin && ahoraMomentoOfertas <= c.fechaFin);
+        if (c.activa && ahoraMomentoOfertas >= c.fechaInicio && noExpirada && Array.isArray(c.idsObjetivo)) {
+          c.idsObjetivo.forEach(id => todosIdsActivos.add(id.toString().trim().toLowerCase()));
+        }
+      });
+      listaProductosGlobal.forEach(prod => {
+        const pId = (prod.id || '').toString().trim().toLowerCase();
+        if (!todosIdsActivos.has(pId)) {
+          prod.precioOferta = "";
+        }
+      });
+
       // Recalcular productos: primero limpiar los que ya no pertenecen a esta oferta
       const cambiosParaServidor = {};
       idsAnteriores.forEach(oldId => {
@@ -7244,12 +7260,7 @@ try {
         }
       });
 
-      // El conteo de artículos rebajados ahora se calcula fielmente sobre las campañas activas o productos con precioOferta real
-      const prodsRebajados = listaProductosGlobal.filter(p => {
-        const pIdLower = (p.id || '').toString().trim().toLowerCase();
-        const tieneOfertaDirecta = p.precioOferta && parseFloat(p.precioOferta) > 0;
-        return setIdsRebajadosActivos.has(pIdLower) || tieneOfertaDirecta;
-      }).length;
+      const prodsRebajados = setIdsRebajadosActivos.size;
 
       document.getElementById('statOfertasTotales').innerText = campanas.length;
       document.getElementById('statOfertasActivas').innerText = activasCount;
