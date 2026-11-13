@@ -1982,42 +1982,67 @@ function cerrarModalFAQ(e) {
   }
 }
 
+function renderizarHTMLFaqs(faqs) {
+  const cont = document.getElementById('faqContenedor');
+  if (!cont) return;
+  if (!faqs || !faqs.length) {
+    cont.innerHTML = '<p class="text-center text-xs text-gray-500 py-6">No hay preguntas frecuentes disponibles.</p>';
+    return;
+  }
+  const cats = {};
+  faqs.forEach(item => {
+    const c = item.categoria || 'General';
+    if (!cats[c]) cats[c] = [];
+    cats[c].push(item);
+  });
+
+  let h = '';
+  for (const [cName, items] of Object.entries(cats)) {
+    h += `<div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-2 first:mt-0">${cName}</div>`;
+    items.forEach(it => {
+      h += `
+        <div class="border border-gray-100 rounded-lg overflow-hidden mb-2">
+          <button type="button" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.faq-ico').classList.toggle('rotate-180')" class="w-full flex items-center justify-between p-3 text-left text-xs font-semibold text-gray-800 hover:bg-gray-50">
+            <span>${it.pregunta}</span>
+            <i class="fa-solid fa-chevron-down faq-ico text-[10px] text-gray-400 transition-transform duration-200"></i>
+          </button>
+          <div class="hidden p-3 pt-0 text-xs text-gray-600 border-t border-gray-50 bg-gray-50/50 leading-relaxed">${it.respuesta}</div>
+        </div>`;
+    });
+  }
+  cont.innerHTML = h;
+}
+
 function cargarFAQs() {
   const cont = document.getElementById('faqContenedor');
-  // Utiliza la variable APPS_SCRIPT_URL que ya tienes definida en la línea 1853
-  fetch(APPS_SCRIPT_URL + '?accion=obtenerFaq')
+  let hayCache = false;
+
+  // 1. Carga instantánea desde caché local (0 segundos)
+  const cacheFaq = localStorage.getItem('zeronte_faq_cache');
+  if (cacheFaq) {
+    try {
+      const faqsGuardadas = JSON.parse(cacheFaq);
+      if (Array.isArray(faqsGuardadas) && faqsGuardadas.length > 0) {
+        renderizarHTMLFaqs(faqsGuardadas);
+        hayCache = true;
+      }
+    } catch (e) {}
+  }
+
+  // 2. Actualización silenciosa en segundo plano desde Google Sheets
+  fetch(APPS_SCRIPT_URL + '?accion=obtenerFaq&_t=' + Date.now())
     .then(r => r.json())
     .then(d => {
-      if (!d.faqs || !d.faqs.length) {
-        cont.innerHTML = '<p class="text-center text-xs text-gray-500 py-6">No hay preguntas frecuentes disponibles.</p>';
-        return;
+      if (d && Array.isArray(d.faqs)) {
+        localStorage.setItem('zeronte_faq_cache', JSON.stringify(d.faqs));
+        renderizarHTMLFaqs(d.faqs);
+        faqsListas = true;
       }
-      const cats = {};
-      d.faqs.forEach(item => {
-        const c = item.categoria || 'General';
-        if (!cats[c]) cats[c] = [];
-        cats[c].push(item);
-      });
-
-      let h = '';
-      for (const [cName, items] of Object.entries(cats)) {
-        h += `<div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-2 first:mt-0">${cName}</div>`;
-        items.forEach(it => {
-          h += `
-            <div class="border border-gray-100 rounded-lg overflow-hidden mb-2">
-              <button type="button" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.faq-ico').classList.toggle('rotate-180')" class="w-full flex items-center justify-between p-3 text-left text-xs font-semibold text-gray-800 hover:bg-gray-50">
-                <span>${it.pregunta}</span>
-                <i class="fa-solid fa-chevron-down faq-ico text-[10px] text-gray-400 transition-transform duration-200"></i>
-              </button>
-              <div class="hidden p-3 pt-0 text-xs text-gray-600 border-t border-gray-50 bg-gray-50/50 leading-relaxed">${it.respuesta}</div>
-            </div>`;
-        });
-      }
-      cont.innerHTML = h;
-      faqsListas = true;
     })
     .catch(() => {
-      cont.innerHTML = '<p class="text-center text-xs text-red-500 py-6">Error al cargar las preguntas.</p>';
+      if (!hayCache && cont) {
+        cont.innerHTML = '<p class="text-center text-xs text-red-500 py-6">Error al cargar las preguntas.</p>';
+      }
     });
 }
 </script>
