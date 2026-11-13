@@ -3194,6 +3194,19 @@ function cargarFAQs() {
       renderizarCamposPersonalizacion(cant);
     }
 
+    const CONFIG_CAMPOS_PERS = {
+      titulo:           { label: 'Título (Opcional)', placeholder: '' },
+      nombre:           { label: 'Nombre * (Obligatorio)', placeholder: '' },
+      fecha_nacimiento: { label: 'Fecha de nacimiento', placeholder: 'Ej. 30 de julio de 2023' },
+      hora:             { label: 'Hora de nacimiento', placeholder: 'Ej. 13:25' },
+      peso:             { label: 'Peso', placeholder: 'Ej. 3,820 kg' },
+      medida:           { label: 'Medida', placeholder: 'Ej. 54 cm' },
+      padres:           { label: 'Nombres de los padres', placeholder: 'Ej. Manuel y Marta' },
+      dedicatoria:      { label: 'Dedicatoria | máx. 100 car. (Opcional)', placeholder: '', maxLength: 90 },
+      compositor:       { label: 'Compositor (Opcional)', placeholder: '' }
+    };
+    const ORDEN_CAMPOS_PERS = ['titulo', 'nombre', 'fecha_nacimiento', 'hora', 'peso', 'medida', 'padres', 'dedicatoria', 'compositor'];
+
     function renderizarCamposPersonalizacion(cant) {
       const contenedor = document.getElementById('contenedorPersonalizacionesDinamicas');
       if (!contenedor) return;
@@ -3202,40 +3215,51 @@ function cargarFAQs() {
       const replicarComunes = chkMisma ? chkMisma.checked : false;
 
       while (datosPersonalizaciones.length < cant) {
-        datosPersonalizaciones.push({ titulo: '', nombre: '', dedicatoria: '', compositor: '' });
+        datosPersonalizaciones.push({ titulo: '', nombre: '', fecha_nacimiento: '', hora: '', peso: '', medida: '', padres: '', dedicatoria: '', compositor: '' });
       }
       if (datosPersonalizaciones.length > cant) {
         datosPersonalizaciones = datosPersonalizaciones.slice(0, cant);
       }
 
-      // Obtener qué campos están activos para este producto desde la base de datos
       let camposActivos = ['titulo', 'nombre', 'dedicatoria', 'compositor'];
       if (articuloFichaActual && articuloFichaActual.camposPersonalizacion) {
         const cp = articuloFichaActual.camposPersonalizacion;
         if (typeof cp === 'string' && cp.trim() !== '' && cp !== 'NO') {
           try {
             const parsed = JSON.parse(cp);
-            camposActivos = Array.isArray(parsed) ? parsed : cp.split(',').map(s=>s.trim().toLowerCase());
+            camposActivos = Array.isArray(parsed) ? parsed : cp.split(',').map(s => s.trim().toLowerCase());
           } catch(e) {
-            camposActivos = cp.split(',').map(s=>s.trim().toLowerCase());
+            camposActivos = cp.split(',').map(s => s.trim().toLowerCase());
           }
         } else if (Array.isArray(cp)) {
-          camposActivos = cp.map(s=>String(s).trim().toLowerCase());
+          camposActivos = cp.map(s => String(s).trim().toLowerCase());
         }
       }
 
-      // Generar mapeo con numeración dinámica secuencial (1, 2, 3...) según los campos activos
-      const ordenBase = ['titulo', 'nombre', 'dedicatoria', 'compositor'];
-      const numMap = {};
-      let contadorOrden = 1;
-      ordenBase.forEach(c => {
-        if (camposActivos.includes(c)) {
-          numMap[c] = contadorOrden++;
-        }
-      });
+      const camposOrdenados = ORDEN_CAMPOS_PERS.filter(c => camposActivos.includes(c));
 
       contenedor.innerHTML = datosPersonalizaciones.map((item, idx) => {
         const esSecundarioReplicado = replicarComunes && idx > 0;
+
+        const camposHtml = camposOrdenados.map((clave, pos) => {
+          const cfg = CONFIG_CAMPOS_PERS[clave];
+          const num = pos + 1;
+          const esReplicado = esSecundarioReplicado && clave !== 'nombre';
+          const valorActual = esReplicado ? (datosPersonalizaciones[0][clave] || '') : (item[clave] || '');
+          const maxLenAttr = cfg.maxLength ? `maxlength="${cfg.maxLength}"` : '';
+
+          return `
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${num}. ${cfg.label}:</label>
+              <input type="text" ${maxLenAttr} value="${String(valorActual).replace(/"/g, '&quot;')}" 
+                placeholder="${cfg.placeholder}" 
+                ${esReplicado
+                  ? `data-pers-campo="${clave}" data-pers-replicado="true" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"`
+                  : `oninput="actualizarDatoPers(${idx}, '${clave}', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
+            </div>
+          `;
+        }).join('');
+
         return `
           <div class="bg-white border border-gray-300 rounded-xl p-3.5 sm:p-4 text-sm space-y-3 shadow-2xs">
             <div class="flex items-center justify-between pb-1.5 border-b border-gray-200">
@@ -3244,39 +3268,7 @@ function cargarFAQs() {
               </span>
               ${esSecundarioReplicado ? `<span class="text-xs text-amber-800 font-bold bg-amber-100 px-2 py-0.5 rounded">Datos compartidos de #1</span>` : ''}
             </div>
-
-            ${camposActivos.includes('titulo') ? `
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['titulo']}. Título (Opcional):</label>
-              <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].titulo || '') : (item.titulo || '')}" 
-                placeholder="" 
-                ${esSecundarioReplicado ? 'data-pers-campo="titulo" data-pers-replicado="true" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'titulo', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
-            </div>` : ''}
-
-            ${camposActivos.includes('nombre') ? `
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['nombre']}. Nombre * (Obligatorio):</label>
-              <input type="text" value="${item.nombre || ''}" 
-                placeholder="" 
-                oninput="actualizarDatoPers(${idx}, 'nombre', this.value)" 
-                class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-semibold focus:outline-none focus:border-black transition">
-            </div>` : ''}
-
-            ${camposActivos.includes('dedicatoria') ? `
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['dedicatoria']}. Dedicatoria | máx. 100 car. (Opcional):</label>
-              <input type="text" maxlength="90" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].dedicatoria || '') : (item.dedicatoria || '')}" 
-                placeholder="" 
-                ${esSecundarioReplicado ? 'data-pers-campo="dedicatoria" data-pers-replicado="true" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'dedicatoria', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
-            </div>` : ''}
-
-            ${camposActivos.includes('compositor') ? `
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-[#111111] mb-1">${numMap['compositor']}. Compositor (Opcional):</label>
-              <input type="text" value="${esSecundarioReplicado ? (datosPersonalizaciones[0].compositor || '') : (item.compositor || '')}" 
-                placeholder="" 
-                ${esSecundarioReplicado ? 'data-pers-campo="compositor" data-pers-replicado="true" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-gray-500 cursor-not-allowed"' : `oninput="actualizarDatoPers(${idx}, 'compositor', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm sm:text-base text-[#111111] font-medium focus:outline-none focus:border-black transition"`}>
-            </div>` : ''}
+            ${camposHtml}
           </div>
         `;
       }).join('');
@@ -4283,28 +4275,36 @@ function cargarFAQs() {
           }
         }
 
-        const ordenBasePed = ['titulo', 'nombre', 'dedicatoria', 'compositor'];
-        const numMapPed = {};
-        let cOrdenPed = 1;
-        ordenBasePed.forEach(c => {
-          if (camposActivosPed.includes(c)) {
-            numMapPed[c] = cOrdenPed++;
-          }
-        });
+        const camposOrdenadosPed = ORDEN_CAMPOS_PERS.filter(c => camposActivosPed.includes(c));
+        const etiquetasCortas = {
+          titulo: 'Título',
+          nombre: 'Nombre',
+          fecha_nacimiento: 'Fecha nac.',
+          hora: 'Hora',
+          peso: 'Peso',
+          medida: 'Medida',
+          padres: 'Padres',
+          dedicatoria: 'Dedicatoria',
+          compositor: 'Compositor'
+        };
 
         const bloquesFormateados = [];
         for (let i = 0; i < cant; i++) {
-          const datosItem = datosPersonalizaciones[i] || { titulo: '', nombre: '', dedicatoria: '', compositor: '' };
-          const tituloU = (replicar && i > 0) ? (datosPersonalizaciones[0].titulo || '') : (datosItem.titulo || '');
-          const nombreU = datosItem.nombre || '';
-          const dedicatoriaU = (replicar && i > 0) ? (datosPersonalizaciones[0].dedicatoria || '') : (datosItem.dedicatoria || '');
-          const compositorU = (replicar && i > 0) ? (datosPersonalizaciones[0].compositor || '') : (datosItem.compositor || '');
-
+          const datosItem = datosPersonalizaciones[i] || {};
           let txtUnidad = `[UNIDAD ${i + 1}/${cant}]`;
-          if (camposActivosPed.includes('titulo') && tituloU) txtUnidad += ` | ${numMapPed['titulo']}. Título: ${tituloU}`;
-          if (camposActivosPed.includes('nombre')) txtUnidad += ` | ${numMapPed['nombre']}. Nombre: ${nombreU || 'Sin especificar'}`;
-          if (camposActivosPed.includes('dedicatoria') && dedicatoriaU) txtUnidad += ` | ${numMapPed['dedicatoria']}. Dedicatoria: ${dedicatoriaU}`;
-          if (camposActivosPed.includes('compositor') && compositorU) txtUnidad += ` | ${numMapPed['compositor']}. Compositor: ${compositorU}`;
+
+          camposOrdenadosPed.forEach((clave, pos) => {
+            const num = pos + 1;
+            const val = (replicar && i > 0 && clave !== 'nombre')
+              ? (datosPersonalizaciones[0][clave] || '')
+              : (datosItem[clave] || '');
+
+            if (clave === 'nombre') {
+              txtUnidad += ` | ${num}. ${etiquetasCortas[clave]}: ${val || 'Sin especificar'}`;
+            } else if (val) {
+              txtUnidad += ` | ${num}. ${etiquetasCortas[clave]}: ${val}`;
+            }
+          });
 
           bloquesFormateados.push(txtUnidad);
         }
