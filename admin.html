@@ -1348,6 +1348,21 @@
                   </div>
                 </div>
 
+                <!-- Mostrar en categoría destacada de Ofertas en la tienda -->
+                <label id="labelSwitchMostrarEnMenuOfertas" class="flex items-center justify-between p-3 rounded-xl bg-slate-100 border border-slate-200 cursor-not-allowed select-none transition">
+                  <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                    <i id="iconoSwitchOfertaMenu" class="fa-solid fa-tag text-slate-400 text-xs shrink-0"></i>
+                    <div>
+                      <span class="text-xs font-bold text-slate-800 block leading-tight">Mostrar en categoría "Ofertas" del menú</span>
+                      <span id="subtituloSwitchOfertaMenu" class="text-[10px] text-slate-500 block">Bloqueado cuando se aplica a toda la tienda.</span>
+                    </div>
+                  </div>
+                  <input type="checkbox" id="checkMostrarEnMenuOfertas" disabled class="switch-ios-input">
+                  <div id="trackSwitchMostrarEnMenuOfertas" class="switch-ios-track opacity-50">
+                    <div class="switch-ios-thumb"></div>
+                  </div>
+                </label>
+
                 <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
                   <button type="button" onclick="cerrarModalCrearOferta()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
                   <button type="submit" id="btnGuardarCampanaOferta" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 shadow-xs">
@@ -6846,6 +6861,11 @@ try {
           const btnAlcance = document.querySelector(`.btn-alcance-oferta[data-alcance="${camp.alcance || 'todos'}"]`);
           setAlcanceOferta(camp.alcance || 'todos', btnAlcance);
 
+          const chkMenuEdit = document.getElementById('checkMostrarEnMenuOfertas');
+          if (chkMenuEdit && (camp.alcance || 'todos') !== 'todos') {
+            chkMenuEdit.checked = !!camp.mostrarEnMenuOfertas;
+          }
+
           if (camp.alcance === 'categoria' && selectCat && camp.categoriaSeleccionada) {
             selectCat.value = camp.categoriaSeleccionada;
           } else if (camp.alcance === 'individual' && Array.isArray(camp.idsObjetivo)) {
@@ -6936,6 +6956,29 @@ try {
       const boxInd = document.getElementById('subAlcanceIndividual');
       if (boxCat) boxCat.classList.toggle('hidden', alcance !== 'categoria');
       if (boxInd) boxInd.classList.toggle('hidden', alcance !== 'individual');
+
+      const chkMenu = document.getElementById('checkMostrarEnMenuOfertas');
+      const lblMenu = document.getElementById('labelSwitchMostrarEnMenuOfertas');
+      const trackMenu = document.getElementById('trackSwitchMostrarEnMenuOfertas');
+      const icoMenu = document.getElementById('iconoSwitchOfertaMenu');
+      const subMenu = document.getElementById('subtituloSwitchOfertaMenu');
+
+      if (chkMenu && lblMenu && trackMenu) {
+        if (alcance === 'todos') {
+          chkMenu.checked = false;
+          chkMenu.disabled = true;
+          lblMenu.className = 'flex items-center justify-between p-3 rounded-xl bg-slate-100 border border-slate-200 cursor-not-allowed select-none transition';
+          trackMenu.classList.add('opacity-50');
+          if (icoMenu) icoMenu.className = 'fa-solid fa-tag text-slate-400 text-xs shrink-0';
+          if (subMenu) subMenu.innerText = 'Bloqueado cuando se aplica a toda la tienda.';
+        } else {
+          chkMenu.disabled = false;
+          lblMenu.className = 'flex items-center justify-between p-3 rounded-xl bg-rose-50/50 border border-rose-200/80 cursor-pointer select-none transition';
+          trackMenu.classList.remove('opacity-50');
+          if (icoMenu) icoMenu.className = 'fa-solid fa-tag text-rose-500 text-xs shrink-0';
+          if (subMenu) subMenu.innerText = 'Destaca estos productos en la sección "Ofertas" de la tienda.';
+        }
+      }
     }
 
     async function guardarYEjecutarOferta(e) {
@@ -6981,7 +7024,8 @@ try {
         alcance: alcanceOfertaActual,
         categoriaSeleccionada: catSel,
         idsObjetivo: idsObjetivo,
-        activa: true
+        activa: true,
+        mostrarEnMenuOfertas: (alcanceOfertaActual !== 'todos') && !!(document.getElementById('checkMostrarEnMenuOfertas')?.checked)
       };
 
       if (idEditando) {
