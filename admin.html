@@ -1002,25 +1002,25 @@
                       </div>
                     </label>
 
-                    <!-- 3. Audio -->
+                    <!-- 3. JPG -->
+                    <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition">
+                      <div class="flex items-center gap-2 min-w-0 pr-1">
+                        <i class="fa-solid fa-file-image text-emerald-600 text-xs"></i>
+                        <span class="text-xs font-semibold text-slate-800 truncate">JPG</span>
+                      </div>
+                      <input type="checkbox" id="checkBadgeJpg" class="switch-ios-input">
+                      <div class="switch-ios-track">
+                        <div class="switch-ios-thumb"></div>
+                      </div>
+                    </label>
+
+                    <!-- 4. Audio -->
                     <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition">
                       <div class="flex items-center gap-2 min-w-0 pr-1">
                         <i class="fa-solid fa-headphones text-slate-900 text-xs"></i>
                         <span class="text-xs font-semibold text-slate-800 truncate">Audio</span>
                       </div>
                       <input type="checkbox" id="checkBadgeAudio" class="switch-ios-input">
-                      <div class="switch-ios-track">
-                        <div class="switch-ios-thumb"></div>
-                      </div>
-                    </label>
-
-                    <!-- 4. Soporte Físico -->
-                    <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer select-none shadow-2xs hover:border-slate-300 transition">
-                      <div class="flex items-center gap-2 min-w-0 pr-1">
-                        <i class="fa-solid fa-box text-orange-600 text-xs"></i>
-                        <span class="text-xs font-semibold text-slate-800 truncate">Físico</span>
-                      </div>
-                      <input type="checkbox" id="checkBadgeFisico" class="switch-ios-input">
                       <div class="switch-ios-track">
                         <div class="switch-ios-thumb"></div>
                       </div>
@@ -4633,12 +4633,12 @@ function extraerUrlArchivoPedido(pedido) {
           const sellosArray = Array.isArray(prod.badges) ? prod.badges : (prod.badges ? String(prod.badges).split(',').map(s=>s.trim()) : ['descarga', 'pdf']);
           const chkDescarga = document.getElementById('checkBadgeDescarga');
           const chkPdf = document.getElementById('checkBadgePdf');
+          const chkJpg = document.getElementById('checkBadgeJpg');
           const chkAudio = document.getElementById('checkBadgeAudio');
-          const chkFisico = document.getElementById('checkBadgeFisico');
           if (chkDescarga) chkDescarga.checked = sellosArray.includes('descarga');
           if (chkPdf) chkPdf.checked = sellosArray.includes('pdf');
+          if (chkJpg) chkJpg.checked = sellosArray.includes('jpg');
           if (chkAudio) chkAudio.checked = sellosArray.includes('audio');
-          if (chkFisico) chkFisico.checked = sellosArray.includes('fisico');
 
           const chkDestacado = document.getElementById('checkArticuloDestacado');
           if (chkDestacado) chkDestacado.checked = (prod.destacado === true || prod.destacado === "SI");
@@ -4672,12 +4672,12 @@ function extraerUrlArchivoPedido(pedido) {
         // Valores por defecto al crear: Descarga y PDF activados
         const chkDescarga = document.getElementById('checkBadgeDescarga');
         const chkPdf = document.getElementById('checkBadgePdf');
+        const chkJpg = document.getElementById('checkBadgeJpg');
         const chkAudio = document.getElementById('checkBadgeAudio');
-        const chkFisico = document.getElementById('checkBadgeFisico');
         if (chkDescarga) chkDescarga.checked = true;
         if (chkPdf) chkPdf.checked = true;
+        if (chkJpg) chkJpg.checked = false;
         if (chkAudio) chkAudio.checked = false;
-        if (chkFisico) chkFisico.checked = false;
 
         const chkDestacado = document.getElementById('checkArticuloDestacado');
         if (chkDestacado) chkDestacado.checked = false;
@@ -5045,8 +5045,8 @@ function extraerUrlArchivoPedido(pedido) {
       const sellosSeleccionados = [];
       if (document.getElementById('checkBadgeDescarga')?.checked) sellosSeleccionados.push('descarga');
       if (document.getElementById('checkBadgePdf')?.checked) sellosSeleccionados.push('pdf');
+      if (document.getElementById('checkBadgeJpg')?.checked) sellosSeleccionados.push('jpg');
       if (document.getElementById('checkBadgeAudio')?.checked) sellosSeleccionados.push('audio');
-      if (document.getElementById('checkBadgeFisico')?.checked) sellosSeleccionados.push('fisico');
 
       const esPersonalizableVal = document.getElementById('checkArticuloPersonalizado') ? document.getElementById('checkArticuloPersonalizado').checked : true;
       const esDestacadoVal = document.getElementById('checkArticuloDestacado') ? document.getElementById('checkArticuloDestacado').checked : false;
