@@ -1473,10 +1473,28 @@
             <h3 class="font-bold text-sm uppercase tracking-wider text-gray-800 border-b border-gray-100 pb-3">Resumen del Pedido</h3>
             
             <div class="space-y-2 text-xs sm:text-sm text-gray-600">
+              <div id="filaDescuentoCuponCesta" class="hidden flex justify-between items-center text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200">
+                <span id="textoCuponAplicadoCesta">Descuento aplicado</span>
+                <div class="flex items-center gap-2">
+                  <span id="importeDescuentoCuponCesta">-0.00 €</span>
+                  <button type="button" onclick="quitarCuponPromocional()" class="text-rose-500 hover:text-rose-700 font-bold" title="Quitar código">✕</button>
+                </div>
+              </div>
               <div class="flex justify-between items-center text-base sm:text-lg font-bold text-gray-900 pt-1">
                 <span>Total a pagar:</span>
                 <span id="subtotalCarritoDrawer" class="text-2xl font-extrabold text-black">0.00 €</span>
               </div>
+            </div>
+
+            <!-- Casilla de Código Promocional -->
+            <div class="pt-1 pb-1">
+              <div class="flex items-center gap-2">
+                <input type="text" id="inputCodigoPromocionalCesta" placeholder="Código promocional" class="flex-1 bg-gray-50 border border-gray-300 rounded-full px-4 py-2.5 text-xs font-mono uppercase text-gray-900 focus:outline-none focus:border-black focus:bg-white transition">
+                <button type="button" id="btnAplicarCuponCesta" onclick="aplicarCodigoPromocional()" class="bg-gray-900 hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-full transition active:scale-95 shrink-0">
+                  Aplicar
+                </button>
+              </div>
+              <p id="msgErrorCuponCesta" class="hidden text-[11px] text-rose-600 font-semibold mt-1.5 pl-2"></p>
             </div>
 
             <button type="button" onclick="procederCheckoutDesdeCarrito()" class="w-full bg-black hover:bg-zinc-800 text-white font-bold py-4 rounded-full text-sm uppercase tracking-wider transition active:scale-95 shadow-md flex items-center justify-center gap-2">
@@ -3950,6 +3968,45 @@ function cargarFAQs() {
 
     // ================= CARRITO MULTI-PRODUCTO =================
     let carritoProductos = JSON.parse(localStorage.getItem('zeronte_carrito_items') || '[]');
+    let cuponAplicadoActual = null;
+
+    async function aplicarCodigoPromocional() {
+      const inp = document.getElementById('inputCodigoPromocionalCesta');
+      const btn = document.getElementById('btnAplicarCuponCesta');
+      const msgErr = document.getElementById('msgErrorCuponCesta');
+      const codigo = (inp ? inp.value : '').trim().toUpperCase();
+      if (!codigo) return;
+
+      if (msgErr) msgErr.classList.add('hidden');
+      if (btn) { btn.disabled = true; btn.innerText = '...'; }
+
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=validarCupon&codigo=${encodeURIComponent(codigo)}&_t=${Date.now()}`);
+        const data = await res.json();
+        if (data && data.status === 'success' && data.cupon) {
+          cuponAplicadoActual = data.cupon;
+          if (inp) inp.value = '';
+          actualizarBadgesYDrawerCarrito();
+        } else {
+          if (msgErr) {
+            msgErr.innerText = 'El código introducido no es válido o ha caducado.';
+            msgErr.classList.remove('hidden');
+          }
+        }
+      } catch (e) {
+        if (msgErr) {
+          msgErr.innerText = 'Error al comprobar el código.';
+          msgErr.classList.remove('hidden');
+        }
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = 'Aplicar'; }
+      }
+    }
+
+    function quitarCuponPromocional() {
+      cuponAplicadoActual = null;
+      actualizarBadgesYDrawerCarrito();
+    }
 
     function guardarCarritoEnStorage() {
       localStorage.setItem('zeronte_carrito_items', JSON.stringify(carritoProductos));
@@ -4291,8 +4348,30 @@ function cargarFAQs() {
         `;
       }).join('');
 
+      const filaDesc = document.getElementById('filaDescuentoCuponCesta');
+      const txtCupon = document.getElementById('textoCuponAplicadoCesta');
+      const impCupon = document.getElementById('importeDescuentoCuponCesta');
+      let totalConDescuento = sumaTotal;
+
+      if (cuponAplicadoActual && sumaTotal > 0) {
+        let descuento = 0;
+        if (cuponAplicadoActual.tipo === 'gratis') {
+          descuento = sumaTotal;
+        } else if (cuponAplicadoActual.tipo === 'porcentaje') {
+          descuento = sumaTotal * (cuponAplicadoActual.valor / 100);
+        } else {
+          descuento = Math.min(sumaTotal, cuponAplicadoActual.valor);
+        }
+        totalConDescuento = Math.max(0, sumaTotal - descuento);
+        if (filaDesc) filaDesc.classList.remove('hidden');
+        if (txtCupon) txtCupon.innerText = `Cupón ${cuponAplicadoActual.codigo}`;
+        if (impCupon) impCupon.innerText = `-${descuento.toFixed(2)} €`;
+      } else {
+        if (filaDesc) filaDesc.classList.add('hidden');
+      }
+
       const subtotalEl = document.getElementById('subtotalCarritoDrawer');
-      if (subtotalEl) subtotalEl.innerText = `${sumaTotal.toFixed(2)} €`;
+      if (subtotalEl) subtotalEl.innerText = `${totalConDescuento.toFixed(2)} €`;
     }
 
     function abrirDrawerCarrito() {
@@ -4549,7 +4628,13 @@ function cargarFAQs() {
     function procederCheckoutDesdeCarrito() {
       if (carritoProductos.length === 0) return;
 
-      const totalGlobal = carritoProductos.reduce((acc, item) => acc + (item.precioUnitario * item.cantidad), 0);
+      let totalGlobal = carritoProductos.reduce((acc, item) => acc + (item.precioUnitario * item.cantidad), 0);
+      let notaCupon = '';
+      if (cuponAplicadoActual && totalGlobal > 0) {
+        let desc = cuponAplicadoActual.tipo === 'gratis' ? totalGlobal : (cuponAplicadoActual.tipo === 'porcentaje' ? totalGlobal * (cuponAplicadoActual.valor / 100) : Math.min(totalGlobal, cuponAplicadoActual.valor));
+        totalGlobal = Math.max(0, totalGlobal - desc);
+        notaCupon = ` [CUPÓN: ${cuponAplicadoActual.codigo} (-${desc.toFixed(2)} €)]`;
+      }
       const totalUnidades = carritoProductos.reduce((acc, item) => acc + item.cantidad, 0);
 
       // Resumen donde el (xN) va pegado a su artículo específico y si es 1 no lleva multiplicador
@@ -4592,7 +4677,7 @@ function cargarFAQs() {
       if (prodInput) prodInput.value = resumenNombres;
 
       const campoOculto = document.getElementById('personalizacionCliente');
-      if (campoOculto) campoOculto.value = textoFinalConsolidado;
+      if (campoOculto) campoOculto.value = textoFinalConsolidado + notaCupon;
     }
 
     function abrirModal(producto, precio, cantidad = 1) {
@@ -7051,6 +7136,7 @@ function cargarFAQs() {
     function mostrarExito(orderId, datos) {
       // 1. Vaciar completamente la cesta de la compra y actualizar su almacenamiento y vista
       carritoProductos = [];
+      cuponAplicadoActual = null;
       guardarCarritoEnStorage();
 
       // 2. Forzar reseteo del formulario de encargo (Nombre, Email, Teléfono)
