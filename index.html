@@ -1747,7 +1747,7 @@
             </div>
 
           <!-- SELECTOR DE FORMA DE PAGO -->
-          <div>
+          <div id="bloqueMetodoPagoModal">
             <label id="lblMetodoPago" class="block text-[11px] uppercase tracking-wider text-gray-600 mb-2 font-semibold">Método de pago preferido</label>
             <div class="grid grid-cols-2 gap-3">
               
@@ -1779,6 +1779,12 @@
               </label>
 
             </div>
+          </div>
+
+          <!-- Aviso Pedido 100% Gratuito -->
+          <div id="avisoPedidoGratuitoModal" class="hidden p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-start gap-2.5">
+            <i class="fa-solid fa-gift text-emerald-600 text-sm mt-0.5 shrink-0"></i>
+            <span>Este artículo es totalmente gratuito al aplicarle el código promocional. Rellena solo el formulario y pulsa en <strong>Confirmar</strong>.</span>
           </div>
 
           <!-- Botón Confirmar Pedido -->
@@ -4687,8 +4693,10 @@ function cargarFAQs() {
       const prodInput = document.getElementById('productoInput');
       if (prodInput) prodInput.value = `${producto} (x${cantidad})`;
 
-      const precInput = document.getElementById('precioInput');
-      if (precInput) precInput.value = precio;
+      const bloquePago = document.getElementById('bloqueMetodoPagoModal');
+      if (bloquePago) bloquePago.classList.toggle('hidden', precio <= 0);
+      const avisoGratis = document.getElementById('avisoPedidoGratuitoModal');
+      if (avisoGratis) avisoGratis.classList.toggle('hidden', precio > 0);
       
       const resProd = document.getElementById('resumenProducto');
       if (resProd) resProd.innerText = producto;
@@ -7075,7 +7083,7 @@ function cargarFAQs() {
         cantidad: cantidadReal,
         desgloseFracciones: Array.from({ length: cantidadReal }, (_, i) => `${i + 1}/${cantidadReal}`),
         precio: precioTextoFormateado,
-        metodoPago: radioPago ? radioPago.value : 'Bizum'
+        metodoPago: precioNumLimpio <= 0 ? 'Gratuito' : (radioPago ? radioPago.value : 'Bizum')
       };
 
       // Detectar la URL exacta de la portada del artículo
@@ -7174,7 +7182,10 @@ function cargarFAQs() {
       document.getElementById('conceptoBizum').innerText = orderId;
       document.getElementById('totalPaypal').innerText = datos.precio;
 
-      if (datos.metodoPago === 'PayPal') {
+      if (datos.metodoPago === 'Gratuito') {
+        document.getElementById('instruccionesBizum').classList.add('hidden');
+        document.getElementById('instruccionesPaypal').classList.add('hidden');
+      } else if (datos.metodoPago === 'PayPal') {
         document.getElementById('instruccionesBizum').classList.add('hidden');
         document.getElementById('instruccionesPaypal').classList.remove('hidden');
 
