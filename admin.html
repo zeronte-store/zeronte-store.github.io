@@ -1234,6 +1234,68 @@
             </div>
           </section>
 
+          <!-- BLOQUE: CÓDIGOS PROMOCIONALES (CUPONES PARA EMAIL / WHATSAPP) -->
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div>
+                <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <i class="fa-solid fa-ticket text-rose-500"></i> Códigos Promocionales (Cupones)
+                </h2>
+                <p class="text-[11px] text-slate-400 mt-0.5">Genera códigos de descuento o 100% gratuitos para enviar por email o WhatsApp a tus clientes de Etsy.</p>
+              </div>
+              <button type="button" onclick="abrirModalCrearCupon()" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs shrink-0 self-start sm:self-auto">
+                <i class="fa-solid fa-wand-magic-sparkles text-xs text-amber-400"></i> Crear Código
+              </button>
+            </div>
+
+            <div id="contenedorListaCuponesAdmin" class="space-y-2">
+              <p class="text-xs text-slate-400 text-center py-4">Cargando códigos promocionales...</p>
+            </div>
+          </section>
+
+          <!-- MODAL: CREAR CÓDIGO PROMOCIONAL -->
+          <div id="modalCrearCupon" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white border border-slate-200 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
+              <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <i class="fa-solid fa-ticket text-rose-500"></i> Nuevo Código Promocional
+                </h3>
+                <button type="button" onclick="cerrarModalCrearCupon()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl transition">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+              <form onsubmit="guardarNuevoCuponAdmin(event)" class="p-5 space-y-4 text-xs text-slate-700">
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Código del Cupón *</label>
+                  <div class="flex items-center gap-2">
+                    <input type="text" id="inputCodigoCuponAdmin" required placeholder="Ej. ZERONTE20" class="flex-grow bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-mono font-bold uppercase text-slate-900 focus:outline-none focus:border-slate-500">
+                    <button type="button" onclick="generarCodigoCuponAleatorio()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 px-3 py-2.5 rounded-xl font-bold text-[11px] transition active:scale-95 shrink-0">
+                      <i class="fa-solid fa-dice mr-1"></i> Automático
+                    </button>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Tipo de Descuento *</label>
+                    <select id="selectTipoCuponAdmin" onchange="actualizarInputValorCupon(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none">
+                      <option value="porcentaje">Porcentaje (%)</option>
+                      <option value="fijo">Importe Fijo (€)</option>
+                      <option value="gratis">100% Gratuito</option>
+                    </select>
+                  </div>
+                  <div id="boxValorCuponAdmin">
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Valor *</label>
+                    <input type="number" step="0.01" min="1" id="inputValorCuponAdmin" required placeholder="Ej. 20" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none">
+                  </div>
+                </div>
+                <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                  <button type="button" onclick="cerrarModalCrearCupon()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
+                  <button type="submit" id="btnGuardarCuponAdmin" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Guardar Código</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
           <!-- MODAL ETSY: CREAR / LANZAR / EDITAR OFERTA -->
           <div id="modalOfertaEtsy" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-white border border-slate-200 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden my-6">
@@ -5694,6 +5756,7 @@ try {
       } else if (seccion === 'ofertas') {
         if (vOfertas) vOfertas.classList.remove('hidden');
         renderizarModuloOfertas();
+        cargarCuponesAdmin();
       } else if (seccion === 'clientes') {
         document.getElementById('vistaSeccionClientes').classList.remove('hidden');
         renderizarClientes();
@@ -8044,6 +8107,136 @@ try {
         `;
       }).join('');
     }
+
+// ================= GESTIÓN DE CUPONES PROMOCIONALES (ADMIN) =================
+    let listaCuponesAdmin = [];
+
+    function abrirModalCrearCupon() {
+      const m = document.getElementById('modalCrearCupon');
+      if (m) {
+        generarCodigoCuponAleatorio();
+        document.getElementById('selectTipoCuponAdmin').value = 'porcentaje';
+        actualizarInputValorCupon('porcentaje');
+        document.getElementById('inputValorCuponAdmin').value = '20';
+        m.classList.remove('hidden');
+      }
+    }
+
+    function cerrarModalCrearCupon() {
+      const m = document.getElementById('modalCrearCupon');
+      if (m) m.classList.add('hidden');
+    }
+
+    function generarCodigoCuponAleatorio() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let rand = '';
+      for (let i = 0; i < 5; i++) rand += chars.charAt(Math.floor(Math.random() * chars.length));
+      const inp = document.getElementById('inputCodigoCuponAdmin');
+      if (inp) inp.value = 'ZERONTE-' + rand;
+    }
+
+    function actualizarInputValorCupon(tipo) {
+      const box = document.getElementById('boxValorCuponAdmin');
+      const inp = document.getElementById('inputValorCuponAdmin');
+      if (tipo === 'gratis') {
+        if (box) box.classList.add('hidden');
+        if (inp) { inp.required = false; inp.value = '100'; }
+      } else {
+        if (box) box.classList.remove('hidden');
+        if (inp) { inp.required = true; inp.value = tipo === 'porcentaje' ? '20' : '2.00'; }
+      }
+    }
+
+    async function cargarCuponesAdmin() {
+      const cont = document.getElementById('contenedorListaCuponesAdmin');
+      if (!cont) return;
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=obtenerCupones&_t=${Date.now()}`);
+        const data = await res.json();
+        if (data && data.status === 'success') {
+          listaCuponesAdmin = data.cupones || [];
+          renderizarCuponesAdmin();
+        }
+      } catch (e) {
+        cont.innerHTML = '<p class="text-xs text-rose-500 text-center py-4">Error al cargar los cupones.</p>';
+      }
+    }
+
+    function renderizarCuponesAdmin() {
+      const cont = document.getElementById('contenedorListaCuponesAdmin');
+      if (!cont) return;
+      if (listaCuponesAdmin.length === 0) {
+        cont.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No hay códigos promocionales creados todavía.</p>';
+        return;
+      }
+      cont.innerHTML = listaCuponesAdmin.map(c => {
+        let descTexto = c.tipo === 'gratis' ? '100% GRATUITO' : (c.tipo === 'porcentaje' ? `-${c.valor}%` : `-${Number(c.valor).toFixed(2)} €`);
+        return `
+          <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/70 text-xs">
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <span class="font-mono font-extrabold text-slate-900 bg-white border border-slate-300 px-2.5 py-1 rounded-lg select-all">${c.codigo}</span>
+              <span class="font-bold px-2 py-0.5 rounded-md ${c.tipo === 'gratis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${descTexto}</span>
+              <span class="text-[10px] text-slate-400">${c.fechaCreacion || ''}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="copiarDato('${c.codigo}', this)" title="Copiar código" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition">
+                <i class="fa-regular fa-copy text-xs"></i>
+              </button>
+              <button type="button" onclick="eliminarCuponAdmin('${c.codigo}')" title="Eliminar código" class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-trash text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function guardarNuevoCuponAdmin(e) {
+      e.preventDefault();
+      const codigo = document.getElementById('inputCodigoCuponAdmin').value.trim().toUpperCase();
+      const tipo = document.getElementById('selectTipoCuponAdmin').value;
+      const valor = tipo === 'gratis' ? 100 : (parseFloat(document.getElementById('inputValorCuponAdmin').value) || 0);
+      const btn = document.getElementById('btnGuardarCuponAdmin');
+      if (btn) { btn.disabled = true; btn.innerText = 'Guardando...'; }
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            accion: 'guardarCupon',
+            clave: tokenClave || 'zeronte2026',
+            codigo: codigo,
+            tipo: tipo,
+            valor: valor
+          })
+        });
+        cerrarModalCrearCupon();
+        await cargarCuponesAdmin();
+      } catch (err) {
+        alert('Error al guardar el código.');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = 'Guardar Código'; }
+      }
+    }
+
+    async function eliminarCuponAdmin(codigo) {
+      if (!confirm(`¿Eliminar el código promocional ${codigo}?`)) return;
+      listaCuponesAdmin = listaCuponesAdmin.filter(c => c.codigo !== codigo);
+      renderizarCuponesAdmin();
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            accion: 'eliminarCupon',
+            clave: tokenClave || 'zeronte2026',
+            codigo: codigo
+          })
+        });
+      } catch (e) {}
+    }
+
     </script>
 </body>
 </html>
