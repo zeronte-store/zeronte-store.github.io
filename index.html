@@ -7123,6 +7123,12 @@ function cargarFAQs() {
         });
 
         const respuesta = await res.json();
+        if (respuesta.status === "error") {
+          alert(respuesta.message || "No se pudo aplicar el código promocional.");
+          btn.disabled = false;
+          btn.innerHTML = `<span id="btnConfirmarTxt">CONFIRMAR</span><span id="btnPrecioTexto"></span>`;
+          return;
+        }
         const orderIdFinal = respuesta.orderId || orderIdGenerado;
         
         registrarPedidoExitoso(cantidadReal);
