@@ -1824,7 +1824,7 @@
         <!-- AVISO IMPORTANTE: INICIO DE ELABORACIÓN TRAS EL PAGO -->
         <div class="p-3 bg-amber-50 border border-amber-300 rounded-2xl text-left mb-3.5 flex items-start gap-2.5">
           <i class="fa-solid fa-circle-exclamation text-amber-600 text-sm mt-0.5 shrink-0"></i>
-          <p class="text-[11px] sm:text-xs text-amber-900 leading-relaxed font-medium">
+          <p id="avisoPagoPendienteExito" class="text-[11px] sm:text-xs text-amber-900 leading-relaxed font-medium">
             <strong>Información importante:</strong> Tu encargo queda en cola en estado <span class="text-rose-600 font-bold">Pendiente</span>. Al ser una obra personalizada hecha a medida, <strong>la composición y elaboración comenzará una vez recibido y verificado el pago</strong>.
           </p>
         </div>
@@ -1889,7 +1889,7 @@
         </div>
 
         <!-- TEXTO INFORMATIVO RECUPERADO (PAGO MÁS TARDE Y JUSTIFICANTE OPCIONAL) -->
-        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-3.5 text-left mb-3.5 grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] sm:text-xs text-gray-600 leading-relaxed shadow-2xs">
+        <div id="bloqueInfoPagoTardeExito" class="bg-gray-50 border border-gray-200 rounded-2xl p-3.5 text-left mb-3.5 grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] sm:text-xs text-gray-600 leading-relaxed shadow-2xs">
           <p>
             <strong>¿Vas a realizar el pago más tarde?</strong> No te preocupes. Puedes cerrar esta ventana; cuando hagas el abono desde tu app bancaria o PayPal con tu número de pedido en el concepto, lo localizaremos sin problema.
           </p>
@@ -1899,7 +1899,7 @@
         </div>
 
         <!-- Botones de Acción (En fila horizontal de 3 en pantalla ancha y apilados en móvil) -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full pt-1">
+        <div id="gridBotonesExito" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full pt-1">
           <a id="btnWhatsappConfirmar" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-3 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 text-[11px] sm:text-xs uppercase tracking-wider active:scale-98">
             <i class="fa-brands fa-whatsapp text-sm sm:text-base"></i>
             <span id="btnWpConfirmarTxt">Enviar justificante por WhatsApp</span>
@@ -7238,9 +7238,30 @@ function cargarFAQs() {
       document.getElementById('conceptoBizum').innerText = orderId;
       document.getElementById('totalPaypal').innerText = datos.precio;
 
+      const avisoPendienteEl = document.getElementById('avisoPagoPendienteExito');
+      const bloquePagoTardeEl = document.getElementById('bloqueInfoPagoTardeExito');
+      const gridBotonesEl = document.getElementById('gridBotonesExito');
+      const btnWpEl = document.getElementById('btnWhatsappConfirmar');
+      const btnEmEl = document.getElementById('btnEmailConfirmar');
+
       if (datos.metodoPago === 'Gratuito') {
         document.getElementById('instruccionesBizum').classList.add('hidden');
         document.getElementById('instruccionesPaypal').classList.add('hidden');
+        if (avisoPendienteEl) avisoPendienteEl.innerHTML = '<strong>Información importante:</strong> Tu encargo gratuito ha sido registrado correctamente en estado <span class="text-rose-600 font-bold">Pendiente</span> y lo enviaremos los más pronto posible. Si el encargo es de una obra personalizada hecha a medida, <strong>el tiempo estimado ronda entre 1 a 4 días (según la demanda del momento).</strong>.';
+        if (bloquePagoTardeEl) bloquePagoTardeEl.classList.add('hidden');
+        if (btnWpEl) btnWpEl.classList.add('hidden');
+        if (btnEmEl) btnEmEl.classList.add('hidden');
+        if (gridBotonesEl) gridBotonesEl.className = 'grid grid-cols-1 gap-2.5 w-full pt-1';
+      } else {
+        if (avisoPendienteEl) avisoPendienteEl.innerHTML = '<strong>Información importante:</strong> Tu encargo queda en cola en estado <span class="text-rose-600 font-bold">Pendiente</span>. Al ser una obra personalizada hecha a medida, <strong>la composición y elaboración comenzará una vez recibido y verificado el pago</strong>.';
+        if (bloquePagoTardeEl) bloquePagoTardeEl.classList.remove('hidden');
+        if (btnWpEl) btnWpEl.classList.remove('hidden');
+        if (btnEmEl) btnEmEl.classList.remove('hidden');
+        if (gridBotonesEl) gridBotonesEl.className = 'grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full pt-1';
+      }
+
+      if (datos.metodoPago === 'Gratuito') {
+        // Ya gestionado arriba
       } else if (datos.metodoPago === 'PayPal') {
         document.getElementById('instruccionesBizum').classList.add('hidden');
         document.getElementById('instruccionesPaypal').classList.remove('hidden');
