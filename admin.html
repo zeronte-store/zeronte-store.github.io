@@ -8187,7 +8187,7 @@ try {
               <span class="font-mono font-extrabold text-slate-900 bg-white border border-slate-300 px-2.5 py-1 rounded-lg select-all">${c.codigo}</span>
               <span class="font-bold px-2 py-0.5 rounded-md ${c.tipo === 'gratis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${descTexto}</span>
               ${c.unSoloUso ? '<span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">1 solo uso</span>' : ''}
-              <span class="text-[10px] text-slate-400">${c.fechaCreacion || ''}</span>
+              <span class="text-[10px] text-slate-400">${c.fechaCreacion ? formatearFechaEspanol(c.fechaCreacion) : ''}</span>
             </div>
             <div class="flex items-center gap-1.5">
               <button type="button" onclick="copiarDato('${c.codigo}', this)" title="Copiar código" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition">
