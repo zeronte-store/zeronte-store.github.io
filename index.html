@@ -1638,6 +1638,24 @@
     </div>
   </div>
 
+<!-- ==================== MODAL AVISO CUPÓN REPETIDO / INVÁLIDO ==================== -->
+  <div id="modalAvisoCuponRepetido" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[95] backdrop-blur-xs p-4 select-none">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-gray-200 space-y-4">
+      <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-xl">
+        <i class="fa-solid fa-circle-exclamation"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-gray-900">Código no disponible</h3>
+        <p id="textoModalAvisoCupon" class="text-xs text-gray-600 mt-1.5 leading-relaxed">Ya has utilizado este código promocional anteriormente con este email.</p>
+      </div>
+      <div class="pt-1">
+        <button type="button" onclick="cerrarModalAvisoCupon()" class="w-full py-2.5 rounded-full bg-black hover:bg-zinc-800 text-white text-xs font-bold uppercase tracking-wider transition shadow-sm">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== MODAL DE COMPRA (CENTRADO EN MÓVIL Y ESCRITORIO) ==================== -->
   <div id="modalCompra" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[80] backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
     
@@ -4686,6 +4704,26 @@ function cargarFAQs() {
       if (campoOculto) campoOculto.value = textoFinalConsolidado + notaCupon;
     }
 
+    function mostrarModalAvisoCupon(mensaje) {
+      const txt = document.getElementById('textoModalAvisoCupon');
+      if (txt) txt.innerText = mensaje;
+      const m = document.getElementById('modalAvisoCuponRepetido');
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      }
+    }
+
+    function cerrarModalAvisoCupon() {
+      const m = document.getElementById('modalAvisoCuponRepetido');
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+      quitarCuponPromocional();
+      cerrarModal();
+    }
+
     function abrirModal(producto, precio, cantidad = 1) {
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
       const cantTexto = cantidad > 1 ? ` (${cantidad})` : '';
@@ -7124,7 +7162,7 @@ function cargarFAQs() {
 
         const respuesta = await res.json();
         if (respuesta.status === "error") {
-          alert(respuesta.message || "No se pudo aplicar el código promocional.");
+          mostrarModalAvisoCupon(respuesta.message || "No se pudo aplicar el código promocional.");
           btn.disabled = false;
           btn.innerHTML = `<span id="btnConfirmarTxt">CONFIRMAR</span><span id="btnPrecioTexto"></span>`;
           return;
