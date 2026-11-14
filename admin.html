@@ -1288,6 +1288,14 @@
                     <input type="number" step="0.01" min="1" id="inputValorCuponAdmin" required placeholder="Ej. 20" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none">
                   </div>
                 </div>
+                <label class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer select-none">
+                  <div class="pr-2">
+                    <span class="text-xs font-bold text-slate-800 block leading-tight">Código de un solo uso</span>
+                    <span class="text-[10px] text-slate-400 block">Se desactivará automáticamente tras usarse en un pedido.</span>
+                  </div>
+                  <input type="checkbox" id="checkCuponUnSoloUso" class="switch-ios-input">
+                  <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                </label>
                 <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
                   <button type="button" onclick="cerrarModalCrearCupon()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
                   <button type="submit" id="btnGuardarCuponAdmin" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Guardar Código</button>
@@ -8118,6 +8126,8 @@ try {
         document.getElementById('selectTipoCuponAdmin').value = 'porcentaje';
         actualizarInputValorCupon('porcentaje');
         document.getElementById('inputValorCuponAdmin').value = '20';
+        const chk = document.getElementById('checkCuponUnSoloUso');
+        if (chk) chk.checked = false;
         m.classList.remove('hidden');
       }
     }
@@ -8176,6 +8186,7 @@ try {
             <div class="flex items-center gap-2.5 flex-wrap">
               <span class="font-mono font-extrabold text-slate-900 bg-white border border-slate-300 px-2.5 py-1 rounded-lg select-all">${c.codigo}</span>
               <span class="font-bold px-2 py-0.5 rounded-md ${c.tipo === 'gratis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${descTexto}</span>
+              ${c.unSoloUso ? '<span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">1 solo uso</span>' : ''}
               <span class="text-[10px] text-slate-400">${c.fechaCreacion || ''}</span>
             </div>
             <div class="flex items-center gap-1.5">
@@ -8208,7 +8219,8 @@ try {
             clave: tokenClave || 'zeronte2026',
             codigo: codigo,
             tipo: tipo,
-            valor: valor
+            valor: valor,
+            unSoloUso: document.getElementById('checkCuponUnSoloUso')?.checked ? 'SI' : 'NO'
           })
         });
         cerrarModalCrearCupon();
