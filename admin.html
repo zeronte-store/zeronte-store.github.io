@@ -1138,7 +1138,7 @@
                     <input type="file" id="inputVideoProductoAdmin" accept="video/*" onchange="procesarVideoAdmin(this)" class="hidden">
                     <button type="button" onclick="document.getElementById('inputVideoProductoAdmin').click()" class="inline-flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold transition active:scale-95">
                       <i class="fa-solid fa-film text-slate-600"></i>
-                      <span id="txtBtnSubirVideoAdmin">Subir vídeo desde PC / iPad</span>
+                      <span id="txtBtnSubirVideoAdmin">Subir vídeo desde PC / iPad (25MB máximo)</span>
                     </button>
                     <button type="button" id="btnEliminarVideoAdmin" onclick="eliminarVideoAdmin()" class="hidden px-2.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition active:scale-95" title="Quitar vídeo">
                       <i class="fa-solid fa-trash"></i>
@@ -4428,7 +4428,7 @@ try {
       if (urlInp) urlInp.value = "";
       if (input) input.value = "";
       if (btnDel) btnDel.classList.add('hidden');
-      if (txtBtn) txtBtn.innerText = "Subir vídeo desde PC / iPad";
+      if (txtBtn) txtBtn.innerText = "Subir vídeo desde PC / iPad (25MB máximo)";
       previsualizarVideoEtsy('');
     }
 
