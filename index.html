@@ -4008,38 +4008,23 @@ function cargarFAQs() {
         const res = await fetch(`${APPS_SCRIPT_URL}?accion=validarCupon&codigo=${encodeURIComponent(codigo)}&_t=${Date.now()}`);
         const data = await res.json();
         if (data && data.status === 'success' && data.cupon) {
-          const totalUds = carritoProductos.reduce((acc, item) => acc + (item.cantidad || 1), 0);
-          if (totalUds !== 1) {
+          const c = data.cupon;
+          const resCupon = calcularDescuentoCuponElegible(c, carritoProductos);
+
+          if (!resCupon.elegible) {
             if (msgErr) {
-              msgErr.innerText = 'Este código promocional solo es válido para 1 único artículo en la cesta.';
+              if (c.alcance === 'categoria' && c.objetivo) {
+                msgErr.innerText = `Este código solo es válido para 1 artículo de la categoría "${c.objetivo}".`;
+              } else if (c.alcance === 'producto' && c.objetivo) {
+                const prodObj = catalogoCompleto.find(p => (p.id || '').toLowerCase() === c.objetivo.trim().toLowerCase());
+                const nombreObj = prodObj ? prodObj.titulo : c.objetivo;
+                msgErr.innerText = `Este código solo es válido para el artículo "${nombreObj}".`;
+              } else {
+                msgErr.innerText = 'Añade al menos 1 artículo a la cesta para aplicar este código.';
+              }
               msgErr.classList.remove('hidden');
             }
             return;
-          }
-
-          const itemUnico = carritoProductos[0];
-          const c = data.cupon;
-
-          if (c.alcance === 'categoria' && c.objetivo) {
-            const prodCat = catalogoCompleto.find(p => (p.id || '').toLowerCase() === (itemUnico.id || '').toLowerCase());
-            const catItem = (prodCat?.categoria || '').trim().toLowerCase();
-            if (catItem !== c.objetivo.trim().toLowerCase()) {
-              if (msgErr) {
-                msgErr.innerText = `Este código solo es válido para 1 artículo de la categoría "${c.objetivo}".`;
-                msgErr.classList.remove('hidden');
-              }
-              return;
-            }
-          } else if (c.alcance === 'producto' && c.objetivo) {
-            if ((itemUnico.id || '').toLowerCase() !== c.objetivo.trim().toLowerCase()) {
-              const prodObj = catalogoCompleto.find(p => (p.id || '').toLowerCase() === c.objetivo.trim().toLowerCase());
-              const nombreObj = prodObj ? prodObj.titulo : c.objetivo;
-              if (msgErr) {
-                msgErr.innerText = `Este código solo es válido para el artículo "${nombreObj}".`;
-                msgErr.classList.remove('hidden');
-              }
-              return;
-            }
           }
 
           cuponAplicadoActual = c;
@@ -4059,6 +4044,37 @@ function cargarFAQs() {
       } finally {
         if (btn) { btn.disabled = false; btn.innerText = 'Aplicar'; }
       }
+    }
+
+    function calcularDescuentoCuponElegible(cupon, items) {
+      if (!cupon || !items || items.length === 0) return { elegible: false, descuento: 0 };
+
+      let itemElegible = null;
+      if (cupon.alcance === 'categoria' && cupon.objetivo) {
+        const catBuscada = cupon.objetivo.trim().toLowerCase();
+        itemElegible = items.find(it => {
+          const prodCat = catalogoCompleto.find(p => (p.id || '').toLowerCase() === (it.id || '').toLowerCase());
+          return ((prodCat?.categoria || '').trim().toLowerCase() === catBuscada);
+        });
+      } else if (cupon.alcance === 'producto' && cupon.objetivo) {
+        const idBuscado = cupon.objetivo.trim().toLowerCase();
+        itemElegible = items.find(it => (it.id || '').toLowerCase() === idBuscado);
+      } else {
+        itemElegible = items[0];
+      }
+
+      if (!itemElegible) return { elegible: false, descuento: 0 };
+
+      const precioUnidad = itemElegible.precioUnitario || 0;
+      let descuento = 0;
+      if (cupon.tipo === 'gratis') {
+        descuento = precioUnidad;
+      } else if (cupon.tipo === 'porcentaje') {
+        descuento = precioUnidad * (cupon.valor / 100);
+      } else {
+        descuento = Math.min(precioUnidad, cupon.valor);
+      }
+      return { elegible: true, descuento: descuento };
     }
 
     function quitarCuponPromocional() {
@@ -4411,28 +4427,18 @@ function cargarFAQs() {
       const impCupon = document.getElementById('importeDescuentoCuponCesta');
       let totalConDescuento = sumaTotal;
 
-      if (cuponAplicadoActual && totalUnidades > 1) {
-        cuponAplicadoActual = null;
-        const msgErr = document.getElementById('msgErrorCuponCesta');
-        if (msgErr) {
-          msgErr.innerText = 'El código promocional se ha retirado porque solo es válido para 1 único artículo.';
-          msgErr.classList.remove('hidden');
-        }
-      }
-
       if (cuponAplicadoActual && sumaTotal > 0) {
-        let descuento = 0;
-        if (cuponAplicadoActual.tipo === 'gratis') {
-          descuento = sumaTotal;
-        } else if (cuponAplicadoActual.tipo === 'porcentaje') {
-          descuento = sumaTotal * (cuponAplicadoActual.valor / 100);
+        const resCupon = calcularDescuentoCuponElegible(cuponAplicadoActual, carritoProductos);
+        if (!resCupon.elegible) {
+          cuponAplicadoActual = null;
+          if (filaDesc) filaDesc.classList.add('hidden');
         } else {
-          descuento = Math.min(sumaTotal, cuponAplicadoActual.valor);
+          const descuento = resCupon.descuento;
+          totalConDescuento = Math.max(0, sumaTotal - descuento);
+          if (filaDesc) filaDesc.classList.remove('hidden');
+          if (txtCupon) txtCupon.innerText = `Cupón ${cuponAplicadoActual.codigo} (1 ud.)`;
+          if (impCupon) impCupon.innerText = `-${descuento.toFixed(2)} €`;
         }
-        totalConDescuento = Math.max(0, sumaTotal - descuento);
-        if (filaDesc) filaDesc.classList.remove('hidden');
-        if (txtCupon) txtCupon.innerText = `Cupón ${cuponAplicadoActual.codigo}`;
-        if (impCupon) impCupon.innerText = `-${descuento.toFixed(2)} €`;
       } else {
         if (filaDesc) filaDesc.classList.add('hidden');
       }
@@ -4698,9 +4704,11 @@ function cargarFAQs() {
       let totalGlobal = carritoProductos.reduce((acc, item) => acc + (item.precioUnitario * item.cantidad), 0);
       let notaCupon = '';
       if (cuponAplicadoActual && totalGlobal > 0) {
-        let desc = cuponAplicadoActual.tipo === 'gratis' ? totalGlobal : (cuponAplicadoActual.tipo === 'porcentaje' ? totalGlobal * (cuponAplicadoActual.valor / 100) : Math.min(totalGlobal, cuponAplicadoActual.valor));
-        totalGlobal = Math.max(0, totalGlobal - desc);
-        notaCupon = ` [CUPÓN: ${cuponAplicadoActual.codigo} (-${desc.toFixed(2)} €)]`;
+        const resCupon = calcularDescuentoCuponElegible(cuponAplicadoActual, carritoProductos);
+        if (resCupon.elegible && resCupon.descuento > 0) {
+          totalGlobal = Math.max(0, totalGlobal - resCupon.descuento);
+          notaCupon = ` [CUPÓN: ${cuponAplicadoActual.codigo} (-${resCupon.descuento.toFixed(2)} €)]`;
+        }
       }
       const totalUnidades = carritoProductos.reduce((acc, item) => acc + item.cantidad, 0);
 
