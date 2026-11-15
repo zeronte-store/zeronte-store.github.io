@@ -8519,8 +8519,37 @@ try {
         // Abrir app de Email o WhatsApp si se seleccionaron clientes
         if (canalEnvioCuponActual !== 'ninguno' && clientesSeleccionadosCupon.size > 0) {
           const elegidos = listaClientesUnificadosCupon.filter(c => clientesSeleccionadosCupon.has(c.clave));
-          const textoDescuento = tipo === 'gratis' ? '100% GRATUITO' : (tipo === 'porcentaje' ? `${valor}% de descuento` : `${valor}€ de descuento`);
-          const mensajePlantilla = `¡Hola! Muchas gracias por confiar en Zeronte.\n\nTe regalo este código promocional exclusivo de ${textoDescuento} para tu próximo encargo en nuestra tienda oficial (https://www.zerontemusic.com):\n\n🎟️ Código: ${codigo}\n\nSolo tienes que introducirlo en la cesta de compra antes de tramitar tu pedido.\n\n¡Un cordial saludo!\nAdrián Díaz | Zeronte`;
+          const textoDescuento = tipo === 'gratis' ? '100% GRATUITO' : (tipo === 'porcentaje' ? `${valor}%` : `${valor}€`);
+          const alcanceSel = document.getElementById('selectAlcanceCuponAdmin')?.value || 'todos';
+          let textoObjetivo = '';
+          if (alcanceSel === 'producto') {
+            const idProdSel = document.getElementById('selectProductoCuponAdmin')?.value || '';
+            const prodObj = listaProductosGlobal.find(p => p.id === idProdSel);
+            if (prodObj) textoObjetivo = ` para el producto "${prodObj.titulo}"`;
+          } else if (alcanceSel === 'categoria') {
+            const catSel = document.getElementById('selectCategoriaCuponAdmin')?.value || '';
+            if (catSel) textoObjetivo = ` para la categoría "${catSel}"`;
+          }
+
+          const mensajePlantilla = [
+            "¡Hola!",
+            "",
+            `Desde nuestra tienda de partituras musicales personalizadas Zeronte quisiera hacerte un regalo con este código promocional exclusivo${textoObjetivo} con un descuento ${textoDescuento} para tu próximo encargo.`,
+            "",
+            "🎟️ Código Promocional:",
+            "",
+            `${codigo}`,
+            "",
+            "Solo tienes que introducirlo en la cesta de compra antes de tramitar tu pedido y se te aplicará el descuento que has recibido.",
+            "",
+            "¡Un cordial saludo!",
+            "",
+            "Adrián Díaz | Zeronte",
+            "",
+            "www.zerontemusic.com",
+            "(+34) 641 851 073",
+            "zeronte.store@gmail.com"
+          ].join("\r\n");
 
           if (canalEnvioCuponActual === 'email') {
             const emails = elegidos.map(c => c.email).filter(Boolean);
