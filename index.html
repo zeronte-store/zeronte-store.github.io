@@ -1243,6 +1243,10 @@
 
         <!-- MINIREPRODUCTOR DE AUDIO ESTILO SOUNDCLOUD -->
         <div id="bloqueReproductorAudioFicha" class="hidden w-full bg-white border border-gray-200 rounded-2xl p-3 sm:p-3.5 shadow-xs flex items-center gap-3 select-none">
+          <div id="estadoCargandoAudioFicha" class="hidden flex items-center gap-1.5 px-2.5 py-2 rounded-full bg-gray-100 text-gray-600 text-[11px] font-semibold shrink-0">
+            <i class="fa-solid fa-circle-notch fa-spin text-amber-500"></i>
+            <span>Cargando audio...</span>
+          </div>
           <button type="button" id="btnPlayPauseAudioFicha" onclick="togglePlayAudioFicha()" class="w-10 h-10 rounded-full bg-black hover:bg-zinc-800 text-white flex items-center justify-center shrink-0 transition active:scale-95 shadow-sm">
             <i id="iconoPlayPauseAudioFicha" class="fa-solid fa-play text-xs ml-0.5"></i>
           </button>
@@ -3551,6 +3555,7 @@ function cargarFAQs() {
     }
 
     const ALTURAS_ONDA_SC = [30, 55, 40, 80, 95, 60, 45, 75, 100, 65, 35, 85, 70, 50, 90, 60, 40, 75, 95, 55, 35, 65, 85, 50, 70, 90, 45, 60, 80, 50, 35, 65, 45, 75, 55, 30];
+    const cacheAudiosFicha = {};
 
     function configurarReproductorAudioFicha(urlAudio) {
       const bloque = document.getElementById('bloqueReproductorAudioFicha');
@@ -3572,7 +3577,46 @@ function cargarFAQs() {
       }
 
       bloque.classList.remove('hidden');
-      audio.src = urlAudio.trim();
+      let urlFinal = urlAudio.trim();
+      const matchDrive = urlFinal.match(/\/d\/([a-zA-Z0-9_-]+)/) || urlFinal.match(/id=([a-zA-Z0-9_-]+)/);
+      const btnPlay = document.getElementById('btnPlayPauseAudioFicha');
+      const boxCargando = document.getElementById('estadoCargandoAudioFicha');
+
+      if (matchDrive && matchDrive[1] && (urlFinal.includes('drive.google.com') || urlFinal.includes('docs.google.com'))) {
+        const idDriveAudio = matchDrive[1];
+        if (cacheAudiosFicha[idDriveAudio]) {
+          if (boxCargando) boxCargando.classList.add('hidden');
+          if (btnPlay) btnPlay.classList.remove('hidden');
+          if (icono) icono.className = 'fa-solid fa-play text-xs ml-0.5';
+          audio.src = cacheAudiosFicha[idDriveAudio];
+          audio.load();
+        } else {
+          if (btnPlay) btnPlay.classList.add('hidden');
+          if (boxCargando) boxCargando.classList.remove('hidden');
+          fetch(`${APPS_SCRIPT_URL}?accion=obtenerAudio&id=${encodeURIComponent(idDriveAudio)}`)
+            .then(r => r.json())
+            .then(d => {
+              if (d && d.status === 'success' && d.dataUrl) {
+                cacheAudiosFicha[idDriveAudio] = d.dataUrl;
+                audio.src = d.dataUrl;
+                audio.load();
+              }
+              if (boxCargando) boxCargando.classList.add('hidden');
+              if (btnPlay) btnPlay.classList.remove('hidden');
+              if (icono) icono.className = 'fa-solid fa-play text-xs ml-0.5';
+            })
+            .catch(() => {
+              if (boxCargando) boxCargando.classList.add('hidden');
+              if (btnPlay) btnPlay.classList.remove('hidden');
+              if (icono) icono.className = 'fa-solid fa-play text-xs ml-0.5';
+            });
+        }
+      } else {
+        if (boxCargando) boxCargando.classList.add('hidden');
+        if (btnPlay) btnPlay.classList.remove('hidden');
+        audio.src = urlFinal;
+        audio.load();
+      }
 
       contOndas.innerHTML = ALTURAS_ONDA_SC.map((h, i) => `
         <div data-onda-idx="${i}" class="flex-1 rounded-full bg-gray-300 transition-colors duration-150" style="height: ${h}%;"></div>
