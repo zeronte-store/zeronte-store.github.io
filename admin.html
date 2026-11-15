@@ -1128,12 +1128,23 @@
 
                 <!-- ================= SECCIÓN VÍDEO ESTILO ETSY ================= -->
                 <div class="w-full">
-                  <label class="block text-[10px] uppercase font-bold text-slate-700 mb-0.5">Vídeo Mockup</label>
-                  <p class="text-[10px] text-slate-400 mb-1.5">Enlace directo a MP4, YouTube o Vimeo para mostrar el producto en movimiento.</p>
+                  <label class="block text-[10px] uppercase font-bold text-slate-700 mb-0.5">Vídeo Mockup (URL o Archivo)</label>
+                  <p class="text-[10px] text-slate-400 mb-1.5">Pega un enlace de YouTube/Vimeo/MP4 o sube un vídeo directamente desde tu PC o iPad.</p>
                   <div class="relative">
                     <i class="fa-solid fa-video absolute left-3 top-2.5 text-xs text-slate-400"></i>
-                    <input type="url" id="nuevoVideoUrl" oninput="previsualizarVideoEtsy(this.value)" placeholder="https://ejemplo.com/video.mp4 o https://youtube.com/watch?v=..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                    <input type="url" id="nuevoVideoUrl" oninput="document.getElementById('nuevoVideoData').value=''; previsualizarVideoEtsy(this.value)" placeholder="https://ejemplo.com/video.mp4 o https://youtube.com/watch?v=..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
                   </div>
+                  <div class="flex items-center gap-2 mt-2">
+                    <input type="file" id="inputVideoProductoAdmin" accept="video/*" onchange="procesarVideoAdmin(this)" class="hidden">
+                    <button type="button" onclick="document.getElementById('inputVideoProductoAdmin').click()" class="inline-flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold transition active:scale-95">
+                      <i class="fa-solid fa-film text-slate-600"></i>
+                      <span id="txtBtnSubirVideoAdmin">Subir vídeo desde PC / iPad</span>
+                    </button>
+                    <button type="button" id="btnEliminarVideoAdmin" onclick="eliminarVideoAdmin()" class="hidden px-2.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition active:scale-95" title="Quitar vídeo">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                  <input type="hidden" id="nuevoVideoData" value="">
                   <div id="contenedorPreviewVideo" class="hidden mt-2 rounded-xl overflow-hidden border border-slate-200 bg-black aspect-video max-h-36"></div>
                 </div>
 
@@ -4383,6 +4394,42 @@ try {
       resetearAudioAdmin();
     }
 
+    function procesarVideoAdmin(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const hidden = document.getElementById('nuevoVideoData');
+        const urlInp = document.getElementById('nuevoVideoUrl');
+        const btnDel = document.getElementById('btnEliminarVideoAdmin');
+        const txtBtn = document.getElementById('txtBtnSubirVideoAdmin');
+        if (hidden) hidden.value = e.target.result;
+        if (urlInp) urlInp.value = '';
+        if (btnDel) btnDel.classList.remove('hidden');
+        if (txtBtn) txtBtn.innerText = file.name;
+        previsualizarVideoEtsy(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetearVideoAdmin() {
+      const hidden = document.getElementById('nuevoVideoData');
+      const urlInp = document.getElementById('nuevoVideoUrl');
+      const btnDel = document.getElementById('btnEliminarVideoAdmin');
+      const txtBtn = document.getElementById('txtBtnSubirVideoAdmin');
+      const input = document.getElementById('inputVideoProductoAdmin');
+      if (hidden) hidden.value = "";
+      if (urlInp) urlInp.value = "";
+      if (input) input.value = "";
+      if (btnDel) btnDel.classList.add('hidden');
+      if (txtBtn) txtBtn.innerText = "Subir vídeo desde PC / iPad";
+      previsualizarVideoEtsy('');
+    }
+
+    function eliminarVideoAdmin() {
+      resetearVideoAdmin();
+    }
+
     function previsualizarVideoEtsy(url) {
       const cont = document.getElementById('contenedorPreviewVideo');
       if (!cont) return;
@@ -4823,7 +4870,7 @@ try {
 
       form.reset();
       resetearSlotsFotosEtsy();
-      previsualizarVideoEtsy('');
+      resetearVideoAdmin();
       resetearAudioAdmin();
       const editorDesc = document.getElementById('editorDescripcion');
       if (editorDesc) {
@@ -4872,6 +4919,12 @@ try {
           if (inputVid) {
             inputVid.value = prod.video || '';
             previsualizarVideoEtsy(prod.video || '');
+            if (prod.video) {
+              const btnDelV = document.getElementById('btnEliminarVideoAdmin');
+              const txtBtnV = document.getElementById('txtBtnSubirVideoAdmin');
+              if (btnDelV) btnDelV.classList.remove('hidden');
+              if (txtBtnV) txtBtnV.innerText = prod.video.includes('drive.google.com') || prod.video.includes('docs.google.com') ? "Vídeo guardado en Drive" : "Cambiar vídeo";
+            }
           }
 
           if (prod.audio) {
@@ -5322,7 +5375,8 @@ try {
       const ofertaLimpia = rawOferta.toString().replace('€', '').trim().replace(',', '.');
 
       const tituloVal = (document.getElementById('nuevoTitulo')?.value || '').trim();
-      const videoVal = (document.getElementById('nuevoVideoUrl')?.value || '').trim();
+      const videoDataVal = (document.getElementById('nuevoVideoData')?.value || '').trim();
+      const videoVal = videoDataVal || (document.getElementById('nuevoVideoUrl')?.value || '').trim();
 
       // Recoger sellos seleccionados
       const sellosSeleccionados = [];
