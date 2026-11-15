@@ -4008,7 +4008,41 @@ function cargarFAQs() {
         const res = await fetch(`${APPS_SCRIPT_URL}?accion=validarCupon&codigo=${encodeURIComponent(codigo)}&_t=${Date.now()}`);
         const data = await res.json();
         if (data && data.status === 'success' && data.cupon) {
-          cuponAplicadoActual = data.cupon;
+          const totalUds = carritoProductos.reduce((acc, item) => acc + (item.cantidad || 1), 0);
+          if (totalUds !== 1) {
+            if (msgErr) {
+              msgErr.innerText = 'Este código promocional solo es válido para 1 único artículo en la cesta.';
+              msgErr.classList.remove('hidden');
+            }
+            return;
+          }
+
+          const itemUnico = carritoProductos[0];
+          const c = data.cupon;
+
+          if (c.alcance === 'categoria' && c.objetivo) {
+            const prodCat = catalogoCompleto.find(p => (p.id || '').toLowerCase() === (itemUnico.id || '').toLowerCase());
+            const catItem = (prodCat?.categoria || '').trim().toLowerCase();
+            if (catItem !== c.objetivo.trim().toLowerCase()) {
+              if (msgErr) {
+                msgErr.innerText = `Este código solo es válido para 1 artículo de la categoría "${c.objetivo}".`;
+                msgErr.classList.remove('hidden');
+              }
+              return;
+            }
+          } else if (c.alcance === 'producto' && c.objetivo) {
+            if ((itemUnico.id || '').toLowerCase() !== c.objetivo.trim().toLowerCase()) {
+              const prodObj = catalogoCompleto.find(p => (p.id || '').toLowerCase() === c.objetivo.trim().toLowerCase());
+              const nombreObj = prodObj ? prodObj.titulo : c.objetivo;
+              if (msgErr) {
+                msgErr.innerText = `Este código solo es válido para el artículo "${nombreObj}".`;
+                msgErr.classList.remove('hidden');
+              }
+              return;
+            }
+          }
+
+          cuponAplicadoActual = c;
           if (inp) inp.value = '';
           actualizarBadgesYDrawerCarrito();
         } else {
@@ -4376,6 +4410,15 @@ function cargarFAQs() {
       const txtCupon = document.getElementById('textoCuponAplicadoCesta');
       const impCupon = document.getElementById('importeDescuentoCuponCesta');
       let totalConDescuento = sumaTotal;
+
+      if (cuponAplicadoActual && totalUnidades > 1) {
+        cuponAplicadoActual = null;
+        const msgErr = document.getElementById('msgErrorCuponCesta');
+        if (msgErr) {
+          msgErr.innerText = 'El código promocional se ha retirado porque solo es válido para 1 único artículo.';
+          msgErr.classList.remove('hidden');
+        }
+      }
 
       if (cuponAplicadoActual && sumaTotal > 0) {
         let descuento = 0;
