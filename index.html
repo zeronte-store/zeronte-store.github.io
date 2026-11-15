@@ -3993,11 +3993,36 @@ function cargarFAQs() {
           vid.parentNode.insertBefore(iframeVid, vid);
 
         } else {
-          // Archivo MP4 directo
+          // Archivo MP4 directo o vídeo alojado en Google Drive
           if (vid) {
             vid.classList.remove('hidden');
-            vid.src = item.url;
-            vid.play().catch(() => {});
+            const matchDriveV = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (matchDriveV && matchDriveV[1] && (url.includes('drive.google.com') || url.includes('docs.google.com'))) {
+              const idDriveVid = matchDriveV[1];
+              window.cacheVideosFicha = window.cacheVideosFicha || {};
+              if (window.cacheVideosFicha[idDriveVid]) {
+                vid.src = window.cacheVideosFicha[idDriveVid];
+                vid.play().catch(() => {});
+              } else {
+                vid.removeAttribute('src');
+                vid.load();
+                fetch(`${APPS_SCRIPT_URL}?accion=obtenerVideo&id=${encodeURIComponent(idDriveVid)}`)
+                  .then(r => r.json())
+                  .then(d => {
+                    if (d && d.status === 'success' && d.dataUrl) {
+                      window.cacheVideosFicha[idDriveVid] = d.dataUrl;
+                      if (galeriaFichaActual[indiceMediaFicha] && galeriaFichaActual[indiceMediaFicha].url === item.url) {
+                        vid.src = d.dataUrl;
+                        vid.play().catch(() => {});
+                      }
+                    }
+                  })
+                  .catch(() => {});
+              }
+            } else {
+              vid.src = item.url;
+              vid.play().catch(() => {});
+            }
           }
         }
       } else {
