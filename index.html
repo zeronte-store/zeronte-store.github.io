@@ -1241,6 +1241,24 @@
           </div>
         </div>
 
+        <!-- MINIREPRODUCTOR DE AUDIO ESTILO SOUNDCLOUD -->
+        <div id="bloqueReproductorAudioFicha" class="hidden w-full bg-white border border-gray-200 rounded-2xl p-3 sm:p-3.5 shadow-xs flex items-center gap-3 select-none">
+          <button type="button" id="btnPlayPauseAudioFicha" onclick="togglePlayAudioFicha()" class="w-10 h-10 rounded-full bg-black hover:bg-zinc-800 text-white flex items-center justify-center shrink-0 transition active:scale-95 shadow-sm">
+            <i id="iconoPlayPauseAudioFicha" class="fa-solid fa-play text-xs ml-0.5"></i>
+          </button>
+          <div class="flex-1 min-w-0 flex flex-col gap-1">
+            <div class="flex items-center justify-between text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+              <span class="flex items-center gap-1 text-gray-800"><i class="fa-solid fa-headphones text-amber-500"></i> Muestra de audio</span>
+              <span id="tiempoAudioFicha" class="font-mono text-gray-600">0:00 / 0:00</span>
+            </div>
+            <!-- Barras de onda interactivas estilo SoundCloud -->
+            <div id="ondasAudioFicha" onclick="buscarPosicionAudioFicha(event)" class="flex items-center gap-[2px] h-7 cursor-pointer w-full">
+              <!-- Generado dinámicamente por JS -->
+            </div>
+          </div>
+          <audio id="audioPlayerFicha" preload="metadata"></audio>
+        </div>
+
         <!-- BLOQUE INFERIOR: Título, Precios y Sellos -->
         <div class="space-y-3 pt-2">
           <!-- Título -->
@@ -3532,6 +3550,84 @@ function cargarFAQs() {
       recalcularSubtotalFicha();
     }
 
+    const ALTURAS_ONDA_SC = [30, 55, 40, 80, 95, 60, 45, 75, 100, 65, 35, 85, 70, 50, 90, 60, 40, 75, 95, 55, 35, 65, 85, 50, 70, 90, 45, 60, 80, 50, 35, 65, 45, 75, 55, 30];
+
+    function configurarReproductorAudioFicha(urlAudio) {
+      const bloque = document.getElementById('bloqueReproductorAudioFicha');
+      const audio = document.getElementById('audioPlayerFicha');
+      const icono = document.getElementById('iconoPlayPauseAudioFicha');
+      const tiempo = document.getElementById('tiempoAudioFicha');
+      const contOndas = document.getElementById('ondasAudioFicha');
+      if (!bloque || !audio || !contOndas) return;
+
+      audio.pause();
+      audio.currentTime = 0;
+      if (icono) icono.className = 'fa-solid fa-play text-xs ml-0.5';
+      if (tiempo) tiempo.innerText = '0:00 / 0:00';
+
+      if (!urlAudio || !urlAudio.trim()) {
+        bloque.classList.add('hidden');
+        audio.src = '';
+        return;
+      }
+
+      bloque.classList.remove('hidden');
+      audio.src = urlAudio.trim();
+
+      contOndas.innerHTML = ALTURAS_ONDA_SC.map((h, i) => `
+        <div data-onda-idx="${i}" class="flex-1 rounded-full bg-gray-300 transition-colors duration-150" style="height: ${h}%;"></div>
+      `).join('');
+
+      const fmtTiempo = (seg) => {
+        if (!seg || isNaN(seg)) return '0:00';
+        const m = Math.floor(seg / 60);
+        const s = Math.floor(seg % 60);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+      };
+
+      audio.onloadedmetadata = () => {
+        if (tiempo) tiempo.innerText = `0:00 / ${fmtTiempo(audio.duration)}`;
+      };
+
+      audio.ontimeupdate = () => {
+        const dur = audio.duration || 0;
+        const cur = audio.currentTime || 0;
+        if (tiempo) tiempo.innerText = `${fmtTiempo(cur)} / ${fmtTiempo(dur)}`;
+        const progreso = dur > 0 ? (cur / dur) : 0;
+        const barras = contOndas.children;
+        const activas = Math.floor(progreso * barras.length);
+        for (let i = 0; i < barras.length; i++) {
+          barras[i].className = `flex-1 rounded-full transition-colors duration-150 ${i <= activas && cur > 0 ? 'bg-amber-500' : 'bg-gray-300'}`;
+        }
+      };
+
+      audio.onended = () => {
+        if (icono) icono.className = 'fa-solid fa-play text-xs ml-0.5';
+      };
+    }
+
+    function togglePlayAudioFicha() {
+      const audio = document.getElementById('audioPlayerFicha');
+      const icono = document.getElementById('iconoPlayPauseAudioFicha');
+      if (!audio || !audio.src) return;
+      if (audio.paused) {
+        audio.play().catch(() => {});
+        if (icono) icono.className = 'fa-solid fa-pause text-xs';
+      } else {
+        audio.pause();
+        if (icono) icono.className = 'fa-solid fa-play text-xs ml-0.5';
+      }
+    }
+
+    function buscarPosicionAudioFicha(e) {
+      const audio = document.getElementById('audioPlayerFicha');
+      const cont = document.getElementById('ondasAudioFicha');
+      if (!audio || !cont || !audio.duration) return;
+      const rect = cont.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      audio.currentTime = ratio * audio.duration;
+    }
+
     function abrirFichaArticulo(indiceOProducto) {
       const p = typeof indiceOProducto === 'number' ? catalogoCompleto[indiceOProducto] : indiceOProducto;
       if (!p) return;
@@ -3577,6 +3673,8 @@ function cargarFAQs() {
         }
       }
       
+      configurarReproductorAudioFicha(p.audio || "");
+
       const elTit = document.getElementById('tituloFichaArticulo');
       if (elTit) elTit.innerText = tituloTrad;
 
@@ -3973,6 +4071,8 @@ function cargarFAQs() {
     }
 
     function cerrarFichaArticulo() {
+      const aud = document.getElementById('audioPlayerFicha');
+      if (aud) aud.pause();
       const vid = document.getElementById('videoPrincipalFicha');
       if (vid) vid.pause();
       const iframeVid = document.getElementById('iframePrincipalFicha');
