@@ -4782,6 +4782,9 @@ function cargarFAQs() {
       const prodInput = document.getElementById('productoInput');
       if (prodInput) prodInput.value = `${producto} (x${cantidad})`;
 
+      const precioInputEl = document.getElementById('precioInput');
+      if (precioInputEl) precioInputEl.value = precio.toFixed(2);
+
       const bloquePago = document.getElementById('bloqueMetodoPagoModal');
       if (bloquePago) bloquePago.classList.toggle('hidden', precio <= 0);
       const avisoGratis = document.getElementById('avisoPedidoGratuitoModal');
