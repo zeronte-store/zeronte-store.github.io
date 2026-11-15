@@ -1137,6 +1137,26 @@
                   <div id="contenedorPreviewVideo" class="hidden mt-2 rounded-xl overflow-hidden border border-slate-200 bg-black aspect-video max-h-36"></div>
                 </div>
 
+                <!-- ================= SECCIÓN AUDIO DE MUESTRA (DRIVE: Zeronte_Audios) ================= -->
+                <div class="w-full">
+                  <label class="block text-[10px] uppercase font-bold text-slate-700 mb-0.5">Audio de muestra (MP3 / WAV)</label>
+                  <p class="text-[10px] text-slate-400 mb-1.5">Sube una muestra de audio para que el cliente pueda escucharla en la ficha del producto.</p>
+                  <div class="flex items-center gap-2">
+                    <input type="file" id="inputAudioProductoAdmin" accept="audio/*" onchange="procesarAudioAdmin(this)" class="hidden">
+                    <button type="button" onclick="document.getElementById('inputAudioProductoAdmin').click()" class="inline-flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold transition active:scale-95">
+                      <i class="fa-solid fa-headphones text-slate-600"></i>
+                      <span id="txtBtnSubirAudioAdmin">Seleccionar archivo de audio</span>
+                    </button>
+                    <button type="button" id="btnEliminarAudioAdmin" onclick="eliminarAudioAdmin()" class="hidden px-2.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition active:scale-95" title="Quitar audio">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                  <div id="contenedorPreviewAudioAdmin" class="hidden mt-2 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                    <audio id="previewAudioAdminPlayer" controls class="w-full h-8"></audio>
+                  </div>
+                  <input type="hidden" id="nuevoAudioData" value="">
+                </div>
+
                 <!-- Editor enriquecido -->
                 <div class="w-full">
                   <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Descripción *</label>
@@ -4319,6 +4339,50 @@ try {
       }
     }
 
+    function procesarAudioAdmin(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        mostrarPreviewAudioAdmin(e.target.result, file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function mostrarPreviewAudioAdmin(srcAudio, nombreArchivo) {
+      const hidden = document.getElementById('nuevoAudioData');
+      const cont = document.getElementById('contenedorPreviewAudioAdmin');
+      const player = document.getElementById('previewAudioAdminPlayer');
+      const btnDel = document.getElementById('btnEliminarAudioAdmin');
+      const txtBtn = document.getElementById('txtBtnSubirAudioAdmin');
+
+      if (hidden) hidden.value = srcAudio;
+      if (player) player.src = srcAudio;
+      if (cont) cont.classList.remove('hidden');
+      if (btnDel) btnDel.classList.remove('hidden');
+      if (txtBtn) txtBtn.innerText = nombreArchivo || "Audio seleccionado";
+    }
+
+    function resetearAudioAdmin() {
+      const hidden = document.getElementById('nuevoAudioData');
+      const cont = document.getElementById('contenedorPreviewAudioAdmin');
+      const player = document.getElementById('previewAudioAdminPlayer');
+      const btnDel = document.getElementById('btnEliminarAudioAdmin');
+      const txtBtn = document.getElementById('txtBtnSubirAudioAdmin');
+      const input = document.getElementById('inputAudioProductoAdmin');
+
+      if (hidden) hidden.value = "";
+      if (input) input.value = "";
+      if (player) { player.pause(); player.src = ""; }
+      if (cont) cont.classList.add('hidden');
+      if (btnDel) btnDel.classList.add('hidden');
+      if (txtBtn) txtBtn.innerText = "Seleccionar archivo de audio";
+    }
+
+    function eliminarAudioAdmin() {
+      resetearAudioAdmin();
+    }
+
     function previsualizarVideoEtsy(url) {
       const cont = document.getElementById('contenedorPreviewVideo');
       if (!cont) return;
@@ -4760,6 +4824,7 @@ try {
       form.reset();
       resetearSlotsFotosEtsy();
       previsualizarVideoEtsy('');
+      resetearAudioAdmin();
       const editorDesc = document.getElementById('editorDescripcion');
       if (editorDesc) {
         editorDesc.innerHTML = '';
@@ -4807,6 +4872,10 @@ try {
           if (inputVid) {
             inputVid.value = prod.video || '';
             previsualizarVideoEtsy(prod.video || '');
+          }
+
+          if (prod.audio) {
+            mostrarPreviewAudioAdmin(prod.audio, "Audio guardado en Drive");
           }
 
           if (editorDesc) editorDesc.innerHTML = prod.descripcion || '';
@@ -5293,6 +5362,8 @@ try {
       if (porc) porc.innerText = '15%';
       if (txt) txt.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-slate-900"></i> ${idEditando ? 'Actualizando artículo...' : 'Publicando artículo en la tienda...'}`;
 
+      const audioVal = (document.getElementById('nuevoAudioData')?.value || '').trim();
+
       const datosEnvio = {
         accion: idEditando ? "editarProducto" : "crearProducto",
         clave: tokenClave || "zeronte2026",
@@ -5304,6 +5375,7 @@ try {
         categoria: categoriaVal,
         imagenes: fotosValidas,
         video: videoVal,
+        audio: audioVal,
         descripcion: descVal,
         badges: sellosSeleccionados,
         esPersonalizable: esPersonalizableVal,
@@ -5346,6 +5418,7 @@ try {
             prodMemoria.categoria = categoriaVal;
             prodMemoria.imagen = fotosValidas;
             prodMemoria.video = videoVal;
+            prodMemoria.audio = audioVal;
             prodMemoria.descripcion = descVal;
             prodMemoria.badges = sellosSeleccionados;
             prodMemoria.esPersonalizable = esPersonalizableVal;
