@@ -4397,6 +4397,12 @@ try {
     function procesarVideoAdmin(input) {
       const file = input.files && input.files[0];
       if (!file) return;
+      const mb = file.size / (1024 * 1024);
+      if (mb > 25) {
+        alert(`El vídeo pesa ${mb.toFixed(1)} MB. El máximo recomendado para subir directamente es 25 MB. Para vídeos más pesados, súbelo a Drive/YouTube y pega el enlace.`);
+        input.value = "";
+        return;
+      }
       const reader = new FileReader();
       reader.onload = function(e) {
         const hidden = document.getElementById('nuevoVideoData');
@@ -4406,7 +4412,7 @@ try {
         if (hidden) hidden.value = e.target.result;
         if (urlInp) urlInp.value = '';
         if (btnDel) btnDel.classList.remove('hidden');
-        if (txtBtn) txtBtn.innerText = file.name;
+        if (txtBtn) txtBtn.innerText = `${file.name} (${mb.toFixed(1)} MB)`;
         previsualizarVideoEtsy(e.target.result);
       };
       reader.readAsDataURL(file);
