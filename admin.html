@@ -1288,6 +1288,16 @@
                     <input type="number" step="0.01" min="1" id="inputValorCuponAdmin" required placeholder="Ej. 20" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none">
                   </div>
                 </div>
+                <div class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <label class="block text-[10px] uppercase font-bold text-slate-500">Válido para (máx. 1 artículo en cesta) *</label>
+                  <select id="selectAlcanceCuponAdmin" onchange="cambiarAlcanceCuponAdmin(this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none">
+                    <option value="todos">Cualquier artículo (1 unidad)</option>
+                    <option value="categoria">Por Categoría (1 unidad)</option>
+                    <option value="producto">Artículo Específico (1 unidad)</option>
+                  </select>
+                  <select id="selectCategoriaCuponAdmin" class="hidden w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none"></select>
+                  <select id="selectProductoCuponAdmin" class="hidden w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none"></select>
+                </div>
                 <label class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer select-none">
                   <div class="pr-2">
                     <span class="text-xs font-bold text-slate-800 block leading-tight">Código de un solo uso</span>
@@ -8119,6 +8129,13 @@ try {
 // ================= GESTIÓN DE CUPONES PROMOCIONALES (ADMIN) =================
     let listaCuponesAdmin = [];
 
+    function cambiarAlcanceCuponAdmin(alcance) {
+      const selCat = document.getElementById('selectCategoriaCuponAdmin');
+      const selProd = document.getElementById('selectProductoCuponAdmin');
+      if (selCat) selCat.classList.toggle('hidden', alcance !== 'categoria');
+      if (selProd) selProd.classList.toggle('hidden', alcance !== 'producto');
+    }
+
     function abrirModalCrearCupon() {
       const m = document.getElementById('modalCrearCupon');
       if (m) {
@@ -8128,6 +8145,22 @@ try {
         document.getElementById('inputValorCuponAdmin').value = '20';
         const chk = document.getElementById('checkCuponUnSoloUso');
         if (chk) chk.checked = false;
+
+        const selAlcance = document.getElementById('selectAlcanceCuponAdmin');
+        if (selAlcance) {
+          selAlcance.value = 'todos';
+          cambiarAlcanceCuponAdmin('todos');
+        }
+        const selCat = document.getElementById('selectCategoriaCuponAdmin');
+        if (selCat) {
+          const cats = Array.from(new Set(listaProductosGlobal.map(p => (p.categoria || '').trim()).filter(Boolean)));
+          selCat.innerHTML = cats.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('');
+        }
+        const selProd = document.getElementById('selectProductoCuponAdmin');
+        if (selProd) {
+          selProd.innerHTML = listaProductosGlobal.map(p => `<option value="${p.id}">${p.titulo} (${p.id})</option>`).join('');
+        }
+
         m.classList.remove('hidden');
       }
     }
@@ -8181,11 +8214,19 @@ try {
       }
       cont.innerHTML = listaCuponesAdmin.map(c => {
         let descTexto = c.tipo === 'gratis' ? '100% GRATUITO' : (c.tipo === 'porcentaje' ? `-${c.valor}%` : `-${Number(c.valor).toFixed(2)} €`);
+        let alcanceBadge = '';
+        if (c.alcance === 'categoria' && c.objetivo) {
+          alcanceBadge = `<span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md">Cat: ${c.objetivo}</span>`;
+        } else if (c.alcance === 'producto' && c.objetivo) {
+          const pObj = listaProductosGlobal.find(p => (p.id || '').toLowerCase() === c.objetivo.toLowerCase());
+          alcanceBadge = `<span class="text-[10px] font-bold bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md">Art: ${pObj ? pObj.titulo : c.objetivo}</span>`;
+        }
         return `
           <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/70 text-xs">
             <div class="flex items-center gap-2.5 flex-wrap">
               <span class="font-mono font-extrabold text-slate-900 bg-white border border-slate-300 px-2.5 py-1 rounded-lg select-all">${c.codigo}</span>
               <span class="font-bold px-2 py-0.5 rounded-md ${c.tipo === 'gratis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${descTexto}</span>
+              ${alcanceBadge}
               ${c.unSoloUso ? '<span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">1 solo uso</span>' : ''}
               <span class="text-[10px] text-slate-400">${c.fechaCreacion ? formatearFechaEspanol(c.fechaCreacion) : ''}</span>
             </div>
@@ -8220,7 +8261,13 @@ try {
             codigo: codigo,
             tipo: tipo,
             valor: valor,
-            unSoloUso: document.getElementById('checkCuponUnSoloUso')?.checked ? 'SI' : 'NO'
+            unSoloUso: document.getElementById('checkCuponUnSoloUso')?.checked ? 'SI' : 'NO',
+            alcance: document.getElementById('selectAlcanceCuponAdmin')?.value || 'todos',
+            objetivo: (document.getElementById('selectAlcanceCuponAdmin')?.value === 'categoria')
+              ? (document.getElementById('selectCategoriaCuponAdmin')?.value || '')
+              : ((document.getElementById('selectAlcanceCuponAdmin')?.value === 'producto')
+                ? (document.getElementById('selectProductoCuponAdmin')?.value || '')
+                : '')
           })
         });
         cerrarModalCrearCupon();
