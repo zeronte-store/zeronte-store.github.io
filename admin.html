@@ -1254,8 +1254,8 @@
           </section>
 
           <!-- MODAL: CREAR CÓDIGO PROMOCIONAL -->
-          <div id="modalCrearCupon" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-            <div class="bg-white border border-slate-200 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
+          <div id="modalCrearCupon" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 overflow-hidden">
+            <div class="bg-white border border-slate-200 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
               <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                 <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <i class="fa-solid fa-ticket text-rose-500"></i> Nuevo Código Promocional
@@ -1264,7 +1264,7 @@
                   <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
               </div>
-              <form onsubmit="guardarNuevoCuponAdmin(event)" class="p-5 space-y-4 text-xs text-slate-700">
+              <form onsubmit="guardarNuevoCuponAdmin(event)" class="p-5 space-y-4 text-xs text-slate-700 overflow-y-auto flex-1">
                 <div>
                   <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Código del Cupón *</label>
                   <div class="flex items-center gap-2">
@@ -1306,6 +1306,66 @@
                   <input type="checkbox" id="checkCuponUnSoloUso" class="switch-ios-input">
                   <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
                 </label>
+
+                <!-- NUEVO BLOQUE: ENVIAR CÓDIGO A CLIENTES (WEB + ETSY) -->
+                <div class="space-y-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <div class="flex items-center justify-between">
+                    <label class="block text-[10px] uppercase font-bold text-slate-500">Enviar código al guardar (Opcional)</label>
+                    <span id="contadorClientesSelCupon" class="text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-md hidden">0 selec.</span>
+                  </div>
+
+                  <!-- Selector de Canal -->
+                  <div class="grid grid-cols-3 gap-1.5">
+                    <button type="button" onclick="cambiarCanalEnvioCupon('ninguno', this)" class="btn-canal-cupon py-2 px-2 rounded-lg border border-slate-900 bg-slate-900 text-white font-bold text-[11px] transition active:scale-95">
+                      Solo guardar
+                    </button>
+                    <button type="button" onclick="cambiarCanalEnvioCupon('email', this)" class="btn-canal-cupon py-2 px-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 font-semibold text-[11px] transition active:scale-95 flex items-center justify-center gap-1">
+                      <i class="fa-regular fa-envelope text-blue-600"></i> Email
+                    </button>
+                    <button type="button" onclick="cambiarCanalEnvioCupon('whatsapp', this)" class="btn-canal-cupon py-2 px-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 font-semibold text-[11px] transition active:scale-95 flex items-center justify-center gap-1">
+                      <i class="fa-brands fa-whatsapp text-emerald-600"></i> WhatsApp
+                    </button>
+                  </div>
+
+                  <!-- Campo manual + Buscador con desplegable hacia arriba -->
+                  <div id="boxSelectorClientesCupon" class="hidden space-y-2.5 pt-1 relative">
+                    <!-- 1. Añadir cliente nuevo manualmente (Justo debajo de Email / WhatsApp) -->
+                    <div class="flex items-center gap-1.5">
+                      <input type="text" id="inputContactoManualCupon" placeholder="Añadir email o WhatsApp manual (ej. +34600...)" class="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-slate-500">
+                      <button type="button" onclick="agregarContactoManualCupon()" class="bg-slate-800 hover:bg-black text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition active:scale-95 shrink-0">
+                        + Añadir
+                      </button>
+                    </div>
+
+                    <!-- 2. Buscador con desplegable flotante hacia ARRIBA -->
+                    <div class="relative">
+                      <!-- Panel desplegable hacia arriba -->
+                      <div id="panelDesplegableClientesCupon" class="hidden absolute bottom-full left-0 right-0 mb-2 bg-white border border-slate-300 rounded-xl shadow-2xl z-50 p-2 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2 pb-1 border-b border-slate-100">
+                          <button type="button" onclick="toggleTodosClientesCupon()" class="text-[10px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition active:scale-95">
+                            Seleccionar / Deseleccionar todos
+                          </button>
+                          <button type="button" onclick="document.getElementById('panelDesplegableClientesCupon').classList.add('hidden')" class="text-[10px] font-bold text-slate-500 hover:text-slate-900 px-2 py-1 rounded-lg">
+                            Cerrar ✕
+                          </button>
+                        </div>
+                        <div id="listaClientesCuponContainer" class="max-h-[58vh] overflow-y-auto divide-y divide-slate-100 space-y-0.5">
+                          <!-- Se llena dinámicamente en orden alfabético -->
+                        </div>
+                      </div>
+
+                      <!-- Input buscador con botón X -->
+                      <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-[10px] text-slate-400"></i>
+                        <input type="text" id="buscadorClientesCupon" onfocus="document.getElementById('panelDesplegableClientesCupon').classList.remove('hidden')" oninput="document.getElementById('panelDesplegableClientesCupon').classList.remove('hidden'); document.getElementById('btnLimpiarBuscCupon').classList.toggle('hidden', !this.value); renderizarListaClientesCupon(this.value)" placeholder="Buscar cliente en la base de datos..." class="w-full bg-white border border-slate-300 rounded-lg pl-7 pr-7 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-slate-500">
+                        <button type="button" id="btnLimpiarBuscCupon" onclick="const inp = document.getElementById('buscadorClientesCupon'); inp.value=''; this.classList.add('hidden'); renderizarListaClientesCupon(''); inp.focus();" class="hidden absolute right-1.5 top-1 w-5 h-5 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                          <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
                   <button type="button" onclick="cerrarModalCrearCupon()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
                   <button type="submit" id="btnGuardarCuponAdmin" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">Guardar Código</button>
@@ -8157,6 +8217,154 @@ try {
       if (selProd) selProd.classList.toggle('hidden', alcance !== 'producto');
     }
 
+    let canalEnvioCuponActual = 'ninguno';
+    let clientesSeleccionadosCupon = new Set();
+    let listaClientesUnificadosCupon = [];
+
+    function obtenerClientesUnificadosParaCupon() {
+      const mapa = {};
+      const normalizar = (s) => (s || '').toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      // 1. Clientes de la Tienda Web
+      (listaPedidosGlobal || []).forEach(p => {
+        const nom = (p.nombre || '').trim();
+        const email = (p.email || '').trim().toLowerCase();
+        const tel = (p.telefono || '').toString().replace(/[^0-9+]/g, '');
+        if (!nom && !email) return;
+        const clave = email || normalizar(nom);
+        if (!mapa[clave]) {
+          mapa[clave] = { clave, nombre: nom || 'Cliente Web', email, telefono: tel, origen: 'Web' };
+        } else {
+          if (!mapa[clave].email && email) mapa[clave].email = email;
+          if (!mapa[clave].telefono && tel) mapa[clave].telefono = tel;
+        }
+      });
+
+      // 2. Clientes históricos de Etsy
+      (typeof listaVentasEtsyGlobal !== 'undefined' ? listaVentasEtsyGlobal : []).forEach(v => {
+        const nom = (v.nombre || '').trim();
+        const email = (v.email || '').trim().toLowerCase();
+        if (!nom && !email) return;
+        const clave = email || normalizar(nom);
+        if (!mapa[clave]) {
+          mapa[clave] = { clave, nombre: nom || 'Cliente Etsy', email, telefono: '', origen: 'Etsy' };
+        } else {
+          if (!mapa[clave].email && email) mapa[clave].email = email;
+          if (mapa[clave].origen === 'Web') mapa[clave].origen = 'Web + Etsy';
+        }
+      });
+
+      return Object.values(mapa).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+    }
+
+    function cambiarCanalEnvioCupon(canal, btn) {
+      canalEnvioCuponActual = canal;
+      document.querySelectorAll('.btn-canal-cupon').forEach(b => {
+        b.className = 'btn-canal-cupon py-2 px-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 font-semibold text-[11px] transition active:scale-95 flex items-center justify-center gap-1';
+      });
+      if (btn) {
+        btn.className = 'btn-canal-cupon py-2 px-2 rounded-lg border border-slate-900 bg-slate-900 text-white font-bold text-[11px] transition active:scale-95 flex items-center justify-center gap-1';
+      }
+
+      const box = document.getElementById('boxSelectorClientesCupon');
+      const badge = document.getElementById('contadorClientesSelCupon');
+      if (canal === 'ninguno') {
+        if (box) box.classList.add('hidden');
+        if (badge) badge.classList.add('hidden');
+      } else {
+        if (box) box.classList.remove('hidden');
+        if (badge) badge.classList.remove('hidden');
+        renderizarListaClientesCupon(document.getElementById('buscadorClientesCupon')?.value || '');
+      }
+    }
+
+    function toggleSeleccionClienteCupon(clave, checked) {
+      if (checked) clientesSeleccionadosCupon.add(clave);
+      else clientesSeleccionadosCupon.delete(clave);
+      const badge = document.getElementById('contadorClientesSelCupon');
+      if (badge) badge.innerText = `${clientesSeleccionadosCupon.size} selec.`;
+    }
+
+    function renderizarListaClientesCupon(filtro = '') {
+      const cont = document.getElementById('listaClientesCuponContainer');
+      if (!cont) return;
+      const q = filtro.toLowerCase().trim();
+
+      const filtrados = listaClientesUnificadosCupon.filter(c => {
+        if (canalEnvioCuponActual === 'email' && !c.email) return false;
+        if (canalEnvioCuponActual === 'whatsapp' && !c.telefono) return false;
+        if (!q) return true;
+        return `${c.nombre} ${c.email} ${c.telefono}`.toLowerCase().includes(q);
+      });
+
+      if (filtrados.length === 0) {
+        cont.innerHTML = `<p class="text-[11px] text-slate-400 text-center py-3">No hay clientes con ${canalEnvioCuponActual === 'whatsapp' ? 'WhatsApp' : 'Email'} disponible.</p>`;
+        return;
+      }
+
+      cont.innerHTML = filtrados.map(c => {
+        const marcado = clientesSeleccionadosCupon.has(c.clave) ? 'checked' : '';
+        const datoSecundario = canalEnvioCuponActual === 'whatsapp' ? c.telefono : c.email;
+        return `
+          <label class="flex items-center gap-2 p-1.5 rounded-md hover:bg-slate-50 cursor-pointer text-xs">
+            <input type="checkbox" ${marcado} onchange="toggleSeleccionClienteCupon('${c.clave.replace(/'/g, "\\'")}', this.checked)" class="rounded border-slate-300 text-slate-900 focus:ring-0">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-slate-800 truncate">${c.nombre}</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 font-semibold">${c.origen}</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block truncate">${datoSecundario}</span>
+            </div>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function toggleTodosClientesCupon() {
+      const filtro = (document.getElementById('buscadorClientesCupon')?.value || '').toLowerCase().trim();
+      const visibles = listaClientesUnificadosCupon.filter(c => {
+        if (canalEnvioCuponActual === 'email' && !c.email) return false;
+        if (canalEnvioCuponActual === 'whatsapp' && !c.telefono) return false;
+        if (!filtro) return true;
+        return `${c.nombre} ${c.email} ${c.telefono}`.toLowerCase().includes(filtro);
+      });
+      if (visibles.length === 0) return;
+
+      const todosMarcados = visibles.every(c => clientesSeleccionadosCupon.has(c.clave));
+      visibles.forEach(c => {
+        if (todosMarcados) clientesSeleccionadosCupon.delete(c.clave);
+        else clientesSeleccionadosCupon.add(c.clave);
+      });
+
+      const badge = document.getElementById('contadorClientesSelCupon');
+      if (badge) badge.innerText = `${clientesSeleccionadosCupon.size} selec.`;
+      renderizarListaClientesCupon(filtro);
+    }
+
+    function agregarContactoManualCupon() {
+      const inp = document.getElementById('inputContactoManualCupon');
+      const val = (inp ? inp.value : '').trim();
+      if (!val) return;
+
+      const esEmail = val.includes('@');
+      const clave = 'manual_' + val.toLowerCase();
+
+      if (!listaClientesUnificadosCupon.some(c => c.clave === clave)) {
+        listaClientesUnificadosCupon.unshift({
+          clave: clave,
+          nombre: esEmail ? val.split('@')[0] : 'Cliente Nuevo',
+          email: esEmail ? val.toLowerCase() : '',
+          telefono: esEmail ? '' : val.replace(/[^0-9+]/g, ''),
+          origen: 'Manual'
+        });
+      }
+      clientesSeleccionadosCupon.add(clave);
+      if (inp) inp.value = '';
+      const badge = document.getElementById('contadorClientesSelCupon');
+      if (badge) badge.innerText = `${clientesSeleccionadosCupon.size} selec.`;
+      renderizarListaClientesCupon(document.getElementById('buscadorClientesCupon')?.value || '');
+    }
+
     function abrirModalCrearCupon() {
       const m = document.getElementById('modalCrearCupon');
       if (m) {
@@ -8166,6 +8374,16 @@ try {
         document.getElementById('inputValorCuponAdmin').value = '20';
         const chk = document.getElementById('checkCuponUnSoloUso');
         if (chk) chk.checked = false;
+
+        // Resetear selector de clientes y canal
+        clientesSeleccionadosCupon.clear();
+        listaClientesUnificadosCupon = obtenerClientesUnificadosParaCupon();
+        const busq = document.getElementById('buscadorClientesCupon');
+        if (busq) busq.value = '';
+        const badge = document.getElementById('contadorClientesSelCupon');
+        if (badge) badge.innerText = '0 selec.';
+        const btnSoloGuardar = document.querySelector('.btn-canal-cupon');
+        cambiarCanalEnvioCupon('ninguno', btnSoloGuardar);
 
         const selAlcance = document.getElementById('selectAlcanceCuponAdmin');
         if (selAlcance) {
@@ -8182,6 +8400,7 @@ try {
           selProd.innerHTML = listaProductosGlobal.map(p => `<option value="${p.id}">${p.titulo} (${p.id})</option>`).join('');
         }
 
+        document.body.style.overflow = 'hidden';
         m.classList.remove('hidden');
       }
     }
@@ -8189,6 +8408,7 @@ try {
     function cerrarModalCrearCupon() {
       const m = document.getElementById('modalCrearCupon');
       if (m) m.classList.add('hidden');
+      document.body.style.overflow = '';
     }
 
     function generarCodigoCuponAleatorio() {
@@ -8291,6 +8511,32 @@ try {
                 : '')
           })
         });
+        // Abrir app de Email o WhatsApp si se seleccionaron clientes
+        if (canalEnvioCuponActual !== 'ninguno' && clientesSeleccionadosCupon.size > 0) {
+          const elegidos = listaClientesUnificadosCupon.filter(c => clientesSeleccionadosCupon.has(c.clave));
+          const textoDescuento = tipo === 'gratis' ? '100% GRATUITO' : (tipo === 'porcentaje' ? `${valor}% de descuento` : `${valor}€ de descuento`);
+          const mensajePlantilla = `¡Hola! Muchas gracias por confiar en Zeronte.\n\nTe regalo este código promocional exclusivo de ${textoDescuento} para tu próximo encargo en nuestra tienda oficial (https://www.zerontemusic.com):\n\n🎟️ Código: ${codigo}\n\nSolo tienes que introducirlo en la cesta de compra antes de tramitar tu pedido.\n\n¡Un cordial saludo!\nAdrián Díaz | Zeronte`;
+
+          if (canalEnvioCuponActual === 'email') {
+            const emails = elegidos.map(c => c.email).filter(Boolean);
+            if (emails.length > 0) {
+              const asunto = encodeURIComponent(`🎁 Tu código promocional exclusivo de Zeronte: ${codigo}`);
+              const cuerpo = encodeURIComponent(mensajePlantilla);
+              const mailto = emails.length === 1
+                ? `mailto:${emails[0]}?subject=${asunto}&body=${cuerpo}`
+                : `mailto:zeronte.store@gmail.com?bcc=${emails.join(',')}&subject=${asunto}&body=${cuerpo}`;
+              window.location.href = mailto;
+            }
+          } else if (canalEnvioCuponActual === 'whatsapp') {
+            const primerConTel = elegidos.find(c => c.telefono);
+            if (primerConTel) {
+              const telLimpio = primerConTel.telefono.replace(/[^0-9]/g, '');
+              const urlWa = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensajePlantilla)}`;
+              window.open(urlWa, '_blank');
+            }
+          }
+        }
+
         cerrarModalCrearCupon();
         await cargarCuponesAdmin();
       } catch (err) {
