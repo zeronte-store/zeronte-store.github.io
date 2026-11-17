@@ -7843,7 +7843,7 @@ let temporizadorCuentaAtrasEtsy = null;
     }
 
     (async function registrarVisitaZeronte() {
-      // 1. Si eres tú (has iniciado sesión alguna vez en admin o estás en modo desarrollo/localhost), NUNCA registrará la visita
+      // 1. Excluir al administrador y entornos de prueba
       const esAdminOPropio = localStorage.getItem('zeronte_google_auth') === 'true' || 
                              localStorage.getItem('zeronte_modo_admin') === 'true' ||
                              window.location.hostname === 'localhost' ||
@@ -7852,21 +7852,14 @@ let temporizadorCuentaAtrasEtsy = null;
                              window.location.pathname.includes('__vfs__');
       if (esAdminOPropio) return;
 
-      // 2. Control diario estilo Etsy/Amazon: 1 visita por visitante al día.
-      // Si entra varias veces el mismo día no se duplica. Si vuelve mañana o en días posteriores, sí cuenta.
-      const hoyClave = new Date().toISOString().slice(0, 10); // Formato YYYY-MM-DD
-      const ultimaVisitaRegistrada = localStorage.getItem('zeronte_ultima_visita_fecha');
-      if (ultimaVisitaRegistrada === hoyClave) return;
+      // 2. Candado estricto anti-duplicados: comprobar y BLOQUEAR de inmediato antes de cualquier fetch
+      const hoyClave = new Date().toISOString().slice(0, 10);
+      if (localStorage.getItem('zeronte_ultima_visita_fecha') === hoyClave) return;
+      if (window._visitaEnProceso) return;
+      window._visitaEnProceso = true;
+      localStorage.setItem('zeronte_ultima_visita_fecha', hoyClave);
 
-      let pais = "Desconocido";
-      let ciudad = "Desconocida";
-      try {
-        const geo = await fetch('https://ipwho.is/').then(r => r.json());
-        if (geo && geo.country) pais = geo.country;
-        if (geo && geo.city) ciudad = geo.city;
-      } catch (e) {}
-
-      // Identificar de forma legible y clara la página visitada
+      // 3. Identificar página de entrada de forma legible
       let nombrePagina = "Inicio (Tienda)";
       const paramsUrl = new URLSearchParams(window.location.search);
       const prodParam = paramsUrl.get('prod');
@@ -7875,6 +7868,31 @@ let temporizadorCuentaAtrasEtsy = null;
       } else if (window.location.hash) {
         nombrePagina = `Sección: ${window.location.hash.replace('#', '')}`;
       }
+
+      // 4. Doble servicio de geolocalización (si uno falla o se bloquea, salta el segundo)
+      let pais = "";
+      let ciudad = "";
+      try {
+        const geo1 = await fetch('https://ipwho.is/').then(r => r.json());
+        if (geo1 && geo1.success !== false) {
+          pais = geo1.country || "";
+          ciudad = geo1.city || "";
+        }
+      } catch (e) {}
+
+      if (!pais) {
+        try {
+          const geo2 = await fetch('https://ipapi.co/json/').then(r => r.json());
+          if (geo2) {
+            pais = geo2.country_name || "";
+            ciudad = geo2.city || "";
+          }
+        } catch (e) {}
+      }
+
+      // Si el navegador bloqueó completamente ambas consultas, registrar con etiqueta clara
+      if (!pais) pais = "Ubicación oculta";
+      if (!ciudad) ciudad = "Privada";
 
       try {
         await fetch(APPS_SCRIPT_URL, {
@@ -7889,7 +7907,6 @@ let temporizadorCuentaAtrasEtsy = null;
             dispositivo: /Mobi|Android/i.test(navigator.userAgent) ? "Móvil" : "PC"
           })
         });
-        localStorage.setItem('zeronte_ultima_visita_fecha', hoyClave);
       } catch (e) {}
     })();
   </script>
