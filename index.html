@@ -7866,6 +7866,16 @@ let temporizadorCuentaAtrasEtsy = null;
         if (geo && geo.city) ciudad = geo.city;
       } catch (e) {}
 
+      // Identificar de forma legible y clara la página visitada
+      let nombrePagina = "Inicio (Tienda)";
+      const paramsUrl = new URLSearchParams(window.location.search);
+      const prodParam = paramsUrl.get('prod');
+      if (prodParam) {
+        nombrePagina = `Ficha: ${prodParam}`;
+      } else if (window.location.hash) {
+        nombrePagina = `Sección: ${window.location.hash.replace('#', '')}`;
+      }
+
       try {
         await fetch(APPS_SCRIPT_URL, {
           method: "POST",
@@ -7875,7 +7885,7 @@ let temporizadorCuentaAtrasEtsy = null;
             accion: "registrarVisita",
             pais: pais,
             ciudad: ciudad,
-            pagina: window.location.pathname || "/",
+            pagina: nombrePagina,
             dispositivo: /Mobi|Android/i.test(navigator.userAgent) ? "Móvil" : "PC"
           })
         });
