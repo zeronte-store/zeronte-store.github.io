@@ -7843,7 +7843,19 @@ let temporizadorCuentaAtrasEtsy = null;
     }
 
     (async function registrarVisitaZeronte() {
-      if (sessionStorage.getItem('zeronte_visita_ok')) return;
+      // 1. Si eres tú (has iniciado sesión alguna vez en admin o estás en modo desarrollo/localhost), NUNCA registrará la visita
+      const esAdminOPropio = localStorage.getItem('zeronte_google_auth') === 'true' || 
+                             localStorage.getItem('zeronte_modo_admin') === 'true' ||
+                             window.location.hostname === 'localhost' ||
+                             window.location.hostname === '127.0.0.1';
+      if (esAdminOPropio) return;
+
+      // 2. Control diario estilo Etsy/Amazon: 1 visita por visitante al día.
+      // Si entra varias veces el mismo día no se duplica. Si vuelve mañana o en días posteriores, sí cuenta.
+      const hoyClave = new Date().toISOString().slice(0, 10); // Formato YYYY-MM-DD
+      const ultimaVisitaRegistrada = localStorage.getItem('zeronte_ultima_visita_fecha');
+      if (ultimaVisitaRegistrada === hoyClave) return;
+
       let pais = "Desconocido";
       let ciudad = "Desconocida";
       try {
@@ -7851,6 +7863,7 @@ let temporizadorCuentaAtrasEtsy = null;
         if (geo && geo.country) pais = geo.country;
         if (geo && geo.city) ciudad = geo.city;
       } catch (e) {}
+
       try {
         await fetch(APPS_SCRIPT_URL, {
           method: "POST",
@@ -7860,11 +7873,11 @@ let temporizadorCuentaAtrasEtsy = null;
             accion: "registrarVisita",
             pais: pais,
             ciudad: ciudad,
-            pagina: window.location.pathname,
+            pagina: window.location.pathname || "/",
             dispositivo: /Mobi|Android/i.test(navigator.userAgent) ? "Móvil" : "PC"
           })
         });
-        sessionStorage.setItem('zeronte_visita_ok', '1');
+        localStorage.setItem('zeronte_ultima_visita_fecha', hoyClave);
       } catch (e) {}
     })();
   </script>
