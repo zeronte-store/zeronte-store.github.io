@@ -4242,11 +4242,151 @@ try {
       }
     }
 
+    let bloqueoClickSlot = false;
+
     function clickSlotFoto(indice) {
+      if (bloqueoClickSlot) return;
       slotFotoActivo = indice;
       const input = document.getElementById('inputFotosEtsyHidden');
       if (input) input.click();
     }
+
+    function renderizarSlotsFotosEtsy() {
+      for (let i = 0; i < 10; i++) {
+        const img = document.getElementById(`imgSlot-${i}`);
+        const slot = document.getElementById(`slotFoto-${i}`);
+        const src = arrayFotosEtsy[i] || "";
+        if (img) {
+          if (src) {
+            img.src = src;
+            img.classList.remove('hidden');
+          } else {
+            img.src = "";
+            img.classList.add('hidden');
+          }
+        }
+        if (slot) {
+          const btnDel = slot.querySelector('.btn-del-slot');
+          if (btnDel) btnDel.classList.toggle('hidden', !src);
+          slot.style.cursor = src ? 'grab' : 'pointer';
+        }
+      }
+      actualizarContadorFotosEtsy();
+    }
+
+    (function inicializarArrastreSlotsFotos() {
+      let dragOrigenIdx = null;
+      let startX = 0;
+      let startY = 0;
+      let arrastrando = false;
+      let ghostEl = null;
+      let slotDestinoActual = null;
+
+      const limpiarEstilosDestino = () => {
+        if (slotDestinoActual) {
+          slotDestinoActual.classList.remove('ring-2', 'ring-slate-900', 'scale-105');
+          slotDestinoActual = null;
+        }
+      };
+
+      for (let i = 0; i < 10; i++) {
+        const slot = document.getElementById(`slotFoto-${i}`);
+        if (!slot) continue;
+        slot.style.touchAction = 'none';
+        slot.classList.add('select-none');
+
+        const img = document.getElementById(`imgSlot-${i}`);
+        if (img) {
+          img.draggable = false;
+          img.addEventListener('dragstart', (ev) => ev.preventDefault());
+        }
+
+        slot.addEventListener('pointerdown', (e) => {
+          if (e.target.closest('.btn-del-slot')) return;
+          if (!arrayFotosEtsy[i]) return;
+          if (e.button !== undefined && e.button !== 0) return;
+
+          e.preventDefault();
+          dragOrigenIdx = i;
+          startX = e.clientX;
+          startY = e.clientY;
+          arrastrando = false;
+        });
+      }
+
+      window.addEventListener('pointermove', (e) => {
+        if (dragOrigenIdx === null) return;
+
+        const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
+        if (!arrastrando && dist > 6) {
+          arrastrando = true;
+          const slotOrigen = document.getElementById(`slotFoto-${dragOrigenIdx}`);
+          if (slotOrigen) slotOrigen.classList.add('opacity-40');
+
+          ghostEl = document.createElement('img');
+          ghostEl.src = arrayFotosEtsy[dragOrigenIdx];
+          ghostEl.style.position = 'fixed';
+          ghostEl.style.width = '64px';
+          ghostEl.style.height = '64px';
+          ghostEl.style.objectFit = 'cover';
+          ghostEl.style.borderRadius = '12px';
+          ghostEl.style.pointerEvents = 'none';
+          ghostEl.style.zIndex = '9999';
+          ghostEl.style.opacity = '0.9';
+          ghostEl.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+          ghostEl.style.transform = 'scale(1.08)';
+          document.body.appendChild(ghostEl);
+        }
+
+        if (arrastrando && ghostEl) {
+          ghostEl.style.left = `${e.clientX - 32}px`;
+          ghostEl.style.top = `${e.clientY - 32}px`;
+
+          limpiarEstilosDestino();
+          const elBajo = document.elementFromPoint(e.clientX, e.clientY);
+          const slotBajo = elBajo ? elBajo.closest('.slot-foto-etsy') : null;
+          if (slotBajo && slotBajo.id !== `slotFoto-${dragOrigenIdx}`) {
+            slotDestinoActual = slotBajo;
+            slotDestinoActual.classList.add('ring-2', 'ring-slate-900', 'scale-105');
+          }
+        }
+      });
+
+      const finalizarArrastre = (e) => {
+        if (dragOrigenIdx === null) return;
+
+        const slotOrigen = document.getElementById(`slotFoto-${dragOrigenIdx}`);
+        if (slotOrigen) slotOrigen.classList.remove('opacity-40');
+
+        if (arrastrando) {
+          bloqueoClickSlot = true;
+          setTimeout(() => { bloqueoClickSlot = false; }, 60);
+
+          const elBajo = document.elementFromPoint(e.clientX, e.clientY);
+          const slotBajo = elBajo ? elBajo.closest('.slot-foto-etsy') : null;
+          if (slotBajo && slotBajo.id && slotBajo.id.startsWith('slotFoto-')) {
+            const destIdx = parseInt(slotBajo.id.replace('slotFoto-', ''), 10);
+            if (!isNaN(destIdx) && destIdx !== dragOrigenIdx) {
+              const temp = arrayFotosEtsy[dragOrigenIdx];
+              arrayFotosEtsy[dragOrigenIdx] = arrayFotosEtsy[destIdx];
+              arrayFotosEtsy[destIdx] = temp;
+              renderizarSlotsFotosEtsy();
+            }
+          }
+        }
+
+        if (ghostEl) {
+          ghostEl.remove();
+          ghostEl = null;
+        }
+        limpiarEstilosDestino();
+        dragOrigenIdx = null;
+        arrastrando = false;
+      };
+
+      window.addEventListener('pointerup', finalizarArrastre);
+      window.addEventListener('pointercancel', finalizarArrastre);
+    })();
 
     function eliminarFotoSlot(indice) {
       arrayFotosEtsy[indice] = "";
