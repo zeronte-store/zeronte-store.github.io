@@ -2689,9 +2689,9 @@ function cargarFAQs() {
             const inM = document.getElementById('buscadorTiendaMovil');
             const textoActivo = ((inW ? inW.value : '') || (inM ? inM.value : '')).trim();
             if (textoActivo) {
-              buscarProductos(textoActivo);
+              buscarProductos(textoActivo, true);
             } else {
-              filtrarCategoria(categoriaSeleccionada, null);
+              filtrarCategoria(categoriaSeleccionada, null, true);
             }
             actualizarSelectProductosResena();
             verificarAperturaProductoPorUrl();
@@ -2809,9 +2809,9 @@ function cargarFAQs() {
           const inM = document.getElementById('buscadorTiendaMovil');
           const textoActivo = ((inW ? inW.value : '') || (inM ? inM.value : '')).trim();
           if (textoActivo) {
-            buscarProductos(textoActivo);
+            buscarProductos(textoActivo, true);
           } else {
-            filtrarCategoria(categoriaSeleccionada, null);
+            filtrarCategoria(categoriaSeleccionada, null, true);
           }
           actualizarSelectProductosResena();
           verificarAperturaProductoPorUrl();
@@ -5243,7 +5243,7 @@ let temporizadorCuentaAtrasEtsy = null;
       return copia;
     }
 
-    function filtrarCategoria(cat, btn) {
+    function filtrarCategoria(cat, btn, mantenerPagina = false) {
       categoriaSeleccionada = cat;
       const t = TRADUCCIONES[idiomaActual] || TRADUCCIONES.es;
 
@@ -5310,7 +5310,7 @@ let temporizadorCuentaAtrasEtsy = null;
         filtrados = catalogoCompleto.filter(p => (p.categoria || '').trim().toLowerCase() === cat.trim().toLowerCase());
       }
 
-      paginaCatalogoActual = 1;
+      if (!mantenerPagina) paginaCatalogoActual = 1;
       renderizarCatalogo(aplicarOrden(filtrados));
     }
 
@@ -5332,7 +5332,7 @@ let temporizadorCuentaAtrasEtsy = null;
       if (bE) bE.focus();
     }
 
-    function buscarProductos(termino) {
+    function buscarProductos(termino, mantenerPagina = false) {
       const qCrudo = termino.trim();
       const qNorm = quitarTildesTexto(termino);
 
@@ -5383,7 +5383,7 @@ let temporizadorCuentaAtrasEtsy = null;
       // Renderizar sugerencias en los menús desplegables en vivo
       actualizarDesplegablesSugerencias(qNorm, resultados);
 
-      paginaCatalogoActual = 1;
+      if (!mantenerPagina) paginaCatalogoActual = 1;
       renderizarCatalogo(aplicarOrden(resultados));
     }
 
