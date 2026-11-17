@@ -2283,9 +2283,9 @@ function cargarFAQs() {
       cargarCatalogoDinamico();
       aplicarIdioma(idiomaActual);
 
-      // Auto-refresco en segundo plano solo si el usuario está en español para evitar parpadeos de traducción
+      // Auto-refresco en segundo plano solo si el usuario está en español y no está viendo un carrusel
       setInterval(() => {
-        if (idiomaActual === 'es') {
+        if (idiomaActual === 'es' && !window.carruselPortadaActivo) {
           cargarCatalogoDinamico();
           actualizarContadorVentas();
         }
@@ -3035,30 +3035,53 @@ function cargarFAQs() {
     }
 
     function cambiarImagenConTransicion(img, nuevaUrl) {
-      if (!img || !nuevaUrl) return;
-      img.style.transition = 'opacity 0.16s ease, transform 0.18s ease';
-      img.style.opacity = '0.25';
-      img.style.transform = 'scale(1.03)';
-      setTimeout(() => {
+      if (!img || !nuevaUrl || !img.parentElement) return;
+      const pre = new Image();
+      pre.onload = () => {
+        if (!img.parentElement) return;
+        const imgSaliente = img.cloneNode();
+        imgSaliente.style.position = 'absolute';
+        imgSaliente.style.inset = '0';
+        imgSaliente.style.width = '100%';
+        imgSaliente.style.height = '100%';
+        imgSaliente.style.transition = 'none';
+        imgSaliente.style.transform = 'translateX(0)';
+        imgSaliente.style.pointerEvents = 'none';
+        img.parentElement.appendChild(imgSaliente);
+
+        img.style.transition = 'none';
+        img.style.transform = 'translateX(100%)';
         img.src = nuevaUrl;
-        img.style.opacity = '1';
-        img.style.transform = '';
-      }, 140);
+        void img.offsetWidth;
+
+        imgSaliente.style.transition = 'transform 0.6s ease-out';
+        imgSaliente.style.transform = 'translateX(-100%)';
+        img.style.transition = 'transform 0.6s ease-out';
+        img.style.transform = 'translateX(0)';
+
+        setTimeout(() => {
+          if (imgSaliente.parentNode) imgSaliente.remove();
+        }, 620);
+      };
+      pre.src = nuevaUrl;
     }
 
     function iniciarCarruselPortada(contenedor, fotos) {
+      window.carruselPortadaActivo = true;
       if (!Array.isArray(fotos) || fotos.length <= 1) return;
       const img = contenedor.querySelector('img');
       if (!img) return;
       detenerCarruselPortada(contenedor, fotos[0]);
+      fotos.forEach(url => { const pre = new Image(); pre.src = url; });
       let idx = 0;
       contenedor._carruselTimer = setInterval(() => {
         idx = (idx + 1) % fotos.length;
         cambiarImagenConTransicion(img, fotos[idx]);
-      }, 900);
+      }, 1800);
     }
 
     function detenerCarruselPortada(contenedor, fotoInicial) {
+      window.carruselPortadaActivo = false;
       if (contenedor._carruselTimer) {
         clearInterval(contenedor._carruselTimer);
         contenedor._carruselTimer = null;
