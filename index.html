@@ -1208,6 +1208,10 @@
             <div class="relative w-full aspect-square bg-[#f9f9f9] rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center shadow-xs group/visor">
               <img id="imgPrincipalFicha" src="" alt="Mockup" class="w-full h-full object-cover aspect-square cursor-pointer" onclick="abrirZoomEtsy()">
               <video id="videoPrincipalFicha" controls class="w-full h-full object-cover aspect-square hidden" playsinline></video>
+              <div id="overlayCargandoVideoFicha" class="hidden absolute inset-0 bg-black/75 backdrop-blur-xs flex flex-col items-center justify-center gap-2.5 text-white z-10 pointer-events-none">
+                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
+                <span class="text-xs sm:text-sm font-semibold tracking-wide">Cargando vídeo...</span>
+              </div>
 
               <!-- Botón de expandir estilo Etsy garantizado y visible -->
               <button id="btnAbrirZoomHover" type="button" onclick="abrirZoomEtsy()" class="absolute top-3 left-3 w-10 h-10 rounded-full bg-white hover:bg-gray-100 text-gray-800 shadow-xl flex items-center justify-center transition-all duration-200 opacity-0 group-hover/visor:opacity-100 z-20 active:scale-95 border border-gray-200" title="Ampliar imagen">
@@ -1297,6 +1301,7 @@
                 <div id="wrapperImagenZoom" class="w-fit h-fit max-h-[88vh] overflow-hidden flex items-center justify-center cursor-zoom-in" onclick="alternarLupaZoom(event)" onmousemove="moverLupaZoom(event)">
                   <img id="imgZoomEtsy" src="" alt="Detalle ampliado" class="max-w-[85vw] sm:max-w-[78vw] max-h-[88vh] w-auto h-auto object-contain select-none pointer-events-auto transition-[transform] duration-75 block">
                 </div>
+                <video id="videoZoomEtsy" controls playsinline class="hidden max-w-[85vw] sm:max-w-[78vw] max-h-[88vh] w-auto h-auto object-contain rounded-2xl bg-black"></video>
 
                 <!-- Flechas de navegación pegadas sobre los laterales de la imagen -->
                 <button type="button" onclick="navegarMediaFicha(-1); sincronizarVisorZoom();" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-xl flex items-center justify-center text-sm sm:text-base transition active:scale-95 z-20">
@@ -3907,6 +3912,22 @@ function cargarFAQs() {
 
       if (p.video) {
         galeriaFichaActual.push({ tipo: 'video', url: p.video });
+        const urlVidPre = (p.video || '').trim();
+        const matchDrivePre = urlVidPre.match(/\/d\/([a-zA-Z0-9_-]+)/) || urlVidPre.match(/id=([a-zA-Z0-9_-]+)/);
+        if (matchDrivePre && matchDrivePre[1] && (urlVidPre.includes('drive.google.com') || urlVidPre.includes('docs.google.com'))) {
+          const idDrivePre = matchDrivePre[1];
+          window.cacheVideosFicha = window.cacheVideosFicha || {};
+          if (!window.cacheVideosFicha[idDrivePre]) {
+            fetch(`${APPS_SCRIPT_URL}?accion=obtenerVideo&id=${encodeURIComponent(idDrivePre)}`)
+              .then(r => r.json())
+              .then(d => {
+                if (d && d.status === 'success' && d.dataUrl) {
+                  window.cacheVideosFicha[idDrivePre] = d.dataUrl;
+                }
+              })
+              .catch(() => {});
+          }
+        }
       }
 
       galeriaFichaActual = galeriaFichaActual.slice(0, 10);
@@ -3994,6 +4015,7 @@ function cargarFAQs() {
 
         } else {
           // Archivo MP4 directo o vídeo alojado en Google Drive
+          const overlayVid = document.getElementById('overlayCargandoVideoFicha');
           if (vid) {
             vid.classList.remove('hidden');
             const matchDriveV = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
@@ -4001,14 +4023,17 @@ function cargarFAQs() {
               const idDriveVid = matchDriveV[1];
               window.cacheVideosFicha = window.cacheVideosFicha || {};
               if (window.cacheVideosFicha[idDriveVid]) {
+                if (overlayVid) overlayVid.classList.add('hidden');
                 vid.src = window.cacheVideosFicha[idDriveVid];
                 vid.play().catch(() => {});
               } else {
+                if (overlayVid) overlayVid.classList.remove('hidden');
                 vid.removeAttribute('src');
                 vid.load();
                 fetch(`${APPS_SCRIPT_URL}?accion=obtenerVideo&id=${encodeURIComponent(idDriveVid)}`)
                   .then(r => r.json())
                   .then(d => {
+                    if (overlayVid) overlayVid.classList.add('hidden');
                     if (d && d.status === 'success' && d.dataUrl) {
                       window.cacheVideosFicha[idDriveVid] = d.dataUrl;
                       if (galeriaFichaActual[indiceMediaFicha] && galeriaFichaActual[indiceMediaFicha].url === item.url) {
@@ -4017,9 +4042,13 @@ function cargarFAQs() {
                       }
                     }
                   })
-                  .catch(() => {});
+                  .catch(() => {
+                    if (overlayVid) overlayVid.classList.add('hidden');
+                  });
               }
             } else {
+              if (overlayVid) overlayVid.classList.remove('hidden');
+              vid.oncanplay = () => { if (overlayVid) overlayVid.classList.add('hidden'); };
               vid.src = item.url;
               vid.play().catch(() => {});
             }
@@ -4027,6 +4056,8 @@ function cargarFAQs() {
         }
       } else {
         // Modo Foto
+        const overlayVid = document.getElementById('overlayCargandoVideoFicha');
+        if (overlayVid) overlayVid.classList.add('hidden');
         if (vid) {
           vid.pause();
           vid.classList.add('hidden');
@@ -4062,6 +4093,11 @@ function cargarFAQs() {
     }
 
     function cerrarZoomEtsy() {
+      const vidZoom = document.getElementById('videoZoomEtsy');
+      if (vidZoom) {
+        vidZoom.pause();
+        vidZoom.classList.add('hidden');
+      }
       const modal = document.getElementById('modalZoomEtsy');
       if (modal) {
         modal.classList.add('hidden');
@@ -4073,9 +4109,35 @@ function cargarFAQs() {
     function sincronizarVisorZoom() {
       if (!galeriaFichaActual || !galeriaFichaActual[indiceMediaFicha]) return;
       const item = galeriaFichaActual[indiceMediaFicha];
+      const wrapperImg = document.getElementById('wrapperImagenZoom');
       const imgZoom = document.getElementById('imgZoomEtsy');
-      if (imgZoom) {
-        imgZoom.src = item.url;
+      const vidZoom = document.getElementById('videoZoomEtsy');
+      const vidPrincipal = document.getElementById('videoPrincipalFicha');
+
+      if (item.tipo === 'video') {
+        if (wrapperImg) wrapperImg.classList.add('hidden');
+        if (vidZoom) {
+          vidZoom.classList.remove('hidden');
+          const url = (item.url || '').trim();
+          const matchDriveV = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+          if (matchDriveV && matchDriveV[1] && window.cacheVideosFicha && window.cacheVideosFicha[matchDriveV[1]]) {
+            vidZoom.src = window.cacheVideosFicha[matchDriveV[1]];
+          } else if (vidPrincipal && vidPrincipal.src) {
+            vidZoom.src = vidPrincipal.src;
+          } else {
+            vidZoom.src = url;
+          }
+          vidZoom.play().catch(() => {});
+        }
+      } else {
+        if (vidZoom) {
+          vidZoom.pause();
+          vidZoom.classList.add('hidden');
+        }
+        if (wrapperImg) wrapperImg.classList.remove('hidden');
+        if (imgZoom) {
+          imgZoom.src = item.url;
+        }
       }
       resetearLupa();
 
@@ -4084,7 +4146,11 @@ function cargarFAQs() {
       if (cMiniaturas) {
         cMiniaturas.innerHTML = galeriaFichaActual.map((it, idx) => `
           <button type="button" onclick="seleccionarMediaFicha(${idx})" class="w-16 h-16 sm:w-20 sm:h-20 aspect-square rounded-xl overflow-hidden border-2 transition flex-shrink-0 bg-white shadow-md ${idx === indiceMediaFicha ? 'border-white ring-2 ring-black opacity-100 scale-105' : 'border-transparent opacity-75 hover:opacity-100'}">
-            <img src="${it.url}" class="w-full h-full object-cover">
+            ${it.tipo === 'video' ? `
+              <div class="w-full h-full bg-black text-white flex items-center justify-center text-xs aspect-square"><i class="fa-solid fa-play"></i></div>
+            ` : `
+              <img src="${it.url}" class="w-full h-full object-cover">
+            `}
           </button>
         `).join('');
       }
@@ -4128,7 +4194,8 @@ function cargarFAQs() {
         img.style.transformOrigin = "center center";
       }
       if (wrapper) {
-        wrapper.className = "w-full h-full overflow-hidden flex items-center justify-center cursor-zoom-in";
+        wrapper.classList.remove("cursor-zoom-out");
+        wrapper.classList.add("cursor-zoom-in");
       }
     }
 
