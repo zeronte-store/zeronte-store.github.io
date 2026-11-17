@@ -252,7 +252,10 @@
               <div class="flex flex-col sm:flex-row items-center gap-2 w-full">
                 <div class="relative flex-grow w-full">
                   <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-                  <input type="text" id="inputBuscador" oninput="filtrarPedidos()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                  <input type="text" id="inputBuscador" oninput="document.getElementById('btnLimpiarBuscadorPedidos').classList.toggle('hidden', !this.value); filtrarPedidos()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                  <button type="button" id="btnLimpiarBuscadorPedidos" onclick="const inp = document.getElementById('inputBuscador'); inp.value=''; this.classList.add('hidden'); filtrarPedidos(); inp.focus();" title="Limpiar búsqueda" class="hidden absolute right-2 top-2 w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition active:scale-90">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                  </button>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto w-full sm:w-auto">
                   <select id="ordenPedidos" onchange="cambiarOrdenPedidos(this.value)" class="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-slate-400 focus:bg-white transition cursor-pointer">
@@ -343,7 +346,10 @@
           <div class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 shadow-xs">
             <div class="relative w-full">
               <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-              <input type="text" id="buscadorProcesarPedidos" oninput="filtrarPedidosPorProcesar()" placeholder="Buscar por cliente, ID de pedido, producto..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+              <input type="text" id="buscadorProcesarPedidos" oninput="document.getElementById('btnLimpiarBuscadorProcesar').classList.toggle('hidden', !this.value); filtrarPedidosPorProcesar()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+              <button type="button" id="btnLimpiarBuscadorProcesar" onclick="const inp = document.getElementById('buscadorProcesarPedidos'); inp.value=''; this.classList.add('hidden'); filtrarPedidosPorProcesar(); inp.focus();" title="Limpiar búsqueda" class="hidden absolute right-2 top-2 w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition active:scale-90">
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
             </div>
           </div>
 
@@ -677,7 +683,10 @@
                     <div class="flex items-center justify-between gap-2">
                       <div class="relative flex-grow">
                         <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-[10px] text-slate-400"></i>
-                        <input type="text" id="buscadorProdsLote" oninput="filtrarCheckboxProdsLote(this.value)" placeholder="Buscar productos para marcar..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+                        <input type="text" id="buscadorProdsLote" oninput="document.getElementById('btnLimpiarBuscLote').classList.toggle('hidden', !this.value); filtrarCheckboxProdsLote(this.value)" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-7 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+                        <button type="button" id="btnLimpiarBuscLote" onclick="const inp = document.getElementById('buscadorProdsLote'); inp.value=''; this.classList.add('hidden'); filtrarCheckboxProdsLote(''); inp.focus();" title="Limpiar búsqueda" class="hidden absolute right-1.5 top-1 w-5 h-5 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition">
+                          <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
                       </div>
                       <button type="button" onclick="toggleTodosCheckboxLote()" class="shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-xl hover:bg-emerald-100 transition">
                         Marcar / Desmarcar todos
@@ -1461,7 +1470,7 @@
                       <button type="button" onclick="aplicarPlantillaCampana('Navidad Especial', 25)" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px]">Navidad (-25%)</button>
                     </div>
                   </div>
-                  <input type="text" id="ofertaNombre" required placeholder="Ej. Black Friday Zeronte" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                  <input type="text" id="ofertaNombre" required placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
                 </div>
 
                 <!-- Tipo de descuento y Valor -->
@@ -1585,7 +1594,10 @@
             <!-- Buscador de Clientes -->
             <div class="relative w-full mb-5">
               <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-              <input type="text" id="inputBuscadorClientes" oninput="filtrarListaClientes()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+              <input type="text" id="inputBuscadorClientes" oninput="document.getElementById('btnLimpiarBuscadorClientes').classList.toggle('hidden', !this.value); filtrarListaClientes()" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+              <button type="button" id="btnLimpiarBuscadorClientes" onclick="const inp = document.getElementById('inputBuscadorClientes'); inp.value=''; this.classList.add('hidden'); filtrarListaClientes(); inp.focus();" title="Limpiar búsqueda" class="hidden absolute right-2 top-2 w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition active:scale-90">
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
             </div>
 
             <!-- Listado / Tarjetas de Clientes -->
@@ -1660,7 +1672,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div class="relative flex-grow">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-xs text-slate-400"></i>
-                <input type="text" id="buscadorEtsyInput" oninput="document.getElementById('btnLimpiarBuscadorEtsy').classList.toggle('hidden', !this.value); filtrarVentasEtsy(true)" placeholder="Buscar por cliente, email, producto, país..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                <input type="text" id="buscadorEtsyInput" oninput="document.getElementById('btnLimpiarBuscadorEtsy').classList.toggle('hidden', !this.value); filtrarVentasEtsy(true)" placeholder="" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
                 <button type="button" id="btnLimpiarBuscadorEtsy" onclick="const inp = document.getElementById('buscadorEtsyInput'); inp.value=''; this.classList.add('hidden'); filtrarVentasEtsy(true); inp.focus();" title="Limpiar búsqueda" class="hidden absolute right-2 top-1.5 w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition active:scale-90">
                   <i class="fa-solid fa-xmark text-xs"></i>
                 </button>
