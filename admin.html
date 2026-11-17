@@ -2299,7 +2299,7 @@ function extraerUrlArchivoPedido(pedido) {
 
       if (esEntornoPruebas || localStorage.getItem('zeronte_google_auth') === 'true') {
         tokenClave = "zeronte2026";
-        cargarDatos(true);
+        cargarDatos(false);
       } else {
         inicializarBotonGoogle();
       }
