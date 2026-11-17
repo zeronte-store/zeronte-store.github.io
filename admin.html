@@ -10,6 +10,7 @@
   <!-- Motor PDF Vectorial con texto nativo -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -1659,7 +1660,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div class="relative flex-grow">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-xs text-slate-400"></i>
-                <input type="text" id="buscadorEtsyInput" oninput="filtrarVentasEtsy()" placeholder="Buscar por cliente, email, producto, país..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                <input type="text" id="buscadorEtsyInput" oninput="document.getElementById('btnLimpiarBuscadorEtsy').classList.toggle('hidden', !this.value); filtrarVentasEtsy(true)" placeholder="Buscar por cliente, email, producto, país..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                <button type="button" id="btnLimpiarBuscadorEtsy" onclick="const inp = document.getElementById('buscadorEtsyInput'); inp.value=''; this.classList.add('hidden'); filtrarVentasEtsy(true); inp.focus();" title="Limpiar búsqueda" class="hidden absolute right-2 top-1.5 w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition active:scale-90">
+                  <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
               </div>
 
               <div class="flex items-center gap-1.5 shrink-0 overflow-x-auto no-scrollbar">
@@ -1704,6 +1708,11 @@
               <div id="contenedorRankingPaisesEtsy" class="space-y-2 text-xs">
                 <!-- Render dinámico -->
               </div>
+              <div class="pt-3 border-t border-slate-100 flex justify-center">
+                <div class="w-full max-w-[260px] h-[230px]">
+                  <canvas id="graficaQuesitoPaisesEtsy"></canvas>
+                </div>
+              </div>
             </div>
 
             <!-- 2. Top Productos Más Vendidos -->
@@ -1716,6 +1725,11 @@
               </div>
               <div id="contenedorRankingProductosEtsy" class="space-y-2 text-xs">
                 <!-- Render dinámico -->
+              </div>
+              <div class="pt-3 border-t border-slate-100 flex justify-center">
+                <div class="w-full max-w-[260px] h-[230px]">
+                  <canvas id="graficaQuesitoProductosEtsy"></canvas>
+                </div>
               </div>
             </div>
 
@@ -8187,6 +8201,67 @@ try {
               </div>
             `;
           }).join('');
+        }
+      }
+
+      // Renderizar gráficas tipo quesito (Top Países y Top Productos)
+      if (typeof Chart !== 'undefined') {
+        const coloresQuesito = ['#F1641E', '#0F172A', '#2563EB', '#10B981', '#F59E0B', '#94A3B8'];
+
+        const prepararDatosQuesito = (ordenados) => {
+          const top5 = ordenados.slice(0, 5);
+          const resto = ordenados.slice(5).reduce((acc, item) => acc + item[1], 0);
+          const labels = top5.map(i => i[0].length > 22 ? i[0].slice(0, 22) + '...' : i[0]);
+          const data = top5.map(i => i[1]);
+          if (resto > 0) {
+            labels.push('Otros');
+            data.push(resto);
+          }
+          return { labels, data };
+        };
+
+        const ctxPaises = document.getElementById('graficaQuesitoPaisesEtsy');
+        if (ctxPaises) {
+          if (window.chartPaisesEtsy) window.chartPaisesEtsy.destroy();
+          const dPaises = prepararDatosQuesito(paisesOrdenados);
+          if (dPaises.data.length > 0) {
+            window.chartPaisesEtsy = new Chart(ctxPaises, {
+              type: 'doughnut',
+              data: {
+                labels: dPaises.labels,
+                datasets: [{ data: dPaises.data, backgroundColor: coloresQuesito, borderWidth: 2, borderColor: '#ffffff' }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, family: 'Montserrat' } } }
+                }
+              }
+            });
+          }
+        }
+
+        const ctxProds = document.getElementById('graficaQuesitoProductosEtsy');
+        if (ctxProds) {
+          if (window.chartProductosEtsy) window.chartProductosEtsy.destroy();
+          const dProds = prepararDatosQuesito(prodsOrdenados);
+          if (dProds.data.length > 0) {
+            window.chartProductosEtsy = new Chart(ctxProds, {
+              type: 'doughnut',
+              data: {
+                labels: dProds.labels,
+                datasets: [{ data: dProds.data, backgroundColor: coloresQuesito, borderWidth: 2, borderColor: '#ffffff' }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, family: 'Montserrat' } } }
+                }
+              }
+            });
+          }
         }
       }
 
