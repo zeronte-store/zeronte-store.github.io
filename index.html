@@ -7847,7 +7847,9 @@ let temporizadorCuentaAtrasEtsy = null;
       const esAdminOPropio = localStorage.getItem('zeronte_google_auth') === 'true' || 
                              localStorage.getItem('zeronte_modo_admin') === 'true' ||
                              window.location.hostname === 'localhost' ||
-                             window.location.hostname === '127.0.0.1';
+                             window.location.hostname === '127.0.0.1' ||
+                             window.location.hostname.includes('onecompiler') ||
+                             window.location.pathname.includes('__vfs__');
       if (esAdminOPropio) return;
 
       // 2. Control diario estilo Etsy/Amazon: 1 visita por visitante al día.
