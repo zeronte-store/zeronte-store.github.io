@@ -2258,7 +2258,7 @@ function extraerUrlArchivoPedido(pedido) {
       if (datosUsuario && datosUsuario.email && datosUsuario.email.toLowerCase() === EMAIL_AUTORIZADO.toLowerCase()) {
         if (msgError) msgError.classList.add('hidden');
         tokenClave = "zeronte2026";
-        sessionStorage.setItem('zeronte_google_auth', 'true');
+        localStorage.setItem('zeronte_google_auth', 'true');
         cargarDatos();
       } else {
         if (msgError) {
@@ -2297,7 +2297,7 @@ function extraerUrlArchivoPedido(pedido) {
       // Si NO estás en ninguno de tus dominios oficiales, entra directo (OneCompiler / local)
       const esEntornoPruebas = !dominiosOficiales.includes(window.location.hostname);
 
-      if (esEntornoPruebas || sessionStorage.getItem('zeronte_google_auth') === 'true') {
+      if (esEntornoPruebas || localStorage.getItem('zeronte_google_auth') === 'true') {
         tokenClave = "zeronte2026";
         cargarDatos(true);
       } else {
@@ -5938,7 +5938,10 @@ try {
         clearInterval(temporizadorAutoRefresco);
         temporizadorAutoRefresco = null;
       }
+      localStorage.removeItem('zeronte_google_auth');
+      sessionStorage.removeItem('zeronte_google_auth');
       tokenClave = "";
+      inicializarBotonGoogle();
 
       // Restablecer el botón de entrar para que no se quede bloqueado en "Cargando..."
       const btn = document.getElementById('btnEntrar');
