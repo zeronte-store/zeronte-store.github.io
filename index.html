@@ -3032,6 +3032,18 @@ function cargarFAQs() {
       cont.innerHTML = html;
     }
 
+    function cambiarImagenConTransicion(img, nuevaUrl) {
+      if (!img || !nuevaUrl) return;
+      img.style.transition = 'opacity 0.16s ease, transform 0.18s ease';
+      img.style.opacity = '0.25';
+      img.style.transform = 'scale(1.03)';
+      setTimeout(() => {
+        img.src = nuevaUrl;
+        img.style.opacity = '1';
+        img.style.transform = '';
+      }, 140);
+    }
+
     function iniciarCarruselPortada(contenedor, fotos) {
       if (!Array.isArray(fotos) || fotos.length <= 1) return;
       const img = contenedor.querySelector('img');
@@ -3040,7 +3052,7 @@ function cargarFAQs() {
       let idx = 0;
       contenedor._carruselTimer = setInterval(() => {
         idx = (idx + 1) % fotos.length;
-        img.src = fotos[idx];
+        cambiarImagenConTransicion(img, fotos[idx]);
       }, 900);
     }
 
@@ -3050,7 +3062,11 @@ function cargarFAQs() {
         contenedor._carruselTimer = null;
       }
       const img = contenedor.querySelector('img');
-      if (img && fotoInicial) img.src = fotoInicial;
+      if (img) {
+        img.style.opacity = '1';
+        img.style.transform = '';
+        if (fotoInicial) img.src = fotoInicial;
+      }
     }
 
     function avanzarFotoPortadaMovil(btn, fotos) {
@@ -3061,7 +3077,7 @@ function cargarFAQs() {
       let idx = parseInt(btn.getAttribute('data-idx') || '0', 10);
       idx = (idx + 1) % fotos.length;
       btn.setAttribute('data-idx', idx);
-      img.src = fotos[idx];
+      cambiarImagenConTransicion(img, fotos[idx]);
       const contador = btn.querySelector('.contador-foto-movil');
       if (contador) contador.innerText = `${idx + 1}/${fotos.length}`;
     }
