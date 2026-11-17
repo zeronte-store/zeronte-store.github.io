@@ -3032,7 +3032,39 @@ function cargarFAQs() {
       cont.innerHTML = html;
     }
 
-    let temporizadorCuentaAtrasEtsy = null;
+    function iniciarCarruselPortada(contenedor, fotos) {
+      if (!Array.isArray(fotos) || fotos.length <= 1) return;
+      const img = contenedor.querySelector('img');
+      if (!img) return;
+      detenerCarruselPortada(contenedor, fotos[0]);
+      let idx = 0;
+      contenedor._carruselTimer = setInterval(() => {
+        idx = (idx + 1) % fotos.length;
+        img.src = fotos[idx];
+      }, 900);
+    }
+
+    function detenerCarruselPortada(contenedor, fotoInicial) {
+      if (contenedor._carruselTimer) {
+        clearInterval(contenedor._carruselTimer);
+        contenedor._carruselTimer = null;
+      }
+      const img = contenedor.querySelector('img');
+      if (img && fotoInicial) img.src = fotoInicial;
+    }
+
+    function avanzarFotoPortadaMovil(btn, fotos) {
+      if (!Array.isArray(fotos) || fotos.length <= 1) return;
+      const contenedor = btn.closest('.aspect-square');
+      const img = contenedor ? contenedor.querySelector('img') : null;
+      if (!img) return;
+      let idx = parseInt(btn.getAttribute('data-idx') || '0', 10);
+      idx = (idx + 1) % fotos.length;
+      btn.setAttribute('data-idx', idx);
+      img.src = fotos[idx];
+      const contador = btn.querySelector('.contador-foto-movil');
+      if (contador) contador.innerText = `${idx + 1}/${fotos.length}`;
+    }
 
     function formatearTiempoEtsy(ms) {
       if (ms <= 0) return "0:00:00";
@@ -3135,13 +3167,22 @@ function cargarFAQs() {
           seccionDest.classList.remove('hidden');
           gridDest.innerHTML = destacados.map((p) => {
             let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
+            let listaFotos = [imgUrl];
             try {
-              if (Array.isArray(p.imagen)) imgUrl = p.imagen[0] || imgUrl;
-              else if (typeof p.imagen === 'string' && (p.imagen.trim().startsWith('[') || p.imagen.trim().startsWith('{'))) {
+              if (Array.isArray(p.imagen) && p.imagen.length > 0) {
+                listaFotos = p.imagen.filter(Boolean);
+                imgUrl = listaFotos[0] || imgUrl;
+              } else if (typeof p.imagen === 'string' && (p.imagen.trim().startsWith('[') || p.imagen.trim().startsWith('{'))) {
                 const arr = JSON.parse(p.imagen);
-                imgUrl = Array.isArray(arr) && arr.length > 0 ? arr[0] : imgUrl;
-              } else if (p.imagen) imgUrl = p.imagen;
-            } catch(e) { if (p.imagen) imgUrl = p.imagen; }
+                if (Array.isArray(arr) && arr.length > 0) {
+                  listaFotos = arr.filter(Boolean);
+                  imgUrl = listaFotos[0] || imgUrl;
+                }
+              } else if (p.imagen) {
+                imgUrl = p.imagen;
+                listaFotos = [imgUrl];
+              }
+            } catch(e) { if (p.imagen) { imgUrl = p.imagen; listaFotos = [imgUrl]; } }
 
             const precioBase = parseFloat(p.precio) || 0;
             const precioOferta = p.precioOferta ? parseFloat(String(p.precioOferta).replace(',', '.')) : null;
@@ -3154,8 +3195,14 @@ function cargarFAQs() {
             return `
               <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick='abrirFichaArticulo(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
                 <div>
-                  <div class="aspect-square bg-gray-100 relative overflow-hidden">
+                  <div class="aspect-square bg-gray-100 relative overflow-hidden" onmouseenter='iniciarCarruselPortada(this, ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")})' onmouseleave='detenerCarruselPortada(this, "${imgUrl.replace(/"/g, "&quot;")}")'>
                     <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    ${listaFotos.length > 1 ? `
+                      <button type="button" data-idx="0" onclick='event.stopPropagation(); avanzarFotoPortadaMovil(this, ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")})' class="lg:hidden absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-xs flex items-center gap-1 z-10 shadow-sm active:scale-90 transition">
+                        <i class="fa-solid fa-images"></i>
+                        <span class="contador-foto-movil">1/${listaFotos.length}</span>
+                      </button>
+                    ` : ''}
                     <div class="absolute top-2 left-2 flex flex-col gap-1 items-start z-10 pointer-events-none">
                       <span class="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                         <i class="fa-solid fa-star text-[9px]"></i>
@@ -3249,17 +3296,23 @@ function cargarFAQs() {
 
       contenedor.innerHTML = listaPaginada.map((p, idxLista) => {
         let imgUrl = 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=600&q=80';
+        let listaFotos = [imgUrl];
         try {
-          if (Array.isArray(p.imagen)) {
-            imgUrl = p.imagen[0] || imgUrl;
+          if (Array.isArray(p.imagen) && p.imagen.length > 0) {
+            listaFotos = p.imagen.filter(Boolean);
+            imgUrl = listaFotos[0] || imgUrl;
           } else if (typeof p.imagen === 'string' && (p.imagen.trim().startsWith('[') || p.imagen.trim().startsWith('{'))) {
             const arrParsed = JSON.parse(p.imagen);
-            imgUrl = Array.isArray(arrParsed) && arrParsed.length > 0 ? arrParsed[0] : imgUrl;
+            if (Array.isArray(arrParsed) && arrParsed.length > 0) {
+              listaFotos = arrParsed.filter(Boolean);
+              imgUrl = listaFotos[0] || imgUrl;
+            }
           } else if (p.imagen) {
             imgUrl = p.imagen;
+            listaFotos = [imgUrl];
           }
         } catch(e) {
-          if (p.imagen) imgUrl = p.imagen;
+          if (p.imagen) { imgUrl = p.imagen; listaFotos = [imgUrl]; }
         }
 
         const precioBase = parseFloat(p.precio) || 0;
@@ -3275,8 +3328,14 @@ function cargarFAQs() {
         return `
           <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(catalogoFiltradoActual[${inicioPag + idxLista}])">
             <div>
-              <div class="aspect-square bg-gray-100 relative overflow-hidden">
+              <div class="aspect-square bg-gray-100 relative overflow-hidden" onmouseenter='iniciarCarruselPortada(this, ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")})' onmouseleave='detenerCarruselPortada(this, "${imgUrl.replace(/"/g, "&quot;")}")'>
                 <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                ${listaFotos.length > 1 ? `
+                  <button type="button" data-idx="0" onclick='event.stopPropagation(); avanzarFotoPortadaMovil(this, ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")})' class="lg:hidden absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-xs flex items-center gap-1 z-10 shadow-sm active:scale-90 transition">
+                    <i class="fa-solid fa-images"></i>
+                    <span class="contador-foto-movil">1/${listaFotos.length}</span>
+                  </button>
+                ` : ''}
                 <div class="absolute top-2 left-2 flex flex-col gap-1 items-start z-10 pointer-events-none">
                   ${p.masVendido ? `
                     <span class="inline-flex items-center gap-1 bg-[#FDEBD2] text-[#593d00] text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm border-b border-dashed border-[#593d00]">
