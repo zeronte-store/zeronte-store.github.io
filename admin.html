@@ -156,6 +156,14 @@
             <span class="sidebar-text truncate">Estadísticas</span>
           </button>
 
+          <!-- BOTÓN TRÁFICO WEB -->
+          <button onclick="cambiarSeccion('trafico', this)" title="Tráfico Web" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-globe text-sm text-blue-600"></i>
+            </div>
+            <span class="sidebar-text truncate">Tráfico Web</span>
+          </button>
+
           <!-- BOTÓN FINANZAS -->
           <button onclick="cambiarSeccion('finanzas', this)" title="Finanzas" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
@@ -1933,6 +1941,62 @@
           </section>
         </div>
 
+        <!-- ================= SECCIÓN: TRÁFICO WEB ================= -->
+        <div id="vistaSeccionTrafico" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <i class="fa-solid fa-globe text-blue-600"></i> Tráfico y Ubicaciones Web
+              </h1>
+              <p class="text-xs text-slate-400 mt-0.5">Visitantes en tiempo real, países y ciudades desde donde acceden a zerontemusic.com</p>
+            </div>
+          </div>
+
+          <!-- Tarjetas Resumen -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-white border border-slate-200 border-l-4 border-l-blue-500 p-4 rounded-2xl shadow-xs">
+              <span class="text-slate-400 text-[10px] uppercase tracking-wider font-semibold block">Visitas Totales</span>
+              <p id="statTraficoTotal" class="text-2xl font-bold text-slate-900 mt-1">0</p>
+            </div>
+            <div class="bg-white border border-slate-200 border-l-4 border-l-emerald-500 p-4 rounded-2xl shadow-xs">
+              <span class="text-slate-400 text-[10px] uppercase tracking-wider font-semibold block">Visitas Hoy</span>
+              <p id="statTraficoHoy" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
+            </div>
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+              <span class="text-slate-400 text-[10px] uppercase tracking-wider font-semibold block">País Principal</span>
+              <p id="statTraficoTopPais" class="text-base sm:text-lg font-bold text-slate-900 mt-1 truncate">---</p>
+            </div>
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+              <span class="text-slate-400 text-[10px] uppercase tracking-wider font-semibold block">Ciudad Principal</span>
+              <p id="statTraficoTopCiudad" class="text-base sm:text-lg font-bold text-slate-900 mt-1 truncate">---</p>
+            </div>
+          </div>
+
+          <!-- Gráficas de Países y Ciudades -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-earth-americas text-blue-500"></i> Top Países
+              </h3>
+              <div class="h-[240px] w-full"><canvas id="chartTraficoPaises"></canvas></div>
+            </div>
+            <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-city text-emerald-500"></i> Top Ciudades
+              </h3>
+              <div class="h-[240px] w-full"><canvas id="chartTraficoCiudades"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Tabla de Últimas Visitas -->
+          <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3">Últimos Visitantes Registrados</h3>
+            <div id="contenedorTablaVisitas" class="space-y-2 text-xs">
+              <p class="text-slate-400 text-center py-6">Aún no hay visitas registradas.</p>
+            </div>
+          </section>
+        </div>
+
         <!-- ================= SECCIÓN: FINANZAS ================= -->
         <div id="vistaSeccionFinanzas" class="hidden space-y-6">
           <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs">
@@ -2448,6 +2512,7 @@ try {
           if (k.startsWith('pago_pedido_')) localStorage.removeItem(k);
         });
 
+        listaVisitasGlobal = data.visitas || [];
         const pedidosServidor = data.pedidos || [];
         listaPedidosGlobal = pedidosServidor.filter(p => !idsEliminadosLocalmente.has(p.id));
 
@@ -6132,6 +6197,8 @@ try {
       const vEtsy = document.getElementById('vistaSeccionVentasEtsy');
       if (vEtsy) vEtsy.classList.add('hidden');
       document.getElementById('vistaSeccionEstadisticas').classList.add('hidden');
+      const vTrafico = document.getElementById('vistaSeccionTrafico');
+      if (vTrafico) vTrafico.classList.add('hidden');
       document.getElementById('vistaSeccionFinanzas').classList.add('hidden');
       document.getElementById('vistaSeccionMensajes').classList.add('hidden');
 
@@ -6167,6 +6234,9 @@ try {
       } else if (seccion === 'estadisticas') {
         document.getElementById('vistaSeccionEstadisticas').classList.remove('hidden');
         renderizarEstadisticas();
+      } else if (seccion === 'trafico') {
+        if (vTrafico) vTrafico.classList.remove('hidden');
+        renderizarTraficoWeb();
       } else if (seccion === 'finanzas') {
         document.getElementById('vistaSeccionFinanzas').classList.remove('hidden');
         renderizarFinanzas();
@@ -8950,6 +9020,83 @@ try {
       } catch (e) {}
     }
 
+    // ==================== SECCIÓN: TRÁFICO WEB ====================
+    let listaVisitasGlobal = [];
+
+    function renderizarTraficoWeb() {
+      const total = listaVisitasGlobal.length;
+      const elTotal = document.getElementById('statTraficoTotal');
+      if (elTotal) elTotal.innerText = total;
+
+      const hoy = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Madrid' });
+      const visitasHoy = listaVisitasGlobal.filter(v => (v.fecha || '').includes(hoy)).length;
+      const elHoy = document.getElementById('statTraficoHoy');
+      if (elHoy) elHoy.innerText = visitasHoy;
+
+      const mapaPaises = {};
+      const mapaCiudades = {};
+      listaVisitasGlobal.forEach(v => {
+        const pais = (v.pais || 'Desconocido').trim();
+        const ciudad = (v.ciudad || 'Desconocida').trim();
+        mapaPaises[pais] = (mapaPaises[pais] || 0) + 1;
+        mapaCiudades[ciudad] = (mapaCiudades[ciudad] || 0) + 1;
+      });
+
+      const topPaises = Object.entries(mapaPaises).sort((a, b) => b[1] - a[1]);
+      const topCiudades = Object.entries(mapaCiudades).sort((a, b) => b[1] - a[1]);
+
+      const elTopPais = document.getElementById('statTraficoTopPais');
+      const elTopCiudad = document.getElementById('statTraficoTopCiudad');
+      if (elTopPais) elTopPais.innerText = topPaises[0] ? `${topPaises[0][0]} (${topPaises[0][1]})` : '---';
+      if (elTopCiudad) elTopCiudad.innerText = topCiudades[0] ? `${topCiudades[0][0]} (${topCiudades[0][1]})` : '---';
+
+      if (typeof Chart !== 'undefined') {
+        const ctxP = document.getElementById('chartTraficoPaises');
+        if (ctxP) {
+          if (window.chartTraficoPaisesInst) window.chartTraficoPaisesInst.destroy();
+          window.chartTraficoPaisesInst = new Chart(ctxP, {
+            type: 'bar',
+            data: {
+              labels: topPaises.slice(0, 8).map(p => p[0]),
+              datasets: [{ label: 'Visitas', data: topPaises.slice(0, 8).map(p => p[1]), backgroundColor: '#2563EB', borderRadius: 4, maxBarThickness: 38 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+          });
+        }
+        const ctxC = document.getElementById('chartTraficoCiudades');
+        if (ctxC) {
+          if (window.chartTraficoCiudadesInst) window.chartTraficoCiudadesInst.destroy();
+          window.chartTraficoCiudadesInst = new Chart(ctxC, {
+            type: 'bar',
+            data: {
+              labels: topCiudades.slice(0, 8).map(c => c[0]),
+              datasets: [{ label: 'Visitas', data: topCiudades.slice(0, 8).map(c => c[1]), backgroundColor: '#10B981', borderRadius: 4, maxBarThickness: 38 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+          });
+        }
+      }
+
+      const cont = document.getElementById('contenedorTablaVisitas');
+      if (!cont) return;
+      if (total === 0) {
+        cont.innerHTML = '<p class="text-slate-400 text-center py-6">Aún no hay visitas registradas.</p>';
+        return;
+      }
+
+      cont.innerHTML = listaVisitasGlobal.slice(0, 30).map(v => `
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0"><i class="fa-solid fa-location-dot text-xs"></i></span>
+            <div class="min-w-0">
+              <span class="font-bold text-slate-900 block truncate">${v.ciudad || 'Ciudad desconocida'}, ${v.pais || 'País desconocido'}</span>
+              <span class="text-[10px] text-slate-400 block truncate">${v.pagina || '/'} · ${v.dispositivo || 'Web'}</span>
+            </div>
+          </div>
+          <span class="text-[11px] font-medium text-slate-500 shrink-0 ml-2">${v.fecha || ''}</span>
+        </div>
+      `).join('');
+    }
     </script>
 </body>
 </html>
