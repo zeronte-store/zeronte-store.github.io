@@ -3081,7 +3081,7 @@ function cargarFAQs() {
       const contador = btn.querySelector('.contador-foto-movil');
       if (contador) contador.innerText = `${idx + 1}/${fotos.length}`;
     }
-
+let temporizadorCuentaAtrasEtsy = null;
     function formatearTiempoEtsy(ms) {
       if (ms <= 0) return "0:00:00";
       const totalSeg = Math.floor(ms / 1000);
@@ -3996,15 +3996,21 @@ function cargarFAQs() {
         if (matchDrivePre && matchDrivePre[1] && (urlVidPre.includes('drive.google.com') || urlVidPre.includes('docs.google.com'))) {
           const idDrivePre = matchDrivePre[1];
           window.cacheVideosFicha = window.cacheVideosFicha || {};
-          if (!window.cacheVideosFicha[idDrivePre]) {
-            fetch(`${APPS_SCRIPT_URL}?accion=obtenerVideo&id=${encodeURIComponent(idDrivePre)}`)
+          window.promesasVideosFicha = window.promesasVideosFicha || {};
+          if (!window.cacheVideosFicha[idDrivePre] && !window.promesasVideosFicha[idDrivePre]) {
+            window.promesasVideosFicha[idDrivePre] = fetch(`${APPS_SCRIPT_URL}?accion=obtenerVideo&id=${encodeURIComponent(idDrivePre)}`)
               .then(r => r.json())
               .then(d => {
                 if (d && d.status === 'success' && d.dataUrl) {
                   window.cacheVideosFicha[idDrivePre] = d.dataUrl;
                 }
+                delete window.promesasVideosFicha[idDrivePre];
+                return d;
               })
-              .catch(() => {});
+              .catch(() => {
+                delete window.promesasVideosFicha[idDrivePre];
+                return null;
+              });
           }
         }
       }
@@ -4125,8 +4131,9 @@ function cargarFAQs() {
 
                 vid.removeAttribute('src');
                 vid.load();
-                fetch(`${APPS_SCRIPT_URL}?accion=obtenerVideo&id=${encodeURIComponent(idDriveVid)}`)
-                  .then(r => r.json())
+                window.promesasVideosFicha = window.promesasVideosFicha || {};
+                const promesaVid = window.promesasVideosFicha[idDriveVid] || fetch(`${APPS_SCRIPT_URL}?accion=obtenerVideo&id=${encodeURIComponent(idDriveVid)}`).then(r => r.json());
+                promesaVid
                   .then(d => {
                     clearInterval(window.timerProgresoVideoFicha);
                     actualizarCirculoVid(100);
