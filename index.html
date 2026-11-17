@@ -3034,73 +3034,6 @@ function cargarFAQs() {
       cont.innerHTML = html;
     }
 
-    function cambiarImagenConTransicion(img, nuevaUrl, direccion = 1) {
-      if (!img || !nuevaUrl || !img.parentElement) return;
-      const pre = new Image();
-      pre.onload = () => {
-        if (!img.parentElement) return;
-        const imgSaliente = img.cloneNode();
-        imgSaliente.style.position = 'absolute';
-        imgSaliente.style.inset = '0';
-        imgSaliente.style.width = '100%';
-        imgSaliente.style.height = '100%';
-        imgSaliente.style.transition = 'none';
-        imgSaliente.style.transform = 'translateX(0)';
-        imgSaliente.style.pointerEvents = 'none';
-        img.parentElement.appendChild(imgSaliente);
-
-        img.style.transition = 'none';
-        img.style.transform = direccion >= 0 ? 'translateX(100%)' : 'translateX(-100%)';
-        img.src = nuevaUrl;
-        void img.offsetWidth;
-
-        imgSaliente.style.transition = 'transform 0.6s ease-out';
-        imgSaliente.style.transform = direccion >= 0 ? 'translateX(-100%)' : 'translateX(100%)';
-        img.style.transition = 'transform 0.6s ease-out';
-        img.style.transform = 'translateX(0)';
-
-        setTimeout(() => {
-          if (imgSaliente.parentNode) imgSaliente.remove();
-        }, 620);
-      };
-      pre.src = nuevaUrl;
-    }
-
-    function cambiarFotoPortadaManual(contenedor, fotos, delta) {
-      if (!contenedor || !Array.isArray(fotos) || fotos.length <= 1) return;
-      const img = contenedor.querySelector('img');
-      if (!img) return;
-      let idx = parseInt(contenedor.getAttribute('data-idx') || '0', 10);
-      idx = (idx + delta + fotos.length) % fotos.length;
-      contenedor.setAttribute('data-idx', idx);
-      cambiarImagenConTransicion(img, fotos[idx], delta);
-      const contador = contenedor.querySelector('.contador-foto-movil');
-      if (contador) contador.innerText = `${idx + 1}/${fotos.length}`;
-    }
-
-    function iniciarSwipePortada(e, contenedor) {
-      if (!e.touches || !e.touches[0]) return;
-      contenedor._touchStartX = e.touches[0].clientX;
-      contenedor._touchStartY = e.touches[0].clientY;
-    }
-
-    function finalizarSwipePortada(e, contenedor, fotos) {
-      if (contenedor._touchStartX === undefined || !e.changedTouches || !e.changedTouches[0]) return;
-      const diffX = e.changedTouches[0].clientX - contenedor._touchStartX;
-      const diffY = e.changedTouches[0].clientY - contenedor._touchStartY;
-      contenedor._touchStartX = undefined;
-      contenedor._touchStartY = undefined;
-      if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
-        contenedor._bloqueoClickSwipe = true;
-        setTimeout(() => { contenedor._bloqueoClickSwipe = false; }, 250);
-        cambiarFotoPortadaManual(contenedor, fotos, diffX < 0 ? 1 : -1);
-      }
-    }
-
-    function avanzarFotoPortadaMovil(btn, fotos) {
-      const contenedor = btn.closest('.aspect-square');
-      cambiarFotoPortadaManual(contenedor, fotos, 1);
-    }
 let temporizadorCuentaAtrasEtsy = null;
     function formatearTiempoEtsy(ms) {
       if (ms <= 0) return "0:00:00";
@@ -3231,20 +3164,8 @@ let temporizadorCuentaAtrasEtsy = null;
             return `
               <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick='abrirFichaArticulo(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
                 <div>
-                  <div class="aspect-square bg-gray-100 relative overflow-hidden group/portada" data-idx="0" onclick="if(this._bloqueoClickSwipe){event.stopPropagation();}" ontouchstart="iniciarSwipePortada(event, this)" ontouchend='finalizarSwipePortada(event, this, ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")})'>
+                  <div class="aspect-square bg-gray-100 relative overflow-hidden">
                     <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                    ${listaFotos.length > 1 ? `
-                      <button type="button" onclick='event.stopPropagation(); cambiarFotoPortadaManual(this.closest(".aspect-square"), ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")}, -1)' class="hidden lg:flex opacity-0 group-hover/portada:opacity-100 absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md items-center justify-center transition active:scale-95 z-20">
-                        <i class="fa-solid fa-chevron-left text-xs"></i>
-                      </button>
-                      <button type="button" onclick='event.stopPropagation(); cambiarFotoPortadaManual(this.closest(".aspect-square"), ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")}, 1)' class="hidden lg:flex opacity-0 group-hover/portada:opacity-100 absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md items-center justify-center transition active:scale-95 z-20">
-                        <i class="fa-solid fa-chevron-right text-xs"></i>
-                      </button>
-                      <button type="button" onclick='event.stopPropagation(); avanzarFotoPortadaMovil(this, ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")})' class="lg:hidden absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-xs flex items-center gap-1 z-10 shadow-sm active:scale-90 transition">
-                        <i class="fa-solid fa-images"></i>
-                        <span class="contador-foto-movil">1/${listaFotos.length}</span>
-                      </button>
-                    ` : ''}
                     <div class="absolute top-2 left-2 flex flex-col gap-1 items-start z-10 pointer-events-none">
                       <span class="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                         <i class="fa-solid fa-star text-[9px]"></i>
@@ -3370,20 +3291,8 @@ let temporizadorCuentaAtrasEtsy = null;
         return `
           <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition flex flex-col justify-between group cursor-pointer" onclick="abrirFichaArticulo(catalogoFiltradoActual[${inicioPag + idxLista}])">
             <div>
-              <div class="aspect-square bg-gray-100 relative overflow-hidden group/portada" data-idx="0" onclick="if(this._bloqueoClickSwipe){event.stopPropagation();}" ontouchstart="iniciarSwipePortada(event, this)" ontouchend='finalizarSwipePortada(event, this, ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")})'>
+              <div class="aspect-square bg-gray-100 relative overflow-hidden">
                 <img src="${imgUrl}" alt="${tituloTraducido}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                ${listaFotos.length > 1 ? `
-                  <button type="button" onclick='event.stopPropagation(); cambiarFotoPortadaManual(this.closest(".aspect-square"), ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")}, -1)' class="hidden lg:flex opacity-0 group-hover/portada:opacity-100 absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md items-center justify-center transition active:scale-95 z-20">
-                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                  </button>
-                  <button type="button" onclick='event.stopPropagation(); cambiarFotoPortadaManual(this.closest(".aspect-square"), ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")}, 1)' class="hidden lg:flex opacity-0 group-hover/portada:opacity-100 absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md items-center justify-center transition active:scale-95 z-20">
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                  </button>
-                  <button type="button" onclick='event.stopPropagation(); avanzarFotoPortadaMovil(this, ${JSON.stringify(listaFotos).replace(/'/g, "&#39;")})' class="lg:hidden absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-xs flex items-center gap-1 z-10 shadow-sm active:scale-90 transition">
-                    <i class="fa-solid fa-images"></i>
-                    <span class="contador-foto-movil">1/${listaFotos.length}</span>
-                  </button>
-                ` : ''}
                 <div class="absolute top-2 left-2 flex flex-col gap-1 items-start z-10 pointer-events-none">
                   ${p.masVendido ? `
                     <span class="inline-flex items-center gap-1 bg-[#FDEBD2] text-[#593d00] text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm border-b border-dashed border-[#593d00]">
