@@ -2464,7 +2464,7 @@ function extraerUrlArchivoPedido(pedido) {
       }
 
       try {
-        const res = await fetch(`${APPS_SCRIPT_URL}?accion=datosAdmin&clave=${encodeURIComponent(tokenClave)}`);
+        const res = await fetch(`${APPS_SCRIPT_URL}?accion=datosAdmin&clave=${encodeURIComponent(tokenClave)}&_t=${Date.now()}`);
         const data = await res.json();
 
         if (data.status !== "success") {
@@ -2499,9 +2499,10 @@ function extraerUrlArchivoPedido(pedido) {
           btn.disabled = false;
         }
 
-        // Comparar si hubo cambios antes de re-renderizar para evitar parpadeos
+        // Comparar si hubo cambios antes de re-renderizar para evitar parpadeos (incluyendo visitas)
         const datosCambiaron = JSON.stringify(listaPedidosGlobal) !== JSON.stringify(data.pedidos || []) ||
-                               JSON.stringify(listaProductosGlobal) !== JSON.stringify(data.productos || []);
+                               JSON.stringify(listaProductosGlobal) !== JSON.stringify(data.productos || []) ||
+                               JSON.stringify(listaVisitasGlobal) !== JSON.stringify(data.visitas || []);
 
 try {
           localStorage.setItem('zeronte_admin_cache', JSON.stringify(data));
@@ -2612,6 +2613,12 @@ try {
           const vistaClientes = document.getElementById('vistaSeccionClientes');
           if (vistaClientes && !vistaClientes.classList.contains('hidden')) {
             renderizarClientes();
+          }
+
+          // Si la sección de Tráfico Web está en pantalla, refrescar sus datos y gráficos en vivo
+          const vistaTrafico = document.getElementById('vistaSeccionTrafico');
+          if (vistaTrafico && !vistaTrafico.classList.contains('hidden')) {
+            renderizarTraficoWeb();
           }
         }
 
