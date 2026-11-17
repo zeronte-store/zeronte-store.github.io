@@ -1208,9 +1208,13 @@
             <div class="relative w-full aspect-square bg-[#f9f9f9] rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center shadow-xs group/visor">
               <img id="imgPrincipalFicha" src="" alt="Mockup" class="w-full h-full object-cover aspect-square cursor-pointer" onclick="abrirZoomEtsy()">
               <video id="videoPrincipalFicha" controls class="w-full h-full object-cover aspect-square hidden" playsinline></video>
-              <div id="overlayCargandoVideoFicha" class="hidden absolute inset-0 bg-black/75 backdrop-blur-xs flex flex-col items-center justify-center gap-2.5 text-white z-10 pointer-events-none">
-                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
+              <div id="overlayCargandoVideoFicha" class="hidden absolute inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center gap-2 text-white z-10 pointer-events-none">
+                <svg class="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="4"></circle>
+                  <circle id="circuloProgresoVideoFicha" cx="28" cy="28" r="24" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="150.8" style="transition: stroke-dashoffset 0.2s ease;"></circle>
+                </svg>
                 <span class="text-xs sm:text-sm font-semibold tracking-wide">Cargando vídeo...</span>
+                <span id="porcentajeCargaVideoFicha" class="text-xs font-mono font-bold text-amber-400">0%</span>
               </div>
 
               <!-- Botón de expandir estilo Etsy garantizado y visible -->
@@ -4028,12 +4032,30 @@ function cargarFAQs() {
                 vid.play().catch(() => {});
               } else {
                 if (overlayVid) overlayVid.classList.remove('hidden');
+                let pctVid = 5;
+                const circuloVid = document.getElementById('circuloProgresoVideoFicha');
+                const txtPctVid = document.getElementById('porcentajeCargaVideoFicha');
+                const actualizarCirculoVid = (p) => {
+                  if (circuloVid) circuloVid.style.strokeDashoffset = (150.8 - (150.8 * p) / 100).toFixed(1);
+                  if (txtPctVid) txtPctVid.innerText = `${Math.round(p)}%`;
+                };
+                actualizarCirculoVid(pctVid);
+                if (window.timerProgresoVideoFicha) clearInterval(window.timerProgresoVideoFicha);
+                window.timerProgresoVideoFicha = setInterval(() => {
+                  if (pctVid < 90) {
+                    pctVid += Math.max(1, (90 - pctVid) * 0.12);
+                    actualizarCirculoVid(pctVid);
+                  }
+                }, 200);
+
                 vid.removeAttribute('src');
                 vid.load();
                 fetch(`${APPS_SCRIPT_URL}?accion=obtenerVideo&id=${encodeURIComponent(idDriveVid)}`)
                   .then(r => r.json())
                   .then(d => {
-                    if (overlayVid) overlayVid.classList.add('hidden');
+                    clearInterval(window.timerProgresoVideoFicha);
+                    actualizarCirculoVid(100);
+                    setTimeout(() => { if (overlayVid) overlayVid.classList.add('hidden'); }, 200);
                     if (d && d.status === 'success' && d.dataUrl) {
                       window.cacheVideosFicha[idDriveVid] = d.dataUrl;
                       if (galeriaFichaActual[indiceMediaFicha] && galeriaFichaActual[indiceMediaFicha].url === item.url) {
@@ -4043,6 +4065,7 @@ function cargarFAQs() {
                     }
                   })
                   .catch(() => {
+                    clearInterval(window.timerProgresoVideoFicha);
                     if (overlayVid) overlayVid.classList.add('hidden');
                   });
               }
