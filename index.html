@@ -7900,6 +7900,32 @@ let temporizadorCuentaAtrasEtsy = null;
       document.getElementById('formContactoCliente').classList.add('hidden');
       document.getElementById('contactoExitoAviso').classList.remove('hidden');
     }
+
+    (async function registrarVisitaZeronte() {
+      if (sessionStorage.getItem('zeronte_visita_ok')) return;
+      let pais = "Desconocido";
+      let ciudad = "Desconocida";
+      try {
+        const geo = await fetch('https://ipwho.is/').then(r => r.json());
+        if (geo && geo.country) pais = geo.country;
+        if (geo && geo.city) ciudad = geo.city;
+      } catch (e) {}
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "registrarVisita",
+            pais: pais,
+            ciudad: ciudad,
+            pagina: window.location.pathname,
+            dispositivo: /Mobi|Android/i.test(navigator.userAgent) ? "Móvil" : "PC"
+          })
+        });
+        sessionStorage.setItem('zeronte_visita_ok', '1');
+      } catch (e) {}
+    })();
   </script>
 </body>
 </html>
