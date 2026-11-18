@@ -1697,6 +1697,18 @@
               </div>
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <select id="filtroPaisEtsy" onchange="filtrarVentasEtsy(true)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:border-slate-400 focus:bg-white transition cursor-pointer">
+                <option value="todos">Todos los países</option>
+              </select>
+              <select id="ordenVentasEtsy" onchange="filtrarVentasEtsy(true)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:border-slate-400 focus:bg-white transition cursor-pointer">
+                <option value="defecto">Más recientes primero</option>
+                <option value="antiguos">Más antiguos primero</option>
+                <option value="precio_desc">Más caro a más barato</option>
+                <option value="precio_asc">Más barato a más caro</option>
+              </select>
+            </div>
+
             <!-- Listado de filas interactivo (desplegable de 20 en 20 sin scroll infinito) -->
             <div id="contenedorListaPedidosEtsy" class="space-y-2">
               <!-- Render dinámico -->
@@ -8332,12 +8344,34 @@ try {
       const barraPaginacion = document.getElementById('barraPaginacionEtsy');
       if (!cont) return;
 
+      const selectPais = document.getElementById('filtroPaisEtsy');
+      if (selectPais && listaVentasEtsyGlobal.length > 0) {
+        const valorPrevio = selectPais.value || 'todos';
+        const paisesUnicos = Array.from(new Set(listaVentasEtsyGlobal.map(v => (v.pais || '').trim()).filter(Boolean)))
+          .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        selectPais.innerHTML = '<option value="todos">Todos los países</option>' +
+          paisesUnicos.map(p => `<option value="${p.replace(/"/g, '&quot;')}">${p}</option>`).join('');
+        selectPais.value = paisesUnicos.includes(valorPrevio) ? valorPrevio : 'todos';
+      }
+
+      const paisSeleccionado = selectPais ? selectPais.value : 'todos';
+      const ordenSeleccionado = document.getElementById('ordenVentasEtsy')?.value || 'defecto';
+
       const filtrados = listaVentasEtsyGlobal.filter(v => {
         const coincideAno = filtroAnoEtsyActual === 'todos' || v.anio === filtroAnoEtsyActual;
+        const coincidePais = paisSeleccionado === 'todos' || (v.pais || '').trim() === paisSeleccionado;
         const texto = `${v.id || ''} ${v.nombre || ''} ${v.email || ''} ${v.producto || ''} ${v.pais || ''} ${v.fecha || ''}`.toLowerCase();
         const coincideBusqueda = !busqueda || texto.includes(busqueda);
-        return coincideAno && coincideBusqueda;
+        return coincideAno && coincidePais && coincideBusqueda;
       });
+
+      if (ordenSeleccionado === 'antiguos') {
+        filtrados.reverse();
+      } else if (ordenSeleccionado === 'precio_desc') {
+        filtrados.sort((a, b) => (b.precio || 0) - (a.precio || 0));
+      } else if (ordenSeleccionado === 'precio_asc') {
+        filtrados.sort((a, b) => (a.precio || 0) - (b.precio || 0));
+      }
 
       let facturacionTotal = 0;
       const mapaProds = {};
