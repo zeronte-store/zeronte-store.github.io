@@ -888,6 +888,7 @@
                         <option value="partitura">🎵 Partituras Personalizadas</option>
                         <option value="natalicio">👶 Natalicio</option>
                         <option value="familiar">👨‍👩‍👧‍👦 Familiar</option>
+                        <option value="orla">🎓 Orla</option>
                       </select>
                     </div>
                   </div>
@@ -981,6 +982,20 @@
                     <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
                       <span class="text-xs font-semibold text-slate-800 truncate pr-1">Dibujo/Edades</span>
                       <input type="checkbox" id="checkPersCampoDibujoFamiliar" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 14. Curso -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Curso</span>
+                      <input type="checkbox" id="checkPersCampoCurso" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 15. Alumnos (máx. 28) -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Alumnos (28)</span>
+                      <input type="checkbox" id="checkPersCampoAlumnos" class="switch-ios-input">
                       <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
                     </label>
                   </div>
@@ -4245,20 +4260,23 @@ try {
       const esPartitura = (tipo === 'partitura');
       const esNatalicio = (tipo === 'natalicio');
       const esFamiliar = (tipo === 'familiar');
+      const esOrla = (tipo === 'orla');
       const mapa = {
-        checkPersCampoTitulo: esPartitura || esFamiliar,
-        checkPersCampoNombre: esPartitura || esNatalicio,
-        checkPersCampoDedicatoria: esPartitura,
+        checkPersCampoTitulo: esPartitura || esFamiliar || esOrla,
+        checkPersCampoNombre: esPartitura || esNatalicio || esOrla,
+        checkPersCampoDedicatoria: esPartitura || esOrla,
         checkPersCampoCompositor: esPartitura,
         checkPersCampoFechaNacimiento: esNatalicio,
         checkPersCampoHora: esNatalicio,
         checkPersCampoPeso: esNatalicio,
         checkPersCampoMedida: esNatalicio,
         checkPersCampoPadres: esNatalicio,
-        checkPersCampoSubtitulo: esFamiliar,
+        checkPersCampoSubtitulo: esFamiliar || esOrla,
         checkPersCampoMiembros: esFamiliar,
         checkPersCampoFraseEmotiva: esFamiliar,
-        checkPersCampoDibujoFamiliar: esFamiliar
+        checkPersCampoDibujoFamiliar: esFamiliar,
+        checkPersCampoCurso: esOrla,
+        checkPersCampoAlumnos: esOrla
       };
       Object.entries(mapa).forEach(([id, val]) => {
         const el = document.getElementById(id);
@@ -4270,20 +4288,23 @@ try {
       const esPartitura = (tipo === 'partitura');
       const esNatalicio = (tipo === 'natalicio');
       const esFamiliar = (tipo === 'familiar');
+      const esOrla = (tipo === 'orla');
       const mapa = {
-        checkPersCampoTitulo: esPartitura || esFamiliar,
-        checkPersCampoNombre: esPartitura || esNatalicio,
-        checkPersCampoDedicatoria: esPartitura,
+        checkPersCampoTitulo: esPartitura || esFamiliar || esOrla,
+        checkPersCampoNombre: esPartitura || esNatalicio || esOrla,
+        checkPersCampoDedicatoria: esPartitura || esOrla,
         checkPersCampoCompositor: esPartitura,
         checkPersCampoFechaNacimiento: esNatalicio,
         checkPersCampoHora: esNatalicio,
         checkPersCampoPeso: esNatalicio,
         checkPersCampoMedida: esNatalicio,
         checkPersCampoPadres: esNatalicio,
-        checkPersCampoSubtitulo: esFamiliar,
+        checkPersCampoSubtitulo: esFamiliar || esOrla,
         checkPersCampoMiembros: esFamiliar,
         checkPersCampoFraseEmotiva: esFamiliar,
-        checkPersCampoDibujoFamiliar: esFamiliar
+        checkPersCampoDibujoFamiliar: esFamiliar,
+        checkPersCampoCurso: esOrla,
+        checkPersCampoAlumnos: esOrla
       };
       Object.entries(mapa).forEach(([id, val]) => {
         const el = document.getElementById(id);
@@ -5272,6 +5293,8 @@ try {
             if (document.getElementById('checkPersCampoMiembros')) document.getElementById('checkPersCampoMiembros').checked = camposPers.includes('miembros');
             if (document.getElementById('checkPersCampoFraseEmotiva')) document.getElementById('checkPersCampoFraseEmotiva').checked = camposPers.includes('frase_emotiva');
             if (document.getElementById('checkPersCampoDibujoFamiliar')) document.getElementById('checkPersCampoDibujoFamiliar').checked = camposPers.includes('dibujo_familiar');
+            if (document.getElementById('checkPersCampoCurso')) document.getElementById('checkPersCampoCurso').checked = camposPers.includes('curso');
+            if (document.getElementById('checkPersCampoAlumnos')) document.getElementById('checkPersCampoAlumnos').checked = camposPers.includes('alumnos');
           }
 
           // Cargar badges/sellos guardados
@@ -5317,6 +5340,8 @@ try {
         if (document.getElementById('checkPersCampoMiembros')) document.getElementById('checkPersCampoMiembros').checked = false;
         if (document.getElementById('checkPersCampoFraseEmotiva')) document.getElementById('checkPersCampoFraseEmotiva').checked = false;
         if (document.getElementById('checkPersCampoDibujoFamiliar')) document.getElementById('checkPersCampoDibujoFamiliar').checked = false;
+        if (document.getElementById('checkPersCampoCurso')) document.getElementById('checkPersCampoCurso').checked = false;
+        if (document.getElementById('checkPersCampoAlumnos')) document.getElementById('checkPersCampoAlumnos').checked = false;
         if (document.getElementById('selectPlantillaCamposPers')) document.getElementById('selectPlantillaCamposPers').value = 'partitura';
 
         // Valores por defecto al crear: Descarga y PDF activados
@@ -5717,6 +5742,8 @@ try {
         if (document.getElementById('checkPersCampoMiembros')?.checked) camposPersonalizacionSeleccionados.push('miembros');
         if (document.getElementById('checkPersCampoFraseEmotiva')?.checked) camposPersonalizacionSeleccionados.push('frase_emotiva');
         if (document.getElementById('checkPersCampoDibujoFamiliar')?.checked) camposPersonalizacionSeleccionados.push('dibujo_familiar');
+        if (document.getElementById('checkPersCampoCurso')?.checked) camposPersonalizacionSeleccionados.push('curso');
+        if (document.getElementById('checkPersCampoAlumnos')?.checked) camposPersonalizacionSeleccionados.push('alumnos');
       }
 
       let filaReal = "";
