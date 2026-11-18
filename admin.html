@@ -884,12 +884,11 @@
                       <p class="text-[10px] text-amber-700/80">Selecciona qué opciones verá el cliente al personalizar este artículo.</p>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
-                      <button type="button" onclick="aplicarPlantillaCamposPers('partitura')" class="px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-[10px] font-bold text-amber-900 hover:bg-amber-100 transition">
-                        🎵 Partitura
-                      </button>
-                      <button type="button" onclick="aplicarPlantillaCamposPers('natalicio')" class="px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-[10px] font-bold text-amber-900 hover:bg-amber-100 transition">
-                        👶 Natalicio
-                      </button>
+                      <select id="selectPlantillaCamposPers" onchange="aplicarPlantillaCamposPers(this.value)" class="px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-[10px] font-bold text-amber-900 focus:outline-none focus:border-amber-500 cursor-pointer">
+                        <option value="partitura">🎵 Partituras Personalizadas</option>
+                        <option value="natalicio">👶 Natalicio</option>
+                        <option value="familiar">👨‍👩‍👧‍👦 Familiar</option>
+                      </select>
                     </div>
                   </div>
 
@@ -954,6 +953,34 @@
                     <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
                       <span class="text-xs font-semibold text-slate-800 truncate pr-1">Padres</span>
                       <input type="checkbox" id="checkPersCampoPadres" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 10. Subtítulo Familiar -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Subtítulo fam.</span>
+                      <input type="checkbox" id="checkPersCampoSubtitulo" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 11. Miembros y Mascotas -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Familiares/Masc.</span>
+                      <input type="checkbox" id="checkPersCampoMiembros" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 12. Frase Emotiva -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Frase emotiva</span>
+                      <input type="checkbox" id="checkPersCampoFraseEmotiva" class="switch-ios-input">
+                      <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
+                    </label>
+
+                    <!-- 13. Dibujo Familiar / Edades -->
+                    <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-amber-200/70 cursor-pointer select-none shadow-2xs hover:border-amber-300 transition">
+                      <span class="text-xs font-semibold text-slate-800 truncate pr-1">Dibujo/Edades</span>
+                      <input type="checkbox" id="checkPersCampoDibujoFamiliar" class="switch-ios-input">
                       <div class="switch-ios-track"><div class="switch-ios-thumb"></div></div>
                     </label>
                   </div>
@@ -4215,17 +4242,23 @@ try {
     }
 
     function aplicarPlantillaCamposPers(tipo) {
+      const esPartitura = (tipo === 'partitura');
       const esNatalicio = (tipo === 'natalicio');
+      const esFamiliar = (tipo === 'familiar');
       const mapa = {
-        checkPersCampoTitulo: !esNatalicio,
-        checkPersCampoNombre: true,
-        checkPersCampoDedicatoria: !esNatalicio,
-        checkPersCampoCompositor: !esNatalicio,
+        checkPersCampoTitulo: esPartitura || esFamiliar,
+        checkPersCampoNombre: esPartitura || esNatalicio,
+        checkPersCampoDedicatoria: esPartitura,
+        checkPersCampoCompositor: esPartitura,
         checkPersCampoFechaNacimiento: esNatalicio,
         checkPersCampoHora: esNatalicio,
         checkPersCampoPeso: esNatalicio,
         checkPersCampoMedida: esNatalicio,
-        checkPersCampoPadres: esNatalicio
+        checkPersCampoPadres: esNatalicio,
+        checkPersCampoSubtitulo: esFamiliar,
+        checkPersCampoMiembros: esFamiliar,
+        checkPersCampoFraseEmotiva: esFamiliar,
+        checkPersCampoDibujoFamiliar: esFamiliar
       };
       Object.entries(mapa).forEach(([id, val]) => {
         const el = document.getElementById(id);
@@ -4234,17 +4267,23 @@ try {
     }
 
     function aplicarPlantillaCamposPers(tipo) {
+      const esPartitura = (tipo === 'partitura');
       const esNatalicio = (tipo === 'natalicio');
+      const esFamiliar = (tipo === 'familiar');
       const mapa = {
-        checkPersCampoTitulo: !esNatalicio,
-        checkPersCampoNombre: true,
-        checkPersCampoDedicatoria: !esNatalicio,
-        checkPersCampoCompositor: !esNatalicio,
+        checkPersCampoTitulo: esPartitura || esFamiliar,
+        checkPersCampoNombre: esPartitura || esNatalicio,
+        checkPersCampoDedicatoria: esPartitura,
+        checkPersCampoCompositor: esPartitura,
         checkPersCampoFechaNacimiento: esNatalicio,
         checkPersCampoHora: esNatalicio,
         checkPersCampoPeso: esNatalicio,
         checkPersCampoMedida: esNatalicio,
-        checkPersCampoPadres: esNatalicio
+        checkPersCampoPadres: esNatalicio,
+        checkPersCampoSubtitulo: esFamiliar,
+        checkPersCampoMiembros: esFamiliar,
+        checkPersCampoFraseEmotiva: esFamiliar,
+        checkPersCampoDibujoFamiliar: esFamiliar
       };
       Object.entries(mapa).forEach(([id, val]) => {
         const el = document.getElementById(id);
@@ -5229,6 +5268,10 @@ try {
             if (document.getElementById('checkPersCampoPeso')) document.getElementById('checkPersCampoPeso').checked = camposPers.includes('peso');
             if (document.getElementById('checkPersCampoMedida')) document.getElementById('checkPersCampoMedida').checked = camposPers.includes('medida');
             if (document.getElementById('checkPersCampoPadres')) document.getElementById('checkPersCampoPadres').checked = camposPers.includes('padres');
+            if (document.getElementById('checkPersCampoSubtitulo')) document.getElementById('checkPersCampoSubtitulo').checked = camposPers.includes('subtitulo');
+            if (document.getElementById('checkPersCampoMiembros')) document.getElementById('checkPersCampoMiembros').checked = camposPers.includes('miembros');
+            if (document.getElementById('checkPersCampoFraseEmotiva')) document.getElementById('checkPersCampoFraseEmotiva').checked = camposPers.includes('frase_emotiva');
+            if (document.getElementById('checkPersCampoDibujoFamiliar')) document.getElementById('checkPersCampoDibujoFamiliar').checked = camposPers.includes('dibujo_familiar');
           }
 
           // Cargar badges/sellos guardados
@@ -5270,6 +5313,11 @@ try {
         if (document.getElementById('checkPersCampoPeso')) document.getElementById('checkPersCampoPeso').checked = false;
         if (document.getElementById('checkPersCampoMedida')) document.getElementById('checkPersCampoMedida').checked = false;
         if (document.getElementById('checkPersCampoPadres')) document.getElementById('checkPersCampoPadres').checked = false;
+        if (document.getElementById('checkPersCampoSubtitulo')) document.getElementById('checkPersCampoSubtitulo').checked = false;
+        if (document.getElementById('checkPersCampoMiembros')) document.getElementById('checkPersCampoMiembros').checked = false;
+        if (document.getElementById('checkPersCampoFraseEmotiva')) document.getElementById('checkPersCampoFraseEmotiva').checked = false;
+        if (document.getElementById('checkPersCampoDibujoFamiliar')) document.getElementById('checkPersCampoDibujoFamiliar').checked = false;
+        if (document.getElementById('selectPlantillaCamposPers')) document.getElementById('selectPlantillaCamposPers').value = 'partitura';
 
         // Valores por defecto al crear: Descarga y PDF activados
         const chkDescarga = document.getElementById('checkBadgeDescarga');
@@ -5665,6 +5713,10 @@ try {
         if (document.getElementById('checkPersCampoPeso')?.checked) camposPersonalizacionSeleccionados.push('peso');
         if (document.getElementById('checkPersCampoMedida')?.checked) camposPersonalizacionSeleccionados.push('medida');
         if (document.getElementById('checkPersCampoPadres')?.checked) camposPersonalizacionSeleccionados.push('padres');
+        if (document.getElementById('checkPersCampoSubtitulo')?.checked) camposPersonalizacionSeleccionados.push('subtitulo');
+        if (document.getElementById('checkPersCampoMiembros')?.checked) camposPersonalizacionSeleccionados.push('miembros');
+        if (document.getElementById('checkPersCampoFraseEmotiva')?.checked) camposPersonalizacionSeleccionados.push('frase_emotiva');
+        if (document.getElementById('checkPersCampoDibujoFamiliar')?.checked) camposPersonalizacionSeleccionados.push('dibujo_familiar');
       }
 
       let filaReal = "";
