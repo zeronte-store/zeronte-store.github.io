@@ -11,6 +11,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -1970,6 +1972,14 @@
               <span class="text-slate-400 text-[10px] uppercase tracking-wider font-semibold block">Ciudad Principal</span>
               <p id="statTraficoTopCiudad" class="text-base sm:text-lg font-bold text-slate-900 mt-1 truncate">---</p>
             </div>
+          </div>
+
+          <!-- Mapa Mundial de Visitantes -->
+          <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-map-location-dot text-blue-600"></i> Mapa Mundial de Visitantes
+            </h3>
+            <div id="mapaTraficoMundial" class="h-[320px] sm:h-[380px] w-full rounded-xl border border-slate-100 z-0"></div>
           </div>
 
           <!-- Gráficas de Países y Ciudades -->
@@ -9103,6 +9113,67 @@ try {
           <span class="text-[11px] font-medium text-slate-500 shrink-0 ml-2">${v.fecha || ''}</span>
         </div>
       `).join('');
+
+      dibujarMapaTraficoMundial();
+    }
+
+    async function dibujarMapaTraficoMundial() {
+      const elMapa = document.getElementById('mapaTraficoMundial');
+      if (!elMapa || typeof L === 'undefined') return;
+
+      if (!window.mapaTraficoInst) {
+        window.mapaTraficoInst = L.map('mapaTraficoMundial', { scrollWheelZoom: false }).setView([25, 0], 2);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap',
+          maxZoom: 18
+        }).addTo(window.mapaTraficoInst);
+        window.capaMarcadoresTrafico = L.layerGroup().addTo(window.mapaTraficoInst);
+      }
+
+      setTimeout(() => { window.mapaTraficoInst.invalidateSize(); }, 200);
+      window.capaMarcadoresTrafico.clearLayers();
+
+      const agrupadas = {};
+      listaVisitasGlobal.forEach(v => {
+        const pais = (v.pais || '').trim();
+        const ciudad = (v.ciudad || '').trim();
+        if (!pais || pais === 'Ubicación oculta' || pais === 'Desconocido' || ciudad === 'Privada') return;
+        const clave = `${ciudad}, ${pais}`;
+        if (!agrupadas[clave]) agrupadas[clave] = { ciudad, pais, count: 0 };
+        agrupadas[clave].count++;
+      });
+
+      const cacheGeo = JSON.parse(localStorage.getItem('zeronte_geo_cache') || '{}');
+
+      await Promise.all(Object.keys(agrupadas).map(async (clave) => {
+        const info = agrupadas[clave];
+        let coords = cacheGeo[clave];
+
+        if (!coords) {
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(clave)}`);
+            const data = await res.json();
+            if (data && data[0]) {
+              coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+              cacheGeo[clave] = coords;
+              localStorage.setItem('zeronte_geo_cache', JSON.stringify(cacheGeo));
+            }
+          } catch (e) {}
+        }
+
+        if (coords) {
+          L.circleMarker(coords, {
+            radius: Math.min(6 + info.count * 2, 16),
+            fillColor: '#2563EB',
+            color: '#ffffff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+          })
+          .bindPopup(`<strong>${info.ciudad}, ${info.pais}</strong><br>${info.count} ${info.count === 1 ? 'visita' : 'visitas'}`)
+          .addTo(window.capaMarcadoresTrafico);
+        }
+      }));
     }
     </script>
 </body>
