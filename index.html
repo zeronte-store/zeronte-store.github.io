@@ -7843,6 +7843,13 @@ let temporizadorCuentaAtrasEtsy = null;
     }
 
     (async function registrarVisitaZeronte() {
+      // 0. Si entras con ?notrack=1 (ej. zerontemusic.com/?notrack=1), marca este dispositivo como tuyo para siempre
+      const paramsTrack = new URLSearchParams(window.location.search);
+      if (paramsTrack.get('notrack') === '1') {
+        localStorage.setItem('zeronte_modo_admin', 'true');
+        return;
+      }
+
       // 1. Excluir al administrador y entornos de prueba
       const esAdminOPropio = localStorage.getItem('zeronte_google_auth') === 'true' || 
                              localStorage.getItem('zeronte_modo_admin') === 'true' ||
