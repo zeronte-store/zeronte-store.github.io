@@ -9232,9 +9232,50 @@ try {
       const topPaises = Object.entries(mapaPaises).sort((a, b) => b[1] - a[1]);
       const topCiudades = Object.entries(mapaCiudades).sort((a, b) => b[1] - a[1]);
 
+      const obtenerBanderaPais = (pais) => {
+        const p = (pais || '').toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const mapa = {
+          'espana': 'es', 'spain': 'es', 'es': 'es',
+          'estados unidos': 'us', 'united states': 'us', 'usa': 'us', 'us': 'us',
+          'mexico': 'mx', 'mx': 'mx',
+          'argentina': 'ar', 'ar': 'ar',
+          'colombia': 'co', 'co': 'co',
+          'chile': 'cl', 'cl': 'cl',
+          'peru': 'pe', 'pe': 'pe',
+          'francia': 'fr', 'france': 'fr', 'fr': 'fr',
+          'alemania': 'de', 'germany': 'de', 'de': 'de',
+          'italia': 'it', 'italy': 'it', 'it': 'it',
+          'reino unido': 'gb', 'united kingdom': 'gb', 'uk': 'gb', 'gb': 'gb',
+          'portugal': 'pt', 'pt': 'pt',
+          'brasil': 'br', 'brazil': 'br', 'br': 'br',
+          'canada': 'ca', 'ca': 'ca',
+          'paises bajos': 'nl', 'netherlands': 'nl', 'nl': 'nl',
+          'belgica': 'be', 'belgium': 'be', 'be': 'be',
+          'suiza': 'ch', 'switzerland': 'ch', 'ch': 'ch',
+          'austria': 'at', 'at': 'at',
+          'irlanda': 'ie', 'ireland': 'ie', 'ie': 'ie',
+          'polonia': 'pl', 'poland': 'pl', 'pl': 'pl',
+          'suecia': 'se', 'sweden': 'se', 'se': 'se',
+          'noruega': 'no', 'norway': 'no', 'no': 'no',
+          'dinamarca': 'dk', 'denmark': 'dk', 'dk': 'dk',
+          'japon': 'jp', 'japan': 'jp', 'jp': 'jp',
+          'india': 'in', 'in': 'in',
+          'china': 'cn', 'cn': 'cn',
+          'australia': 'au', 'au': 'au',
+          'venezuela': 've', 'ecuador': 'ec', 'uruguay': 'uy', 'paraguay': 'py',
+          'bolivia': 'bo', 'costa rica': 'cr', 'panama': 'pa', 'cuba': 'cu',
+          'republica dominicana': 'do', 'guatemala': 'gt', 'honduras': 'hn',
+          'el salvador': 'sv', 'nicaragua': 'ni', 'puerto rico': 'pr',
+          'andorra': 'ad', 'marruecos': 'ma', 'morocco': 'ma'
+        };
+        const iso = mapa[p];
+        if (!iso) return '<span class="inline-block mr-1">🌐</span>';
+        return `<img src="https://flagcdn.com/w20/${iso}.png" alt="${pais}" class="inline-block w-4 h-3 rounded-[2px] mr-1 object-cover align-middle shadow-2xs">`;
+      };
+
       const elTopPais = document.getElementById('statTraficoTopPais');
       const elTopCiudad = document.getElementById('statTraficoTopCiudad');
-      if (elTopPais) elTopPais.innerText = topPaises[0] ? `${topPaises[0][0]} (${topPaises[0][1]})` : '---';
+      if (elTopPais) elTopPais.innerHTML = topPaises[0] ? `${obtenerBanderaPais(topPaises[0][0])}${topPaises[0][0]} (${topPaises[0][1]})` : '---';
       if (elTopCiudad) elTopCiudad.innerText = topCiudades[0] ? `${topCiudades[0][0]} (${topCiudades[0][1]})` : '---';
 
       if (typeof Chart !== 'undefined') {
@@ -9290,7 +9331,7 @@ try {
           <div class="flex items-center gap-2.5 min-w-0">
             <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0"><i class="fa-solid fa-location-dot text-xs"></i></span>
             <div class="min-w-0">
-              <span class="font-bold text-slate-900 block truncate">${v.ciudad || 'Ciudad desconocida'}, ${v.pais || 'País desconocido'}</span>
+              <span class="font-bold text-slate-900 block truncate">${v.ciudad || 'Ciudad desconocida'}, ${obtenerBanderaPais(v.pais)} ${v.pais || 'País desconocido'}</span>
               <span class="text-[10px] text-slate-400 block truncate">${(!v.pagina || v.pagina === '/' || v.pagina === '/index.html') ? 'Inicio (Tienda)' : v.pagina} · ${v.dispositivo || 'Web'}</span>
             </div>
           </div>
