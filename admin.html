@@ -868,7 +868,7 @@
                         <i class="fa-solid fa-star text-amber-500 text-xs shrink-0"></i>
                         <span class="text-xs font-bold text-amber-950 truncate">Destacado en portada</span>
                       </div>
-                      <input type="checkbox" id="checkArticuloDestacado" class="switch-ios-input">
+                      <input type="checkbox" id="checkArticuloDestacado" onchange="verificarLimiteDestacados(this)" class="switch-ios-input">
                       <div class="switch-ios-track">
                         <div class="switch-ios-thumb"></div>
                       </div>
@@ -1270,6 +1270,34 @@
             </div>
           </div>
         </div>
+
+        <!-- MODAL FLOTANTE: LÍMITE DE 6 ARTÍCULOS DESTACADOS -->
+          <div id="modalLimiteDestacados" class="fixed inset-0 bg-black/70 z-[70] hidden flex items-center justify-center p-4 select-none">
+            <div class="bg-white border border-slate-200 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-amber-50/80">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs shadow-2xs">
+                    <i class="fa-solid fa-star"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-slate-900">Límite de 6 destacados alcanzado</h3>
+                    <p class="text-[10px] text-amber-800">Deselecciona uno para poder añadir este artículo.</p>
+                  </div>
+                </div>
+                <button type="button" onclick="cerrarModalLimiteDestacados()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl transition">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+              <div id="listaDestacadosActualesModal" class="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
+                <!-- Se llena dinámicamente -->
+              </div>
+              <div class="px-5 py-3 border-t border-slate-100 bg-slate-50 flex justify-end">
+                <button type="button" onclick="cerrarModalLimiteDestacados()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-200 transition">
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
 
         <!-- ================= SECCIÓN: OFERTAS & PROMOCIONES (ESTILO ETSY) ================= -->
         <div id="vistaSeccionOfertas" class="hidden space-y-6">
@@ -5703,6 +5731,93 @@ try {
     function renderizarProductos() {
       poblarCategoriasCatalogo();
       filtrarCatalogoEtsy();
+    }
+
+function verificarLimiteDestacados(checkbox) {
+      if (!checkbox || !checkbox.checked) return;
+      const idEditando = (document.getElementById('prodEditandoId')?.value || '').trim().toLowerCase();
+      const destacadosActuales = listaProductosGlobal.filter(p => {
+        const esDest = (p.destacado === true || p.destacado === "SI");
+        const pId = (p.id || '').trim().toLowerCase();
+        return esDest && pId !== idEditando;
+      });
+
+      if (destacadosActuales.length >= 6) {
+        checkbox.checked = false;
+        abrirModalLimiteDestacados(destacadosActuales);
+      }
+    }
+
+    function abrirModalLimiteDestacados(destacados) {
+      const modal = document.getElementById('modalLimiteDestacados');
+      const cont = document.getElementById('listaDestacadosActualesModal');
+      if (!modal || !cont) return;
+
+      cont.innerHTML = destacados.map(p => {
+        const fotos = extraerFotosProducto(p.imagen);
+        const foto = fotos[0] || 'https://zeronte-store.github.io/img/logo-zeronte.png';
+        return `
+          <div class="flex items-center justify-between gap-3 p-2.5 rounded-2xl border border-amber-200 bg-amber-50/40">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img src="${foto}" alt="${p.titulo}" class="w-10 h-10 rounded-xl object-cover border border-slate-200 shrink-0">
+              <div class="min-w-0">
+                <span class="font-mono text-[9px] font-bold bg-slate-900 text-white px-1.5 py-0.5 rounded">${p.id}</span>
+                <p class="text-xs font-bold text-slate-900 truncate mt-0.5">${p.titulo}</p>
+              </div>
+            </div>
+            <button type="button" onclick="quitarDestacadoDesdeModal('${p.id}')" class="shrink-0 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 text-[11px] font-bold transition active:scale-95">
+              Quitar
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function cerrarModalLimiteDestacados() {
+      const modal = document.getElementById('modalLimiteDestacados');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function quitarDestacadoDesdeModal(prodId) {
+      const prod = listaProductosGlobal.find(p => (p.id || '') === prodId);
+      if (!prod) return;
+
+      prod.destacado = false;
+      renderizarProductos();
+      cerrarModalLimiteDestacados();
+
+      const chk = document.getElementById('checkArticuloDestacado');
+      if (chk) chk.checked = true;
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            accion: "editarProducto",
+            clave: tokenClave || "zeronte2026",
+            id: prod.id,
+            fila: prod.fila || "",
+            titulo: prod.titulo || "",
+            precio: (prod.precio || "").toString().replace('€', '').trim(),
+            precioOferta: (prod.precioOferta || "").toString().replace('€', '').trim(),
+            categoria: prod.categoria || "",
+            imagenes: extraerFotosProducto(prod.imagen),
+            video: prod.video || "",
+            audio: prod.audio || "",
+            descripcion: prod.descripcion || "",
+            badges: Array.isArray(prod.badges) ? prod.badges : ['descarga', 'pdf'],
+            esPersonalizable: prod.esPersonalizable !== false,
+            camposPersonalizacion: prod.camposPersonalizacion || ['titulo', 'nombre', 'dedicatoria', 'compositor'],
+            destacado: false
+          })
+        });
+      } catch (e) {
+        console.error("Error al quitar destacado:", e);
+      }
     }
 
     async function guardarProducto(e) {
