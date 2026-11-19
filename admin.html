@@ -2008,6 +2008,19 @@
             </div>
           </div>
 
+          <!-- Barra de Progreso de Carga de Tráfico Web -->
+          <div id="progresoTraficoBox" class="hidden bg-white border border-slate-200 rounded-2xl p-3.5 shadow-xs space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+              <span id="txtProgresoTrafico" class="flex items-center gap-1.5 text-blue-700">
+                <i class="fa-solid fa-circle-notch fa-spin text-blue-600"></i> Cargando estadísticas y mapa...
+              </span>
+              <span id="porcProgresoTrafico" class="font-mono text-blue-700 font-extrabold">0%</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+              <div id="barraProgresoTrafico" class="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out" style="width: 0%;"></div>
+            </div>
+          </div>
+
           <!-- Tarjetas Resumen -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div class="bg-white border border-slate-200 border-l-4 border-l-blue-500 p-4 rounded-2xl shadow-xs">
@@ -2034,6 +2047,38 @@
               <i class="fa-solid fa-map-location-dot text-blue-600"></i> Mapa Mundial de Visitantes
             </h3>
             <div id="mapaTraficoMundial" class="h-[320px] sm:h-[380px] w-full rounded-xl border border-slate-100 z-0"></div>
+          </div>
+
+          <!-- Gráfico Horizontal de Evolución de Visitas (Estilo Search Console) -->
+          <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-blue-600"></i> Evolución de Visitas
+              </h3>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <!-- Filtro de métricas (individual o conjunto) -->
+                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 p-1 rounded-xl">
+                  <button type="button" id="btnToggleVisitasDia" onclick="toggleSerieTrafico('dia')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-600 text-white transition active:scale-95 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-white"></span> Visitas del día
+                  </button>
+                  <button type="button" id="btnToggleVisitasTotales" onclick="toggleSerieTrafico('total')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-600 text-white transition active:scale-95 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-white"></span> Visitas totales
+                  </button>
+                </div>
+
+                <!-- Filtro temporal: Días / Meses / Años -->
+                <div class="flex items-center gap-1 bg-slate-100 border border-slate-200 p-1 rounded-xl">
+                  <button type="button" onclick="cambiarAgrupacionTrafico('dias', this)" class="btn-agrup-trafico px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-900 shadow-2xs transition">Días</button>
+                  <button type="button" onclick="cambiarAgrupacionTrafico('meses', this)" class="btn-agrup-trafico px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition">Meses</button>
+                  <button type="button" onclick="cambiarAgrupacionTrafico('anos', this)" class="btn-agrup-trafico px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition">Años</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="h-[240px] sm:h-[260px] w-full">
+              <canvas id="chartEvolucionTrafico"></canvas>
+            </div>
           </div>
 
           <!-- Gráficas de Países y Ciudades -->
@@ -9154,6 +9199,18 @@ try {
     let listaVisitasGlobal = [];
 
     function renderizarTraficoWeb() {
+      const boxProg = document.getElementById('progresoTraficoBox');
+      const barraProg = document.getElementById('barraProgresoTrafico');
+      const porcProg = document.getElementById('porcProgresoTrafico');
+      const txtProg = document.getElementById('txtProgresoTrafico');
+
+      if (!window.traficoCargadoInicial && boxProg) {
+        boxProg.classList.remove('hidden');
+        if (barraProg) barraProg.style.width = '15%';
+        if (porcProg) porcProg.innerText = '15%';
+        if (txtProg) txtProg.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-blue-600"></i> Cargando estadísticas y gráficas...`;
+      }
+
       const total = listaVisitasGlobal.length;
       const elTotal = document.getElementById('statTraficoTotal');
       if (elTotal) elTotal.innerText = total;
@@ -9183,27 +9240,41 @@ try {
       if (typeof Chart !== 'undefined') {
         const ctxP = document.getElementById('chartTraficoPaises');
         if (ctxP) {
-          if (window.chartTraficoPaisesInst) window.chartTraficoPaisesInst.destroy();
-          window.chartTraficoPaisesInst = new Chart(ctxP, {
-            type: 'bar',
-            data: {
-              labels: topPaises.slice(0, 8).map(p => p[0]),
-              datasets: [{ label: 'Visitas', data: topPaises.slice(0, 8).map(p => p[1]), backgroundColor: '#2563EB', borderRadius: 4, maxBarThickness: 38 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-          });
+          const labelsP = topPaises.slice(0, 8).map(p => p[0]);
+          const dataP = topPaises.slice(0, 8).map(p => p[1]);
+          if (window.chartTraficoPaisesInst) {
+            window.chartTraficoPaisesInst.data.labels = labelsP;
+            window.chartTraficoPaisesInst.data.datasets[0].data = dataP;
+            window.chartTraficoPaisesInst.update('none');
+          } else {
+            window.chartTraficoPaisesInst = new Chart(ctxP, {
+              type: 'bar',
+              data: {
+                labels: labelsP,
+                datasets: [{ label: 'Visitas', data: dataP, backgroundColor: '#2563EB', borderRadius: 4, maxBarThickness: 38 }]
+              },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+            });
+          }
         }
         const ctxC = document.getElementById('chartTraficoCiudades');
         if (ctxC) {
-          if (window.chartTraficoCiudadesInst) window.chartTraficoCiudadesInst.destroy();
-          window.chartTraficoCiudadesInst = new Chart(ctxC, {
-            type: 'bar',
-            data: {
-              labels: topCiudades.slice(0, 8).map(c => c[0]),
-              datasets: [{ label: 'Visitas', data: topCiudades.slice(0, 8).map(c => c[1]), backgroundColor: '#10B981', borderRadius: 4, maxBarThickness: 38 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-          });
+          const labelsC = topCiudades.slice(0, 8).map(c => c[0]);
+          const dataC = topCiudades.slice(0, 8).map(c => c[1]);
+          if (window.chartTraficoCiudadesInst) {
+            window.chartTraficoCiudadesInst.data.labels = labelsC;
+            window.chartTraficoCiudadesInst.data.datasets[0].data = dataC;
+            window.chartTraficoCiudadesInst.update('none');
+          } else {
+            window.chartTraficoCiudadesInst = new Chart(ctxC, {
+              type: 'bar',
+              data: {
+                labels: labelsC,
+                datasets: [{ label: 'Visitas', data: dataC, backgroundColor: '#10B981', borderRadius: 4, maxBarThickness: 38 }]
+              },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+            });
+          }
         }
       }
 
@@ -9228,6 +9299,179 @@ try {
       `).join('');
 
       dibujarMapaTraficoMundial();
+      renderizarGraficoEvolucionTrafico();
+    }
+
+    let agrupacionTraficoActual = 'dias';
+    let mostrarVisitasDiaTrafico = true;
+    let mostrarVisitasTotalesTrafico = true;
+
+    function cambiarAgrupacionTrafico(tipo, btn) {
+      agrupacionTraficoActual = tipo;
+      document.querySelectorAll('.btn-agrup-trafico').forEach(b => {
+        b.className = 'btn-agrup-trafico px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition';
+      });
+      if (btn) {
+        btn.className = 'btn-agrup-trafico px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-900 shadow-2xs transition';
+      }
+      renderizarGraficoEvolucionTrafico();
+    }
+
+    function toggleSerieTrafico(serie) {
+      if (serie === 'dia') {
+        if (mostrarVisitasDiaTrafico && !mostrarVisitasTotalesTrafico) return;
+        mostrarVisitasDiaTrafico = !mostrarVisitasDiaTrafico;
+      } else {
+        if (mostrarVisitasTotalesTrafico && !mostrarVisitasDiaTrafico) return;
+        mostrarVisitasTotalesTrafico = !mostrarVisitasTotalesTrafico;
+      }
+
+      const btnDia = document.getElementById('btnToggleVisitasDia');
+      const btnTot = document.getElementById('btnToggleVisitasTotales');
+      if (btnDia) {
+        btnDia.className = mostrarVisitasDiaTrafico
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-600 text-white transition active:scale-95 flex items-center gap-1.5'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white text-slate-400 border border-slate-200 transition active:scale-95 flex items-center gap-1.5';
+      }
+      if (btnTot) {
+        btnTot.className = mostrarVisitasTotalesTrafico
+          ? 'px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-600 text-white transition active:scale-95 flex items-center gap-1.5'
+          : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white text-slate-400 border border-slate-200 transition active:scale-95 flex items-center gap-1.5';
+      }
+      renderizarGraficoEvolucionTrafico();
+    }
+
+    function parsearFechaVisitaTrafico(fechaStr) {
+      if (!fechaStr) return null;
+      const s = fechaStr.toString().trim();
+      const matchEs = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+      if (matchEs) {
+        const dia = parseInt(matchEs[1], 10);
+        const mes = parseInt(matchEs[2], 10) - 1;
+        let anio = parseInt(matchEs[3], 10);
+        if (anio < 100) anio += 2000;
+        const d = new Date(anio, mes, dia);
+        if (!isNaN(d.getTime())) return d;
+      }
+      const dAuto = new Date(s);
+      return isNaN(dAuto.getTime()) ? null : dAuto;
+    }
+
+    function renderizarGraficoEvolucionTrafico() {
+      const ctx = document.getElementById('chartEvolucionTrafico');
+      if (!ctx || typeof Chart === 'undefined') return;
+
+      const mapa = {};
+      listaVisitasGlobal.forEach(v => {
+        const d = parsearFechaVisitaTrafico(v.fecha);
+        if (!d) return;
+        let clave = '';
+        let etiqueta = '';
+        let orden = 0;
+
+        if (agrupacionTraficoActual === 'dias') {
+          const dd = String(d.getDate()).padStart(2, '0');
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const yy = String(d.getFullYear()).slice(-2);
+          clave = `${d.getFullYear()}-${mm}-${dd}`;
+          etiqueta = `${dd}/${mm}/${yy}`;
+          orden = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        } else if (agrupacionTraficoActual === 'meses') {
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const mesesCortos = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+          clave = `${d.getFullYear()}-${mm}`;
+          etiqueta = `${mesesCortos[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`;
+          orden = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+        } else {
+          clave = `${d.getFullYear()}`;
+          etiqueta = `${d.getFullYear()}`;
+          orden = new Date(d.getFullYear(), 0, 1).getTime();
+        }
+
+        if (!mapa[clave]) mapa[clave] = { etiqueta, orden, count: 0 };
+        mapa[clave].count++;
+      });
+
+      const puntos = Object.values(mapa).sort((a, b) => a.orden - b.orden);
+      let acumulado = 0;
+      const labels = puntos.map(p => p.etiqueta);
+      const datosDia = puntos.map(p => p.count);
+      const datosTotales = puntos.map(p => {
+        acumulado += p.count;
+        return acumulado;
+      });
+
+      const datasets = [];
+      if (mostrarVisitasDiaTrafico) {
+        datasets.push({
+          label: agrupacionTraficoActual === 'dias' ? 'Visitas del día' : (agrupacionTraficoActual === 'meses' ? 'Visitas del mes' : 'Visitas del año'),
+          data: datosDia,
+          borderColor: '#2563EB',
+          backgroundColor: 'rgba(37, 99, 235, 0.08)',
+          borderWidth: 2,
+          tension: 0.25,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          yAxisID: 'y'
+        });
+      }
+      if (mostrarVisitasTotalesTrafico) {
+        datasets.push({
+          label: 'Visitas totales acumuladas',
+          data: datosTotales,
+          borderColor: '#7C3AED',
+          backgroundColor: 'rgba(124, 58, 237, 0.08)',
+          borderWidth: 2,
+          tension: 0.25,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          yAxisID: 'y1'
+        });
+      }
+
+      if (window.chartEvolucionTraficoInst) {
+        window.chartEvolucionTraficoInst.data.labels = labels;
+        window.chartEvolucionTraficoInst.data.datasets = datasets;
+        window.chartEvolucionTraficoInst.options.scales.y.display = mostrarVisitasDiaTrafico;
+        window.chartEvolucionTraficoInst.options.scales.y1.display = mostrarVisitasTotalesTrafico;
+        window.chartEvolucionTraficoInst.options.scales.y1.grid.drawOnChartArea = !mostrarVisitasDiaTrafico;
+        window.chartEvolucionTraficoInst.update('none');
+      } else {
+        window.chartEvolucionTraficoInst = new Chart(ctx, {
+          type: 'line',
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 11 } }
+              },
+              y: {
+                type: 'linear',
+                display: mostrarVisitasDiaTrafico,
+                position: 'left',
+                beginAtZero: true,
+                ticks: { precision: 0, font: { size: 11 } },
+                grid: { color: '#f1f5f9' }
+              },
+              y1: {
+                type: 'linear',
+                display: mostrarVisitasTotalesTrafico,
+                position: 'right',
+                beginAtZero: true,
+                ticks: { precision: 0, font: { size: 11 } },
+                grid: { drawOnChartArea: !mostrarVisitasDiaTrafico, color: '#f1f5f9' }
+              }
+            }
+          }
+        });
+      }
     }
 
     async function dibujarMapaTraficoMundial() {
@@ -9258,7 +9502,23 @@ try {
 
       const cacheGeo = JSON.parse(localStorage.getItem('zeronte_geo_cache') || '{}');
 
-      await Promise.all(Object.keys(agrupadas).map(async (clave) => {
+      const claves = Object.keys(agrupadas);
+      const boxProg = document.getElementById('progresoTraficoBox');
+      const barraProg = document.getElementById('barraProgresoTrafico');
+      const porcProg = document.getElementById('porcProgresoTrafico');
+      const txtProg = document.getElementById('txtProgresoTrafico');
+
+      if (!window.traficoCargadoInicial && boxProg) {
+        boxProg.classList.remove('hidden');
+        if (barraProg) barraProg.style.width = '20%';
+        if (porcProg) porcProg.innerText = '20%';
+        if (txtProg) txtProg.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-blue-600"></i> Cargando ubicaciones en el mapa...`;
+      }
+
+      let procesadas = 0;
+      const totalClaves = claves.length || 1;
+
+      await Promise.all(claves.map(async (clave) => {
         const info = agrupadas[clave];
         let coords = cacheGeo[clave];
 
@@ -9286,7 +9546,24 @@ try {
           .bindPopup(`<strong>${info.ciudad}, ${info.pais}</strong><br>${info.count} ${info.count === 1 ? 'visita' : 'visitas'}`)
           .addTo(window.capaMarcadoresTrafico);
         }
+
+        procesadas++;
+        if (!window.traficoCargadoInicial && barraProg && porcProg) {
+          const pct = Math.min(20 + Math.round((procesadas / totalClaves) * 80), 100);
+          barraProg.style.width = pct + '%';
+          porcProg.innerText = pct + '%';
+        }
       }));
+
+      if (!window.traficoCargadoInicial && boxProg) {
+        window.traficoCargadoInicial = true;
+        if (barraProg) barraProg.style.width = '100%';
+        if (porcProg) porcProg.innerText = '100%';
+        if (txtProg) txtProg.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> ¡Datos y mapa cargados!`;
+        setTimeout(() => {
+          boxProg.classList.add('hidden');
+        }, 500);
+      }
     }
     </script>
 </body>
