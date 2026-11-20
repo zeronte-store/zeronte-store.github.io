@@ -182,6 +182,14 @@
             <span id="badgeMensajes" class="sidebar-text text-[10px] min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-amber-100 text-amber-800 font-extrabold hidden">0</span>
           </button>
 
+          <!-- SECCIÓN: MARCADORES Y ACCESOS RÁPIDOS -->
+          <button onclick="cambiarSeccion('configuracion', this)" title="Marcadores" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+            <div class="w-6 h-6 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-bookmark text-sm text-slate-600"></i>
+            </div>
+            <span class="sidebar-text truncate flex-grow text-left">Marcadores</span>
+          </button>
+
           <!-- ENLACE DIRECTO A LA TIENDA WEB -->
           <a href="https://www.zerontemusic.com" target="_blank" rel="noopener noreferrer" title="Zeronte Web" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
             <div class="w-6 h-6 flex items-center justify-center shrink-0">
@@ -190,14 +198,6 @@
             <span class="sidebar-text truncate flex-grow text-left">Zeronte Web</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400 sidebar-text"></i>
           </a>
-
-          <!-- NUEVA SECCIÓN: CONFIGURACIÓN Y ACCESOS RÁPIDOS -->
-          <button onclick="cambiarSeccion('configuracion', this)" title="Configuración" class="nav-item-btn w-full h-11 flex items-center gap-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-            <div class="w-6 h-6 flex items-center justify-center shrink-0">
-              <i class="fa-solid fa-gear text-sm text-slate-600"></i>
-            </div>
-            <span class="sidebar-text truncate flex-grow text-left">Configuración</span>
-          </button>
         </nav>
       </div>
 
@@ -2246,168 +2246,116 @@
           </section>
         </div>
 
-        <!-- ================= SECCIÓN: CONFIGURACIÓN Y ENLACES DIRECTOS ================= -->
-        <div id="vistaSeccionConfiguracion" class="hidden space-y-6">
+        <!-- ================= SECCIÓN: CONFIGURACIÓN Y MARCADORES FAVORITOS ================= -->
+        <div id="vistaSeccionConfiguracion" class="hidden space-y-5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div class="flex items-center gap-2">
                 <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <i class="fa-solid fa-sliders text-slate-700"></i> Configuración
+                  <i class="fa-solid fa-bookmark text-slate-700"></i> Marcadores
                 </h1>
-                <span class="text-xs bg-slate-900 text-white px-2.5 py-0.5 rounded-full font-bold">Enlaces Zeronte</span>
+                <span id="badgeTotalMarcadores" class="text-xs bg-slate-200/80 text-slate-700 px-2.5 py-0.5 rounded-full font-bold">0 marcadores</span>
               </div>
-              <p class="text-xs text-slate-400 mt-0.5">Acceso rápido oficial al repositorio, compiladores, Google Workspace y bases de datos.</p>
+              <p class="text-xs text-slate-400 mt-0.5">Gestiona tus accesos rápidos, herramientas, bases de datos y marcadores favoritos.</p>
             </div>
-            <!-- Indicador de cuenta Google fijada -->
-            <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs text-emerald-800 font-semibold shadow-2xs">
-              <i class="fa-solid fa-shield-halved text-emerald-600"></i>
-              <span>Cuenta fijada: <strong>zeronte.store@gmail.com</strong></span>
+
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+              <button type="button" onclick="abrirModalMarcador()" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs">
+                <i class="fa-solid fa-plus text-xs"></i> Añadir marcador
+              </button>
             </div>
           </div>
 
-          <<!-- PARRILLA DE ENLACES OFICIALES CON LOGOS -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            
-            <!-- 1. GITHUB REPOSITORIO -->
-            <a href="https://github.com/zeronte-store/zeronte-store.github.io/tree/main" target="_blank" rel="noopener noreferrer" class="group bg-white border border-slate-200 hover:border-slate-400 p-5 rounded-2xl shadow-xs hover:shadow-md transition flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <div class="w-12 h-12 rounded-xl bg-[#24292e] text-white flex items-center justify-center text-2xl shadow-2xs group-hover:scale-105 transition">
-                    <i class="fa-brands fa-github"></i>
-                  </div>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-1 rounded-md flex items-center gap-1">
-                    Código <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                  </span>
-                </div>
-                <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition">GitHub Repository</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Actualiza el código del repositorio principal de la tienda (rama <code>main</code>) en tiempo real.</p>
-              </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-mono text-slate-400 truncate">
-                zeronte-store.github.io/tree/main
-              </div>
-            </a>
+          <!-- Barra de búsqueda y filtro por categoría -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row items-center gap-2.5">
+            <div class="relative flex-grow w-full">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-xs text-slate-400"></i>
+              <input type="text" id="inputBuscadorMarcadores" oninput="document.getElementById('btnLimpiarBuscadorMarcadores').classList.toggle('hidden', !this.value); filtrarMarcadoresConfig()" placeholder="Buscar marcador por nombre, URL o descripción..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-800 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+              <button type="button" id="btnLimpiarBuscadorMarcadores" onclick="const inp = document.getElementById('inputBuscadorMarcadores'); inp.value=''; this.classList.add('hidden'); filtrarMarcadoresConfig(); inp.focus();" title="Limpiar búsqueda" class="hidden absolute right-2 top-1.5 w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition active:scale-90">
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+            </div>
 
-            <!-- 2. ONE COMPILER -->
-            <a href="https://onecompiler.com/html" target="_blank" rel="noopener noreferrer" class="group bg-white border border-slate-200 hover:border-blue-400 p-5 rounded-2xl shadow-xs hover:shadow-md transition flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl font-mono font-black shadow-2xs group-hover:scale-105 transition">
-                    &lt;/&gt;
-                  </div>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-1 rounded-md flex items-center gap-1">
-                    Sandbox <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                  </span>
-                </div>
-                <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition">OneCompiler (HTML Sandbox)</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Entorno de pruebas web instantáneo para validar código HTML, Tailwind y scripts antes de subirlos.</p>
-              </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-mono text-slate-400 truncate">
-                onecompiler.com/html
-              </div>
-            </a>
-
-            <!-- 3. GOOGLE APPS SCRIPT (UBICADO EN LA 3ª POSICIÓN) -->
-            <a href="https://script.google.com/home/projects/1csF_IeoGz6wLH3DCo6OuCmH7G9NMGRhS1j3QW8dabKGGcKNH2nAnqHz2/edit?authuser=zeronte.store@gmail.com" target="_blank" rel="noopener noreferrer" class="group bg-white border border-slate-200 hover:border-blue-400 p-5 rounded-2xl shadow-xs hover:shadow-md transition flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <!-- Logo Oficial Google Apps Script SVG -->
-                  <div class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-2.5 shadow-2xs group-hover:scale-105 transition">
-                    <svg viewBox="0 0 512 512" class="w-full h-full">
-                      <polygon fill="#4285F4" points="256,128 384,128 320,256 192,256"/>
-                      <polygon fill="#1973E8" points="384,128 320,256 384,384 448,256"/>
-                      <polygon fill="#FBBC04" points="192,256 320,256 256,384 128,384"/>
-                      <polygon fill="#EA4335" points="128,384 192,256 128,128 64,256"/>
-                    </svg>
-                  </div>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-1 rounded-md flex items-center gap-1">
-                    Backend <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                  </span>
-                </div>
-                <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition">Google Apps Script</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Editor del backend y API de Zeronte. Abre directamente en el proyecto con la cuenta de Zeronte.</p>
-              </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-mono text-slate-400 truncate">
-                script.google.com (zeronte.store@gmail.com)
-              </div>
-            </a>
-
-            <!-- 4. GMAIL ZERONTE -->
-            <a href="https://mail.google.com/mail/?authuser=zeronte.store@gmail.com" target="_blank" rel="noopener noreferrer" class="group bg-white border border-slate-200 hover:border-rose-400 p-5 rounded-2xl shadow-xs hover:shadow-md transition flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <!-- Logo Oficial Gmail SVG -->
-                  <div class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-2 shadow-2xs group-hover:scale-105 transition">
-                    <svg viewBox="0 0 24 24" class="w-full h-full">
-                      <path fill="#4285F4" d="M22 6.5V18c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6.5l9.3 6.2c.4.3 1 .3 1.4 0L22 6.5z"/>
-                      <path fill="#EA4335" d="M22 6.5L12 13.2 2 6.5 12 0l10 6.5z"/>
-                    </svg>
-                  </div>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-1 rounded-md flex items-center gap-1">
-                    Bandeja <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                  </span>
-                </div>
-                <h3 class="text-sm font-bold text-slate-900 group-hover:text-rose-600 transition">Gmail Zeronte</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Abre directamente el buzón de entrada de <strong>zeronte.store@gmail.com</strong> sin alternar tu cuenta personal.</p>
-              </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-mono text-slate-400 truncate">
-                mail.google.com (zeronte.store@gmail.com)
-              </div>
-            </a>
-
-            <!-- 5. GOOGLE DRIVE ZERONTE -->
-            <a href="https://drive.google.com/drive/my-drive?authuser=zeronte.store@gmail.com" target="_blank" rel="noopener noreferrer" class="group bg-white border border-slate-200 hover:border-emerald-400 p-5 rounded-2xl shadow-xs hover:shadow-md transition flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <!-- Logo Oficial Google Drive SVG -->
-                  <div class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-2.5 shadow-2xs group-hover:scale-105 transition">
-                    <svg viewBox="0 0 87.3 78" class="w-full h-full">
-                      <path fill="#0066DA" d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z"/>
-                      <path fill="#00AC47" d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44C.4 50 0 51.55 0 53.1h27.5z"/>
-                      <path fill="#EA4335" d="m73.55 76.8 13.75-23.7c.8-1.4 1.2-2.95 1.2-4.5H61.05l5.95 10.3z"/>
-                      <path fill="#00832D" d="M87.3 53.1c0-1.55-.4-3.1-1.2-4.5L60.7 4.5C59.9 3.1 58.75 2 57.4 1.2L43.65 25l17.4 30.1h26.25z"/>
-                      <path fill="#2684FC" d="M27.5 53.1h59.8L73.55 76.8c-.8 1.4-1.95 2.5-3.3 3.3H17.05c-1.35-.8-2.5-1.9-3.3-3.3z"/>
-                      <path fill="#FFBA00" d="m29.9 1.2 13.75 23.8 13.75-23.8C56.05.4 54.5 0 52.95 0H34.35c-1.55 0-3.1.4-4.45 1.2z"/>
-                    </svg>
-                  </div>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md flex items-center gap-1">
-                    Archivos <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                  </span>
-                </div>
-                <h3 class="text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition">Google Drive Zeronte</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Carpeta en la nube donde se alojan partituras, audios finales y entregas de clientes.</p>
-              </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-mono text-slate-400 truncate">
-                drive.google.com (zeronte.store@gmail.com)
-              </div>
-            </a>
-
-            <!-- 6. HOJA DE CÁLCULO GOOGLE SHEETS (BASE DE DATOS) -->
-            <a href="https://docs.google.com/spreadsheets/d/1czuxQBY1yX4J02BGX1v1jRVjA-ti0IUyVgOpzHXbWCY/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" class="group bg-white border border-slate-200 hover:border-emerald-500 p-5 rounded-2xl shadow-xs hover:shadow-md transition flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <!-- Logo Oficial Sheets SVG -->
-                  <div class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-2.5 shadow-2xs group-hover:scale-105 transition">
-                    <svg viewBox="0 0 192 192" class="w-full h-full">
-                      <path fill="#0F9D58" d="M142 0H50C39 0 30 9 30 20v152c0 11 9 20 20 20h92c11 0 20-9 20-20V50l-50-50z"/>
-                      <path fill="#0B8043" d="M142 0v50h50L142 0z"/>
-                      <path fill="#F1F1F1" d="M50 82h92v16H50zm0 28h92v16H50zm0 28h92v16H50z"/>
-                    </svg>
-                  </div>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-1 rounded-md flex items-center gap-1">
-                    Base de Datos <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                  </span>
-                </div>
-                <h3 class="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition">Google Sheets (Pedidos)</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Hojas de cálculo donde se almacenan los pedidos, estado, catálogo y mensajes en vivo.</p>
-              </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-mono text-slate-400 truncate">
-                docs.google.com/spreadsheets
-              </div>
-            </a>
-
+            <select id="filtroCategoriaMarcadores" onchange="filtrarMarcadoresConfig()" class="w-full sm:w-52 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:border-slate-400 cursor-pointer shrink-0">
+              <option value="todas">Todas las categorías</option>
+            </select>
           </div>
 
+          <!-- Contenedor dinámico de marcadores agrupados por categoría -->
+          <div id="contenedorMarcadoresConfig" class="space-y-6">
+            <!-- Renderizado dinámico -->
           </div>
+
+          <div id="sinMarcadoresConfig" class="hidden text-center py-14 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <i class="fa-regular fa-bookmark text-3xl text-slate-300 mb-2 block"></i>
+            <p class="text-xs font-semibold text-slate-500">No hay marcadores guardados con ese criterio.</p>
+            <button type="button" onclick="abrirModalMarcador()" class="mt-3 text-xs text-blue-600 hover:underline font-bold">+ Añadir tu primer marcador</button>
+          </div>
+
+          <!-- MODAL FLOTANTE: AÑADIR / EDITAR MARCADOR -->
+          <div id="modalMarcadorConfig" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 select-none">
+            <div class="bg-white border border-slate-200 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs">
+                    <i id="iconoModalMarcador" class="fa-solid fa-bookmark"></i>
+                  </div>
+                  <div>
+                    <h3 id="tituloModalMarcador" class="text-sm font-bold text-slate-900">Añadir marcador</h3>
+                    <p class="text-[10px] text-slate-400">Guarda un acceso directo con detección automática de icono</p>
+                  </div>
+                </div>
+                <button type="button" onclick="cerrarModalMarcador()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl transition">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <form onsubmit="guardarMarcadorConfig(event)" class="p-5 space-y-4 text-xs text-slate-700">
+                <input type="hidden" id="marcadorEditandoId" value="">
+
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Nombre del marcador *</label>
+                  <input type="text" id="inputNombreMarcador" required placeholder="Ej. Google Sheets Pedidos" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-500 focus:bg-white transition">
+                </div>
+
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">URL de destino *</label>
+                  <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                      <img id="previewFaviconMarcador" src="" alt="" class="w-6 h-6 object-contain hidden" onerror="this.classList.add('hidden'); document.getElementById('fallbackIconMarcador').classList.remove('hidden');">
+                      <i id="fallbackIconMarcador" class="fa-solid fa-globe text-slate-400 text-sm"></i>
+                    </div>
+                    <input type="url" id="inputUrlMarcador" required oninput="actualizarPreviewFaviconMarcador(this.value)" placeholder="https://..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:border-slate-500 focus:bg-white transition">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Categoría *</label>
+                  <select id="selectCategoriaMarcador" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-slate-500 cursor-pointer">
+                    <option value="Base de datos">Base de datos</option>
+                    <option value="Herramientas">Herramientas</option>
+                    <option value="Configuración">Configuración</option>
+                    <option value="Código">Código</option>
+                    <option value="Google Workspace">Google Workspace</option>
+                    <option value="Otros">Otros</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Descripción (Opcional)</label>
+                  <textarea id="inputDescMarcador" rows="2" placeholder="Breve nota sobre para qué sirve este enlace..." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800 focus:outline-none focus:border-slate-500 focus:bg-white transition"></textarea>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                  <button type="button" onclick="cerrarModalMarcador()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
+                  <button type="submit" id="btnGuardarMarcador" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">
+                    Guardar Marcador
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
 
   <!-- ==================== SCRIPT DASHBOARD ==================== -->
   <script>
@@ -2576,6 +2524,7 @@ function extraerUrlArchivoPedido(pedido) {
               listaProductosGlobal = dataCache.productos || [];
               mensajesClientes = (dataCache.mensajes || []).map(m => filasLeidasLocalmente.has(m.fila) ? { ...m, estado: "Leído" } : m);
               if (Array.isArray(dataCache.ofertas)) listaCampanasOfertasGlobal = dataCache.ofertas;
+              if (Array.isArray(dataCache.marcadores)) listaMarcadoresGlobal = dataCache.marcadores;
               if (Array.isArray(dataCache.ventasEtsy)) {
                 listaVentasEtsyGlobal = dataCache.ventasEtsy.map(v => {
                   const matchAnio = (v.fecha || "").match(/\b(202[3-6])\b/);
@@ -2674,6 +2623,7 @@ try {
         });
 
         listaVisitasGlobal = data.visitas || [];
+        listaMarcadoresGlobal = data.marcadores || [];
         const pedidosServidor = data.pedidos || [];
         listaPedidosGlobal = pedidosServidor.filter(p => !idsEliminadosLocalmente.has(p.id));
 
@@ -6501,6 +6451,7 @@ function verificarLimiteDestacados(checkbox) {
         renderizarModuloProcesarPedidos();
       } else if (seccion === 'configuracion') {
         if (vConfig) vConfig.classList.remove('hidden');
+        renderizarMarcadoresConfig();
       }
 
       document.querySelectorAll('.nav-item-btn').forEach(b => {
@@ -9912,6 +9863,266 @@ function verificarLimiteDestacados(checkbox) {
           boxProg.classList.add('hidden');
         }, 500);
       }
+    }
+    // ==================== GESTIÓN DE MARCADORES (CONFIGURACIÓN) ====================
+    let listaMarcadoresGlobal = [];
+
+    function obtenerFaviconUrl(url) {
+      if (!url) return "";
+      try {
+        const dominio = new URL(url.startsWith('http') ? url : 'https://' + url).hostname;
+        return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(dominio)}&sz=64`;
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function actualizarPreviewFaviconMarcador(url) {
+      const img = document.getElementById('previewFaviconMarcador');
+      const fallback = document.getElementById('fallbackIconMarcador');
+      if (!img || !fallback) return;
+      const fav = obtenerFaviconUrl(url);
+      if (fav) {
+        img.src = fav;
+        img.classList.remove('hidden');
+        fallback.classList.add('hidden');
+      } else {
+        img.classList.add('hidden');
+        fallback.classList.remove('hidden');
+      }
+    }
+
+    function abrirModalMarcador(idMarcador = null) {
+      const modal = document.getElementById('modalMarcadorConfig');
+      if (!modal) return;
+
+      const inpId = document.getElementById('marcadorEditandoId');
+      const inpNom = document.getElementById('inputNombreMarcador');
+      const inpUrl = document.getElementById('inputUrlMarcador');
+      const selCat = document.getElementById('selectCategoriaMarcador');
+      const inpDesc = document.getElementById('inputDescMarcador');
+      const titulo = document.getElementById('tituloModalMarcador');
+
+      if (idMarcador) {
+        const m = listaMarcadoresGlobal.find(item => item.id === idMarcador);
+        if (m) {
+          if (inpId) inpId.value = m.id;
+          if (inpNom) inpNom.value = m.nombre || '';
+          if (inpUrl) inpUrl.value = m.url || '';
+          if (selCat) selCat.value = m.categoria || 'Herramientas';
+          if (inpDesc) inpDesc.value = m.descripcion || '';
+          if (titulo) titulo.innerText = 'Editar marcador';
+          actualizarPreviewFaviconMarcador(m.url || '');
+        }
+      } else {
+        if (inpId) inpId.value = '';
+        if (inpNom) inpNom.value = '';
+        if (inpUrl) inpUrl.value = '';
+        if (selCat) selCat.value = 'Herramientas';
+        if (inpDesc) inpDesc.value = '';
+        if (titulo) titulo.innerText = 'Añadir marcador';
+        actualizarPreviewFaviconMarcador('');
+      }
+
+      modal.classList.remove('hidden');
+      setTimeout(() => { if (inpNom) inpNom.focus(); }, 50);
+    }
+
+    function cerrarModalMarcador() {
+      const modal = document.getElementById('modalMarcadorConfig');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function guardarMarcadorConfig(e) {
+      e.preventDefault();
+      const idEdit = (document.getElementById('marcadorEditandoId')?.value || '').trim();
+      const nombre = document.getElementById('inputNombreMarcador').value.trim();
+      const url = document.getElementById('inputUrlMarcador').value.trim();
+      const categoria = document.getElementById('selectCategoriaMarcador').value;
+      const descripcion = document.getElementById('inputDescMarcador').value.trim();
+      const btn = document.getElementById('btnGuardarMarcador');
+
+      if (!nombre || !url) return;
+      if (btn) { btn.disabled = true; btn.innerText = 'Guardando...'; }
+
+      const marcadorObj = {
+        id: idEdit || ('marc-' + Date.now()),
+        nombre,
+        url,
+        descripcion,
+        categoria
+      };
+
+      if (idEdit) {
+        const idx = listaMarcadoresGlobal.findIndex(m => m.id === idEdit);
+        if (idx !== -1) listaMarcadoresGlobal[idx] = marcadorObj;
+      } else {
+        listaMarcadoresGlobal.push(marcadorObj);
+      }
+
+      renderizarMarcadoresConfig();
+      cerrarModalMarcador();
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            accion: 'guardarMarcador',
+            clave: tokenClave || 'zeronte2026',
+            marcador: marcadorObj
+          })
+        });
+      } catch (err) {
+        console.error('Error al guardar marcador:', err);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = 'Guardar Marcador'; }
+      }
+    }
+
+    async function eliminarMarcadorConfig(idMarcador, nombre) {
+      if (!confirm(`¿Eliminar el marcador "${nombre}"?`)) return;
+      listaMarcadoresGlobal = listaMarcadoresGlobal.filter(m => m.id !== idMarcador);
+      renderizarMarcadoresConfig();
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            accion: 'eliminarMarcador',
+            clave: tokenClave || 'zeronte2026',
+            id: idMarcador
+          })
+        });
+      } catch (err) {
+        console.error('Error al eliminar marcador:', err);
+      }
+    }
+
+    function renderizarMarcadoresConfig() {
+      const selCat = document.getElementById('filtroCategoriaMarcadores');
+      const badge = document.getElementById('badgeTotalMarcadores');
+      if (badge) badge.innerText = `${listaMarcadoresGlobal.length} ${listaMarcadoresGlobal.length === 1 ? 'marcador' : 'marcadores'}`;
+
+      if (selCat) {
+        const valPrevio = selCat.value || 'todas';
+        const cats = Array.from(new Set(listaMarcadoresGlobal.map(m => (m.categoria || 'Herramientas').trim()))).sort();
+        selCat.innerHTML = '<option value="todas">Todas las categorías</option>' +
+          cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        selCat.value = cats.includes(valPrevio) ? valPrevio : 'todas';
+      }
+
+      filtrarMarcadoresConfig();
+    }
+
+    function filtrarMarcadoresConfig() {
+      const cont = document.getElementById('contenedorMarcadoresConfig');
+      const sinMarc = document.getElementById('sinMarcadoresConfig');
+      if (!cont) return;
+
+      const q = (document.getElementById('inputBuscadorMarcadores')?.value || '').toLowerCase().trim();
+      const catFiltro = document.getElementById('filtroCategoriaMarcadores')?.value || 'todas';
+
+      const filtrados = listaMarcadoresGlobal.filter(m => {
+        const coincideCat = catFiltro === 'todas' || (m.categoria || 'Herramientas') === catFiltro;
+        const txt = `${m.nombre || ''} ${m.url || ''} ${m.descripcion || ''} ${m.categoria || ''}`.toLowerCase();
+        const coincideQ = !q || txt.includes(q);
+        return coincideCat && coincideQ;
+      });
+
+      if (filtrados.length === 0) {
+        cont.innerHTML = '';
+        if (sinMarc) sinMarc.classList.remove('hidden');
+        return;
+      }
+      if (sinMarc) sinMarc.classList.add('hidden');
+
+      // Agrupar por categoría para mantener todo ordenado aunque haya muchos
+      const grupos = {};
+      filtrados.forEach(m => {
+        const cat = (m.categoria || 'Herramientas').trim();
+        if (!grupos[cat]) grupos[cat] = [];
+        grupos[cat].push(m);
+      });
+
+      const categoriasOrdenadas = Object.keys(grupos).sort((a, b) => a.localeCompare(b, 'es'));
+
+      cont.innerHTML = categoriasOrdenadas.map(cat => {
+        const items = grupos[cat];
+        const estaAbierta = q !== '' || carpetasMarcadoresAbiertas.has(cat);
+        const catEscapada = cat.replace(/'/g, "\\'");
+
+        const cardsHtml = items.map(m => {
+          const favicon = obtenerFaviconUrl(m.url);
+          let dominioCorto = m.url;
+          try { dominioCorto = new URL(m.url).hostname.replace(/^www\./, ''); } catch (e) {}
+
+          return `
+            <div class="group bg-white border border-slate-200 hover:border-slate-400 rounded-2xl p-4 shadow-xs hover:shadow-md transition flex flex-col justify-between gap-3">
+              <a href="${m.url}" target="_blank" rel="noopener noreferrer" class="block space-y-3 flex-1">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden p-1.5 group-hover:scale-105 transition">
+                    <img src="${favicon}" alt="" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <i class="fa-solid fa-globe text-slate-400 text-sm hidden"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-600 truncate transition" title="${m.nombre}">${m.nombre}</h3>
+                    <span class="text-[10px] font-mono text-slate-400 block truncate">${dominioCorto}</span>
+                  </div>
+                </div>
+
+                ${m.descripcion ? `<p class="text-[11px] text-slate-500 leading-relaxed line-clamp-2">${m.descripcion}</p>` : ''}
+              </a>
+
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-end gap-1.5">
+                <button type="button" onclick="abrirModalMarcador('${m.id}')" title="Editar marcador" class="w-7 h-7 rounded-lg bg-slate-50 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition active:scale-90">
+                  <i class="fa-solid fa-pen text-[10px]"></i>
+                </button>
+                <button type="button" onclick="eliminarMarcadorConfig('${m.id}', '${(m.nombre || '').replace(/'/g, "\\'")}')" title="Eliminar marcador" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-500 hover:text-white flex items-center justify-center transition active:scale-90">
+                  <i class="fa-solid fa-trash text-[10px]"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <button type="button" onclick="toggleCarpetaMarcadores('${catEscapada}')" class="w-full px-4 py-3.5 flex items-center justify-between gap-3 hover:bg-slate-50/80 transition select-none text-left">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-xl ${estaAbierta ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-slate-100 text-slate-500 border-slate-200'} border flex items-center justify-center shrink-0 transition">
+                  <i class="fa-solid ${estaAbierta ? 'fa-folder-open' : 'fa-folder'} text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                  <span class="text-xs sm:text-sm font-bold text-slate-900 block truncate">${cat}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">${items.length} ${items.length === 1 ? 'enlace' : 'enlaces'}</span>
+                </div>
+              </div>
+              <span class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200 ${estaAbierta ? 'rotate-180' : ''}"></i>
+              </span>
+            </button>
+
+            <div class="${estaAbierta ? '' : 'hidden'} p-4 pt-2 border-t border-slate-100 bg-slate-50/50">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                ${cardsHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    const carpetasMarcadoresAbiertas = new Set();
+
+    function toggleCarpetaMarcadores(cat) {
+      if (carpetasMarcadoresAbiertas.has(cat)) {
+        carpetasMarcadoresAbiertas.delete(cat);
+      } else {
+        carpetasMarcadoresAbiertas.add(cat);
+      }
+      filtrarMarcadoresConfig();
     }
     </script>
 </body>
