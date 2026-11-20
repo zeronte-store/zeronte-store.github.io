@@ -1530,7 +1530,7 @@
               <p id="msgErrorCuponCesta" class="hidden text-[11px] text-rose-600 font-semibold mt-1.5 pl-2"></p>
             </div>
 
-            <button type="button" onclick="procederCheckoutDesdeCarrito()" class="w-full bg-black hover:bg-zinc-800 text-white font-bold py-4 rounded-full text-sm uppercase tracking-wider transition active:scale-95 shadow-md flex items-center justify-center gap-2">
+            <button type="button" onclick="abrirAvisoDigitalAntesDeCheckout()" class="w-full bg-black hover:bg-zinc-800 text-white font-bold py-4 rounded-full text-sm uppercase tracking-wider transition active:scale-95 shadow-md flex items-center justify-center gap-2">
               <span>Tramitar pedido</span>
               <i class="fa-solid fa-arrow-right text-xs"></i>
             </button>
@@ -1684,6 +1684,35 @@
       <div class="pt-1">
         <button type="button" onclick="cerrarModalAvisoCupon()" class="w-full py-2.5 rounded-full bg-black hover:bg-zinc-800 text-white text-xs font-bold uppercase tracking-wider transition shadow-sm">
           Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL ADVERTENCIA ARTÍCULO DIGITAL ==================== -->
+  <div id="modalAvisoProductoDigital" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[95] backdrop-blur-xs p-4 select-none">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl border border-gray-200 space-y-4">
+      <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-xl">
+        <i class="fa-solid fa-circle-info"></i>
+      </div>
+      <div class="space-y-2.5 text-left">
+        <h3 class="text-base font-bold text-gray-900 text-center">Aviso importante antes de comprar</h3>
+        <p class="text-xs text-gray-600 leading-relaxed">
+          Este pedido es <strong>100% digital</strong>. Lo recibirás por <strong>correo electrónico</strong> tras comprar y también podrás descargarlo en la sección<strong>"Mis pedidos"</strong>. No se envía producto físico a ninguna dirección.
+        </p>
+        <p class="text-xs text-gray-600 leading-relaxed">
+          Al tratarse de un pedido digital por descarga directa o hecho por encargo si es un artículo personalizado, <strong>no se admiten devoluciones ni reembolsos</strong> una vez realizado el pedido.
+        </p>
+        <p class="text-xs text-gray-600 leading-relaxed">
+          Si hay algún error en los datos o has cambiado de opinión, puedes hacer cualquier modificación antes de finalizar, pero una vez realizado y enviado el pedido no se devuelve. <strong>¿Entendido?</strong>
+        </p>
+      </div>
+      <div class="flex items-center gap-2 pt-2">
+        <button type="button" onclick="cerrarAvisoDigitalAntesDeCheckout()" class="flex-1 py-2.5 rounded-full border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition">
+          Cancelar
+        </button>
+        <button type="button" onclick="cerrarAvisoDigitalAntesDeCheckout(); procederCheckoutDesdeCarrito();" class="flex-1 py-2.5 rounded-full bg-black hover:bg-zinc-800 text-white text-xs font-bold transition shadow-sm">
+          Continuar
         </button>
       </div>
     </div>
@@ -5041,6 +5070,23 @@ let temporizadorCuentaAtrasEtsy = null;
           }, 400);
         }
       });
+    }
+
+    function abrirAvisoDigitalAntesDeCheckout() {
+      if (carritoProductos.length === 0) return;
+      const m = document.getElementById('modalAvisoProductoDigital');
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      }
+    }
+
+    function cerrarAvisoDigitalAntesDeCheckout() {
+      const m = document.getElementById('modalAvisoProductoDigital');
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
     }
 
     function procederCheckoutDesdeCarrito() {
