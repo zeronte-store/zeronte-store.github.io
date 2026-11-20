@@ -2331,14 +2331,10 @@
 
                 <div>
                   <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Categoría *</label>
-                  <select id="selectCategoriaMarcador" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-slate-500 cursor-pointer">
-                    <option value="Base de datos">Base de datos</option>
-                    <option value="Herramientas">Herramientas</option>
-                    <option value="Configuración">Configuración</option>
-                    <option value="Código">Código</option>
-                    <option value="Google Workspace">Google Workspace</option>
-                    <option value="Otros">Otros</option>
+                  <select id="selectCategoriaMarcador" onchange="alternarNuevaCategoriaMarcador(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-slate-500 cursor-pointer">
+                    <option value="__nueva__">+ Añadir nueva categoría...</option>
                   </select>
+                  <input type="text" id="inputNuevaCategoriaMarcador" placeholder="Escribe el nombre de la nueva categoría..." class="hidden mt-2 w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
                 </div>
 
                 <div>
@@ -9892,6 +9888,20 @@ function verificarLimiteDestacados(checkbox) {
       }
     }
 
+    function alternarNuevaCategoriaMarcador(val) {
+      const inp = document.getElementById('inputNuevaCategoriaMarcador');
+      if (!inp) return;
+      if (val === '__nueva__') {
+        inp.classList.remove('hidden');
+        inp.required = true;
+        inp.focus();
+      } else {
+        inp.classList.add('hidden');
+        inp.required = false;
+        inp.value = '';
+      }
+    }
+
     function abrirModalMarcador(idMarcador = null) {
       const modal = document.getElementById('modalMarcadorConfig');
       if (!modal) return;
@@ -9903,13 +9913,32 @@ function verificarLimiteDestacados(checkbox) {
       const inpDesc = document.getElementById('inputDescMarcador');
       const titulo = document.getElementById('tituloModalMarcador');
 
+      const catsReales = Array.from(new Set(listaMarcadoresGlobal.map(item => (item.categoria || '').trim()).filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b, 'es'));
+
+      if (selCat) {
+        selCat.innerHTML = '<option value="__nueva__">+ Añadir nueva categoría...</option>' +
+          catsReales.map(c => `<option value="${c}">${c}</option>`).join('');
+      }
+
       if (idMarcador) {
         const m = listaMarcadoresGlobal.find(item => item.id === idMarcador);
         if (m) {
           if (inpId) inpId.value = m.id;
           if (inpNom) inpNom.value = m.nombre || '';
           if (inpUrl) inpUrl.value = m.url || '';
-          if (selCat) selCat.value = m.categoria || 'Herramientas';
+          if (selCat) {
+            const catM = m.categoria || 'Herramientas';
+            const existe = Array.from(selCat.options).some(o => o.value === catM);
+            if (!existe) {
+              const opt = document.createElement('option');
+              opt.value = catM;
+              opt.text = catM;
+              selCat.appendChild(opt);
+            }
+            selCat.value = catM;
+            alternarNuevaCategoriaMarcador(catM);
+          }
           if (inpDesc) inpDesc.value = m.descripcion || '';
           if (titulo) titulo.innerText = 'Editar marcador';
           actualizarPreviewFaviconMarcador(m.url || '');
@@ -9918,7 +9947,11 @@ function verificarLimiteDestacados(checkbox) {
         if (inpId) inpId.value = '';
         if (inpNom) inpNom.value = '';
         if (inpUrl) inpUrl.value = '';
-        if (selCat) selCat.value = 'Herramientas';
+        if (selCat) {
+          const defCat = catsReales[0] || '__nueva__';
+          selCat.value = defCat;
+          alternarNuevaCategoriaMarcador(defCat);
+        }
         if (inpDesc) inpDesc.value = '';
         if (titulo) titulo.innerText = 'Añadir marcador';
         actualizarPreviewFaviconMarcador('');
@@ -9938,7 +9971,10 @@ function verificarLimiteDestacados(checkbox) {
       const idEdit = (document.getElementById('marcadorEditandoId')?.value || '').trim();
       const nombre = document.getElementById('inputNombreMarcador').value.trim();
       const url = document.getElementById('inputUrlMarcador').value.trim();
-      const categoria = document.getElementById('selectCategoriaMarcador').value;
+      const selCatVal = document.getElementById('selectCategoriaMarcador').value;
+      const categoria = selCatVal === '__nueva__'
+        ? document.getElementById('inputNuevaCategoriaMarcador').value.trim()
+        : selCatVal;
       const descripcion = document.getElementById('inputDescMarcador').value.trim();
       const btn = document.getElementById('btnGuardarMarcador');
 
